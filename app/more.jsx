@@ -1,0 +1,124 @@
+import React from 'react';
+import {
+  View, Text, TouchableOpacity,
+  StyleSheet, SafeAreaView, ScrollView,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, radius, spacing, font } from '../constants/theme';
+
+const menuItems = [
+  {
+    section: 'Practice',
+    items: [
+      { label: 'Stoic compass', sub: 'Your north star', icon: 'compass-outline', route: '/compass' },
+      { label: 'Morning journal', sub: "Today's reflection and history", icon: 'sunny-outline', route: '/journal?type=morning' },
+      { label: 'Evening journal', sub: "Tonight's reflection and history", icon: 'moon-outline', route: '/journal?type=evening' },
+      { label: 'Daily readings', sub: 'Your reading archive', icon: 'book-outline', route: '/read' },
+      { label: 'Weekly review', sub: 'Examine the week', icon: 'layers-outline', route: '/review' },
+    ],
+  },
+  {
+    section: 'App',
+    items: [
+      { label: 'How Marcus works', sub: 'The practice explained', icon: 'help-circle-outline', route: '/howto' },
+      { label: 'Settings', sub: 'Notifications and preferences', icon: 'settings-outline', route: '/settings' },
+    ],
+  },
+];
+
+export default function MoreScreen() {
+  const router = useRouter();
+
+  return (
+    <SafeAreaView style={s.safe}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+
+        <View style={s.hero}>
+          <Text style={s.title}>Marcus</Text>
+          <Text style={s.sub}>A Stoic practice app</Text>
+          <Text style={s.heroQuote}>"Waste no more time arguing about what a good man should be. Be one."</Text>
+        </View>
+
+        {menuItems.map(section => (
+          <View key={section.section} style={s.section}>
+            <Text style={s.sectionLabel}>{section.section}</Text>
+            <View style={s.card}>
+              {section.items.map((item, idx) => (
+                <TouchableOpacity
+                  key={item.label}
+                  style={[s.row, idx < section.items.length - 1 && s.rowBorder]}
+                  onPress={() => router.push(item.route)}
+                  activeOpacity={0.7}
+                >
+                  <View style={s.iconWrap}>
+                    <Ionicons name={item.icon} size={20} color={colors.textMuted} />
+                  </View>
+                  <View style={s.rowContent}>
+                    <Text style={s.rowLabel}>{item.label}</Text>
+                    <Text style={s.rowSub}>{item.sub}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.textDim} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ))}
+
+        <View style={s.footer}>
+          <Text style={s.footerQuote}>
+            {'"Waste no more time arguing about what a good man should be. Be one."'}
+          </Text>
+          <Text style={s.footerAttr}>Marcus Aurelius</Text>
+        </View>
+
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const s = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
+  scroll: { flex: 1 },
+  hero: {
+    backgroundColor: colors.bgDeep,
+    padding: spacing.xl,
+    paddingTop: 48,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+  },
+  title: { fontSize: 52, fontWeight: '700', color: '#FFFFFF', letterSpacing: -2, marginBottom: 8 },
+  sub: { fontSize: 18, color: colors.textSecondary, fontStyle: 'italic', fontFamily: font.serif, marginBottom: 20 },
+  heroQuote: { fontSize: 15, color: colors.textDim, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 24 },
+  section: { paddingHorizontal: spacing.md, paddingTop: spacing.lg },
+  sectionLabel: {
+    fontSize: font.labelSize,
+    letterSpacing: font.sectionTracking,
+    color: colors.textDim,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+    paddingLeft: 4,
+  },
+  card: {
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    backgroundColor: colors.bgCard,
+    overflow: 'hidden',
+  },
+  row: { flexDirection: 'row', alignItems: 'center', padding: 18, gap: 14 },
+  rowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  iconWrap: {
+    width: 36, height: 36, borderRadius: radius.sm,
+    backgroundColor: colors.bgElevated, alignItems: 'center', justifyContent: 'center',
+  },
+  rowContent: { flex: 1 },
+  rowLabel: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
+  rowSub: { fontSize: 13, color: colors.textDim },
+  footer: { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: 40, alignItems: 'center' },
+  footerQuote: {
+    fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif,
+    textAlign: 'center', lineHeight: 22, marginBottom: 8,
+  },
+  footerAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
+});
