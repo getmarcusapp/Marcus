@@ -67,18 +67,6 @@
     filter: drop-shadow(0 0 40px rgba(200, 169, 122, 0.15));
   }
 
-  .skull-placeholder {
-    width: 100px;
-    height: 100px;
-    border: 1px solid var(--border-mid);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 48px;
-    margin: 0 auto;
-  }
-
   .hero-eyebrow {
     font-size: 11px;
     letter-spacing: 3px;
@@ -106,29 +94,16 @@
     margin-bottom: 52px;
   }
 
-  .hero-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--accent);
-    color: #000;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    padding: 20px 40px;
-    border-radius: 12px;
-    text-decoration: none;
-    transition: opacity 0.2s;
-    margin-bottom: 16px;
-  }
-
-  .hero-cta:hover { opacity: 0.88; }
-
-  .hero-cta-sub {
-    font-size: 13px;
-    color: var(--text-dim);
-    letter-spacing: 0.5px;
-  }
+  /* ─── EMAIL CAPTURE ──────────────────────────────────── */
+  .email-form { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; max-width: 480px; }
+  .email-row { display: flex; width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-mid); }
+  .email-input { flex: 1; background: #111; color: var(--text-primary); font-size: 16px; padding: 18px 20px; border: none; outline: none; font-family: inherit; }
+  .email-input::placeholder { color: var(--text-dim); }
+  .email-submit { background: var(--accent); color: #000; font-size: 15px; font-weight: 700; padding: 18px 28px; border: none; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; font-family: inherit; letter-spacing: 0.3px; }
+  .email-submit:hover { opacity: 0.88; }
+  .email-note { font-size: 13px; color: var(--text-dim); letter-spacing: 0.5px; text-align: center; }
+  .email-success { font-size: 17px; color: var(--accent); font-family: Georgia, serif; font-style: italic; text-align: center; padding: 20px 0; display: none; }
+  @media (max-width: 500px) { .email-row { flex-direction: column; } .email-submit { padding: 16px; } }
 
   /* ─── PAIN SECTION ──────────────────────────────────── */
   .pain {
@@ -542,12 +517,6 @@
     text-align: center;
   }
 
-  .memento-skull {
-    font-size: 64px;
-    margin-bottom: 32px;
-    opacity: 0.6;
-  }
-
   .memento-title {
     font-size: clamp(28px, 5vw, 44px);
     font-weight: 700;
@@ -581,16 +550,6 @@
     margin: 0 auto;
   }
 
-  .final-skull {
-    width: 80px;
-    height: 80px;
-    object-fit: contain;
-    opacity: 0.9;
-    margin: 0 auto 32px;
-    display: block;
-    filter: drop-shadow(0 0 20px rgba(200, 169, 122, 0.2));
-  }
-
   .final-eyebrow {
     font-size: 11px;
     letter-spacing: 3px;
@@ -615,30 +574,6 @@
     font-style: italic;
     line-height: 1.7;
     margin-bottom: 48px;
-  }
-
-  .final-cta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--accent);
-    color: #000;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    padding: 20px 40px;
-    border-radius: 12px;
-    text-decoration: none;
-    transition: opacity 0.2s;
-    margin-bottom: 16px;
-  }
-
-  .final-cta-btn:hover { opacity: 0.88; }
-
-  .final-cta-note {
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-top: 16px;
   }
 
   /* ─── FOOTER ─────────────────────────────────────────── */
@@ -670,9 +605,7 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════
-     HERO
-════════════════════════════════════════════════════ -->
+<!-- HERO -->
 <section class="hero">
   <div class="skull-wrap">
     <img src="skull.png" alt="Marcus" />
@@ -683,17 +616,18 @@
     "Waste no more time arguing about what a good man should be.<br>Be one."
     <br><br>— Marcus Aurelius, Meditations
   </p>
-  <a href="#app-store-link" class="hero-cta">
-    Download on the App Store
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-  </a>
-  <p class="hero-cta-sub">Free · iOS · No account required</p>
+  <div class="email-form">
+    <div class="email-row">
+      <input type="email" class="email-input" placeholder="Enter your email" id="hero-email" />
+      <button class="email-submit" onclick="submitEmail('hero-email','hero-success')">Join the waitlist &#8594;</button>
+    </div>
+    <p class="email-note">Free &middot; iOS &middot; No account required &middot; Launching soon</p>
+    <p class="email-success" id="hero-success">Your practice begins soon. Watch your inbox.</p>
+  </div>
 </section>
 
 
-<!-- ═══════════════════════════════════════════════════
-     PAIN — THE RESPECT GAP
-════════════════════════════════════════════════════ -->
+<!-- PAIN -->
 <section class="pain">
   <p class="pain-eyebrow">The real problem</p>
   <h2 class="pain-title">You've succeeded at everything.<br>So why don't you <em>respect yourself?</em></h2>
@@ -705,9 +639,7 @@
 </section>
 
 
-<!-- ═══════════════════════════════════════════════════
-     AGITATION — WHY EVERYTHING ELSE FAILED
-════════════════════════════════════════════════════ -->
+<!-- AGITATION -->
 <section class="agitation">
   <div class="agitation-inner">
     <h2 class="agitation-title">Why every productivity app you've tried made things worse</h2>
@@ -758,9 +690,7 @@
 </section>
 
 
-<!-- ═══════════════════════════════════════════════════
-     THE MECHANISM — THE RATIONAL AUDIT
-════════════════════════════════════════════════════ -->
+<!-- MECHANISM -->
 <section class="mechanism">
   <p class="mechanism-eyebrow">The solution</p>
   <h2 class="mechanism-title">A two-thousand-year-old system for earning your own respect</h2>
@@ -781,9 +711,7 @@
 </section>
 
 
-<!-- ═══════════════════════════════════════════════════
-     WHAT IT IS — FEATURES
-════════════════════════════════════════════════════ -->
+<!-- WHAT IT IS -->
 <section class="what">
   <div class="what-inner">
     <p class="what-eyebrow">What Marcus is</p>
@@ -831,9 +759,7 @@
 </section>
 
 
-<!-- ═══════════════════════════════════════════════════
-     DIFFERENTIATOR — NOT A STREAK APP
-════════════════════════════════════════════════════ -->
+<!-- DIFFERENTIATOR -->
 <section class="diff">
   <p class="diff-eyebrow">What makes Marcus different</p>
   <h2 class="diff-title">We don't punish you for being human</h2>
@@ -870,9 +796,7 @@
 </section>
 
 
-<!-- ═══════════════════════════════════════════════════
-     PHILOSOPHY — THE FOUR VIRTUES
-════════════════════════════════════════════════════ -->
+<!-- PHILOSOPHY -->
 <section class="philosophy">
   <div class="philosophy-inner">
     <p class="philosophy-eyebrow">The foundation</p>
@@ -904,9 +828,7 @@
 </section>
 
 
-<!-- ═══════════════════════════════════════════════════
-     MEMENTO MORI — THE URGENCY CLOSE
-════════════════════════════════════════════════════ -->
+<!-- MEMENTO MORI -->
 <section class="memento">
   <img src="skull.png" alt="" style="width:72px;height:72px;object-fit:contain;opacity:0.6;margin-bottom:32px;" />
   <h2 class="memento-title">You could leave life right now.<br>Let that determine what you do.</h2>
@@ -918,32 +840,65 @@
 </section>
 
 
-<!-- ═══════════════════════════════════════════════════
-     FINAL CTA
-════════════════════════════════════════════════════ -->
+<!-- FINAL CTA -->
 <section class="final-cta">
   <div class="final-cta-inner">
     <img src="skull.png" alt="" style="width:80px;height:80px;object-fit:contain;opacity:0.9;margin:0 auto 32px;display:block;filter:drop-shadow(0 0 20px rgba(200,169,122,0.2));" />
     <p class="final-eyebrow">Begin your practice</p>
     <h2 class="final-title">Become someone<br>you respect.</h2>
     <p class="final-sub">Not by feeling better about yourself.<br>By being better. Starting today.</p>
-    <br>
-    <a href="#app-store-link" class="final-cta-btn">
-      Download Marcus — Free
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-    </a>
-    <p class="final-cta-note">iOS · No account · No subscription required · Your data stays on your device</p>
+    <div class="email-form" style="margin:0 auto;">
+      <div class="email-row">
+        <input type="email" class="email-input" placeholder="Enter your email" id="final-email" />
+        <button class="email-submit" onclick="submitEmail('final-email','final-success')">Begin your practice &#8594;</button>
+      </div>
+      <p class="email-note">Free &middot; iOS &middot; Launching soon &middot; Your data stays on your device</p>
+      <p class="email-success" id="final-success">Your practice begins soon. Watch your inbox.</p>
+    </div>
   </div>
 </section>
 
 
-<!-- ═══════════════════════════════════════════════════
-     FOOTER
-════════════════════════════════════════════════════ -->
+<!-- FOOTER -->
 <footer>
-  <p>Marcus · A Stoic Practice App · <a href="https://getmarcus.app">getmarcus.app</a></p>
+  <p>Marcus &middot; A Stoic Practice App &middot; <a href="https://getmarcus.app">getmarcus.app</a></p>
   <p style="margin-top:8px;">"The impediment to action advances action. What stands in the way becomes the way." — Marcus Aurelius</p>
 </footer>
+
+<script>
+async function submitEmail(inputId, successId) {
+  const input = document.getElementById(inputId);
+  const success = document.getElementById(successId);
+  const email = input ? input.value.trim() : '';
+
+  if (!email || !email.includes('@')) {
+    input.style.outline = '2px solid #a05050';
+    input.focus();
+    return;
+  }
+
+  const btn = input.parentElement.querySelector('.email-submit');
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  try {
+    const fd = new FormData();
+    fd.append('email', email);
+    fd.append('is_js_enabled', 'true');
+    fd.append('sent_from_orchid', 'true');
+    fd.append('double_opt', 'false');
+    fd.append('fallback_path', '/');
+    await fetch('https://marcusapp.beehiiv.com/create', {
+      method: 'POST',
+      body: fd,
+      mode: 'no-cors'
+    });
+  } catch(e) {}
+
+  input.parentElement.style.display = 'none';
+  if (success) success.style.display = 'block';
+}
+</script>
 
 </body>
 </html>
