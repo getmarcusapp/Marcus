@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marcus — A Stoic Practice App</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #080808;
+    --bg-deep: #040404;
+    --bg-card: #0f0f0f;
+    --border: #1e1e1e;
+    --border-mid: #2a2a2a;
+    --text-primary: #F0F0F0;
+    --text-secondary: #C0C0C0;
+    --text-muted: #888888;
+    --text-dim: #555555;
+    --accent: #C8A97A;
+    --accent-dim: #8a7254;
+    --accent-bg: #1a1610;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── HERO ─────────────────────────────────────────── */
+  .hero {
+    background: var(--bg-deep);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 24px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(200, 169, 122, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .skull-wrap {
+    margin-bottom: 40px;
+    opacity: 0.9;
+  }
+
+  .skull-wrap img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 40px rgba(200, 169, 122, 0.15));
+  }
+
+  .skull-placeholder {
+    width: 100px;
+    height: 100px;
+    border: 1px solid var(--border-mid);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    margin: 0 auto;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    font-size: clamp(52px, 10vw, 88px);
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+
+  .hero-sub {
+    font-size: clamp(18px, 3vw, 22px);
+    color: var(--text-secondary);
+    font-style: italic;
+    font-family: Georgia, serif;
+    max-width: 540px;
+    line-height: 1.7;
+    margin-bottom: 52px;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--accent);
+    color: #000;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    padding: 20px 40px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .hero-cta:hover { opacity: 0.88; }
+
+  .hero-cta-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── PAIN SECTION ──────────────────────────────────── */
+  .pain {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 100px 24px;
+    text-align: center;
+  }
+
+  .pain-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  .pain-title {
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 32px;
+  }
+
+  .pain-title em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .pain-body {
+    font-size: 19px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-family: Georgia, serif;
+    font-style: italic;
+  }
+
+  .pain-body p + p { margin-top: 20px; }
+
+  /* ─── AGITATION ─────────────────────────────────────── */
+  .agitation {
+    background: var(--bg-deep);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 100px 24px;
+  }
+
+  .agitation-inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .agitation-title {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -1px;
+    line-height: 1.15;
+    margin-bottom: 52px;
+    text-align: center;
+  }
+
+  .agitation-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .agitation-item {
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .agitation-item:last-child { border-bottom: none; }
+
+  .agitation-num {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    padding-top: 3px;
+    letter-spacing: 1px;
+  }
+
+  .agitation-item-title {
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .agitation-item-body {
+    font-size: 16px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ─── MECHANISM ─────────────────────────────────────── */
+  .mechanism {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 100px 24px;
+    text-align: center;
+  }
+
+  .mechanism-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .mechanism-title {
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 32px;
+  }
+
+  .mechanism-body {
+    font-size: 19px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-family: Georgia, serif;
+    font-style: italic;
+    margin-bottom: 60px;
+  }
+
+  .mechanism-body p + p { margin-top: 20px; }
+
+  .pull-quote {
+    border-left: 2px solid var(--accent);
+    padding: 20px 28px;
+    margin: 48px 0;
+    text-align: left;
+    background: var(--accent-bg);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .pull-quote p {
+    font-size: 20px;
+    color: var(--text-primary);
+    font-style: italic;
+    font-family: Georgia, serif;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .pull-quote cite {
+    font-size: 12px;
+    color: var(--accent-dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-style: normal;
+  }
+
+  /* ─── WHAT IT IS ────────────────────────────────────── */
+  .what {
+    background: var(--bg-deep);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 100px 24px;
+  }
+
+  .what-inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .what-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .what-title {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .features {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .feature {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr;
+    background: var(--bg-card);
+    transition: background 0.2s;
+  }
+
+  .feature:last-child { border-bottom: none; }
+  .feature:hover { background: #141414; }
+
+  .feature-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .feature-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .feature-body {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ─── DIFFERENTIATOR ────────────────────────────────── */
+  .diff {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 100px 24px;
+  }
+
+  .diff-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .diff-title {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .diff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .diff-grid { grid-template-columns: 1fr; }
+  }
+
+  .diff-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    background: var(--bg-card);
+  }
+
+  .diff-card.bad {
+    border-color: #2a1a1a;
+    background: #0d0808;
+  }
+
+  .diff-card.good {
+    border-color: var(--accent-dim);
+    background: var(--accent-bg);
+  }
+
+  .diff-card-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .diff-card.bad .diff-card-label { color: #664444; }
+  .diff-card.good .diff-card-label { color: var(--accent); }
+
+  .diff-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .diff-card li {
+    font-size: 15px;
+    line-height: 1.5;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .diff-card.bad li { color: #664444; }
+  .diff-card.good li { color: var(--text-secondary); }
+
+  .diff-card li .icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 13px;
+  }
+
+  /* ─── PHILOSOPHY ────────────────────────────────────── */
+  .philosophy {
+    background: var(--bg-deep);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 100px 24px;
+    text-align: center;
+  }
+
+  .philosophy-inner {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .philosophy-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .philosophy-title {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 40px;
+  }
+
+  .philosophy-body {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-family: Georgia, serif;
+    font-style: italic;
+    margin-bottom: 48px;
+  }
+
+  .virtues {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    text-align: left;
+    margin-top: 48px;
+  }
+
+  @media (max-width: 600px) {
+    .virtues { grid-template-columns: 1fr; }
+  }
+
+  .virtue-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--bg-card);
+  }
+
+  .virtue-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .virtue-latin {
+    font-size: 12px;
+    color: var(--accent);
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+
+  .virtue-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ─── MEMENTO MORI ──────────────────────────────────── */
+  .memento {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 100px 24px;
+    text-align: center;
+  }
+
+  .memento-skull {
+    font-size: 64px;
+    margin-bottom: 32px;
+    opacity: 0.6;
+  }
+
+  .memento-title {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -1px;
+    line-height: 1.15;
+    margin-bottom: 28px;
+  }
+
+  .memento-body {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-family: Georgia, serif;
+    font-style: italic;
+    margin-bottom: 20px;
+  }
+
+  .memento-body p + p { margin-top: 16px; }
+
+  /* ─── FINAL CTA ─────────────────────────────────────── */
+  .final-cta {
+    background: var(--bg-deep);
+    border-top: 1px solid var(--accent-dim);
+    padding: 100px 24px;
+    text-align: center;
+  }
+
+  .final-cta-inner {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .final-skull {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    opacity: 0.9;
+    margin: 0 auto 32px;
+    display: block;
+    filter: drop-shadow(0 0 20px rgba(200, 169, 122, 0.2));
+  }
+
+  .final-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .final-title {
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  .final-sub {
+    font-size: 18px;
+    color: var(--text-muted);
+    font-family: Georgia, serif;
+    font-style: italic;
+    line-height: 1.7;
+    margin-bottom: 48px;
+  }
+
+  .final-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--accent);
+    color: #000;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    padding: 20px 40px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .final-cta-btn:hover { opacity: 0.88; }
+
+  .final-cta-note {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 16px;
+  }
+
+  /* ─── FOOTER ─────────────────────────────────────────── */
+  footer {
+    padding: 40px 24px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  footer a {
+    color: var(--accent-dim);
+    text-decoration: none;
+  }
+
+  /* ─── DIVIDER ────────────────────────────────────────── */
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: var(--accent-dim);
+    margin: 40px auto;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="skull-wrap">
+    <img src="skull.png" alt="Marcus" />
+  </div>
+  <p class="hero-eyebrow">Memento mori</p>
+  <h1 class="hero-title">Marcus</h1>
+  <p class="hero-sub">
+    "Waste no more time arguing about what a good man should be.<br>Be one."
+    <br><br>— Marcus Aurelius, Meditations
+  </p>
+  <a href="#app-store-link" class="hero-cta">
+    Download on the App Store
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+  <p class="hero-cta-sub">Free · iOS · No account required</p>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAIN — THE RESPECT GAP
+════════════════════════════════════════════════════ -->
+<section class="pain">
+  <p class="pain-eyebrow">The real problem</p>
+  <h2 class="pain-title">You've succeeded at everything.<br>So why don't you <em>respect yourself?</em></h2>
+  <div class="pain-body">
+    <p>You hit the goals. You're productive on paper. You've read the books, tried the apps, built the routines. You can recite the frameworks.</p>
+    <p>And yet — in the quiet moments, when no one is watching — you still feel the gap. The distance between the person you perform and the person you actually are.</p>
+    <p>That gap has a name. The Stoics called it the distance between <em>who you are</em> and <em>who you admire</em>. Two thousand years later, nothing has changed — except now we have apps that make the gap worse.</p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     AGITATION — WHY EVERYTHING ELSE FAILED
+════════════════════════════════════════════════════ -->
+<section class="agitation">
+  <div class="agitation-inner">
+    <h2 class="agitation-title">Why every productivity app you've tried made things worse</h2>
+    <div class="agitation-items">
+
+      <div class="agitation-item">
+        <span class="agitation-num">01</span>
+        <div>
+          <p class="agitation-item-title">They treat you like a machine</p>
+          <p class="agitation-item-body">Habit trackers optimize for the checkmark, not the character. When you break a streak — because life happened — you feel shame instead of growth. You abandon the habit entirely, proving the motivation was never rooted in who you are. It was rooted in a number.</p>
+        </div>
+      </div>
+
+      <div class="agitation-item">
+        <span class="agitation-num">02</span>
+        <div>
+          <p class="agitation-item-title">They reward the wrong thing</p>
+          <p class="agitation-item-body">Checking off twenty small tasks feels like progress. But you've done it again — productive procrastination. The one difficult, character-building thing you were supposed to do remains undone. The app gave you a badge for avoiding it.</p>
+        </div>
+      </div>
+
+      <div class="agitation-item">
+        <span class="agitation-num">03</span>
+        <div>
+          <p class="agitation-item-title">Meditation apps make you passive</p>
+          <p class="agitation-item-body">Calm. Headspace. Peaceful, certainly. But you don't need to feel calmer — you need to act better. There's a difference between a tranquilized mind and a disciplined one. Stoicism was never passive. It was a system for war.</p>
+        </div>
+      </div>
+
+      <div class="agitation-item">
+        <span class="agitation-num">04</span>
+        <div>
+          <p class="agitation-item-title">The algorithms are extracting you</p>
+          <p class="agitation-item-body">Every platform you use treats your cognitive focus as a resource to harvest. They are engineered to trigger anxiety, outrage, and comparison — because your fragmentation is their product. You are not the user. You are the inventory.</p>
+        </div>
+      </div>
+
+      <div class="agitation-item">
+        <span class="agitation-num">05</span>
+        <div>
+          <p class="agitation-item-title">Self-help taught you to feel good, not be good</p>
+          <p class="agitation-item-body">The self-esteem movement shifted the goal from character to comfort. Affirmations. Gratitude journals. "You are enough." But self-respect isn't given — it's earned. The Stoics knew this. The only thing you can control is what you do with the hours you have.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     THE MECHANISM — THE RATIONAL AUDIT
+════════════════════════════════════════════════════ -->
+<section class="mechanism">
+  <p class="mechanism-eyebrow">The solution</p>
+  <h2 class="mechanism-title">A two-thousand-year-old system for earning your own respect</h2>
+  <div class="mechanism-body">
+    <p>Marcus Aurelius kept a private journal. Not for publication. Not for followers. He wrote to hold himself accountable — every morning, setting his intention; every evening, examining his conduct.</p>
+    <p>It was called the daily Examen. And it worked for the most powerful man in the world, who faced pressures that make modern burnout look trivial. Not because it made him feel better. Because it made him act better.</p>
+  </div>
+
+  <div class="pull-quote">
+    <p>"Begin at once to live, and count each separate day as a separate life."</p>
+    <cite>— Seneca, Letters</cite>
+  </div>
+
+  <div class="mechanism-body">
+    <p>This is the practice Marcus is built on. Not habit tracking. Not streaks. Not badges. A daily system of honest self-examination — rooted in the four cardinal virtues that Stoic philosophy identified as the only reliable path to a life you can respect.</p>
+    <p>Two thousand years without becoming irrelevant is not a coincidence. It's evidence.</p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     WHAT IT IS — FEATURES
+════════════════════════════════════════════════════ -->
+<section class="what">
+  <div class="what-inner">
+    <p class="what-eyebrow">What Marcus is</p>
+    <h2 class="what-title">A complete daily practice.<br>Not a productivity tool.</h2>
+    <div class="features">
+
+      <div class="feature">
+        <p class="feature-label">Your foundation</p>
+        <p class="feature-title">Stoic Compass</p>
+        <p class="feature-body">Before the day begins, you read your compass — three personal answers to the questions that anchor everything: Why am I here? What am I working through? Who am I becoming? It takes sixty seconds and reorients everything that follows.</p>
+      </div>
+
+      <div class="feature">
+        <p class="feature-label">Daily wisdom</p>
+        <p class="feature-title">AI-Powered Daily Reading</p>
+        <p class="feature-body">Every morning, a quote and reflection from Marcus Aurelius, Epictetus, or Seneca — generated fresh each day. Real quotes, accurately attributed. Ancient wisdom surfaced for this specific day. Then a space to capture your own insight.</p>
+      </div>
+
+      <div class="feature">
+        <p class="feature-label">Morning practice</p>
+        <p class="feature-title">Morning Journal</p>
+        <p class="feature-body">Five Stoic prompts rooted in two thousand years of practical philosophy — including premeditatio malorum, negative visualization proven by modern research to reduce anxiety and sharpen intention. Choose your virtue focus for the day. Begin with clarity instead of noise.</p>
+      </div>
+
+      <div class="feature">
+        <p class="feature-label">Evening practice</p>
+        <p class="feature-title">Evening Journal</p>
+        <p class="feature-body">The nightly Examen — Marcus Aurelius's actual practice. Examine where you acted with virtue. Confess where you fell short. Release what you're carrying before sleep. The gap between who you are and who you admire only closes when you look at it honestly.</p>
+      </div>
+
+      <div class="feature">
+        <p class="feature-label">Emotional mastery</p>
+        <p class="feature-title">Emotion Logger</p>
+        <p class="feature-body">Between stimulus and response, there is a space. This is that space. Log your triggers, examine your automatic reactions, identify cognitive distortions — the same CBT techniques validated by modern psychology, framed in the language Epictetus used two thousand years before CBT existed.</p>
+      </div>
+
+      <div class="feature">
+        <p class="feature-label">Weekly reckoning</p>
+        <p class="feature-title">Weekly Review</p>
+        <p class="feature-body">Once a week, examine the whole. What patterns are forming? Which virtues are you embodying? Where are you repeatedly falling short? Over time, this becomes a mirror — and the mirror shows you who you're actually becoming, not who you imagine yourself to be.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     DIFFERENTIATOR — NOT A STREAK APP
+════════════════════════════════════════════════════ -->
+<section class="diff">
+  <p class="diff-eyebrow">What makes Marcus different</p>
+  <h2 class="diff-title">We don't punish you for being human</h2>
+
+  <div class="diff-grid">
+    <div class="diff-card bad">
+      <p class="diff-card-label">Every other app</p>
+      <ul>
+        <li><span class="icon">✕</span> Break your streak, lose everything</li>
+        <li><span class="icon">✕</span> Badges for checking boxes</li>
+        <li><span class="icon">✕</span> Optimized for engagement</li>
+        <li><span class="icon">✕</span> Feels good over being good</li>
+        <li><span class="icon">✕</span> Shame when life gets in the way</li>
+      </ul>
+    </div>
+    <div class="diff-card good">
+      <p class="diff-card-label">Marcus</p>
+      <ul>
+        <li><span class="icon">◎</span> Three streak metrics: current, longest, total days</li>
+        <li><span class="icon">◎</span> Missing a day doesn't erase your history</li>
+        <li><span class="icon">◎</span> "Begin again" — the Stoic response to failure</li>
+        <li><span class="icon">◎</span> No account. No data harvesting. Private.</li>
+        <li><span class="icon">◎</span> Designed for character, not for retention</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="pull-quote">
+    <p>"You missed a day. The Stoic doesn't dwell on what's done. Begin again."</p>
+    <cite>— Marcus, on breaking your streak</cite>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PHILOSOPHY — THE FOUR VIRTUES
+════════════════════════════════════════════════════ -->
+<section class="philosophy">
+  <div class="philosophy-inner">
+    <p class="philosophy-eyebrow">The foundation</p>
+    <h2 class="philosophy-title">Built on two thousand years of the only thing that actually works</h2>
+    <p class="philosophy-body">The Stoics identified four virtues as the complete map of a good human life. Not goals. Not achievements. Ways of being — that you either embody in each moment, or you don't. Marcus is built around these four. Everything in the app — every prompt, every reflection, every review — returns to them.</p>
+    <div class="virtues">
+      <div class="virtue-card">
+        <p class="virtue-name">Wisdom</p>
+        <p class="virtue-latin">Sophia</p>
+        <p class="virtue-desc">Discernment and right judgment. Seeing clearly — not as you wish things to be, but as they are.</p>
+      </div>
+      <div class="virtue-card">
+        <p class="virtue-name">Courage</p>
+        <p class="virtue-latin">Andreia</p>
+        <p class="virtue-desc">Doing the right thing even when it is hard or costly. Not the absence of fear — its mastery.</p>
+      </div>
+      <div class="virtue-card">
+        <p class="virtue-name">Temperance</p>
+        <p class="virtue-latin">Sophrosyne</p>
+        <p class="virtue-desc">Neither too much nor too little of anything. Self-mastery and the disciplined middle path.</p>
+      </div>
+      <div class="virtue-card">
+        <p class="virtue-name">Justice</p>
+        <p class="virtue-latin">Dikaiosyne</p>
+        <p class="virtue-desc">Acting rightly toward others. Community, fairness, duty — the social dimension of virtue.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     MEMENTO MORI — THE URGENCY CLOSE
+════════════════════════════════════════════════════ -->
+<section class="memento">
+  <img src="skull.png" alt="" style="width:72px;height:72px;object-fit:contain;opacity:0.6;margin-bottom:32px;" />
+  <h2 class="memento-title">You could leave life right now.<br>Let that determine what you do.</h2>
+  <div class="memento-body">
+    <p>This is not motivational. This is the oldest philosophical technique for focusing a human mind on what actually matters.</p>
+    <p>Marcus Aurelius wrote it to himself. Not as despair — as clarification. If today were your last, would you spend it the way you're planning to? If not — what is stopping you from living better, starting now?</p>
+    <p>The hourglass turns. The practice doesn't take hours. It takes honesty.</p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     FINAL CTA
+════════════════════════════════════════════════════ -->
+<section class="final-cta">
+  <div class="final-cta-inner">
+    <img src="skull.png" alt="" style="width:80px;height:80px;object-fit:contain;opacity:0.9;margin:0 auto 32px;display:block;filter:drop-shadow(0 0 20px rgba(200,169,122,0.2));" />
+    <p class="final-eyebrow">Begin your practice</p>
+    <h2 class="final-title">Become someone<br>you respect.</h2>
+    <p class="final-sub">Not by feeling better about yourself.<br>By being better. Starting today.</p>
+    <br>
+    <a href="#app-store-link" class="final-cta-btn">
+      Download Marcus — Free
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <p class="final-cta-note">iOS · No account · No subscription required · Your data stays on your device</p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════ -->
+<footer>
+  <p>Marcus · A Stoic Practice App · <a href="https://getmarcus.app">getmarcus.app</a></p>
+  <p style="margin-top:8px;">"The impediment to action advances action. What stands in the way becomes the way." — Marcus Aurelius</p>
+</footer>
+
+</body>
+</html>

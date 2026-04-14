@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
+import { requestNotificationPermissions, scheduleAllNotifications, cancelAllNotifications } from '../notifications';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
@@ -67,10 +68,17 @@ function TimeAdjuster({ hour, minute, onHourChange, onMinuteChange }) {
 export default function SettingsScreen() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
+  const [permissionGranted, setPermissionGranted] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(NOTIF_SETTINGS_KEY).then(raw => {
       if (raw) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(raw) });
+    });
+    // Check existing permission status
+    import('expo-notifications').then(Notifications => {
+      Notifications.getPermissionsAsync().then(({ status }) => {
+        setPermissionGranted(status === 'granted');
+      });
     });
   }, []);
 
@@ -81,13 +89,44 @@ export default function SettingsScreen() {
 
   async function handleSave() {
     await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, JSON.stringify(settings));
+
+    // Request permissions if not already granted
+    if (!permissionGranted) {
+      const granted = await requestNotificationPermissions();
+      setPermissionGranted(granted);
+      if (!granted) {
+        Alert.alert(
+          'Notifications disabled',
+          'Please enable notifications for Marcus in your iPhone Settings to receive daily reminders.',
+          [{ text: 'OK' }]
+        );
+        setSaved(true);
+        return;
+      }
+    }
+
+    // Schedule notifications
+    await scheduleAllNotifications();
     setSaved(true);
-    Alert.alert('', 'Settings saved.');
+    Alert.alert('', 'Settings saved. Notifications scheduled.');
   }
 
   async function handleResetOnboarding() {
     await AsyncStorage.removeItem('has_onboarded');
     Alert.alert('', 'Onboarding reset. Close and reopen the app to see it.');
+  }
+
+  async function handleDisableAll() {
+    await cancelAllNotifications();
+    const updated = {
+      ...settings,
+      morningEnabled: false,
+      eveningEnabled: false,
+      reviewEnabled: false,
+    };
+    setSettings(updated);
+    await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, JSON.stringify(updated));
+    Alert.alert('', 'All notifications cancelled.');
   }
 
   return (
@@ -99,6 +138,15 @@ export default function SettingsScreen() {
           <Text style={s.title}>Settings</Text>
           <Text style={s.sub}>Configure your daily practice</Text>
         </View>
+
+        {!permissionGranted && (
+          <View style={s.permissionBanner}>
+            <Text style={s.permissionTitle}>Notifications not enabled</Text>
+            <Text style={s.permissionText}>
+              Save your settings below to request notification permissions. Or enable them manually in iPhone Settings → Marcus.
+            </Text>
+          </View>
+        )}
 
         <View style={s.body}>
 
@@ -126,6 +174,9 @@ export default function SettingsScreen() {
                   onMinuteChange={v => update('morningMinute', v)}
                 />
                 <Text style={s.timePreview}>{formatTime(settings.morningHour, settings.morningMinute)}</Text>
+                <View style={s.sampleMsg}>
+                  <Text style={s.sampleText}>"The hourglass turns. Your morning practice awaits."</Text>
+                </View>
               </View>
             )}
           </View>
@@ -154,6 +205,9 @@ export default function SettingsScreen() {
                   onMinuteChange={v => update('eveningMinute', v)}
                 />
                 <Text style={s.timePreview}>{formatTime(settings.eveningHour, settings.eveningMinute)}</Text>
+                <View style={s.sampleMsg}>
+                  <Text style={s.sampleText}>"The day closes. Time to examine it."</Text>
+                </View>
               </View>
             )}
           </View>
@@ -182,6 +236,9 @@ export default function SettingsScreen() {
                   onMinuteChange={v => update('reviewMinute', v)}
                 />
                 <Text style={s.timePreview}>{formatTime(settings.reviewHour, settings.reviewMinute)}</Text>
+                <View style={s.sampleMsg}>
+                  <Text style={s.sampleText}>"A week has passed. Seal it with intention."</Text>
+                </View>
               </View>
             )}
           </View>
@@ -209,22 +266,21 @@ export default function SettingsScreen() {
             onPress={handleSave}
             activeOpacity={0.8}
           >
-            <Text style={s.saveBtnText}>{saved ? 'Settings saved' : 'Save settings'}</Text>
+            <Text style={s.saveBtnText}>{saved ? 'Notifications scheduled ✓' : 'Save & schedule notifications'}</Text>
           </TouchableOpacity>
 
           <View style={s.notifNote}>
             <Text style={s.notifNoteTitle}>About notifications</Text>
             <Text style={s.notifNoteText}>
-              Push notifications will be activated in a future update. Your time preferences are saved and will be applied automatically when enabled.
+              Saving your settings will request permission to send notifications and schedule your daily reminders. You can update your times at any time and save again to reschedule.
             </Text>
           </View>
 
           <Text style={s.secLabel}>Developer</Text>
-          <TouchableOpacity
-            style={s.resetBtn}
-            onPress={handleResetOnboarding}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity style={s.dangerBtn} onPress={handleDisableAll} activeOpacity={0.8}>
+            <Text style={s.dangerBtnText}>Cancel all notifications</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.resetBtn} onPress={handleResetOnboarding} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Reset onboarding</Text>
           </TouchableOpacity>
 
@@ -256,6 +312,14 @@ const s = StyleSheet.create({
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
+  permissionBanner: {
+    backgroundColor: '#0a0f1a',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#1e2a3a',
+    padding: spacing.lg,
+  },
+  permissionTitle: { fontSize: 13, fontWeight: '600', color: '#7aaddd', marginBottom: 6 },
+  permissionText: { fontSize: 13, color: '#3a5a7a', lineHeight: 20 },
   body: { padding: spacing.md },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginTop: 20, marginBottom: 10 },
   card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
@@ -264,7 +328,9 @@ const s = StyleSheet.create({
   rowSub: { fontSize: 13, color: colors.textDim, marginBottom: 0 },
   timeSection: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
   timeLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 4, textAlign: 'center' },
-  timePreview: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 4 },
+  timePreview: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 10 },
+  sampleMsg: { backgroundColor: colors.bgDeep, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 12 },
+  sampleText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 20, textAlign: 'center' },
   dayRow: { flexDirection: 'row', gap: 6, marginTop: 14 },
   dayBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgDeep },
   dayBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
@@ -276,6 +342,8 @@ const s = StyleSheet.create({
   notifNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgDeep },
   notifNoteTitle: { fontSize: 13, fontWeight: '600', color: colors.textMuted, marginBottom: 8 },
   notifNoteText: { fontSize: 13, color: colors.textDim, lineHeight: 20 },
+  dangerBtn: { borderWidth: 0.5, borderColor: '#2a1a1a', borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: '#0d0808', marginBottom: 10 },
+  dangerBtnText: { fontSize: 12, color: '#884444', letterSpacing: 1, textTransform: 'uppercase' },
   resetBtn: { borderWidth: 0.5, borderColor: '#3a2020', borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: '#1a0a0a', marginBottom: 32 },
   resetBtnText: { fontSize: 12, color: '#cc6060', letterSpacing: 1, textTransform: 'uppercase' },
 });

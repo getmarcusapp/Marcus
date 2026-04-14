@@ -156,7 +156,14 @@ export default function JournalScreen() {
       setAlreadySaved(true);
       const all = await getJournals();
       setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
-      Alert.alert('', isMorning ? 'Morning reflection saved.' : 'Evening reflection saved.');
+      Alert.alert(
+  '',
+  isMorning ? 'Morning reflection saved.' : 'Evening reflection saved.',
+  [
+    { text: 'Go to Practice', onPress: () => router.replace('/') },
+    { text: 'Read today\'s wisdom', onPress: () => router.replace('/read') },
+  ]
+);
     }
   }
 
