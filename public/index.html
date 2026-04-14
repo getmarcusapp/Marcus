@@ -601,8 +601,16 @@
     margin: 40px auto;
   }
 
+
+  /* EMAIL CAPTURE */
+  .email-form { display:flex; flex-direction:column; align-items:center; gap:12px; width:100%; max-width:480px; }
+  .email-row { display:flex; width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--border-mid); }
+  .email-input { flex:1; background:#111; color:var(--text-primary); font-size:16px; padding:18px 20px; border:none; outline:none; font-family:inherit; }
+  .email-input::placeholder { color:var(--text-dim); }
+  .email-submit { background:var(--accent); color:#000; font-size:15px; font-weight:700; padding:18px 28px; border:none; cursor:pointer; transition:opacity 0.2s; white-space:nowrap; font-family:inherit; letter-spacing:0.3px; }
+  .email-submit:hover { opacity:0.88; }
+  .email-note { font-size:13px; color:var(--text-dim); letter-spacing:0.5px; text-align:center; }
 </style>
-<script async src="https://subscribe-forms.beehiiv.com/16c32792-287c-4402-9e74-94be1110d190/embeds/form.js" type="module"></script>
 </head>
 <body>
 
@@ -617,7 +625,13 @@
     "Waste no more time arguing about what a good man should be.<br>Be one."
     <br><br>— Marcus Aurelius, Meditations
   </p>
-  <div data-beehiiv-form="16c32792-287c-4402-9e74-94be1110d190"></div>
+  <div class="email-form">
+    <div class="email-row">
+      <input type="email" class="email-input" placeholder="Enter your email" id="hero-email" />
+      <button class="email-submit" onclick="goSubscribe('hero-email')">Join the waitlist &#8594;</button>
+    </div>
+    <p class="email-note">Free &middot; iOS &middot; No account required &middot; Launching soon</p>
+  </div>
 </section>
 
 
@@ -841,7 +855,13 @@
     <p class="final-eyebrow">Begin your practice</p>
     <h2 class="final-title">Become someone<br>you respect.</h2>
     <p class="final-sub">Not by feeling better about yourself.<br>By being better. Starting today.</p>
-    <div data-beehiiv-form="16c32792-287c-4402-9e74-94be1110d190"></div>
+    <div class="email-form" style="margin:0 auto;">
+      <div class="email-row">
+        <input type="email" class="email-input" placeholder="Enter your email" id="final-email" />
+        <button class="email-submit" onclick="goSubscribe('final-email')">Begin your practice &#8594;</button>
+      </div>
+      <p class="email-note">Free &middot; iOS &middot; Launching soon &middot; Your data stays on your device</p>
+    </div>
   </div>
 </section>
 
@@ -887,5 +907,18 @@ async function submitEmail(inputId, successId) {
 }
 </script>
 
+
+<script>
+function goSubscribe(inputId) {
+  const input = document.getElementById(inputId);
+  const email = input ? input.value.trim() : '';
+  if (!email || !email.includes('@')) {
+    input.style.outline = '2px solid #a05050';
+    input.focus();
+    return;
+  }
+  window.location.href = 'https://marcusapp.beehiiv.com/subscribe?email=' + encodeURIComponent(email);
+}
+</script>
 </body>
 </html>
