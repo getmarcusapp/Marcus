@@ -74,7 +74,6 @@ export default function SettingsScreen() {
     AsyncStorage.getItem(NOTIF_SETTINGS_KEY).then(raw => {
       if (raw) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(raw) });
     });
-    // Check existing permission status
     import('expo-notifications').then(Notifications => {
       Notifications.getPermissionsAsync().then(({ status }) => {
         setPermissionGranted(status === 'granted');
@@ -89,8 +88,6 @@ export default function SettingsScreen() {
 
   async function handleSave() {
     await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, JSON.stringify(settings));
-
-    // Request permissions if not already granted
     if (!permissionGranted) {
       const granted = await requestNotificationPermissions();
       setPermissionGranted(granted);
@@ -104,8 +101,6 @@ export default function SettingsScreen() {
         return;
       }
     }
-
-    // Schedule notifications
     await scheduleAllNotifications();
     setSaved(true);
     Alert.alert('', 'Settings saved. Notifications scheduled.');
@@ -114,6 +109,11 @@ export default function SettingsScreen() {
   async function handleResetOnboarding() {
     await AsyncStorage.removeItem('has_onboarded');
     Alert.alert('', 'Onboarding reset. Close and reopen the app to see it.');
+  }
+
+  async function handleClearReading() {
+    await AsyncStorage.removeItem('reading_today');
+    Alert.alert('', 'Reading cache cleared. Open the Read tab to generate a fresh one.');
   }
 
   async function handleDisableAll() {
@@ -280,6 +280,9 @@ export default function SettingsScreen() {
           <TouchableOpacity style={s.dangerBtn} onPress={handleDisableAll} activeOpacity={0.8}>
             <Text style={s.dangerBtnText}>Cancel all notifications</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={s.dangerBtn} onPress={handleClearReading} activeOpacity={0.8}>
+            <Text style={s.dangerBtnText}>Clear today's reading cache</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={s.resetBtn} onPress={handleResetOnboarding} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Reset onboarding</Text>
           </TouchableOpacity>
@@ -302,22 +305,11 @@ const t = StyleSheet.create({
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  hero: {
-    backgroundColor: colors.bgDeep,
-    padding: spacing.xl,
-    paddingTop: 36,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
-  },
+  hero: { backgroundColor: colors.bgDeep, padding: spacing.xl, paddingTop: 36, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
-  permissionBanner: {
-    backgroundColor: '#0a0f1a',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#1e2a3a',
-    padding: spacing.lg,
-  },
+  permissionBanner: { backgroundColor: '#0a0f1a', borderBottomWidth: 0.5, borderBottomColor: '#1e2a3a', padding: spacing.lg },
   permissionTitle: { fontSize: 13, fontWeight: '600', color: '#7aaddd', marginBottom: 6 },
   permissionText: { fontSize: 13, color: '#3a5a7a', lineHeight: 20 },
   body: { padding: spacing.md },
