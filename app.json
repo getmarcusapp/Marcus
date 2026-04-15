@@ -21,8 +21,7 @@
       }
     },
     "scheme": "marcus",
-    "plugins": ["expo-router"],
-    "extra": {
+    "plugins": ["expo-router", "expo-notifications"],    "extra": {
       "router": {},
       "eas": {
         "projectId": "230367c9-90a1-453c-8717-ee248ed3eb1b"
