@@ -38,6 +38,7 @@ export default function MoreScreen() {
           <Text style={s.title}>Marcus</Text>
           <Text style={s.sub}>A Stoic practice app</Text>
           <Text style={s.heroQuote}>"Waste no more time arguing about what a good man should be. Be one."</Text>
+          <Text style={s.heroAttr}>Marcus Aurelius</Text>
         </View>
 
         {menuItems.map(section => (
@@ -65,14 +66,7 @@ export default function MoreScreen() {
           </View>
         ))}
 
-        <View style={s.footer}>
-          <Text style={s.footerQuote}>
-            {'"Waste no more time arguing about what a good man should be. Be one."'}
-          </Text>
-          <Text style={s.footerAttr}>Marcus Aurelius</Text>
-        </View>
 
-      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -90,6 +84,7 @@ const s = StyleSheet.create({
   title: { fontSize: 52, fontWeight: '700', color: '#FFFFFF', letterSpacing: -2, marginBottom: 8 },
   sub: { fontSize: 18, color: colors.textSecondary, fontStyle: 'italic', fontFamily: font.serif, marginBottom: 20 },
   heroQuote: { fontSize: 15, color: colors.textDim, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 24 },
+  heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase', marginTop: 8 },
   section: { paddingHorizontal: spacing.md, paddingTop: spacing.lg },
   sectionLabel: {
     fontSize: font.labelSize,
@@ -115,7 +110,6 @@ const s = StyleSheet.create({
   rowContent: { flex: 1 },
   rowLabel: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
   rowSub: { fontSize: 13, color: colors.textDim },
-  footer: { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: 40, alignItems: 'center' },
   footerQuote: {
     fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif,
     textAlign: 'center', lineHeight: 22, marginBottom: 8,
