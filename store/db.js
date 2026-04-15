@@ -102,9 +102,10 @@ export async function incrementStreak() {
     const today = new Date().toDateString();
     if (streak.lastDate === today) return streak;
     const morning = await getTodayJournal('morning');
+    const evening = await getTodayJournal('evening');
     const reading = await getTodayReading();
     const compass = await getCompassDone();
-    if (!morning || !reading || !compass) return streak;
+    if (!morning || !evening || !reading || !compass) return streak;
     const newCurrent = streak.current + 1;
     const updated = {
       current: newCurrent,

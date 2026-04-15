@@ -10,9 +10,6 @@ import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/qu
 import { virtues } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone } from '../store/db';
 
-const today = new Date();
-const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
 const virtueDetails = {
   wisdom: { definition: 'The virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
   courage: { definition: 'The virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
@@ -26,10 +23,14 @@ export default function PracticeScreen() {
   const [eveningDone, setEveningDone] = useState(false);
   const [compassDone, setCompassDone] = useState(false);
   const [readingDone, setReadingDone] = useState(false);
-  const [streak, setStreak] = useState({ count: 0 });
-  const [todayVirtue, setTodayVirtue] = useState(virtues[today.getDate() % 4]);
+  const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
+  const [todayDate, setTodayDate] = useState(new Date());
   const [reviewDay, setReviewDay] = useState(0);
   const [virtueExpanded, setVirtueExpanded] = useState(false);
+
+  const today = todayDate;
+  const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const [todayVirtue, setTodayVirtue] = useState(virtues[today.getDate() % 4]);
   const isReviewDay = today.getDay() === reviewDay;
 
   const quote = getDailyQuote(morningQuotes);
@@ -37,7 +38,9 @@ export default function PracticeScreen() {
 
   useFocusEffect(useCallback(() => {
     async function load() {
-      const morning = await getTodayJournal('morning');
+      const now = new Date();
+      setTodayDate(now);
+      setTodayVirtue(virtues[now.getDate() % 4]);
       const evening = await getTodayJournal('evening');
       const reading = await getTodayReading();
       const compassToday = await getCompassDone();
@@ -80,7 +83,7 @@ export default function PracticeScreen() {
             <Text style={s.sealedEyebrow}>Practice complete</Text>
             <Text style={s.sealedDate}>{dateStr}</Text>
             <Text style={s.sealedStreak}>
-              {streak.count > 0 ? `Day ${streak.count}` : 'Day 1'}
+              {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
             </Text>
           </View>
 
@@ -135,7 +138,7 @@ export default function PracticeScreen() {
           <Text style={s.eyebrow}>Memento mori</Text>
           <Text style={s.heroDate}>{dateStr}</Text>
           <Text style={s.heroSub}>
-            {streak.count > 0 ? `Day ${streak.count} of your finite days` : 'Your practice begins today'}
+            {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
           </Text>
         </View>
 
