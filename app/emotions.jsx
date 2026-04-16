@@ -9,15 +9,15 @@ import { emotions, stoicReframes } from '../constants/virtues';
 import { saveTrigger, getTriggers, updateTriggerEntry } from '../store/db';
 
 const EMOTION_COLORS = {
-  anger:       { bg: '#2a1010', border: '#5a2020', text: '#e08080' },
-  anxiety:     { bg: '#101828', border: '#1e3a5f', text: '#7aaddd' },
-  frustration: { bg: '#1e1a0a', border: '#4a3a10', text: '#c8a84a' },
-  shame:       { bg: '#1a1028', border: '#3a2050', text: '#a880dd' },
-  avoidance:   { bg: '#0a1a18', border: '#1a3a35', text: '#60b8a8' },
-  envy:        { bg: '#0e1a0e', border: '#1e3e1e', text: '#70b870' },
-  grief:       { bg: '#181828', border: '#303050', text: '#8888cc' },
-  fear:        { bg: '#1a1010', border: '#3a2020', text: '#cc8870' },
-  other:       { bg: '#181818', border: '#383838', text: '#aaaaaa' },
+  anger:       { bg: '#FDF0EF', border: '#E8A09A', text: '#C0504A' },
+  anxiety:     { bg: '#EFF4FD', border: '#9AB4E8', text: '#4A6EC0' },
+  frustration: { bg: '#FDF8EF', border: '#E8C87A', text: '#A07830' },
+  shame:       { bg: '#F5EFFd', border: '#C09AE8', text: '#7050B0' },
+  avoidance:   { bg: '#EFF8F5', border: '#7AC8B4', text: '#307870' },
+  envy:        { bg: '#EFF8EF', border: '#80C880', text: '#307030' },
+  grief:       { bg: '#F0F0F8', border: '#A0A0D0', text: '#505090' },
+  fear:        { bg: '#FDF2EF', border: '#E8B09A', text: '#B06040' },
+  other:       { bg: '#F5F5F5', border: '#C0C0C0', text: '#707070' },
 };
 
 const DISTORTIONS = [
@@ -46,18 +46,18 @@ function IntensitySlider({ value, onChange }) {
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 }}>
       <TouchableOpacity
         onPress={() => onChange(Math.max(1, value - 1))}
-        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.lightBorder2, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lightWhite }}
       >
-        <Text style={{ fontSize: 24, color: colors.textSecondary }}>−</Text>
+        <Text style={{ fontSize: 24, color: colors.lightText2 }}>−</Text>
       </TouchableOpacity>
-      <View style={{ flex: 1, height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' }}>
+      <View style={{ flex: 1, height: 4, backgroundColor: colors.lightBorder, borderRadius: 2, overflow: 'hidden' }}>
         <View style={{ width: `${(value / 10) * 100}%`, height: '100%', backgroundColor: colors.textSecondary, borderRadius: 2 }} />
       </View>
       <TouchableOpacity
         onPress={() => onChange(Math.min(10, value + 1))}
-        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.lightBorder2, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.lightWhite }}
       >
-        <Text style={{ fontSize: 24, color: colors.textSecondary }}>+</Text>
+        <Text style={{ fontSize: 24, color: colors.lightText2 }}>+</Text>
       </TouchableOpacity>
       <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, minWidth: 48, textAlign: 'right' }}>{value}/10</Text>
     </View>
