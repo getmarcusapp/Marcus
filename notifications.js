@@ -37,9 +37,9 @@ export async function scheduleAllNotifications() {
         sound: false,
       },
       trigger: {
+        type: 'daily',
         hour: settings.morningHour,
         minute: settings.morningMinute,
-        repeats: true,
       },
     });
   }
@@ -53,14 +53,14 @@ export async function scheduleAllNotifications() {
         sound: false,
       },
       trigger: {
+        type: 'daily',
         hour: settings.eveningHour,
         minute: settings.eveningMinute,
-        repeats: true,
       },
     });
   }
 
-  // Weekly review — only on the selected review day
+  // Weekly review
   if (settings.reviewEnabled) {
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -69,10 +69,10 @@ export async function scheduleAllNotifications() {
         sound: false,
       },
       trigger: {
-        weekday: (settings.reviewDay ?? 0) + 1, // Expo uses 1=Sunday
+        type: 'weekly',
+        weekday: (settings.reviewDay ?? 0) + 1, // Expo: 1=Sunday
         hour: settings.reviewHour,
         minute: settings.reviewMinute,
-        repeats: true,
       },
     });
   }

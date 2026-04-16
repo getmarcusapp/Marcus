@@ -41,6 +41,7 @@ export default function PracticeScreen() {
       const now = new Date();
       setTodayDate(now);
       setTodayVirtue(virtues[now.getDate() % 4]);
+      const morning = await getTodayJournal('morning');
       const evening = await getTodayJournal('evening');
       const reading = await getTodayReading();
       const compassToday = await getCompassDone();
@@ -304,7 +305,7 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     alignItems: 'center',
   },
-  skullIcon: { width: 120, height: 120, marginBottom: 24, opacity: 0.9 },
+  skullIcon: { width: 96, height: 96, marginBottom: 20, opacity: 0.9 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
   heroDate: { fontSize: font.heroSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -1, marginBottom: 8, textAlign: 'center' },
   heroSub: { fontSize: font.subSize, color: colors.textMuted, textAlign: 'center' },
@@ -337,15 +338,16 @@ const s = StyleSheet.create({
   sealedQuoteRule: { height: 0.5, backgroundColor: colors.accentDim, marginVertical: 16 },
   sealedQuoteAttr: { fontSize: 10, color: colors.accentDim, letterSpacing: 1.5 },
 
-  // Sealed rest card
+  // Sealed rest card — light zone
   sealedRestCard: {
     padding: spacing.xl,
     paddingVertical: 24,
     borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.lightBorder,
+    backgroundColor: colors.lightBg,
   },
-  sealedRestTitle: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
-  sealedRestSub: { fontSize: 15, color: colors.textMuted, lineHeight: 24, fontFamily: font.serif },
+  sealedRestTitle: { fontSize: 20, fontWeight: '400', color: colors.lightText, marginBottom: 8 },
+  sealedRestSub: { fontSize: 15, color: colors.lightMuted, lineHeight: 24, fontFamily: font.serif },
 
   // Normal quote
   quoteCard: {
@@ -356,57 +358,58 @@ const s = StyleSheet.create({
     paddingVertical: 22,
   },
   quoteOpen: { fontSize: 36, color: colors.borderStrong, fontFamily: font.serif, lineHeight: 28, marginBottom: -4 },
-  quoteText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28, fontStyle: 'italic', fontFamily: font.serif },
-  quoteAttr: { fontSize: 10, color: colors.textDim, marginTop: 12, letterSpacing: 1.5 },
+  quoteText: { fontSize: 18, color: colors.textPrimary, lineHeight: 30, fontFamily: font.serif },
+  quoteAttr: { fontSize: 11, color: colors.textMuted, marginTop: 12, letterSpacing: 1.5 },
 
-  body: { padding: spacing.md },
+  // Light body zone
+  body: { padding: spacing.md, backgroundColor: colors.lightBg },
   practiceHeader: { marginTop: 8, marginBottom: 10 },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase' },
-  progressBar: { height: 2, backgroundColor: colors.border, borderRadius: 1, marginBottom: 8, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: colors.textMuted, borderRadius: 1 },
-  progressText: { fontSize: 12, color: colors.textMuted, marginBottom: 12 },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.lightDim, textTransform: 'uppercase' },
+  progressBar: { height: 1, backgroundColor: colors.lightBorder, borderRadius: 1, marginBottom: 8, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: colors.lightText, borderRadius: 1 },
+  progressText: { fontSize: 12, color: colors.lightDim, marginBottom: 12 },
 
   streakRow: {
     flexDirection: 'row',
     borderWidth: 0.5,
-    borderColor: colors.border,
+    borderColor: colors.lightBorder,
     borderRadius: radius.md,
-    backgroundColor: colors.bgCard,
-    marginBottom: 16,
+    backgroundColor: colors.lightWhite,
+    marginBottom: 14,
     overflow: 'hidden',
   },
   streakStat: { flex: 1, alignItems: 'center', paddingVertical: 12 },
-  streakNum: { fontSize: 22, fontWeight: '600', color: colors.accent, letterSpacing: -0.5 },
-  streakLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 3 },
-  streakDivider: { width: 0.5, backgroundColor: colors.border, marginVertical: 10 },
+  streakNum: { fontSize: 22, fontWeight: '300', color: colors.lightText, letterSpacing: -0.5 },
+  streakLabel: { fontSize: 10, color: colors.lightDim, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 3 },
+  streakDivider: { width: 0.5, backgroundColor: colors.lightBorder, marginVertical: 8 },
 
   routineCard: {
     borderWidth: 0.5,
-    borderColor: colors.border,
+    borderColor: colors.lightBorder,
     borderRadius: radius.lg,
-    backgroundColor: colors.bgCard,
+    backgroundColor: colors.lightWhite,
     overflow: 'hidden',
     marginBottom: 16,
   },
-  routineRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
-  routineRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  dot: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: colors.borderMid },
-  dotDone: { backgroundColor: colors.borderMid, borderColor: colors.borderMid },
+  routineRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 18 },
+  routineRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.lightBorder },
+  dot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.lightBorder2 },
+  dotDone: { backgroundColor: colors.lightText, borderColor: colors.lightText },
   routineContent: { flex: 1 },
-  routineTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 3 },
-  titleDone: { color: colors.textDim, textDecorationLine: 'line-through' },
-  routineSub: { fontSize: 13, color: colors.textDim },
+  routineTitle: { fontSize: 15, fontWeight: '400', color: colors.lightText, marginBottom: 3 },
+  titleDone: { color: colors.lightDim, textDecorationLine: 'line-through' },
+  routineSub: { fontSize: 12, color: colors.lightDim },
   tagRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  undoBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
-  undoBtnText: { fontSize: 11, color: colors.textDim },
-  tag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
-  tagDone: { borderColor: colors.border },
-  tagNow: { borderColor: colors.borderStrong, backgroundColor: colors.bgElevated },
-  tagLater: { borderColor: colors.border },
-  tagAccent: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  tagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
-  tagTextNow: { color: colors.textSecondary },
-  tagTextAccent: { color: colors.accent },
+  undoBtn: { borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
+  undoBtnText: { fontSize: 11, color: colors.lightMuted },
+  tag: { borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
+  tagDone: { borderColor: colors.lightBorder },
+  tagNow: { borderColor: colors.lightText, backgroundColor: 'transparent' },
+  tagLater: { borderColor: colors.lightBorder },
+  tagAccent: { borderColor: colors.lightBorder2 },
+  tagText: { fontSize: 10, color: colors.lightMuted, letterSpacing: 1, textTransform: 'uppercase' },
+  tagTextNow: { color: colors.lightText, fontWeight: '500' },
+  tagTextAccent: { color: colors.lightMuted },
 
   virtueCard: {
     borderWidth: 0.5,
