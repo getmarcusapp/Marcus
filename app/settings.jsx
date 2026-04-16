@@ -175,8 +175,8 @@ export default function SettingsScreen() {
               <Switch
                 value={settings.compassEnabled}
                 onValueChange={v => update('compassEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.accentDim }}
-                thumbColor={settings.compassEnabled ? colors.accent : colors.textDim}
+                trackColor={{ false: colors.border, true: colors.borderStrong }}
+                thumbColor={settings.compassEnabled ? colors.textPrimary : colors.textDim}
               />
             </View>
             {settings.compassEnabled && (
@@ -234,8 +234,8 @@ export default function SettingsScreen() {
               <Switch
                 value={settings.readingEnabled}
                 onValueChange={v => update('readingEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.accentDim }}
-                thumbColor={settings.readingEnabled ? colors.accent : colors.textDim}
+                trackColor={{ false: colors.border, true: colors.borderStrong }}
+                thumbColor={settings.readingEnabled ? colors.textPrimary : colors.textDim}
               />
             </View>
             {settings.readingEnabled && (
@@ -293,8 +293,8 @@ export default function SettingsScreen() {
               <Switch
                 value={settings.middayEnabled}
                 onValueChange={v => update('middayEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.accentDim }}
-                thumbColor={settings.middayEnabled ? colors.accent : colors.textDim}
+                trackColor={{ false: colors.border, true: colors.borderStrong }}
+                thumbColor={settings.middayEnabled ? colors.textPrimary : colors.textDim}
               />
             </View>
             {settings.middayEnabled && (
