@@ -227,7 +227,7 @@ export default function EmotionsScreen() {
                   style={s.fieldInput}
                   multiline
                   placeholder="Describe the situation..."
-                  placeholderTextColor={colors.textDim}
+                  placeholderTextColor={colors.lightDim}
                   value={trigger}
                   onChangeText={setTrigger}
                   scrollEnabled={false}
@@ -240,7 +240,7 @@ export default function EmotionsScreen() {
                   style={s.fieldInput}
                   multiline
                   placeholder="What did you want to do or say?"
-                  placeholderTextColor={colors.textDim}
+                  placeholderTextColor={colors.lightDim}
                   value={reaction}
                   onChangeText={setReaction}
                   scrollEnabled={false}
@@ -294,7 +294,7 @@ export default function EmotionsScreen() {
                     placeholder={timing === 'now'
                       ? "What is your chosen response going forward?"
                       : "Looking back — what would the Stoic have done?"}
-                    placeholderTextColor={colors.textDim}
+                    placeholderTextColor={colors.lightDim}
                     value={chosenResponse}
                     onChangeText={setChosenResponse}
                     scrollEnabled={false}
@@ -332,7 +332,7 @@ export default function EmotionsScreen() {
             multiline
             value={editingEntry.trigger}
             onChangeText={text => setEditingEntry(prev => ({ ...prev, trigger: text }))}
-            placeholderTextColor={colors.textDim}
+            placeholderTextColor={colors.lightDim}
             scrollEnabled={false}
           />
           <View style={s.editDivider} />
@@ -342,7 +342,7 @@ export default function EmotionsScreen() {
             multiline
             value={editingEntry.reaction || ''}
             onChangeText={text => setEditingEntry(prev => ({ ...prev, reaction: text }))}
-            placeholderTextColor={colors.textDim}
+            placeholderTextColor={colors.lightDim}
             scrollEnabled={false}
           />
           <View style={s.editDivider} />
@@ -354,7 +354,7 @@ export default function EmotionsScreen() {
             multiline
             value={editingEntry.chosenResponse || ''}
             onChangeText={text => setEditingEntry(prev => ({ ...prev, chosenResponse: text }))}
-            placeholderTextColor={colors.textDim}
+            placeholderTextColor={colors.lightDim}
             scrollEnabled={false}
           />
         </View>
@@ -418,6 +418,7 @@ export default function EmotionsScreen() {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
+  // Dark header
   hero: {
     backgroundColor: colors.bgDeep,
     padding: spacing.xl,
@@ -426,67 +427,69 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
-  tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
   tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
   tabBtnTextActive: { color: colors.textSecondary },
-  body: { padding: spacing.md },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
+  // Light body
+  body: { padding: spacing.md, backgroundColor: colors.lightBg },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.lightDim, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
   timingRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 16, backgroundColor: colors.bgCard },
-  timingBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  timingBtnText: { fontSize: 14, fontWeight: '600', color: colors.textDim, marginBottom: 4 },
-  timingBtnTextActive: { color: colors.accent },
-  timingBtnSub: { fontSize: 12, color: colors.textDim, lineHeight: 18 },
-  timingBtnSubActive: { color: colors.accentDim },
+  timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg, padding: 16, backgroundColor: colors.lightWhite },
+  timingBtnActive: { borderColor: colors.lightText2, backgroundColor: colors.lightBg3 },
+  timingBtnText: { fontSize: 14, fontWeight: '400', color: colors.lightMuted, marginBottom: 4 },
+  timingBtnTextActive: { color: colors.lightText, fontWeight: '500' },
+  timingBtnSub: { fontSize: 12, color: colors.lightDim, lineHeight: 18 },
+  timingBtnSubActive: { color: colors.lightText2 },
   emotionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginBottom: 16 },
-  ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 16, alignItems: 'center', backgroundColor: colors.bgCard },
-  eDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: colors.borderMid, marginBottom: 8 },
-  ePillName: { fontSize: 13, color: colors.textMuted, fontWeight: '500' },
-  fieldCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 12, backgroundColor: colors.bgCard },
-  fieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textSecondary, textTransform: 'uppercase', marginBottom: 12 },
-  fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 25, minHeight: 64, textAlignVertical: 'top' },
-  reframeCard: { borderWidth: 1, borderRadius: radius.lg, padding: 20, marginBottom: 12, backgroundColor: colors.bgDeep },
+  ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.md, paddingVertical: 16, alignItems: 'center', backgroundColor: colors.lightWhite },
+  eDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: colors.lightDim, marginBottom: 8 },
+  ePillName: { fontSize: 13, color: colors.lightMuted, fontWeight: '400' },
+  fieldCard: { borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg, padding: 18, marginBottom: 12, backgroundColor: colors.lightWhite },
+  fieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.lightMuted, textTransform: 'uppercase', marginBottom: 12 },
+  fieldInput: { fontSize: 16, color: colors.lightText, lineHeight: 25, minHeight: 64, textAlignVertical: 'top' },
+  reframeCard: { borderWidth: 0.5, borderRadius: radius.lg, padding: 20, marginBottom: 12, backgroundColor: colors.lightBg2 },
   reframeEyebrow: { fontSize: font.microSize, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12, fontWeight: '600' },
-  reframeText: { fontSize: 16, color: colors.textSecondary, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 26, marginBottom: 16 },
-  reframeDivider: { height: 0.5, backgroundColor: colors.border, marginBottom: 16 },
-  distortionSub: { fontSize: 13, color: colors.textMuted, marginBottom: 14 },
+  reframeText: { fontSize: 16, color: colors.lightText2, fontFamily: font.serif, lineHeight: 26, marginBottom: 16 },
+  reframeDivider: { height: 0.5, backgroundColor: colors.lightBorder, marginBottom: 16 },
+  distortionSub: { fontSize: 13, color: colors.lightMuted, marginBottom: 14 },
   distortionGrid: { gap: 10, marginBottom: 16 },
-  distortionPill: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 14, backgroundColor: colors.bgCard },
-  distortionLabel: { fontSize: 15, fontWeight: '600', color: colors.textSecondary, marginBottom: 4 },
-  distortionQ: { fontSize: 13, color: colors.textMuted, lineHeight: 20 },
-  saveBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
-  saveBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
-  saveBtnSub: { fontSize: 12, color: colors.textDim, marginTop: 5 },
-  histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  distortionPill: { borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.md, padding: 14, backgroundColor: colors.lightWhite },
+  distortionLabel: { fontSize: 15, fontWeight: '500', color: colors.lightText, marginBottom: 4 },
+  distortionQ: { fontSize: 13, color: colors.lightMuted, lineHeight: 20 },
+  saveBtn: { borderWidth: 0.5, borderColor: colors.lightBorder2, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.lightWhite, marginBottom: 36 },
+  saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.lightText, letterSpacing: 1, textTransform: 'uppercase' },
+  saveBtnSub: { fontSize: 12, color: colors.lightMuted, marginTop: 5 },
+  // History — light
+  histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.lightBorder, backgroundColor: colors.lightBg },
   histTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
   histTopRight: { alignItems: 'flex-end', gap: 3 },
   histBadge: { borderWidth: 0.5, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
   histEmotion: { fontSize: 13, fontWeight: '600', textTransform: 'capitalize' },
-  histTiming: { fontSize: 10, color: colors.textDim, letterSpacing: 0.5 },
-  histDate: { fontSize: 12, color: colors.textDim },
-  histIntensity: { fontSize: 12, color: colors.textDim, marginBottom: 6 },
+  histTiming: { fontSize: 10, color: colors.lightDim, letterSpacing: 0.5 },
+  histDate: { fontSize: 12, color: colors.lightDim },
+  histIntensity: { fontSize: 12, color: colors.lightMuted, marginBottom: 6 },
   histDistortions: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
   histDistortionTag: { borderWidth: 0.5, borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
   histDistortionText: { fontSize: 11, textTransform: 'capitalize', letterSpacing: 0.3, fontWeight: '500' },
-  histTrigger: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
-  histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, fontFamily: font.serif, lineHeight: 22 },
-  empty: { padding: 60, alignItems: 'center' },
-  emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
+  histTrigger: { fontSize: 15, color: colors.lightText2, lineHeight: 23 },
+  histResponse: { fontSize: 14, color: colors.lightMuted, marginTop: 8, lineHeight: 22 },
+  empty: { padding: 60, alignItems: 'center', backgroundColor: colors.lightBg },
+  emptyText: { fontSize: 16, color: colors.lightDim, textAlign: 'center', lineHeight: 26 },
   editCard: { borderWidth: 1, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden' },
   editCardHeader: { padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   editCardTitle: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
-  editCardDate: { fontSize: 12, color: colors.textDim },
-  editCardBody: { padding: 16, backgroundColor: colors.bgCard },
-  editFieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase', marginBottom: 10 },
-  editFieldInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top', marginBottom: 4 },
-  editDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
-  editBtnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
-  editCancelBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 13, alignItems: 'center' },
-  editCancelBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
+  editCardDate: { fontSize: 12, color: colors.lightDim },
+  editCardBody: { padding: 16, backgroundColor: colors.lightWhite },
+  editFieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.lightDim, textTransform: 'uppercase', marginBottom: 10 },
+  editFieldInput: { fontSize: 15, color: colors.lightText, lineHeight: 24, minHeight: 48, textAlignVertical: 'top', marginBottom: 4 },
+  editDivider: { height: 0.5, backgroundColor: colors.lightBorder, marginVertical: 14 },
+  editBtnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.lightBg2 },
+  editCancelBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.md, padding: 13, alignItems: 'center' },
+  editCancelBtnText: { fontSize: 12, color: colors.lightMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
   editSaveBtn: { flex: 2, borderWidth: 1, borderRadius: radius.md, padding: 13, alignItems: 'center' },
   editSaveBtnText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
   histEditBtn: { marginTop: 10, borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start' },
