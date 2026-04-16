@@ -10,12 +10,21 @@ import { requestNotificationPermissions, scheduleAllNotifications, cancelAllNoti
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
 const DEFAULT_SETTINGS = {
+  compassEnabled: false,
+  compassHour: 6,
+  compassMinute: 30,
   morningEnabled: true,
   morningHour: 7,
   morningMinute: 0,
+  readingEnabled: false,
+  readingHour: 7,
+  readingMinute: 30,
   eveningEnabled: true,
   eveningHour: 20,
   eveningMinute: 0,
+  middayEnabled: false,
+  middayHour: 12,
+  middayMinute: 0,
   reviewEnabled: true,
   reviewHour: 9,
   reviewMinute: 0,
@@ -156,6 +165,34 @@ export default function SettingsScreen() {
 
         <View style={s.body}>
 
+          <Text style={s.secLabel}>Compass</Text>
+          <View style={s.card}>
+            <View style={s.rowBetween}>
+              <View style={{ flex: 1 }}>
+                <Text style={s.rowTitle}>Daily Compass</Text>
+                <Text style={s.rowSub}>Read your north star before the day begins</Text>
+              </View>
+              <Switch
+                value={settings.compassEnabled}
+                onValueChange={v => update('compassEnabled', v)}
+                trackColor={{ false: colors.border, true: colors.accentDim }}
+                thumbColor={settings.compassEnabled ? colors.accent : colors.textDim}
+              />
+            </View>
+            {settings.compassEnabled && (
+              <View style={s.timeSection}>
+                <Text style={s.timeLabel}>Time</Text>
+                <Text style={s.timePreview}>{formatTime(settings.compassHour, settings.compassMinute)}</Text>
+                <TimeAdjuster
+                  hour={settings.compassHour}
+                  minute={settings.compassMinute}
+                  onHourChange={v => update('compassHour', v)}
+                  onMinuteChange={v => update('compassMinute', v)}
+                />
+              </View>
+            )}
+          </View>
+
           <Text style={s.secLabel}>Morning reflection</Text>
           <View style={s.card}>
             <View style={s.rowBetween}>
@@ -187,6 +224,34 @@ export default function SettingsScreen() {
             )}
           </View>
 
+          <Text style={s.secLabel}>Daily reading</Text>
+          <View style={s.card}>
+            <View style={s.rowBetween}>
+              <View style={{ flex: 1 }}>
+                <Text style={s.rowTitle}>Reading reminder</Text>
+                <Text style={s.rowSub}>A nudge to receive today's wisdom</Text>
+              </View>
+              <Switch
+                value={settings.readingEnabled}
+                onValueChange={v => update('readingEnabled', v)}
+                trackColor={{ false: colors.border, true: colors.accentDim }}
+                thumbColor={settings.readingEnabled ? colors.accent : colors.textDim}
+              />
+            </View>
+            {settings.readingEnabled && (
+              <View style={s.timeSection}>
+                <Text style={s.timeLabel}>Time</Text>
+                <Text style={s.timePreview}>{formatTime(settings.readingHour, settings.readingMinute)}</Text>
+                <TimeAdjuster
+                  hour={settings.readingHour}
+                  minute={settings.readingMinute}
+                  onHourChange={v => update('readingHour', v)}
+                  onMinuteChange={v => update('readingMinute', v)}
+                />
+              </View>
+            )}
+          </View>
+
           <Text style={s.secLabel}>Evening reflection</Text>
           <View style={s.card}>
             <View style={s.rowBetween}>
@@ -214,6 +279,34 @@ export default function SettingsScreen() {
                 <View style={s.sampleMsg}>
                   <Text style={s.sampleText}>"The day closes. Time to examine it."</Text>
                 </View>
+              </View>
+            )}
+          </View>
+
+          <Text style={s.secLabel}>Midday check-in</Text>
+          <View style={s.card}>
+            <View style={s.rowBetween}>
+              <View>
+                <Text style={s.rowTitle}>Pause & Notice</Text>
+                <Text style={s.rowSub}>A midday prompt to check in with yourself</Text>
+              </View>
+              <Switch
+                value={settings.middayEnabled}
+                onValueChange={v => update('middayEnabled', v)}
+                trackColor={{ false: colors.border, true: colors.accentDim }}
+                thumbColor={settings.middayEnabled ? colors.accent : colors.textDim}
+              />
+            </View>
+            {settings.middayEnabled && (
+              <View style={s.timeSection}>
+                <Text style={s.timeLabel}>Time</Text>
+                <Text style={s.timePreview}>{formatTime(settings.middayHour, settings.middayMinute)}</Text>
+                <TimeAdjuster
+                  hour={settings.middayHour}
+                  minute={settings.middayMinute}
+                  onHourChange={v => update('middayHour', v)}
+                  onMinuteChange={v => update('middayMinute', v)}
+                />
               </View>
             )}
           </View>

@@ -51,6 +51,38 @@ export async function scheduleAllNotifications() {
   const now = new Date();
   const nowMins = now.getHours() * 60 + now.getMinutes();
 
+  // Compass — skip if already done today
+  if (settings.compassEnabled) {
+    const compassDone = await AsyncStorage.getItem('compass_done_today');
+    const compassDate = compassDone ? JSON.parse(compassDone) : null;
+    const compassAlreadyDone = compassDate === new Date().toDateString();
+    if (!compassAlreadyDone) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Marcus',
+          body: 'Begin with your compass. Let it orient the day.',
+          sound: false,
+        },
+        trigger: { type: 'daily', hour: settings.compassHour, minute: settings.compassMinute },
+      });
+    }
+  }
+
+  // Reading — skip if already done today
+  if (settings.readingEnabled) {
+    const readingDone = await isTodayReadingDone();
+    if (!readingDone) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Marcus',
+          body: 'Your daily wisdom awaits. Take a moment to read.',
+          sound: false,
+        },
+        trigger: { type: 'daily', hour: settings.readingHour, minute: settings.readingMinute },
+      });
+    }
+  }
+
   // Morning — skip if already done today OR if the time has already passed today
   if (settings.morningEnabled) {
     const morningDone = await isTodayJournalDone('morning');
@@ -89,6 +121,18 @@ export async function scheduleAllNotifications() {
         },
       });
     }
+  }
+
+  // Midday check-in
+  if (settings.middayEnabled) {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Marcus',
+        body: 'Pause. How are you meeting the day?',
+        sound: false,
+      },
+      trigger: { type: 'daily', hour: settings.middayHour, minute: settings.middayMinute },
+    });
   }
 
   // Weekly review
