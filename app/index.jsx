@@ -41,6 +41,7 @@ export default function PracticeScreen() {
       const now = new Date();
       setTodayDate(now);
       setTodayVirtue(virtues[now.getDate() % 4]);
+      const morning = await getTodayJournal('morning');
       const evening = await getTodayJournal('evening');
       const reading = await getTodayReading();
       const compassToday = await getCompassDone();
