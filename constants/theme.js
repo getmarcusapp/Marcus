@@ -1,4 +1,5 @@
 export const colors = {
+  // ── Dark zones (hero, nav, headers, sealed state) ──
   bg: '#0a0a0a',
   bgDeep: '#060606',
   bgCard: '#111111',
@@ -18,6 +19,18 @@ export const colors = {
   accent: '#C8A97A',
   accentDim: '#8a7254',
   accentBg: '#1a1610',
+
+  // ── Light zones (cards, writing surfaces, checklists) ──
+  lightBg: '#F7F5F2',
+  lightBg2: '#EFECEA',
+  lightBg3: '#E8E5E1',
+  lightWhite: '#FFFFFF',
+  lightBorder: '#DDDAD6',
+  lightBorder2: '#CCCAC6',
+  lightText: '#1A1A1A',
+  lightText2: '#3A3A3A',
+  lightMuted: '#6A6A6A',
+  lightDim: '#9A9A9A',
 
   virtueGood: '#6a9a6a',
   virtueBad: '#9a6a4a',
