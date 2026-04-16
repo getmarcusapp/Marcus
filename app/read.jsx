@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog } from '../store/db';
+import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog, getTodayJournal } from '../store/db';
 
 const SYSTEM_PROMPT = `You are a Stoic philosopher and teacher. Generate a daily Stoic reading in this EXACT JSON format with no other text:
 {
@@ -96,7 +96,20 @@ export default function ReadScreen() {
     setInsightSaved(true);
     const updated = await getReadingLog();
     setLog(updated);
-    Alert.alert('', 'Insight saved.');
+
+    // Check what's still left to do
+    const morning = await getTodayJournal('morning');
+
+    if (!morning) {
+      Alert.alert('', 'Insight saved.', [
+        { text: 'Morning journal →', onPress: () => router.replace({ pathname: '/journal', params: { type: 'morning' } }) },
+        { text: 'Back to Practice', style: 'cancel', onPress: () => router.replace('/') },
+      ]);
+    } else {
+      Alert.alert('', 'Insight saved.', [
+        { text: 'Back to Practice', onPress: () => router.replace('/') },
+      ]);
+    }
   }
 
   return (
@@ -189,7 +202,7 @@ export default function ReadScreen() {
                       style={s.insightInput}
                       multiline
                       placeholder="Write your reaction, insight, or intention..."
-                      placeholderTextColor={colors.textDim}
+                      placeholderTextColor={colors.lightDim}
                       value={insight}
                       onChangeText={text => { setInsight(text); setInsightSaved(false); }}
                       scrollEnabled={false}
@@ -260,6 +273,7 @@ export default function ReadScreen() {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
+  // Dark header
   hero: {
     backgroundColor: colors.bgDeep,
     padding: spacing.xl,
@@ -268,79 +282,83 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
-  backArrow: { fontSize: 24, color: colors.textMuted },
-  backLabel: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
+  backArrow: { fontSize: 24, color: colors.accent },
+  backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
   tabRow: {
     flexDirection: 'row', gap: 10, padding: spacing.md,
-    borderBottomWidth: 0.5, borderBottomColor: colors.border,
+    borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep,
   },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
   tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
   tabBtnTextActive: { color: colors.textSecondary },
-  body: { padding: spacing.md },
+  // Light reading body
+  body: { padding: spacing.md, backgroundColor: colors.lightBg },
   loadingCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg,
     padding: 48, alignItems: 'center', marginTop: 8,
-    backgroundColor: colors.bgCard,
+    backgroundColor: colors.lightWhite,
   },
   loadingSkull: { width: 64, height: 64, opacity: 0.6, marginBottom: 16 },
-  loadingText: { fontSize: 14, color: colors.textDim, fontFamily: font.serif },
+  loadingText: { fontSize: 14, color: colors.lightMuted },
   badgeRow: { flexDirection: 'row', gap: 8, marginBottom: 14, marginTop: 8 },
   virtueBadge: { borderWidth: 0.5, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 5 },
   virtueBadgeText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
-  themeBadge: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 5 },
-  themeBadgeText: { fontSize: 12, color: colors.textDim },
+  themeBadge: { borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 5 },
+  themeBadgeText: { fontSize: 12, color: colors.lightMuted },
+  // Quote card stays dark — gravitas of the Stoic quote
   quoteCard: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
     padding: 22, marginBottom: 12, backgroundColor: colors.bgDeep,
   },
   quoteMark: { fontSize: 40, color: colors.borderStrong, lineHeight: 32, fontFamily: font.serif, marginBottom: -4 },
-  quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontStyle: 'italic', fontFamily: font.serif },
+  quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontFamily: font.serif },
   quoteRule: { height: 0.5, backgroundColor: colors.border, marginVertical: 16 },
   quoteAuthor: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
-  quoteWork: { fontSize: 12, color: colors.textDim, marginTop: 3, fontStyle: 'italic' },
+  quoteWork: { fontSize: 12, color: colors.textDim, marginTop: 3 },
+  // Reflection — light
   reflectionCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 22, marginBottom: 12, backgroundColor: colors.bgCard,
+    borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg,
+    padding: 22, marginBottom: 12, backgroundColor: colors.lightWhite,
   },
-  reflectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12 },
-  reflectionText: { fontSize: 16, color: colors.textSecondary, lineHeight: 28, fontFamily: font.serif, fontStyle: 'italic' },
+  reflectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.lightMuted, textTransform: 'uppercase', marginBottom: 12 },
+  reflectionText: { fontSize: 16, color: colors.lightText2, lineHeight: 28, fontFamily: font.serif },
+  // Insight — light writing surface
   insightCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 20, marginBottom: 12, backgroundColor: colors.bgCard,
+    borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg,
+    padding: 20, marginBottom: 12, backgroundColor: colors.lightWhite,
   },
-  insightLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
-  insightSub: { fontSize: 13, color: colors.textDim, marginBottom: 14 },
+  insightLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.lightMuted, textTransform: 'uppercase', marginBottom: 4 },
+  insightSub: { fontSize: 13, color: colors.lightDim, marginBottom: 14 },
   insightInput: {
-    fontSize: 16, color: colors.textPrimary, lineHeight: 26,
+    fontSize: 16, color: colors.lightText, lineHeight: 26,
     minHeight: 100, textAlignVertical: 'top',
   },
   saveBtn: {
-    borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md,
-    padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 10,
+    borderWidth: 0.5, borderColor: colors.lightBorder2, borderRadius: radius.md,
+    padding: 18, alignItems: 'center', backgroundColor: colors.lightWhite, marginBottom: 10,
   },
-  saveBtnDone: { borderColor: colors.successBorder, backgroundColor: colors.successBg },
-  saveBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
+  saveBtnDone: { borderColor: colors.lightBorder2, backgroundColor: colors.lightBg3 },
+  saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.lightText, letterSpacing: 1, textTransform: 'uppercase' },
   refreshBtn: { padding: 14, alignItems: 'center', marginBottom: 36 },
-  refreshBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
+  refreshBtnText: { fontSize: 12, color: colors.lightMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
   generateBtn: {
-    borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md,
-    padding: 20, alignItems: 'center', backgroundColor: colors.bgCard, marginTop: 8,
+    borderWidth: 0.5, borderColor: colors.lightBorder2, borderRadius: radius.md,
+    padding: 20, alignItems: 'center', backgroundColor: colors.lightWhite, marginTop: 8,
   },
-  generateBtnText: { fontSize: 14, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
-  empty: { padding: 60, alignItems: 'center' },
-  emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
-  archiveRow: { padding: 20, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  generateBtnText: { fontSize: 14, fontWeight: '500', color: colors.lightText, letterSpacing: 1, textTransform: 'uppercase' },
+  empty: { padding: 60, alignItems: 'center', backgroundColor: colors.lightBg },
+  emptyText: { fontSize: 16, color: colors.lightDim, textAlign: 'center', lineHeight: 26 },
+  archiveRow: { padding: 20, borderBottomWidth: 0.5, borderBottomColor: colors.lightBorder, backgroundColor: colors.lightBg },
   archiveTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  archiveDate: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
+  archiveDate: { fontSize: 14, color: colors.lightText, fontWeight: '500' },
   archiveVirtue: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
-  archiveTheme: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3, marginBottom: 8, textTransform: 'uppercase' },
-  archiveQuote: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 22, marginBottom: 10 },
-  archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.borderMid, paddingLeft: 12, marginTop: 4 },
-  archiveInsightLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 },
-  archiveInsight: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
+  archiveTheme: { fontSize: 12, color: colors.lightDim, letterSpacing: 0.3, marginBottom: 8, textTransform: 'uppercase' },
+  archiveQuote: { fontSize: 14, color: colors.lightMuted, fontFamily: font.serif, lineHeight: 22, marginBottom: 10 },
+  archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.lightBorder2, paddingLeft: 12, marginTop: 4 },
+  archiveInsightLabel: { fontSize: 10, color: colors.lightDim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 },
+  archiveInsight: { fontSize: 14, color: colors.lightText2, lineHeight: 22 },
 });
