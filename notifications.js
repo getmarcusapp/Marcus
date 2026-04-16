@@ -20,44 +20,75 @@ export async function requestNotificationPermissions() {
   return finalStatus === 'granted';
 }
 
+// Helper — check if a journal type is done today without importing db
+// (avoids circular dependency)
+async function isTodayJournalDone(type) {
+  try {
+    const raw = await AsyncStorage.getItem('journals');
+    if (!raw) return false;
+    const journals = JSON.parse(raw);
+    const today = new Date().toDateString();
+    return journals.some(j => j.type === type && new Date(j.date).toDateString() === today);
+  } catch { return false; }
+}
+
+async function isTodayReadingDone() {
+  try {
+    const raw = await AsyncStorage.getItem('reading_today');
+    if (!raw) return false;
+    const reading = JSON.parse(raw);
+    return reading.date === new Date().toDateString();
+  } catch { return false; }
+}
+
 export async function scheduleAllNotifications() {
-  // Cancel all existing scheduled notifications first
   await Notifications.cancelAllScheduledNotificationsAsync();
 
   const raw = await AsyncStorage.getItem('notification_settings');
   if (!raw) return;
   const settings = JSON.parse(raw);
 
-  // Morning
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+
+  // Morning — skip if already done today OR if the time has already passed today
   if (settings.morningEnabled) {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Marcus',
-        body: 'The hourglass turns. Your morning practice awaits.',
-        sound: false,
-      },
-      trigger: {
-        type: 'daily',
-        hour: settings.morningHour,
-        minute: settings.morningMinute,
-      },
-    });
+    const morningDone = await isTodayJournalDone('morning');
+    const morningMins = settings.morningHour * 60 + settings.morningMinute;
+    const morningPassedToday = nowMins > morningMins;
+    if (!morningDone || !morningPassedToday) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Marcus',
+          body: 'The hourglass turns. Your morning practice awaits.',
+          sound: false,
+        },
+        trigger: {
+          type: 'daily',
+          hour: settings.morningHour,
+          minute: settings.morningMinute,
+        },
+      });
+    }
   }
 
-  // Evening
+  // Evening — skip if already done today
   if (settings.eveningEnabled) {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Marcus',
-        body: 'The day closes. Time to examine it.',
-        sound: false,
-      },
-      trigger: {
-        type: 'daily',
-        hour: settings.eveningHour,
-        minute: settings.eveningMinute,
-      },
-    });
+    const eveningDone = await isTodayJournalDone('evening');
+    if (!eveningDone) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Marcus',
+          body: 'The day closes. Time to examine it.',
+          sound: false,
+        },
+        trigger: {
+          type: 'daily',
+          hour: settings.eveningHour,
+          minute: settings.eveningMinute,
+        },
+      });
+    }
   }
 
   // Weekly review
@@ -70,11 +101,37 @@ export async function scheduleAllNotifications() {
       },
       trigger: {
         type: 'weekly',
-        weekday: (settings.reviewDay ?? 0) + 1, // Expo: 1=Sunday
+        weekday: (settings.reviewDay ?? 0) + 1,
         hour: settings.reviewHour,
         minute: settings.reviewMinute,
       },
     });
+  }
+}
+
+// Call this when the app comes to foreground — cancels notifications
+// for things already completed today
+export async function refreshNotificationsForToday() {
+  try {
+    const raw = await AsyncStorage.getItem('notification_settings');
+    if (!raw) return;
+    const settings = JSON.parse(raw);
+
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const morningDone = await isTodayJournalDone('morning');
+    const eveningDone = await isTodayJournalDone('evening');
+
+    for (const notif of scheduled) {
+      const body = notif.content?.body || '';
+      if (morningDone && body.includes('morning practice')) {
+        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
+      }
+      if (eveningDone && body.includes('day closes')) {
+        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
+      }
+    }
+  } catch (e) {
+    console.log('refreshNotifications error:', e);
   }
 }
 
