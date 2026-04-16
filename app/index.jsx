@@ -9,7 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { virtues } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone } from '../store/db';
-import { refreshNotificationsForToday } from '../notifications';
+import { refreshNotificationsForToday, cancelJournalNotification } from '../notifications';
 
 const virtueDetails = {
   wisdom: { definition: 'The virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
@@ -185,7 +185,7 @@ export default function PracticeScreen() {
 
             <TouchableOpacity
               style={[s.routineRow, s.routineRowBorder]}
-              onPress={async () => { router.push('/compass'); setCompassDone(true); await persistCompassDone(); }}
+              onPress={async () => { router.push('/compass'); setCompassDone(true); await persistCompassDone(); cancelJournalNotification('compass').catch(() => {}); }}
               activeOpacity={0.7}
             >
               <View style={[s.dot, compassDone && s.dotDone]} />

@@ -184,7 +184,14 @@ export async function refreshNotificationsForToday() {
 export async function cancelJournalNotification(type) {
   try {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    const keyword = type === 'morning' ? 'morning practice' : 'day closes';
+    const keywords = {
+      morning: 'morning practice',
+      evening: 'day closes',
+      compass: 'Begin with your compass',
+      reading: 'daily wisdom awaits',
+    };
+    const keyword = keywords[type] || '';
+    if (!keyword) return;
     for (const notif of scheduled) {
       if ((notif.content?.body || '').includes(keyword)) {
         await Notifications.cancelScheduledNotificationAsync(notif.identifier);

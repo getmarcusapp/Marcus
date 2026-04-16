@@ -7,6 +7,7 @@ import {
 import { useFocusEffect, useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog, getTodayJournal } from '../store/db';
+import { cancelJournalNotification } from '../notifications';
 
 const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom. Generate a daily reading in this EXACT JSON format with no other text:
 {
@@ -112,6 +113,7 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
     if (!insight.trim()) return;
     await saveReadingInsight(insight);
     setInsightSaved(true);
+    cancelJournalNotification('reading').catch(() => {});
     const updated = await getReadingLog();
     setLog(updated);
 
