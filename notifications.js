@@ -135,6 +135,22 @@ export async function refreshNotificationsForToday() {
   }
 }
 
+
+// Call immediately when a journal is saved — cancels the notification for that type
+export async function cancelJournalNotification(type) {
+  try {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const keyword = type === 'morning' ? 'morning practice' : 'day closes';
+    for (const notif of scheduled) {
+      if ((notif.content?.body || '').includes(keyword)) {
+        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
+      }
+    }
+  } catch (e) {
+    console.log('cancelJournalNotification error:', e);
+  }
+}
+
 export async function cancelAllNotifications() {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }

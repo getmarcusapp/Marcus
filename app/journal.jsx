@@ -153,6 +153,8 @@ export default function JournalScreen() {
     const ok = await saveJournal(entry);
     if (ok) {
       await incrementStreak();
+      // Cancel the notification for this journal type immediately
+      cancelJournalNotification(isMorning ? 'morning' : 'evening').catch(() => {});
       setAlreadySaved(true);
       const all = await getJournals();
       setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
