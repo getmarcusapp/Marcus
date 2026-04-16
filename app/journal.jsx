@@ -78,7 +78,7 @@ function JournalEntryEditor({ entry, onSave, onCancel }) {
                 style={e.promptInput}
                 multiline
                 placeholder="Write here..."
-                placeholderTextColor={colors.textDim}
+                placeholderTextColor={colors.lightDim}
                 value={answers[idx] || ''}
                 onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
                 scrollEnabled={false}
@@ -289,10 +289,11 @@ export default function JournalScreen() {
                           style={s.promptInput}
                           multiline
                           placeholder="Write here — no judgment, only honesty..."
-                          placeholderTextColor={colors.textDim}
+                          placeholderTextColor={colors.lightDim}
                           value={answers[idx] || ''}
                           onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
                           scrollEnabled={false}
+                          keyboardAppearance="dark"
                         />
                       </View>
                     )}
@@ -412,78 +413,80 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
-  backArrow: { fontSize: 24, color: colors.textMuted },
-  backLabel: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36 },
-  sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8, fontFamily: font.serif },
-  tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  backArrow: { fontSize: 24, color: colors.accent },
+  backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 8 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36 },
+  sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8 },
+  tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
   tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
   tabBtnTextActive: { color: colors.textSecondary },
   mementoStrip: {
-    backgroundColor: colors.bgDeep,
+    backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
     padding: spacing.xl,
     paddingVertical: 20,
   },
-  mementoText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
-  mementoSub: { fontSize: 11, color: colors.textDim, marginTop: 8, letterSpacing: 1.5, textTransform: 'uppercase' },
-  body: { padding: spacing.md },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
+  mementoText: { fontSize: 15, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif, fontStyle: 'italic' },
+  mementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, textTransform: 'uppercase' },
+
+  // Light writing surface
+  body: { padding: spacing.md, backgroundColor: colors.lightBg },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.lightDim, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
   virtueSection: { marginBottom: 8 },
   virtuePills: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  vpill: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center' },
-  vpillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  vpillName: { fontSize: 12, fontWeight: '500', color: colors.textDim },
-  vpillNameActive: { color: colors.accent },
+  vpill: { flex: 1, borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center', backgroundColor: colors.lightWhite },
+  vpillActive: { borderColor: colors.lightText2, backgroundColor: colors.lightBg3 },
+  vpillName: { fontSize: 12, fontWeight: '400', color: colors.lightDim },
+  vpillNameActive: { color: colors.lightText, fontWeight: '500' },
   virtueInfoCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg,
     padding: 18, marginBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: colors.bgCard,
+    backgroundColor: colors.lightWhite,
   },
   virtueInfoLeft: { flex: 1 },
-  virtueInfoName: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 2 },
-  virtueInfoLatin: { fontSize: 12, color: colors.accent, fontStyle: 'italic', marginBottom: 6 },
-  virtueInfoDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 21 },
-  virtueInfoChev: { fontSize: 20, color: colors.textDim },
+  virtueInfoName: { fontSize: 20, fontWeight: '400', color: colors.lightText, marginBottom: 2 },
+  virtueInfoLatin: { fontSize: 12, color: colors.lightMuted, marginBottom: 6 },
+  virtueInfoDesc: { fontSize: 14, color: colors.lightText2, lineHeight: 21 },
+  virtueInfoChev: { fontSize: 20, color: colors.lightDim },
   virtueDetailCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 18, marginBottom: 8, backgroundColor: colors.bgDeep,
+    borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg,
+    padding: 18, marginBottom: 8, backgroundColor: colors.lightBg2,
   },
-  virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
-  virtueDetailDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
-  virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif, lineHeight: 22 },
-  promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 12, backgroundColor: colors.bgCard },
-  promptCardOpen: { backgroundColor: colors.bgElevated, borderColor: colors.borderMid },
-  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  promptQ: { fontSize: font.bodySize, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
-  promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
-  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 120, textAlignVertical: 'top' },
+  virtueDetailText: { fontSize: 15, color: colors.lightText2, lineHeight: 24, fontFamily: font.serif },
+  virtueDetailDivider: { height: 0.5, backgroundColor: colors.lightBorder, marginVertical: 14 },
+  virtueDetailQuestion: { fontSize: 14, color: colors.lightMuted, lineHeight: 22 },
+  promptCard: { borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.lightWhite },
+  promptCardOpen: { borderColor: colors.lightBorder2 },
+  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.lightDim, textTransform: 'uppercase', marginBottom: 8 },
+  promptQ: { fontSize: 15, color: colors.lightText, lineHeight: 24, fontWeight: '400' },
+  promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.lightBorder, paddingTop: 16 },
+  promptInput: { fontSize: 16, color: colors.lightText, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
   anchorCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 20, marginBottom: 12, backgroundColor: colors.bgDeep,
+    borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg,
+    padding: 20, marginBottom: 12, backgroundColor: colors.lightBg2,
   },
-  anchorLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 10 },
-  anchorText: { fontSize: 15, color: colors.textSecondary, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 24 },
-  anchorAuthor: { fontSize: 11, color: colors.textDim, marginTop: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
+  anchorLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.lightDim, textTransform: 'uppercase', marginBottom: 10 },
+  anchorText: { fontSize: 15, color: colors.lightText2, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 24 },
+  anchorAuthor: { fontSize: 11, color: colors.lightDim, marginTop: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
   saveBtn: {
-    borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md,
-    padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36,
+    borderWidth: 0.5, borderColor: colors.lightBorder2, borderRadius: radius.md,
+    padding: 18, alignItems: 'center', backgroundColor: colors.lightWhite, marginBottom: 36,
   },
-  saveBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
-  saveBtnSub: { fontSize: 12, color: colors.textDim, marginTop: 5 },
-  empty: { padding: 60, alignItems: 'center' },
-  emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
-  histEntry: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden' },
-  histEntryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  histEntryDate: { fontSize: 15, fontWeight: '600', color: colors.textSecondary, marginBottom: 3 },
-  histEntryVirtue: { fontSize: 12, color: colors.accent, textTransform: 'capitalize', letterSpacing: 0.5 },
-  editBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6 },
-  editBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.5 },
-  histAnswerBlock: { padding: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
-  histPromptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 5 },
-  histAnswer: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
+  saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.lightText, letterSpacing: 1, textTransform: 'uppercase' },
+  saveBtnSub: { fontSize: 12, color: colors.lightMuted, marginTop: 5 },
+  empty: { padding: 60, alignItems: 'center', backgroundColor: colors.lightBg },
+  emptyText: { fontSize: 16, color: colors.lightDim, textAlign: 'center', lineHeight: 26 },
+  histEntry: { borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden', backgroundColor: colors.lightWhite },
+  histEntryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: colors.lightBg2, borderBottomWidth: 0.5, borderBottomColor: colors.lightBorder },
+  histEntryDate: { fontSize: 15, fontWeight: '500', color: colors.lightText, marginBottom: 3 },
+  histEntryVirtue: { fontSize: 12, color: colors.lightMuted, textTransform: 'capitalize', letterSpacing: 0.5 },
+  editBtn: { borderWidth: 0.5, borderColor: colors.lightBorder, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6 },
+  editBtnText: { fontSize: 12, color: colors.lightMuted, letterSpacing: 0.5 },
+  histAnswerBlock: { padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.lightBorder },
+  histPromptNum: { fontSize: 9, letterSpacing: 2, color: colors.lightDim, textTransform: 'uppercase', marginBottom: 5 },
+  histAnswer: { fontSize: 15, color: colors.lightText2, lineHeight: 24 },
 });
