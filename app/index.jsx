@@ -32,6 +32,7 @@ export default function PracticeScreen() {
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const [todayVirtue, setTodayVirtue] = useState(virtues[today.getDate() % 4]);
   const isReviewDay = today.getDay() === reviewDay;
+
   const quote = getDailyQuote(morningQuotes);
   const sealQuote = getDailyQuote(mementoMoriQuotes, 7);
 
@@ -40,26 +41,20 @@ export default function PracticeScreen() {
       const now = new Date();
       setTodayDate(now);
       setTodayVirtue(virtues[now.getDate() % 4]);
-
-      // FIX: morning was never declared — this was the root bug
-      const morning = await getTodayJournal('morning');
       const evening = await getTodayJournal('evening');
       const reading = await getTodayReading();
       const compassToday = await getCompassDone();
       const s = await getStreak();
-
       const settings = await AsyncStorage.getItem('notification_settings');
       if (settings) {
         const parsed = JSON.parse(settings);
         if (parsed.reviewDay !== undefined) setReviewDay(parsed.reviewDay);
       }
-
       setMorningDone(!!morning);
       setEveningDone(!!evening);
       setReadingDone(!!reading);
       setCompassDone(compassToday);
       setStreak(s);
-
       if (morning?.virtue) {
         const found = virtues.find(v => v.id === morning.virtue);
         if (found) setTodayVirtue(found);
@@ -78,8 +73,13 @@ export default function PracticeScreen() {
     return (
       <SafeAreaView style={s.safe}>
         <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+
           <View style={s.heroSealed}>
-            <Image source={require('../assets/skull.png')} style={s.skullIconSealed} resizeMode="contain" />
+            <Image
+              source={require('../assets/skull.png')}
+              style={s.skullIconSealed}
+              resizeMode="contain"
+            />
             <Text style={s.sealedEyebrow}>Practice complete</Text>
             <Text style={s.sealedDate}>{dateStr}</Text>
             <Text style={s.sealedStreak}>
@@ -100,7 +100,11 @@ export default function PracticeScreen() {
           </View>
 
           <View style={s.body}>
-            <TouchableOpacity style={s.virtueCard} onPress={() => setVirtueExpanded(!virtueExpanded)} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={s.virtueCard}
+              onPress={() => setVirtueExpanded(!virtueExpanded)}
+              activeOpacity={0.8}
+            >
               <Text style={s.virtueEyebrow}>Virtue focus · {todayVirtue.latin}</Text>
               <Text style={s.virtueName}>{todayVirtue.name}</Text>
               <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
@@ -115,6 +119,7 @@ export default function PracticeScreen() {
               <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
             </TouchableOpacity>
           </View>
+
         </ScrollView>
       </SafeAreaView>
     );
@@ -123,8 +128,13 @@ export default function PracticeScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+
         <View style={s.hero}>
-          <Image source={require('../assets/skull.png')} style={s.skullIcon} resizeMode="contain" />
+          <Image
+            source={require('../assets/skull.png')}
+            style={s.skullIcon}
+            resizeMode="contain"
+          />
           <Text style={s.eyebrow}>Memento mori</Text>
           <Text style={s.heroDate}>{dateStr}</Text>
           <Text style={s.heroSub}>
@@ -139,23 +149,39 @@ export default function PracticeScreen() {
         </View>
 
         <View style={s.body}>
+
           <View style={s.practiceHeader}>
             <Text style={s.secLabel}>Today's practice</Text>
           </View>
-
           <View style={s.progressBar}>
             <View style={[s.progressFill, { width: `${progress * 100}%` }]} />
           </View>
           <Text style={s.progressText}>{completed} of {totalItems} complete</Text>
 
+          {(streak.current > 0 || streak.longest > 0 || streak.totalDays > 0) && (
+            <View style={s.streakRow}>
+              <View style={s.streakStat}>
+                <Text style={s.streakNum}>{streak.current}</Text>
+                <Text style={s.streakLabel}>Current</Text>
+              </View>
+              <View style={s.streakDivider} />
+              <View style={s.streakStat}>
+                <Text style={s.streakNum}>{streak.longest || 0}</Text>
+                <Text style={s.streakLabel}>Longest</Text>
+              </View>
+              <View style={s.streakDivider} />
+              <View style={s.streakStat}>
+                <Text style={s.streakNum}>{streak.totalDays || 0}</Text>
+                <Text style={s.streakLabel}>Total days</Text>
+              </View>
+            </View>
+          )}
+
           <View style={s.routineCard}>
+
             <TouchableOpacity
               style={[s.routineRow, s.routineRowBorder]}
-              onPress={async () => {
-                router.push('/compass');
-                setCompassDone(true);
-                await persistCompassDone();
-              }}
+              onPress={async () => { router.push('/compass'); setCompassDone(true); await persistCompassDone(); }}
               activeOpacity={0.7}
             >
               <View style={[s.dot, compassDone && s.dotDone]} />
@@ -165,10 +191,7 @@ export default function PracticeScreen() {
               </View>
               <View style={s.tagRow}>
                 {compassDone && (
-                  <TouchableOpacity style={s.undoBtn} onPress={async () => {
-                    setCompassDone(false);
-                    await clearCompassDone();
-                  }}>
+                  <TouchableOpacity style={s.undoBtn} onPress={async () => { setCompassDone(false); await clearCompassDone(); }}>
                     <Text style={s.undoBtnText}>Undo</Text>
                   </TouchableOpacity>
                 )}
@@ -239,9 +262,14 @@ export default function PracticeScreen() {
                 </View>
               </TouchableOpacity>
             )}
+
           </View>
 
-          <TouchableOpacity style={s.virtueCard} onPress={() => setVirtueExpanded(!virtueExpanded)} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={s.virtueCard}
+            onPress={() => setVirtueExpanded(!virtueExpanded)}
+            activeOpacity={0.8}
+          >
             <Text style={s.virtueEyebrow}>Virtue focus · {todayVirtue.latin}</Text>
             <Text style={s.virtueName}>{todayVirtue.name}</Text>
             <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
@@ -255,6 +283,7 @@ export default function PracticeScreen() {
             )}
             <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
           </TouchableOpacity>
+
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -264,35 +293,101 @@ export default function PracticeScreen() {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  hero: { backgroundColor: colors.bgDeep, paddingTop: 48, paddingBottom: 36, paddingHorizontal: spacing.xl, borderBottomWidth: 0.5, borderBottomColor: colors.border, alignItems: 'center' },
+
+  // Normal hero
+  hero: {
+    backgroundColor: colors.bgDeep,
+    paddingTop: 48,
+    paddingBottom: 36,
+    paddingHorizontal: spacing.xl,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    alignItems: 'center',
+  },
   skullIcon: { width: 120, height: 120, marginBottom: 24, opacity: 0.9 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
   heroDate: { fontSize: font.heroSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -1, marginBottom: 8, textAlign: 'center' },
   heroSub: { fontSize: font.subSize, color: colors.textMuted, textAlign: 'center' },
-  heroSealed: { backgroundColor: colors.bgDeep, paddingTop: 48, paddingBottom: 36, paddingHorizontal: spacing.xl, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, alignItems: 'center' },
+
+  // Sealed hero
+  heroSealed: {
+    backgroundColor: colors.bgDeep,
+    paddingTop: 48,
+    paddingBottom: 36,
+    paddingHorizontal: spacing.xl,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.accentDim,
+    alignItems: 'center',
+  },
   skullIconSealed: { width: 140, height: 140, marginBottom: 24, opacity: 1 },
   sealedEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
   sealedDate: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
   sealedStreak: { fontSize: 48, fontWeight: '700', color: colors.accent, letterSpacing: -1, textAlign: 'center' },
-  sealedCard: { backgroundColor: colors.accentBg, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, padding: spacing.xl, paddingVertical: 26 },
+
+  // Sealed quote
+  sealedCard: {
+    backgroundColor: colors.accentBg,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.accentDim,
+    padding: spacing.xl,
+    paddingVertical: 26,
+  },
   sealedQuoteOpen: { fontSize: 40, color: colors.accentDim, fontFamily: font.serif, lineHeight: 32, marginBottom: -4 },
   sealedQuoteText: { fontSize: 18, color: colors.textSecondary, lineHeight: 30, fontStyle: 'italic', fontFamily: font.serif },
   sealedQuoteRule: { height: 0.5, backgroundColor: colors.accentDim, marginVertical: 16 },
   sealedQuoteAttr: { fontSize: 10, color: colors.accentDim, letterSpacing: 1.5 },
-  sealedRestCard: { padding: spacing.xl, paddingVertical: 24, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+
+  // Sealed rest card
+  sealedRestCard: {
+    padding: spacing.xl,
+    paddingVertical: 24,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+  },
   sealedRestTitle: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
-  sealedRestSub: { fontSize: 15, color: colors.textMuted, lineHeight: 24, fontStyle: 'italic', fontFamily: font.serif },
-  quoteCard: { backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border, padding: spacing.xl, paddingVertical: 22 },
+  sealedRestSub: { fontSize: 15, color: colors.textMuted, lineHeight: 24, fontFamily: font.serif },
+
+  // Normal quote
+  quoteCard: {
+    backgroundColor: colors.bgDeep,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    padding: spacing.xl,
+    paddingVertical: 22,
+  },
   quoteOpen: { fontSize: 36, color: colors.borderStrong, fontFamily: font.serif, lineHeight: 28, marginBottom: -4 },
   quoteText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28, fontStyle: 'italic', fontFamily: font.serif },
   quoteAttr: { fontSize: 10, color: colors.textDim, marginTop: 12, letterSpacing: 1.5 },
+
   body: { padding: spacing.md },
   practiceHeader: { marginTop: 8, marginBottom: 10 },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase' },
   progressBar: { height: 2, backgroundColor: colors.border, borderRadius: 1, marginBottom: 8, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: colors.textMuted, borderRadius: 1 },
-  progressText: { fontSize: 12, color: colors.textMuted, marginBottom: 16 },
-  routineCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, overflow: 'hidden', marginBottom: 16 },
+  progressText: { fontSize: 12, color: colors.textMuted, marginBottom: 12 },
+
+  streakRow: {
+    flexDirection: 'row',
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.bgCard,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  streakStat: { flex: 1, alignItems: 'center', paddingVertical: 12 },
+  streakNum: { fontSize: 22, fontWeight: '600', color: colors.accent, letterSpacing: -0.5 },
+  streakLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 3 },
+  streakDivider: { width: 0.5, backgroundColor: colors.border, marginVertical: 10 },
+
+  routineCard: {
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    backgroundColor: colors.bgCard,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
   routineRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
   routineRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
   dot: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: colors.borderMid },
@@ -312,14 +407,22 @@ const s = StyleSheet.create({
   tagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
   tagTextNow: { color: colors.textSecondary },
   tagTextAccent: { color: colors.accent },
-  virtueCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 22, marginBottom: 32, backgroundColor: colors.bgCard },
+
+  virtueCard: {
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: 22,
+    marginBottom: 32,
+    backgroundColor: colors.bgCard,
+  },
   virtueEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
   virtueName: { fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
   virtueDesc: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, marginBottom: 12 },
-  virtueQuestion: { fontSize: 15, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 24 },
+  virtueQuestion: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24 },
   virtueDetail: { marginTop: 14 },
   virtueDivider: { height: 0.5, backgroundColor: colors.border, marginBottom: 14 },
-  virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontStyle: 'italic', fontFamily: font.serif, marginBottom: 10 },
-  virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif },
+  virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif, marginBottom: 10 },
+  virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif },
   virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 12, letterSpacing: 0.5 },
 });

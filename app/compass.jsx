@@ -173,7 +173,7 @@ const s = StyleSheet.create({
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
     padding: 22, marginBottom: 14, backgroundColor: colors.bgCard,
   },
-  bodyText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28, fontStyle: 'italic', fontFamily: font.serif },
+  bodyText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28, fontFamily: font.serif },
   editTrigger: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 16, alignItems: 'center', marginBottom: 28,
@@ -202,5 +202,5 @@ const s = StyleSheet.create({
   virtueLatin: { fontSize: 13, color: colors.accent, fontStyle: 'italic' },
   virtueDesc: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
   virtueDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
-  virtueQuestion: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 22 },
+  virtueQuestion: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif, lineHeight: 22 },
 });

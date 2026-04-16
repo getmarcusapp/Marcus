@@ -10,9 +10,9 @@ export const colors = {
   borderBright: '#444444',
 
   textPrimary: '#F0F0F0',
-  textSecondary: '#C0C0C0',
-  textMuted: '#888888',
-  textDim: '#555555',
+  textSecondary: '#C8C8C8',
+  textMuted: '#A0A0A0',
+  textDim: '#707070',
   textGhost: '#2a2a2a',
 
   accent: '#C8A97A',
@@ -29,8 +29,8 @@ export const colors = {
 export const font = {
   heroSize: 36,
   titleSize: 28,
-  bodySize: 16,
-  subSize: 14,
+  bodySize: 17,
+  subSize: 15,
   labelSize: 11,
   microSize: 10,
   sectionTracking: 1.8,

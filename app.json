@@ -21,7 +21,18 @@
       }
     },
     "scheme": "marcus",
-    "plugins": ["expo-router", "expo-notifications"],    "extra": {
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0a0a0a",
+          "defaultChannel": "default"
+        }
+      ]
+    ],
+    "extra": {
       "router": {},
       "eas": {
         "projectId": "230367c9-90a1-453c-8717-ee248ed3eb1b"
