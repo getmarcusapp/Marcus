@@ -16,16 +16,22 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.gioblanco.marcus",
       "newArchEnabled": false,
-      "userInterfaceStyle": "dark",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "UIUserInterfaceStyle": "Dark"
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "scheme": "marcus",
     "plugins": [
       "expo-router",
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0a0a0a",
+          "defaultChannel": "default"
+        }
+      ],
+      "react-native-purchases"
     ],
     "extra": {
       "router": {},

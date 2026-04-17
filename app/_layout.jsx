@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
 import { colors } from '../constants/theme';
 import { hasOnboarded } from '../store/db';
+import { initializePurchases, getSubscriptionStatus } from '../store/purchases';
 
 function TabIcon({ name, color }) {
   return <Ionicons name={name} size={22} color={color} />;
@@ -16,9 +17,19 @@ function OnboardingGate() {
 
   useEffect(() => {
     async function check() {
+      // Initialize RevenueCat
+      await initializePurchases();
+
       const onboarded = await hasOnboarded();
       if (!onboarded) {
         router.replace('/onboarding');
+        return;
+      }
+
+      // Check subscription status
+      const status = await getSubscriptionStatus();
+      if (!status.isActive) {
+        router.replace('/paywall');
       }
     }
     check();
@@ -62,6 +73,7 @@ export default function Layout() {
         <Tabs.Screen name="settings" options={{ href: null }} />
         <Tabs.Screen name="onboarding" options={{ href: null }} />
         <Tabs.Screen name="howto" options={{ href: null }} />
+        <Tabs.Screen name="paywall" options={{ href: null }} />
       </Tabs>
     </SafeAreaProvider>
   );
