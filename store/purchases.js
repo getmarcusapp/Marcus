@@ -1,7 +1,7 @@
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 
 const RC_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_KEY || 'test_FUdbIroRCeAeiuNnHmHtQZOTSQH';
-const ENTITLEMENT_ID = 'premium';
+const ENTITLEMENT_ID = 'Marcus Premium';
 
 // Initialize RevenueCat — call once on app start
 export async function initializePurchases() {
