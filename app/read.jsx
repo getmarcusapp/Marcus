@@ -1,33 +1,29 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
-  TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator,
-  KeyboardAvoidingView, Platform, Image,
+  TouchableOpacity, StyleSheet, SafeAreaView, Alert,
+  ActivityIndicator, KeyboardAvoidingView, Platform, Image,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog, getTodayJournal } from '../store/db';
-import { cancelJournalNotification } from '../notifications';
+import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog } from '../store/db';
 
-const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom. Generate a daily reading in this EXACT JSON format with no other text:
+const getDailySystemPrompt = () => {
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  });
+  const seed = Math.floor(Math.random() * 99999);
+  return `You are a Stoic philosopher and teacher. Today is ${today} (session: ${seed}). You MUST select a DIFFERENT quote than any previous reading. Vary your selection across all three authors and all their works. Generate a daily Stoic reading in this EXACT JSON format with no other text:
 {
   "quote": "the exact quote",
   "author": "Author Name",
   "work": "Title of Work",
   "theme": "2-4 word theme",
   "virtue": "Wisdom|Courage|Moderation|Justice",
-  "reflection": "A 3-4 sentence practical reflection connecting the wisdom to modern daily life. Write in second person."
+  "reflection": "A 3-4 sentence practical reflection connecting ancient wisdom to modern life. Write in second person."
 }
-
-Draw from this broad range of real, accurately attributed sources — never invent quotes:
-- Core Stoics: Marcus Aurelius (Meditations), Epictetus (Discourses, Enchiridion), Seneca (Letters, On the Shortness of Life, On Benefits), Zeno of Citium, Chrysippus, Cato the Younger, Cleanthes
-- Ancient philosophy aligned with Stoicism: Socrates, Plato, Aristotle, Heraclitus, Pythagoras, Cicero
-- Viktor Frankl (Man's Search for Meaning) — on meaning, suffering, freedom
-- Modern Stoics and adjacent thinkers: Ryan Holiday (The Obstacle Is the Way, Ego Is the Enemy), James Stockdale, Nassim Taleb (on antifragility and resilience)
-- Timeless wisdom from: Rumi (on acceptance and presence), Thoreau (on deliberate living), Emerson (on self-reliance), Montaigne (on self-examination)
-- Historical figures known for Stoic-aligned wisdom: Abraham Lincoln, Theodore Roosevelt, Winston Churchill
-
-Vary the source significantly day to day. Do not repeat the same author on consecutive days. Prefer less commonly cited quotes over famous ones. The date passed in the user message should influence your selection — use seasonal themes, historical events on that date, or the position in the year to add relevance.`;
+Use only real, accurately attributed quotes from Marcus Aurelius (Meditations), Epictetus (Discourses, Enchiridion), or Seneca (Letters, On the Shortness of Life). Never invent quotes. Each reading must use a unique quote not used before.`;
+};
 
 const virtueColor = {
   Wisdom: '#7a9aaa',
@@ -46,23 +42,22 @@ export default function ReadScreen() {
   const [insightSaved, setInsightSaved] = useState(false);
 
   useFocusEffect(useCallback(() => {
-  async function load() {
-    const cached = await getTodayReading();
-    if (cached) {
-      setReading(cached);
-      if (cached.insight) {
-        setInsight(cached.insight);
-        setInsightSaved(true);
+    async function load() {
+      const cached = await getTodayReading();
+      if (cached) {
+        setReading(cached);
+        if (cached.insight) {
+          setInsight(cached.insight);
+          setInsightSaved(true);
+        }
+      } else {
+        generateReading();
       }
-    } else {
-      // Auto-generate on first load of the day
-      generateReading();
+      const logEntries = await getReadingLog();
+      setLog(logEntries);
     }
-    const logEntries = await getReadingLog();
-    setLog(logEntries);
-  }
-  load();
-}, []));
+    load();
+  }, []));
 
   async function generateReading() {
     setLoading(true);
@@ -78,19 +73,10 @@ export default function ReadScreen() {
         body: JSON.stringify({
           model: 'claude-sonnet-4-5',
           max_tokens: 1000,
-          system: SYSTEM_PROMPT,
+          system: getDailySystemPrompt(),
           messages: [{
             role: 'user',
-            content: (() => {
-              const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-              const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-              const recentAuthors = log.slice(0, 14).map(r => r.author).filter(Boolean).join(', ');
-              const recentQuotes = log.slice(0, 7).map(r => r.quote ? r.quote.substring(0, 60) : '').filter(Boolean).join(' | ');
-              return `Today is ${dateStr} (day ${dayOfYear} of the year). Generate a Stoic reading. Return only the JSON object.
-
-Do NOT use these recently used authors: ${recentAuthors || 'none'}.
-Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
-            })(),
+            content: `Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}. Generate a unique Stoic reading for today. Return only the JSON object.`,
           }],
         }),
       });
@@ -113,23 +99,9 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
     if (!insight.trim()) return;
     await saveReadingInsight(insight);
     setInsightSaved(true);
-    cancelJournalNotification('reading').catch(() => {});
     const updated = await getReadingLog();
     setLog(updated);
-
-    // Check what's still left to do
-    const morning = await getTodayJournal('morning');
-
-    if (!morning) {
-      Alert.alert('', 'Insight saved.', [
-        { text: 'Morning journal →', onPress: () => router.replace({ pathname: '/journal', params: { type: 'morning' } }) },
-        { text: 'Back to Practice', style: 'cancel', onPress: () => router.replace('/') },
-      ]);
-    } else {
-      Alert.alert('', 'Insight saved.', [
-        { text: 'Back to Practice', onPress: () => router.replace('/') },
-      ]);
-    }
+    Alert.alert('', 'Insight saved.');
   }
 
   return (
@@ -145,7 +117,6 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
         >
-
           <View style={s.hero}>
             <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
               <Text style={s.backArrow}>‹</Text>
@@ -182,11 +153,6 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                     source={require('../assets/skull.png')}
                     style={s.loadingSkull}
                     resizeMode="contain"
-                  />
-                  <ActivityIndicator
-                    size="small"
-                    color={colors.accent}
-                    style={{ marginTop: 20, marginBottom: 8 }}
                   />
                   <Text style={s.loadingText}>Summoning wisdom from antiquity...</Text>
                 </View>
@@ -229,7 +195,10 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                       placeholder="Write your reaction, insight, or intention..."
                       placeholderTextColor={colors.textDim}
                       value={insight}
-                      onChangeText={text => { setInsight(text); setInsightSaved(false); }}
+                      onChangeText={text => {
+                        setInsight(text);
+                        setInsightSaved(false);
+                      }}
                       scrollEnabled={false}
                     />
                   </View>
@@ -288,7 +257,6 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
               )}
             </View>
           )}
-
         </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
@@ -298,7 +266,6 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  // Dark header
   hero: {
     backgroundColor: colors.bgDeep,
     padding: spacing.xl,
@@ -307,82 +274,53 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
-  backArrow: { fontSize: 24, color: colors.accent },
-  backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
+  backArrow: { fontSize: 24, color: colors.textMuted },
+  backLabel: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
+  title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
-  tabRow: {
-    flexDirection: 'row', gap: 10, padding: spacing.md,
-    borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep,
-  },
+  tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
   tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
   tabBtnTextActive: { color: colors.textSecondary },
-  // Light reading body
-  body: { padding: spacing.md, backgroundColor: colors.bgCard },
-  loadingCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 48, alignItems: 'center', marginTop: 8,
-    backgroundColor: colors.bgCard,
-  },
-  loadingSkull: { width: 120, height: 120, opacity: 0.85, marginBottom: 8, filter: undefined },
-  loadingText: { fontSize: 14, color: colors.textMuted, marginTop: 4, fontFamily: font.serif, fontStyle: 'italic' },
+  body: { padding: spacing.md },
+  loadingCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 48, alignItems: 'center', marginTop: 8, backgroundColor: colors.bgCard },
+  loadingSkull: { width: 64, height: 64, opacity: 0.6, marginBottom: 16 },
+  loadingText: { fontSize: 14, color: colors.textDim, fontStyle: 'italic', fontFamily: font.serif },
   badgeRow: { flexDirection: 'row', gap: 8, marginBottom: 14, marginTop: 8 },
   virtueBadge: { borderWidth: 0.5, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 5 },
   virtueBadgeText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
   themeBadge: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 5 },
-  themeBadgeText: { fontSize: 12, color: colors.textMuted },
-  // Quote card stays dark — gravitas of the Stoic quote
-  quoteCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 22, marginBottom: 12, backgroundColor: colors.bgDeep,
-  },
+  themeBadgeText: { fontSize: 12, color: colors.textDim },
+  quoteCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 22, marginBottom: 12, backgroundColor: colors.bgDeep },
   quoteMark: { fontSize: 40, color: colors.borderStrong, lineHeight: 32, fontFamily: font.serif, marginBottom: -4 },
-  quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontFamily: font.serif },
+  quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontStyle: 'italic', fontFamily: font.serif },
   quoteRule: { height: 0.5, backgroundColor: colors.border, marginVertical: 16 },
   quoteAuthor: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
-  quoteWork: { fontSize: 12, color: colors.textDim, marginTop: 3 },
-  // Reflection — light
-  reflectionCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 22, marginBottom: 12, backgroundColor: colors.bgCard,
-  },
-  reflectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 12 },
-  reflectionText: { fontSize: 16, color: colors.textSecondary, lineHeight: 28, fontFamily: font.serif },
-  // Insight — light writing surface
-  insightCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 20, marginBottom: 12, backgroundColor: colors.bgCard,
-  },
-  insightLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 4 },
-  insightSub: { fontSize: 13, color: colors.textDim, marginBottom: 14 },
-  insightInput: {
-    fontSize: 16, color: colors.textPrimary, lineHeight: 26,
-    minHeight: 100, textAlignVertical: 'top',
-  },
-  saveBtn: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
-    padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 10,
-  },
-  saveBtnDone: { borderColor: colors.borderMid, backgroundColor: colors.bgElevated },
-  saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
+  quoteWork: { fontSize: 12, color: colors.textDim, marginTop: 3, fontStyle: 'italic' },
+  reflectionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 22, marginBottom: 12, backgroundColor: colors.bgCard },
+  reflectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12 },
+  reflectionText: { fontSize: 16, color: colors.textSecondary, lineHeight: 28, fontFamily: font.serif, fontStyle: 'italic' },
+  insightCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 12, backgroundColor: colors.bgCard },
+  insightLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+  insightSub: { fontSize: 13, color: colors.textDim, marginBottom: 14, fontStyle: 'italic' },
+  insightInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
+  saveBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 10 },
+  saveBtnDone: { borderColor: colors.successBorder, backgroundColor: colors.successBg },
+  saveBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
   refreshBtn: { padding: 14, alignItems: 'center', marginBottom: 36 },
-  refreshBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
-  generateBtn: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
-    padding: 20, alignItems: 'center', backgroundColor: colors.bgCard, marginTop: 8,
-  },
-  generateBtnText: { fontSize: 14, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
-  empty: { padding: 60, alignItems: 'center', backgroundColor: colors.bgCard },
-  emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
-  archiveRow: { padding: 20, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
+  refreshBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
+  generateBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 20, alignItems: 'center', backgroundColor: colors.bgCard, marginTop: 8 },
+  generateBtnText: { fontSize: 14, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
+  empty: { padding: 60, alignItems: 'center' },
+  emptyText: { fontSize: 16, color: colors.textDim, fontStyle: 'italic', textAlign: 'center', lineHeight: 26 },
+  archiveRow: { padding: 20, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   archiveTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  archiveDate: { fontSize: 14, color: colors.textPrimary, fontWeight: '500' },
+  archiveDate: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
   archiveVirtue: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
   archiveTheme: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3, marginBottom: 8, textTransform: 'uppercase' },
-  archiveQuote: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif, lineHeight: 22, marginBottom: 10 },
+  archiveQuote: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 22, marginBottom: 10 },
   archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.borderMid, paddingLeft: 12, marginTop: 4 },
   archiveInsightLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 },
   archiveInsight: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },

@@ -44,59 +44,34 @@ function JournalEntryEditor({ entry, onSave, onCancel }) {
         <Text style={e.headerTitle}>Edit {isMorning ? 'morning' : 'evening'} entry</Text>
         <Text style={e.headerDate}>{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
       </View>
-
       {isMorning && (
         <View style={e.virtueSection}>
           <Text style={e.sectionLabel}>Virtue focus</Text>
           <View style={e.virtuePills}>
             {virtues.map(v => (
-              <TouchableOpacity
-                key={v.id}
-                style={[e.vpill, selectedVirtue === v.id && e.vpillActive]}
-                onPress={() => setSelectedVirtue(v.id)}
-                activeOpacity={0.7}
-              >
+              <TouchableOpacity key={v.id} style={[e.vpill, selectedVirtue === v.id && e.vpillActive]} onPress={() => setSelectedVirtue(v.id)} activeOpacity={0.7}>
                 <Text style={[e.vpillName, selectedVirtue === v.id && e.vpillNameActive]}>{v.name}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
       )}
-
       {prompts.map((prompt, idx) => (
-        <TouchableOpacity
-          key={idx}
-          style={[e.promptCard, openPrompt === idx && e.promptCardOpen]}
-          onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)}
-          activeOpacity={0.8}
-        >
+        <TouchableOpacity key={idx} style={[e.promptCard, openPrompt === idx && e.promptCardOpen]} onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)} activeOpacity={0.8}>
           <Text style={e.promptNum}>{prompt.num}</Text>
           <Text style={e.promptQ}>{prompt.q}</Text>
           {openPrompt === idx && (
             <View style={e.promptAnswer}>
-              <TextInput
-                style={e.promptInput}
-                multiline
-                placeholder="Write here..."
-                placeholderTextColor={colors.textDim}
-                value={answers[idx] || ''}
-                onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
-                scrollEnabled={false}
-              />
+              <TextInput style={e.promptInput} multiline placeholder="Write here..." placeholderTextColor={colors.textDim} value={answers[idx] || ''} onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))} scrollEnabled={false} keyboardAppearance="dark" />
             </View>
           )}
         </TouchableOpacity>
       ))}
-
       <View style={e.btnRow}>
         <TouchableOpacity style={e.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
           <Text style={e.cancelBtnText}>Cancel</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={e.saveBtn}
-          onPress={() => onSave({ ...entry, answers, virtue: selectedVirtue })}
-          activeOpacity={0.8}
-        >
+        <TouchableOpacity style={e.saveBtn} onPress={() => onSave({ ...entry, answers, virtue: selectedVirtue })} activeOpacity={0.8}>
           <Text style={e.saveBtnText}>Save changes</Text>
         </TouchableOpacity>
       </View>
@@ -116,7 +91,7 @@ export default function JournalScreen() {
   const [openPrompt, setOpenPrompt] = useState(0);
   const [alreadySaved, setAlreadySaved] = useState(false);
   const [showVirtueDetail, setShowVirtueDetail] = useState(false);
-  const [viewMode, setViewMode] = useState('write'); // 'write' | 'history'
+  const [viewMode, setViewMode] = useState('write');
   const [history, setHistory] = useState([]);
   const [editingEntry, setEditingEntry] = useState(null);
 
@@ -153,67 +128,46 @@ export default function JournalScreen() {
     const ok = await saveJournal(entry);
     if (ok) {
       await incrementStreak();
-      // Cancel the notification for this journal type immediately
-      cancelJournalNotification(isMorning ? 'morning' : 'evening').catch(() => {});
       setAlreadySaved(true);
       const all = await getJournals();
       setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
-
       if (isMorning) {
-        // Morning: offer to go to reading (likely not done yet) or back to practice
-        Alert.alert(
-          '',
-          'Morning reflection saved.',
-          [
-            { text: 'Go to Practice', onPress: () => router.replace('/') },
-            { text: 'Read today\'s wisdom', onPress: () => router.replace('/read') },
-          ]
-        );
+        Alert.alert('', 'Morning reflection saved.', [
+          { text: 'Go to Practice', onPress: () => router.replace('/') },
+          { text: "Read today's wisdom", onPress: () => router.replace('/read') },
+        ]);
       } else {
-        // Evening: check if all practice items are complete
         const readingDone = await getTodayReading();
         const compassDone = await getCompassDone();
         const morningDone = await getTodayJournal('morning');
         const allDone = !!compassDone && !!readingDone && !!morningDone;
-
         if (allDone) {
-          // Everything complete — go straight to the sealed state
           router.replace('/');
         } else if (readingDone) {
-          // Reading done, just go to practice
-          Alert.alert(
-            '',
-            'Evening reflection saved.',
-            [{ text: 'Go to Practice', onPress: () => router.replace('/') }]
-          );
+          Alert.alert('', 'Evening reflection saved.', [{ text: 'Go to Practice', onPress: () => router.replace('/') }]);
         } else {
-          // Reading not done yet — offer it
-          Alert.alert(
-            '',
-            'Evening reflection saved.',
-            [
-              { text: 'Go to Practice', onPress: () => router.replace('/') },
-              { text: 'Read today\'s wisdom', onPress: () => router.replace('/read') },
-            ]
-          );
+          Alert.alert('', 'Evening reflection saved.', [
+            { text: 'Go to Practice', onPress: () => router.replace('/') },
+            { text: "Read today's wisdom", onPress: () => router.replace('/read') },
+          ]);
         }
       }
     }
   }
 
- async function handleEditSave(updated) {
-  const ok = await updateJournalEntry(updated);
-  if (ok) {
-    const all = await getJournals();
-    setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
-    setEditingEntry(null);
-    Alert.alert('', 'Entry updated.');
+  async function handleEditSave(updated) {
+    const ok = await updateJournalEntry(updated);
+    if (ok) {
+      const all = await getJournals();
+      setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
+      setEditingEntry(null);
+      Alert.alert('', 'Entry updated.');
+    }
   }
-}
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: colors.bg }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
     >
@@ -223,6 +177,7 @@ export default function JournalScreen() {
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
+          contentInsetAdjustmentBehavior="never"
         >
           <View style={s.header}>
             <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
@@ -241,11 +196,7 @@ export default function JournalScreen() {
 
           <View style={s.tabRow}>
             {['write', 'history'].map(t => (
-              <TouchableOpacity
-                key={t}
-                style={[s.tabBtn, viewMode === t && s.tabBtnActive]}
-                onPress={() => setViewMode(t)}
-              >
+              <TouchableOpacity key={t} style={[s.tabBtn, viewMode === t && s.tabBtnActive]} onPress={() => setViewMode(t)}>
                 <Text style={[s.tabBtnText, viewMode === t && s.tabBtnTextActive]}>
                   {t === 'write' ? (alreadySaved ? 'Today' : 'Write') : 'History'}
                 </Text>
@@ -278,18 +229,12 @@ export default function JournalScreen() {
                           onPress={() => { setSelectedVirtue(v.id); setShowVirtueDetail(false); }}
                           activeOpacity={0.7}
                         >
-                          <Text style={[s.vpillName, selectedVirtue === v.id && s.vpillNameActive]}>
-                            {v.name}
-                          </Text>
+                          <Text style={[s.vpillName, selectedVirtue === v.id && s.vpillNameActive]}>{v.name}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
                     {selectedVirtueObj && (
-                      <TouchableOpacity
-                        style={s.virtueInfoCard}
-                        onPress={() => setShowVirtueDetail(!showVirtueDetail)}
-                        activeOpacity={0.8}
-                      >
+                      <TouchableOpacity style={s.virtueInfoCard} onPress={() => setShowVirtueDetail(!showVirtueDetail)} activeOpacity={0.8}>
                         <View style={s.virtueInfoLeft}>
                           <Text style={s.virtueInfoName}>{selectedVirtueObj.name}</Text>
                           <Text style={s.virtueInfoLatin}>{virtueDetail?.latin}</Text>
@@ -338,11 +283,11 @@ export default function JournalScreen() {
                   <Text style={s.anchorLabel}>{isMorning ? 'Morning anchor' : 'Evening anchor'}</Text>
                   <Text style={s.anchorText}>
                     {isMorning
-                      ? '"You\'ll encounter rudeness, selfishness, ingratitude today. But you share a divine reason with them. They are kin. Respond not with anger — but with understanding."'
+                      ? 'When you wake up in the morning, tell yourself: The people I deal with today will be meddling, ungrateful, arrogant, dishonest, jealous, and surly. They are like this because they can\'t tell good from evil. But I have seen the beauty of good and the ugliness of evil, and have recognized that the wrongdoer has a nature related to my own — not of the same blood or birth, but the same mind, and possessing a share of the divine. And so none of them can hurt me.'
                       : '"Ask yourself at day\'s end: What was ill done? What done? What left undone? Starting from the first, proceed through all three."'}
                   </Text>
                   <Text style={s.anchorAuthor}>
-                    {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
+                    {isMorning ? 'Marcus Aurelius · Meditations II.1 · Trans. Gregory Hays' : 'Epictetus · Discourses III.10'}
                   </Text>
                 </View>
 
@@ -364,11 +309,7 @@ export default function JournalScreen() {
                 history.map(entry => (
                   <View key={entry.id}>
                     {editingEntry?.id === entry.id ? (
-                      <JournalEntryEditor
-                        entry={editingEntry}
-                        onSave={handleEditSave}
-                        onCancel={() => setEditingEntry(null)}
-                      />
+                      <JournalEntryEditor entry={editingEntry} onSave={handleEditSave} onCancel={() => setEditingEntry(null)} />
                     ) : (
                       <View style={s.histEntry}>
                         <View style={s.histEntryHeader}>
@@ -376,15 +317,9 @@ export default function JournalScreen() {
                             <Text style={s.histEntryDate}>
                               {new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                             </Text>
-                            {entry.virtue && (
-                              <Text style={s.histEntryVirtue}>{entry.virtue}</Text>
-                            )}
+                            {entry.virtue && <Text style={s.histEntryVirtue}>{entry.virtue}</Text>}
                           </View>
-                          <TouchableOpacity
-                            style={s.editBtn}
-                            onPress={() => setEditingEntry(entry)}
-                            activeOpacity={0.7}
-                          >
+                          <TouchableOpacity style={s.editBtn} onPress={() => setEditingEntry(entry)} activeOpacity={0.7}>
                             <Text style={s.editBtnText}>Edit</Text>
                           </TouchableOpacity>
                         </View>
@@ -427,7 +362,7 @@ const e = StyleSheet.create({
   promptCardOpen: { backgroundColor: colors.bgElevated },
   promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 6 },
   promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontFamily: font.serif },
-  promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 },
+  promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12, paddingBottom: 8 },
   promptInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 80, textAlignVertical: 'top' },
   btnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
   cancelBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
@@ -439,13 +374,7 @@ const e = StyleSheet.create({
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  header: {
-    backgroundColor: colors.bgDeep,
-    padding: spacing.xl,
-    paddingTop: spacing.lg,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
-  },
+  header: { backgroundColor: colors.bgDeep, padding: spacing.xl, paddingTop: spacing.lg, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
   backArrow: { fontSize: 24, color: colors.accent },
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
@@ -457,17 +386,9 @@ const s = StyleSheet.create({
   tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
   tabBtnTextActive: { color: colors.textSecondary },
-  mementoStrip: {
-    backgroundColor: colors.accentBg,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
-    padding: spacing.xl,
-    paddingVertical: 20,
-  },
+  mementoStrip: { backgroundColor: colors.accentBg, borderBottomWidth: 0.5, borderBottomColor: colors.border, padding: spacing.xl, paddingVertical: 20 },
   mementoText: { fontSize: 15, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif, fontStyle: 'italic' },
   mementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, textTransform: 'uppercase' },
-
-  // Light writing surface
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
   virtueSection: { marginBottom: 8 },
@@ -476,20 +397,13 @@ const s = StyleSheet.create({
   vpillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
   vpillName: { fontSize: 12, fontWeight: '400', color: colors.textDim },
   vpillNameActive: { color: colors.accent },
-  virtueInfoCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 18, marginBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: colors.bgCard,
-  },
+  virtueInfoCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bgCard },
   virtueInfoLeft: { flex: 1 },
   virtueInfoName: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 2 },
   virtueInfoLatin: { fontSize: 12, color: colors.textMuted, marginBottom: 6 },
   virtueInfoDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 21 },
   virtueInfoChev: { fontSize: 20, color: colors.textDim },
-  virtueDetailCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 18, marginBottom: 8, backgroundColor: colors.bgDeep,
-  },
+  virtueDetailCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 8, backgroundColor: colors.bgDeep },
   virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
   virtueDetailDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
@@ -497,19 +411,14 @@ const s = StyleSheet.create({
   promptCardOpen: { borderColor: colors.borderMid },
   promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   promptQ: { fontSize: font.bodySize, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
-  promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
+  promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16, paddingBottom: 8 },
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 120, textAlignVertical: 'top' },
-  anchorCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 20, marginBottom: 12, backgroundColor: colors.bgDeep,
-  },
-  anchorLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 10 },
-  anchorText: { fontSize: 15, color: colors.textSecondary, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 24 },
-  anchorAuthor: { fontSize: 11, color: colors.textDim, marginTop: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
-  saveBtn: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
-    padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36,
-  },
+  // FIXED: real quote, no italics, bigger font, more line height for readability
+  anchorCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 24, marginBottom: 12, backgroundColor: colors.bgDeep },
+  anchorLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 12 },
+  anchorText: { fontSize: 16, color: colors.textSecondary, lineHeight: 30 },
+  anchorAuthor: { fontSize: 11, color: colors.textDim, marginTop: 12, letterSpacing: 1.2, textTransform: 'uppercase' },
+  saveBtn: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
   saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
   saveBtnSub: { fontSize: 12, color: colors.textMuted, marginTop: 5 },
   empty: { padding: 60, alignItems: 'center', backgroundColor: colors.bgCard },
