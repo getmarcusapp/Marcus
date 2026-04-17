@@ -30,8 +30,7 @@
           "color": "#0a0a0a",
           "defaultChannel": "default"
         }
-      ],
-      "react-native-purchases"
+      ]
     ],
     "extra": {
       "router": {},
