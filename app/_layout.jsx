@@ -13,12 +13,16 @@ function TabIcon({ name, color }) {
 
 function OnboardingGate() {
   const router = useRouter();
-  const segments = useSegments();
 
   useEffect(() => {
     async function check() {
-      // Initialize RevenueCat
-      await initializePurchases();
+      try {
+        // Initialize RevenueCat — wrapped in try/catch so a failure
+        // never crashes the app
+        await initializePurchases();
+      } catch (e) {
+        console.log('RevenueCat init failed, proceeding without paywall:', e);
+      }
 
       const onboarded = await hasOnboarded();
       if (!onboarded) {
@@ -26,10 +30,15 @@ function OnboardingGate() {
         return;
       }
 
-      // Check subscription status
-      const status = await getSubscriptionStatus();
-      if (!status.isActive) {
-        router.replace('/paywall');
+      // Check subscription — default to allowing access if anything fails
+      try {
+        const status = await getSubscriptionStatus();
+        if (!status.isActive) {
+          router.replace('/paywall');
+        }
+      } catch (e) {
+        console.log('Subscription check failed, allowing access:', e);
+        // Do not block app access if RevenueCat is unreachable
       }
     }
     check();
