@@ -9,6 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { virtues } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone } from '../store/db';
+import { refreshNotificationsForToday } from '../notifications';
 
 const virtueDetails = {
   wisdom: { definition: 'The virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
@@ -59,6 +60,7 @@ export default function PracticeScreen() {
       setReadingDone(!!reading);
       setCompassDone(compassToday);
       setStreak(s);
+      refreshNotificationsForToday().catch(() => {});
 
       if (morning?.virtue) {
         const found = virtues.find(v => v.id === morning.virtue);

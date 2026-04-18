@@ -7,6 +7,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
+import { cancelJournalNotification } from '../notifications';
 import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry, getTodayReading, getCompassDone } from '../store/db';
 
 const morningPrompts = [
@@ -128,6 +129,7 @@ export default function JournalScreen() {
     const ok = await saveJournal(entry);
     if (ok) {
       await incrementStreak();
+      cancelJournalNotification(isMorning ? 'morning' : 'evening').catch(() => {});
       setAlreadySaved(true);
       const all = await getJournals();
       setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));

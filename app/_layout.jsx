@@ -62,7 +62,7 @@ export default function Layout() {
             paddingBottom: 24,
             paddingTop: 10,
           },
-          tabBarActiveTintColor: colors.textPrimary,
+          tabBarActiveTintColor: colors.accent,
           tabBarInactiveTintColor: colors.textDim,
           tabBarLabelStyle: {
             fontSize: 9,

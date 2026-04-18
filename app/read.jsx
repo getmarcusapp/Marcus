@@ -207,6 +207,7 @@ export default function ReadScreen() {
                       multiline
                       placeholder="Write your reaction, insight, or intention..."
                       placeholderTextColor={colors.textDim}
+                      keyboardAppearance="dark"
                       value={insight}
                       onChangeText={text => {
                         setInsight(text);
