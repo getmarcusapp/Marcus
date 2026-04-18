@@ -87,7 +87,7 @@ export default function PaywallScreen() {
           />
           <Text style={s.eyebrow}>Marcus Premium</Text>
           <Text style={s.title}>Become someone{'\n'}you respect.</Text>
-          <Text style={s.sub}>A complete daily Stoic practice.{'\n'}7 days free, then less than a dollar a week.</Text>
+          <Text style={s.sub}>A complete daily Stoic practice.{'\n'}7 days free, then 16¢ a day.</Text>
         </View>
 
         {/* Feature list */}
@@ -129,7 +129,7 @@ export default function PaywallScreen() {
                 {annualPrice}<Text style={s.planPeriod}>/year</Text>
               </Text>
               <Text style={[s.planNote, selectedPackage === 'annual' && s.planNoteSelected]}>
-                16¢ a day · Save 37% vs monthly
+                16¢ a day · $1.15/week · Save 37% vs monthly
               </Text>
             </TouchableOpacity>
 
@@ -169,7 +169,7 @@ export default function PaywallScreen() {
         </TouchableOpacity>
 
         <Text style={s.ctaNote}>
-          Free for 7 days · Cancel anytime · Payment required after trial
+          Free for 7 days · then 16¢/day annual or $7.99/mo · Cancel anytime
         </Text>
 
         {/* Restore */}
