@@ -659,6 +659,124 @@
   /* Push hero below fixed nav */
   .hero { padding-top: 120px !important; }
 
+
+  /* ─── PRICING ────────────────────────────────────────── */
+  .pricing {
+    background: var(--bg-deep);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 100px 24px;
+  }
+  .pricing-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .pricing-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .pricing-title {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .pricing-sub {
+    font-size: 17px;
+    color: var(--text-muted);
+    font-family: Georgia, serif;
+    font-style: italic;
+    line-height: 1.7;
+    margin-bottom: 48px;
+  }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 500px) { .pricing-grid { grid-template-columns: 1fr; } }
+  .price-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px 32px;
+    background: var(--bg-card);
+    text-align: center;
+    position: relative;
+  }
+  .price-card.featured {
+    border-color: var(--accent-dim);
+    background: var(--accent-bg);
+  }
+  .price-badge {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 0 0 8px 8px;
+    white-space: nowrap;
+  }
+  .price-period {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    margin-top: 12px;
+  }
+  .price-amount {
+    font-size: 44px;
+    font-weight: 300;
+    color: var(--text-primary);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .price-card.featured .price-amount { color: var(--accent); }
+  .price-unit {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    margin-bottom: 16px;
+  }
+  .price-note {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .price-cta {
+    display: block;
+    margin-top: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 14px 20px;
+    border-radius: 9px;
+    text-decoration: none;
+    transition: opacity 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .price-card.featured .price-cta { background: var(--accent); color: #000; }
+  .price-card:not(.featured) .price-cta { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-mid); }
+  .price-cta:hover { opacity: 0.82; }
+  .pricing-note {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 8px;
+  }
+
 </style>
 </head>
 <body>
@@ -901,6 +1019,34 @@
   </div>
 </section>
 
+
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <p class="pricing-eyebrow">Pricing</p>
+    <h2 class="pricing-title">7 days free.<br>Then 16¢ a day.</h2>
+    <p class="pricing-sub">Start your free trial. Pay only if the practice has changed something.</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <p class="price-period">Monthly</p>
+        <p class="price-amount">$7.99</p>
+        <p class="price-unit">per month</p>
+        <p class="price-note">Cancel anytime. Your data stays on your device regardless.</p>
+        <a class="price-cta" href="#hero-email">Start free trial</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">Best value</div>
+        <p class="price-period">Annual</p>
+        <p class="price-amount">$59.99</p>
+        <p class="price-unit">per year &middot; 16&cent; a day</p>
+        <p class="price-note">Save 37% vs monthly. $1.15 a week for a daily practice that compounds over years.</p>
+        <a class="price-cta" href="#hero-email">Start free trial</a>
+      </div>
+    </div>
+    <p class="pricing-note">7-day free trial &middot; iOS &middot; No account required &middot; Your data never leaves your device</p>
+  </div>
+</section>
 
 <!-- MEMENTO MORI -->
 <section class="memento">
