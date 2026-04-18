@@ -1,28 +1,27 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
-  TouchableOpacity, StyleSheet, SafeAreaView, Alert,
+  TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator,
   ActivityIndicator, KeyboardAvoidingView, Platform, Image,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog } from '../store/db';
+import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog , getTodayJournal } from '../store/db';
 
-const getDailySystemPrompt = () => {
+const getDailySystemPrompt = (recentAuthors, recentQuotes) => {
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
   });
-  const seed = Math.floor(Math.random() * 99999);
-  return `You are a Stoic philosopher and teacher. Today is ${today} (session: ${seed}). You MUST select a DIFFERENT quote than any previous reading. Vary your selection across all three authors and all their works. Generate a daily Stoic reading in this EXACT JSON format with no other text:
-{
-  "quote": "the exact quote",
-  "author": "Author Name",
-  "work": "Title of Work",
-  "theme": "2-4 word theme",
-  "virtue": "Wisdom|Courage|Moderation|Justice",
-  "reflection": "A 3-4 sentence practical reflection connecting ancient wisdom to modern life. Write in second person."
-}
-Use only real, accurately attributed quotes from Marcus Aurelius (Meditations), Epictetus (Discourses, Enchiridion), or Seneca (Letters, On the Shortness of Life). Never invent quotes. Each reading must use a unique quote not used before.`;
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const sources = `
+Draw from this broad range of real, accurately attributed sources — never invent quotes:
+- Core Stoics: Marcus Aurelius (Meditations), Epictetus (Discourses, Enchiridion), Seneca (Letters, On the Shortness of Life), Zeno of Citium, Chrysippus, Cato the Younger, Cleanthes
+- Ancient philosophy: Socrates, Plato, Aristotle, Heraclitus, Cicero
+- Viktor Frankl (Man's Search for Meaning)
+- Ryan Holiday, James Stockdale, Nassim Taleb
+- Rumi, Thoreau, Emerson, Montaigne
+- Lincoln, Roosevelt, Churchill`;
+  return `You are a curator of Stoic and philosophical wisdom. Generate a daily reading in this EXACT JSON format with no other text:\n{\n  "quote": "the exact quote",\n  "author": "Author Name",\n  "work": "Title of Work",\n  "theme": "2-4 word theme",\n  "virtue": "Wisdom|Courage|Moderation|Justice",\n  "reflection": "A 3-4 sentence practical reflection connecting the wisdom to modern daily life. Write in second person."\n}\n\n${sources}\n\nToday is ${today} (day ${dayOfYear} of the year).\nDo NOT use these recently used authors: ${recentAuthors || 'none'}.\nDo NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.\nVary the source significantly. Prefer less commonly cited quotes.`;
 };
 
 const virtueColor = {
@@ -73,7 +72,10 @@ export default function ReadScreen() {
         body: JSON.stringify({
           model: 'claude-sonnet-4-5',
           max_tokens: 1000,
-          system: getDailySystemPrompt(),
+          system: getDailySystemPrompt(
+              log.slice(0, 14).map(r => r.author).filter(Boolean).join(', '),
+              log.slice(0, 7).map(r => r.quote ? r.quote.substring(0, 60) : '').filter(Boolean).join(' | ')
+            ),
           messages: [{
             role: 'user',
             content: `Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}. Generate a unique Stoic reading for today. Return only the JSON object.`,
@@ -101,7 +103,17 @@ export default function ReadScreen() {
     setInsightSaved(true);
     const updated = await getReadingLog();
     setLog(updated);
-    Alert.alert('', 'Insight saved.');
+    const morning = await getTodayJournal('morning');
+    if (!morning) {
+      Alert.alert('', 'Insight saved.', [
+        { text: 'Morning journal \u2192', onPress: () => router.replace({ pathname: '/journal', params: { type: 'morning' } }) },
+        { text: 'Back to Practice', style: 'cancel', onPress: () => router.replace('/') },
+      ]);
+    } else {
+      Alert.alert('', 'Insight saved.', [
+        { text: 'Back to Practice', onPress: () => router.replace('/') },
+      ]);
+    }
   }
 
   return (
@@ -154,6 +166,7 @@ export default function ReadScreen() {
                     style={s.loadingSkull}
                     resizeMode="contain"
                   />
+                  <ActivityIndicator size="small" color={colors.accent} style={{ marginTop: 20, marginBottom: 4 }} />
                   <Text style={s.loadingText}>Summoning wisdom from antiquity...</Text>
                 </View>
               ) : reading ? (
@@ -285,8 +298,8 @@ const s = StyleSheet.create({
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
   tabBtnTextActive: { color: colors.textSecondary },
   body: { padding: spacing.md },
-  loadingCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 48, alignItems: 'center', marginTop: 8, backgroundColor: colors.bgCard },
-  loadingSkull: { width: 64, height: 64, opacity: 0.6, marginBottom: 16 },
+  loadingCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 56, alignItems: 'center', marginTop: 24, backgroundColor: colors.bgCard },
+  loadingSkull: { width: 120, height: 120, opacity: 0.85, marginBottom: 8 },
   loadingText: { fontSize: 14, color: colors.textDim, fontStyle: 'italic', fontFamily: font.serif },
   badgeRow: { flexDirection: 'row', gap: 8, marginBottom: 14, marginTop: 8 },
   virtueBadge: { borderWidth: 0.5, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 5 },

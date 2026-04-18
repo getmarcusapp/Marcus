@@ -148,6 +148,25 @@ export default function PracticeScreen() {
           </View>
           <Text style={s.progressText}>{completed} of {totalItems} complete</Text>
 
+          {(streak.current > 0 || streak.longest > 0 || streak.totalDays > 0) && (
+            <View style={s.streakRow}>
+              <View style={s.streakStat}>
+                <Text style={s.streakNum}>{streak.current}</Text>
+                <Text style={s.streakLabel}>Current</Text>
+              </View>
+              <View style={s.streakDivider} />
+              <View style={s.streakStat}>
+                <Text style={s.streakNum}>{streak.longest || 0}</Text>
+                <Text style={s.streakLabel}>Longest</Text>
+              </View>
+              <View style={s.streakDivider} />
+              <View style={s.streakStat}>
+                <Text style={s.streakNum}>{streak.totalDays || 0}</Text>
+                <Text style={s.streakLabel}>Total days</Text>
+              </View>
+            </View>
+          )}
+
           <View style={s.routineCard}>
             <TouchableOpacity
               style={[s.routineRow, s.routineRowBorder]}
@@ -292,6 +311,19 @@ const s = StyleSheet.create({
   progressBar: { height: 2, backgroundColor: colors.border, borderRadius: 1, marginBottom: 8, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: colors.textMuted, borderRadius: 1 },
   progressText: { fontSize: 12, color: colors.textMuted, marginBottom: 16 },
+  streakRow: {
+    flexDirection: 'row',
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.bgCard,
+    marginBottom: 14,
+    overflow: 'hidden',
+  },
+  streakStat: { flex: 1, alignItems: 'center', paddingVertical: 12 },
+  streakNum: { fontSize: 22, fontWeight: '600', color: colors.accent, letterSpacing: -0.5 },
+  streakLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 3 },
+  streakDivider: { width: 0.5, backgroundColor: colors.border, marginVertical: 8 },
   routineCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, overflow: 'hidden', marginBottom: 16 },
   routineRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
   routineRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
