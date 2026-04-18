@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator,
-  ActivityIndicator, KeyboardAvoidingView, Platform, Image,
+  KeyboardAvoidingView, Platform, Image,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
