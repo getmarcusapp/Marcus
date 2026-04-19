@@ -30,16 +30,15 @@ function OnboardingGate() {
         return;
       }
 
-      // Check subscription — default to allowing access if anything fails
-      try {
-        const status = await getSubscriptionStatus();
-        if (!status.isActive) {
-          router.replace('/paywall');
-        }
-      } catch (e) {
-        console.log('Subscription check failed, allowing access:', e);
-        // Do not block app access if RevenueCat is unreachable
-      }
+      // SCREENSHOT MODE — remove before App Store submission
+      // Subscription check temporarily disabled for screenshots
+      // try {
+      //   const status = await getSubscriptionStatus();
+      //   if (!status.isActive) {
+      //     router.replace('/paywall');
+      //   }
+      // } catch (e) {}
+
     }
     check();
   }, []);
