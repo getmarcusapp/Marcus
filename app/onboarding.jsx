@@ -22,13 +22,13 @@ export default function OnboardingScreen() {
   async function handleFinish() {
     await saveCompass(compass);
     await setHasOnboarded();
-    router.replace('/');
+    router.replace('/paywall');
   }
 
   async function handleSkipCompass() {
     await saveCompass(DEFAULT_COMPASS);
     await setHasOnboarded();
-    router.replace('/');
+    router.replace('/paywall');
   }
 
   const steps = [

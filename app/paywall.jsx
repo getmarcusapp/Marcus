@@ -26,11 +26,21 @@ export default function PaywallScreen() {
   }
 
   function getPackageByType(type) {
-    if (!offerings?.availablePackages) return null;
+    if (!offerings?.availablePackages) {
+      console.log('No available packages in offerings:', offerings);
+      return null;
+    }
+    console.log('Available packages:', offerings.availablePackages.map(p => ({
+      id: p.identifier,
+      type: p.packageType,
+      product: p.product?.productIdentifier
+    })));
     return offerings.availablePackages.find(pkg =>
       type === 'annual'
-        ? pkg.packageType === 'ANNUAL' || pkg.identifier.includes('annual') || pkg.identifier.includes('yearly')
-        : pkg.packageType === 'MONTHLY' || pkg.identifier.includes('monthly')
+        ? pkg.packageType === 'ANNUAL' || pkg.packageType === 'TWO_MONTH' ||
+          pkg.identifier === '$rc_annual' || pkg.identifier.includes('annual') || pkg.identifier.includes('yearly')
+        : pkg.packageType === 'MONTHLY' ||
+          pkg.identifier === '$rc_monthly' || pkg.identifier.includes('monthly')
     );
   }
 
