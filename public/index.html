@@ -777,6 +777,97 @@
     margin-top: 8px;
   }
 
+
+  /* ─── SCREENSHOTS ───────────────────────────────────────── */
+  .screenshots {
+    background: var(--bg);
+    padding: 100px 24px;
+    border-top: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .screenshots-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .screenshots-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .screenshots-title {
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -1px;
+    line-height: 1.15;
+    margin-bottom: 48px;
+    text-align: center;
+  }
+  .screenshots-slider {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 16px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .screenshots-slider::-webkit-scrollbar { display: none; }
+  .screenshot-item {
+    flex: 0 0 220px;
+    scroll-snap-align: start;
+    cursor: pointer;
+  }
+  .screenshot-item img {
+    width: 100%;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    display: block;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .screenshot-item:hover img {
+    transform: translateY(-4px);
+    border-color: var(--accent-dim);
+  }
+  .screenshot-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+  }
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-height: 85vh;
+    max-width: 400px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+  }
+
 </style>
 </head>
 <body>
@@ -1048,6 +1139,48 @@
   </div>
 </section>
 
+
+<!-- SCREENSHOTS -->
+<section class="screenshots">
+  <div class="screenshots-inner">
+    <p class="screenshots-eyebrow">The practice</p>
+    <h2 class="screenshots-title">Every screen has one purpose.<br>Help you think more clearly.</h2>
+    <div class="screenshots-slider">
+      <div class="screenshot-item" onclick="openLightbox(this)">
+        <img src="screenshots/today.png" alt="Today screen" onerror="this.parentElement.style.display='none'">
+        <p class="screenshot-label">Today</p>
+      </div>
+      <div class="screenshot-item" onclick="openLightbox(this)">
+        <img src="screenshots/morning.png" alt="Morning journal" onerror="this.parentElement.style.display='none'">
+        <p class="screenshot-label">Morning journal</p>
+      </div>
+      <div class="screenshot-item" onclick="openLightbox(this)">
+        <img src="screenshots/reading.png" alt="Daily reading" onerror="this.parentElement.style.display='none'">
+        <p class="screenshot-label">Daily reading</p>
+      </div>
+      <div class="screenshot-item" onclick="openLightbox(this)">
+        <img src="screenshots/evening.png" alt="Evening journal" onerror="this.parentElement.style.display='none'">
+        <p class="screenshot-label">Evening journal</p>
+      </div>
+      <div class="screenshot-item" onclick="openLightbox(this)">
+        <img src="screenshots/emotions.png" alt="Emotion logger" onerror="this.parentElement.style.display='none'">
+        <p class="screenshot-label">Emotion logger</p>
+      </div>
+      <div class="screenshot-item" onclick="openLightbox(this)">
+        <img src="screenshots/compass.png" alt="Stoic Compass" onerror="this.parentElement.style.display='none'">
+        <p class="screenshot-label">Stoic Compass</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+
 <!-- MEMENTO MORI -->
 <section class="memento">
   <img src="skull.png" alt="" style="width:72px;height:72px;object-fit:contain;opacity:0.6;margin-bottom:32px;" />
@@ -1152,5 +1285,20 @@ document.addEventListener('click', e => {
   }
 });
 </script>
+
+<script>
+function openLightbox(item) {
+  const img = item.querySelector('img');
+  document.getElementById('lightbox-img').src = img.src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+
 </body>
 </html>
