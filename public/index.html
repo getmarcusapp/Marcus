@@ -854,6 +854,23 @@
     min-height: 20px;
   }
 
+
+  /* ─── APP STORE CTA ─────────────────────────────────── */
+  .appstore-btn {
+    display: inline-block;
+    margin: 0 auto;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .appstore-btn:hover { opacity: 0.82; transform: translateY(-2px); }
+  .appstore-svg { width: 165px; height: 49px; display: block; }
+  .appstore-note {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 14px;
+    line-height: 1.6;
+  }
+
 </style>
 </head>
 <body>
@@ -872,7 +889,7 @@
     <a href="#diff">What's different</a>
     <a href="#philosophy">The foundation</a>
     <a href="#pricing">Pricing</a>
-    <a class="nav-cta" href="#hero-email">Join the waitlist →</a>
+    <a class="nav-cta" href="#hero-email">Download on the App Store →</a>
   </div>
 </nav>
 <div class="mobile-menu" id="mobile-menu">
@@ -880,7 +897,7 @@
   <a href="#diff" onclick="closeMenu()">What's different</a>
   <a href="#philosophy" onclick="closeMenu()">The foundation</a>
   <a href="#pricing" onclick="closeMenu()">Pricing</a>
-  <a href="#hero-email" class="mob-cta" onclick="closeMenu()">Join the waitlist →</a>
+  <a href="#hero-email" class="mob-cta" onclick="closeMenu()">Download on the App Store →</a>
 </div>
 
 <!-- HERO -->
@@ -894,12 +911,18 @@
     "Waste no more time arguing about what a good man should be.<br>Be one."
     <br><br>— Marcus Aurelius, Meditations
   </p>
-  <div class="email-form">
-    <div class="email-row">
-      <input type="email" class="email-input" placeholder="Enter your email" id="hero-email" />
-      <button class="email-submit" onclick="goSubscribe('hero-email')">Join the waitlist &#8594;</button>
-    </div>
-    <p class="email-note">Free &middot; iOS &middot; No account required &middot; Launching soon</p>
+  <div style="text-align:center;">
+    <a href="https://apps.apple.com/app/id6762488316" class="appstore-btn" target="_blank" rel="noopener">
+    <svg class="appstore-svg" viewBox="0 0 165 49" xmlns="http://www.w3.org/2000/svg">
+      <rect width="165" height="49" rx="8" fill="#000"/>
+      <rect width="165" height="49" rx="8" fill="none" stroke="#A6A6A6" stroke-width="1"/>
+      <text x="56" y="16" font-family="-apple-system, SF Pro Display, Helvetica, sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="0.3">Download on the</text>
+      <text x="53" y="34" font-family="-apple-system, SF Pro Display, Helvetica, sans-serif" font-size="19" font-weight="600" fill="#FFFFFF" letter-spacing="-0.3">App Store</text>
+      <path d="M26 10.8c3.8-4.7 9.8-4 9.8-4s.9 5.4-2.9 10.5c-4 5.4-8.6 4.5-8.6 4.5s-1-4.4 1.7-11z" fill="#FFFFFF"/>
+      <path d="M23.8 22.5c1.9 0 5.3-2.6 9.8-2.6 7.7 0 10.8 5.5 10.8 5.5s-5.9 3-5.9 10.4c0 8.3 7.4 11.2 7.4 11.2s-5.2 14.6-12.2 14.6c-3.2 0-5.7-2.2-9.1-2.2-3.4 0-6.8 2.2-9.1 2.2-6.5 0-14.7-13.8-14.7-24.9 0-10.9 6.8-16.6 13.2-16.6 4.1 0 7.3 2.4 9.8 2.4z" fill="#FFFFFF"/>
+    </svg>
+  </a>
+    <p class="appstore-note">7-day free trial &middot; $7.99/month or $59.99/year &middot; iOS &middot; No account required</p>
   </div>
 </section>
 
@@ -1110,7 +1133,7 @@
         <p class="price-amount">$7.99</p>
         <p class="price-unit">per month</p>
         <p class="price-note">Cancel anytime. Your data stays on your device regardless.</p>
-        <a class="price-cta" href="#hero-email">Start free trial</a>
+        <a class="price-cta" href="https://apps.apple.com/app/id6762488316" target="_blank">Download free trial</a>
       </div>
       <div class="price-card featured">
         <div class="price-badge">Best value</div>
@@ -1118,7 +1141,7 @@
         <p class="price-amount">$59.99</p>
         <p class="price-unit">per year &middot; 16&cent; a day</p>
         <p class="price-note">Save 37% vs monthly. $1.15 a week for a daily practice that compounds over years.</p>
-        <a class="price-cta" href="#hero-email">Start free trial</a>
+        <a class="price-cta" href="https://apps.apple.com/app/id6762488316" target="_blank">Download free trial</a>
       </div>
     </div>
     <p class="pricing-note">7-day free trial &middot; iOS &middot; No account required &middot; Your data never leaves your device</p>
@@ -1203,14 +1226,19 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
     <p class="final-eyebrow">Begin your practice</p>
     <h2 class="final-title">Become someone<br>you respect.</h2>
     <p class="final-sub">Not by feeling better about yourself.<br>By being better. Starting today.</p>
-    <div class="email-form" style="margin:0 auto;">
-      <div class="email-row">
-        <input type="email" class="email-input" placeholder="Enter your email" id="final-email" />
-        <button class="email-submit" onclick="goSubscribe('final-email')">Begin your practice &#8594;</button>
-      </div>
-      <p class="email-note">Free &middot; iOS &middot; Free trial &middot; Your data stays on your device</p>
+    <div style="text-align:center;">
+      <a href="https://apps.apple.com/app/id6762488316" class="appstore-btn" target="_blank" rel="noopener">
+    <svg class="appstore-svg" viewBox="0 0 165 49" xmlns="http://www.w3.org/2000/svg">
+      <rect width="165" height="49" rx="8" fill="#000"/>
+      <rect width="165" height="49" rx="8" fill="none" stroke="#A6A6A6" stroke-width="1"/>
+      <text x="56" y="16" font-family="-apple-system, SF Pro Display, Helvetica, sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="0.3">Download on the</text>
+      <text x="53" y="34" font-family="-apple-system, SF Pro Display, Helvetica, sans-serif" font-size="19" font-weight="600" fill="#FFFFFF" letter-spacing="-0.3">App Store</text>
+      <path d="M26 10.8c3.8-4.7 9.8-4 9.8-4s.9 5.4-2.9 10.5c-4 5.4-8.6 4.5-8.6 4.5s-1-4.4 1.7-11z" fill="#FFFFFF"/>
+      <path d="M23.8 22.5c1.9 0 5.3-2.6 9.8-2.6 7.7 0 10.8 5.5 10.8 5.5s-5.9 3-5.9 10.4c0 8.3 7.4 11.2 7.4 11.2s-5.2 14.6-12.2 14.6c-3.2 0-5.7-2.2-9.1-2.2-3.4 0-6.8 2.2-9.1 2.2-6.5 0-14.7-13.8-14.7-24.9 0-10.9 6.8-16.6 13.2-16.6 4.1 0 7.3 2.4 9.8 2.4z" fill="#FFFFFF"/>
+    </svg>
+  </a>
+      <p class="appstore-note">7-day free trial &middot; $7.99/month or $59.99/year &middot; iOS</p>
     </div>
-  </div>
 </section>
 
 
