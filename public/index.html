@@ -784,44 +784,74 @@
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     padding: 100px 24px;
-    overflow: hidden;
   }
-  .screenshots-inner { max-width: 960px; margin: 0 auto; }
+  .screenshots-inner { max-width: 760px; margin: 0 auto; text-align: center; }
   .screenshots-eyebrow {
     font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 20px; text-align: center;
+    color: var(--accent); margin-bottom: 20px;
   }
   .screenshots-title {
     font-size: clamp(26px, 4vw, 38px); font-weight: 700;
-    color: #FFFFFF; letter-spacing: -1px; line-height: 1.15;
-    margin-bottom: 48px; text-align: center;
+    color: #FFFFFF; letter-spacing: -1px; line-height: 1.15; margin-bottom: 48px;
   }
-  .screenshots-slider {
-    display: flex; gap: 16px; overflow-x: auto; padding-bottom: 16px;
-    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+  .screenshot-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
   }
-  .screenshots-slider::-webkit-scrollbar { display: none; }
-  .screenshot-item { flex: 0 0 200px; scroll-snap-align: start; cursor: pointer; }
-  .screenshot-item img {
-    width: 100%; border-radius: 20px; border: 1px solid var(--border);
-    display: block; transition: transform 0.2s ease, border-color 0.2s ease;
+  .screenshot-hero img {
+    width: 260px;
+    max-width: 70vw;
+    border-radius: 28px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 0 auto;
+    transition: opacity 0.3s ease;
   }
-  .screenshot-item:hover img { transform: translateY(-4px); border-color: var(--accent-dim); }
-  .screenshot-label {
-    font-size: 12px; color: var(--text-muted); text-align: center;
-    margin-top: 10px; letter-spacing: 0.5px;
+  .screenshot-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
   }
-  .lightbox {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.92); z-index: 1000;
-    align-items: center; justify-content: center; padding: 24px;
+  .screenshot-nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, color 0.15s;
   }
-  .lightbox.open { display: flex; }
-  .lightbox img { max-height: 85vh; max-width: 360px; border-radius: 20px; border: 1px solid var(--border); }
-  .lightbox-close {
-    position: absolute; top: 24px; right: 24px; background: none;
-    border: none; color: var(--text-muted); font-size: 28px; cursor: pointer; line-height: 1;
+  .screenshot-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .screenshot-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .screenshot-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border-mid);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .screenshot-dot.active { background: var(--accent); transform: scale(1.4); }
+  .screenshot-label-main {
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    min-height: 20px;
   }
 
 </style>
@@ -1101,44 +1131,63 @@
   <div class="screenshots-inner">
     <p class="screenshots-eyebrow">The practice</p>
     <h2 class="screenshots-title">Every screen has one purpose.<br>Help you think more clearly.</h2>
-    <div class="screenshots-slider">
-      <div class="screenshot-item" onclick="openLightbox(this)">
-        <img src="screenshots/today.png" alt="Today screen" onerror="this.parentElement.style.display='none'">
-        <p class="screenshot-label">Today</p>
-      </div>
-      <div class="screenshot-item" onclick="openLightbox(this)">
-        <img src="screenshots/morning.png" alt="Morning journal" onerror="this.parentElement.style.display='none'">
-        <p class="screenshot-label">Morning journal</p>
-      </div>
-      <div class="screenshot-item" onclick="openLightbox(this)">
-        <img src="screenshots/reading.png" alt="Daily reading" onerror="this.parentElement.style.display='none'">
-        <p class="screenshot-label">Daily reading</p>
-      </div>
-      <div class="screenshot-item" onclick="openLightbox(this)">
-        <img src="screenshots/evening.png" alt="Evening journal" onerror="this.parentElement.style.display='none'">
-        <p class="screenshot-label">Evening journal</p>
-      </div>
-      <div class="screenshot-item" onclick="openLightbox(this)">
-        <img src="screenshots/emotions.png" alt="Emotion logger" onerror="this.parentElement.style.display='none'">
-        <p class="screenshot-label">Emotion logger</p>
-      </div>
-      <div class="screenshot-item" onclick="openLightbox(this)">
-        <img src="screenshots/compass.png" alt="Stoic Compass" onerror="this.parentElement.style.display='none'">
-        <p class="screenshot-label">Stoic Compass</p>
-      </div>
+    <div class="screenshot-hero">
+      <img id="ss-main" src="screenshots/today.png" alt="App screenshot">
     </div>
+    <div class="screenshot-nav">
+      <button class="screenshot-nav-btn" onclick="ssNav(-1)">&#8592;</button>
+      <div class="screenshot-dots" id="ss-dots"></div>
+      <button class="screenshot-nav-btn" onclick="ssNav(1)">&#8594;</button>
+    </div>
+    <p class="screenshot-label-main" id="ss-label">Today</p>
   </div>
 </section>
 
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-  <img id="lightbox-img" src="" alt="">
-</div>
+<script>
+var ssScreens = [
+  { src: 'screenshots/today.png', label: 'Today' },
+  { src: 'screenshots/morning.png', label: 'Morning journal' },
+  { src: 'screenshots/reading.png', label: 'Daily reading' },
+  { src: 'screenshots/emotions.png', label: 'Emotion logger' },
+  { src: 'screenshots/evening.png', label: 'Evening journal' },
+  { src: 'screenshots/compass.png', label: 'Daily complete' }
+];
+var ssCurrent = 0;
+function ssRender() {
+  var img = document.getElementById('ss-main');
+  var label = document.getElementById('ss-label');
+  var dots = document.getElementById('ss-dots');
+  img.style.opacity = '0';
+  setTimeout(function() {
+    img.src = ssScreens[ssCurrent].src;
+    img.style.opacity = '1';
+  }, 150);
+  label.textContent = ssScreens[ssCurrent].label;
+  dots.querySelectorAll('.screenshot-dot').forEach(function(d, i) {
+    d.classList.toggle('active', i === ssCurrent);
+  });
+}
+function ssNav(dir) {
+  ssCurrent = (ssCurrent + dir + ssScreens.length) % ssScreens.length;
+  ssRender();
+}
+function ssGoto(i) { ssCurrent = i; ssRender(); }
+(function() {
+  var dots = document.getElementById('ss-dots');
+  ssScreens.forEach(function(_, i) {
+    var d = document.createElement('div');
+    d.className = 'screenshot-dot' + (i === 0 ? ' active' : '');
+    d.onclick = function() { ssGoto(i); };
+    dots.appendChild(d);
+  });
+})();
+</script>
+
+
 
 <!-- MEMENTO MORI -->
 <section class="memento">
-  <img src="skull.png" alt="" style="width:72px;height:72px;object-fit:contain;opacity:0.6;margin-bottom:32px;" />
+  <img src="skull.png" alt="" style="width:120px;height:120px;object-fit:contain;opacity:0.9;margin-bottom:40px;filter:drop-shadow(0 0 40px rgba(200,169,122,0.15));" />
   <h2 class="memento-title">You could leave life right now.<br>Let that determine what you do.</h2>
   <div class="memento-body">
     <p>This is not motivational. This is the oldest philosophical technique for focusing a human mind on what actually matters.</p>
