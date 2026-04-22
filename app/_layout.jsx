@@ -30,15 +30,17 @@ function OnboardingGate() {
         return;
       }
 
-      // Check subscription — default to allowing access if anything fails
-      try {
-        const status = await getSubscriptionStatus();
-        if (!status.isActive) {
-          router.replace('/paywall');
+      // DEV BYPASS — remove before next App Store submission
+      const DEV_BYPASS_PAYWALL = process.env.EXPO_PUBLIC_DEV_BYPASS === 'true';
+      if (!DEV_BYPASS_PAYWALL) {
+        try {
+          const status = await getSubscriptionStatus();
+          if (!status.isActive) {
+            router.replace('/paywall');
+          }
+        } catch (e) {
+          console.log('Subscription check failed, allowing access:', e);
         }
-      } catch (e) {
-        console.log('Subscription check failed, allowing access:', e);
-        // Do not block app access if RevenueCat is unreachable
       }
     }
     check();
