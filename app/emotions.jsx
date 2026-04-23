@@ -9,15 +9,15 @@ import { emotions, stoicReframes } from '../constants/virtues';
 import { saveTrigger, getTriggers, updateTriggerEntry } from '../store/db';
 
 const EMOTION_COLORS = {
-  anger:       { bg: '#2a1010', border: '#5a2020', text: '#e08080' },
-  anxiety:     { bg: '#101828', border: '#1e3a5f', text: '#7aaddd' },
-  frustration: { bg: '#1e1a0a', border: '#4a3a10', text: '#c8a84a' },
-  shame:       { bg: '#1a1028', border: '#3a2050', text: '#a880dd' },
-  avoidance:   { bg: '#0a1a18', border: '#1a3a35', text: '#60b8a8' },
-  envy:        { bg: '#0e1a0e', border: '#1e3e1e', text: '#70b870' },
-  grief:       { bg: '#181828', border: '#303050', text: '#8888cc' },
-  fear:        { bg: '#1a1010', border: '#3a2020', text: '#cc8870' },
-  other:       { bg: '#181818', border: '#383838', text: '#aaaaaa' },
+  anger:       { bg: '#FDF0EF', border: '#E8A09A', text: '#C0504A' },
+  anxiety:     { bg: '#EFF4FD', border: '#9AB4E8', text: '#4A6EC0' },
+  frustration: { bg: '#FDF8EF', border: '#E8C87A', text: '#A07830' },
+  shame:       { bg: '#F5EFFd', border: '#C09AE8', text: '#7050B0' },
+  avoidance:   { bg: '#EFF8F5', border: '#7AC8B4', text: '#307870' },
+  envy:        { bg: '#EFF8EF', border: '#80C880', text: '#307030' },
+  grief:       { bg: '#F0F0F8', border: '#A0A0D0', text: '#505090' },
+  fear:        { bg: '#FDF2EF', border: '#E8B09A', text: '#B06040' },
+  other:       { bg: '#F5F5F5', border: '#C0C0C0', text: '#707070' },
 };
 
 const DISTORTIONS = [
@@ -46,7 +46,7 @@ function IntensitySlider({ value, onChange }) {
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 }}>
       <TouchableOpacity
         onPress={() => onChange(Math.max(1, value - 1))}
-        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgElevated }}
       >
         <Text style={{ fontSize: 24, color: colors.textSecondary }}>−</Text>
       </TouchableOpacity>
@@ -55,7 +55,7 @@ function IntensitySlider({ value, onChange }) {
       </View>
       <TouchableOpacity
         onPress={() => onChange(Math.min(10, value + 1))}
-        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgElevated }}
       >
         <Text style={{ fontSize: 24, color: colors.textSecondary }}>+</Text>
       </TouchableOpacity>
@@ -418,6 +418,7 @@ export default function EmotionsScreen() {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
+  // Dark header
   hero: {
     backgroundColor: colors.bgDeep,
     padding: spacing.xl,
@@ -426,67 +427,69 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
-  tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
   tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
   tabBtnTextActive: { color: colors.textSecondary },
-  body: { padding: spacing.md },
+  // Light body
+  body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
   timingRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 16, backgroundColor: colors.bgCard },
-  timingBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  timingBtnText: { fontSize: 14, fontWeight: '600', color: colors.textDim, marginBottom: 4 },
-  timingBtnTextActive: { color: colors.accent },
+  timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 16, backgroundColor: colors.bgElevated },
+  timingBtnActive: { borderColor: colors.textSecondary, backgroundColor: colors.bgElevated },
+  timingBtnText: { fontSize: 14, fontWeight: '400', color: colors.textMuted, marginBottom: 4 },
+  timingBtnTextActive: { color: colors.textPrimary, fontWeight: '500' },
   timingBtnSub: { fontSize: 12, color: colors.textDim, lineHeight: 18 },
-  timingBtnSubActive: { color: colors.accentDim },
+  timingBtnSubActive: { color: colors.textSecondary },
   emotionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginBottom: 16 },
-  ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 16, alignItems: 'center', backgroundColor: colors.bgCard },
-  eDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: colors.borderMid, marginBottom: 8 },
-  ePillName: { fontSize: 13, color: colors.textMuted, fontWeight: '500' },
-  fieldCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 12, backgroundColor: colors.bgCard },
-  fieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textSecondary, textTransform: 'uppercase', marginBottom: 12 },
+  ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 16, alignItems: 'center', backgroundColor: colors.bgElevated },
+  eDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: colors.textDim, marginBottom: 8 },
+  ePillName: { fontSize: 13, color: colors.textMuted, fontWeight: '400' },
+  fieldCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 12, backgroundColor: colors.bgElevated },
+  fieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 12 },
   fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 25, minHeight: 64, textAlignVertical: 'top' },
-  reframeCard: { borderWidth: 1, borderRadius: radius.lg, padding: 20, marginBottom: 12, backgroundColor: colors.bgDeep },
+  reframeCard: { borderWidth: 0.5, borderRadius: radius.lg, padding: 20, marginBottom: 12, backgroundColor: colors.bgCard },
   reframeEyebrow: { fontSize: font.microSize, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12, fontWeight: '600' },
-  reframeText: { fontSize: 16, color: colors.textSecondary, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 26, marginBottom: 16 },
+  reframeText: { fontSize: 16, color: colors.textSecondary, fontFamily: font.serif, lineHeight: 26, marginBottom: 16 },
   reframeDivider: { height: 0.5, backgroundColor: colors.border, marginBottom: 16 },
   distortionSub: { fontSize: 13, color: colors.textMuted, marginBottom: 14 },
   distortionGrid: { gap: 10, marginBottom: 16 },
-  distortionPill: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 14, backgroundColor: colors.bgCard },
-  distortionLabel: { fontSize: 15, fontWeight: '600', color: colors.textSecondary, marginBottom: 4 },
+  distortionPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, backgroundColor: colors.bgElevated },
+  distortionLabel: { fontSize: 15, fontWeight: '500', color: colors.textPrimary, marginBottom: 4 },
   distortionQ: { fontSize: 13, color: colors.textMuted, lineHeight: 20 },
-  saveBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
-  saveBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
-  saveBtnSub: { fontSize: 12, color: colors.textDim, marginTop: 5 },
-  histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  saveBtn: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgElevated, marginBottom: 36 },
+  saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
+  saveBtnSub: { fontSize: 12, color: colors.textMuted, marginTop: 5 },
+  // History — light
+  histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
   histTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
   histTopRight: { alignItems: 'flex-end', gap: 3 },
   histBadge: { borderWidth: 0.5, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
   histEmotion: { fontSize: 13, fontWeight: '600', textTransform: 'capitalize' },
   histTiming: { fontSize: 10, color: colors.textDim, letterSpacing: 0.5 },
   histDate: { fontSize: 12, color: colors.textDim },
-  histIntensity: { fontSize: 12, color: colors.textDim, marginBottom: 6 },
+  histIntensity: { fontSize: 12, color: colors.textMuted, marginBottom: 6 },
   histDistortions: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
   histDistortionTag: { borderWidth: 0.5, borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
   histDistortionText: { fontSize: 11, textTransform: 'capitalize', letterSpacing: 0.3, fontWeight: '500' },
   histTrigger: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
-  histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, fontFamily: font.serif, lineHeight: 22 },
-  empty: { padding: 60, alignItems: 'center' },
+  histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, lineHeight: 22 },
+  empty: { padding: 60, alignItems: 'center', backgroundColor: colors.bgCard },
   emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
   editCard: { borderWidth: 1, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden' },
   editCardHeader: { padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   editCardTitle: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
   editCardDate: { fontSize: 12, color: colors.textDim },
-  editCardBody: { padding: 16, backgroundColor: colors.bgCard },
+  editCardBody: { padding: 16, backgroundColor: colors.bgElevated },
   editFieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase', marginBottom: 10 },
   editFieldInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top', marginBottom: 4 },
   editDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
-  editBtnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
+  editBtnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgCard },
   editCancelBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 13, alignItems: 'center' },
-  editCancelBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
+  editCancelBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
   editSaveBtn: { flex: 2, borderWidth: 1, borderRadius: radius.md, padding: 13, alignItems: 'center' },
   editSaveBtnText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
   histEditBtn: { marginTop: 10, borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start' },

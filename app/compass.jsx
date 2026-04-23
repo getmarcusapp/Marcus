@@ -188,7 +188,7 @@ const s = StyleSheet.create({
   body: { padding: spacing.md, paddingTop: spacing.lg, backgroundColor: colors.bgCard },
   textCard: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 22, marginBottom: 14, backgroundColor: colors.bgCard,
+    padding: 22, marginBottom: 14, backgroundColor: colors.bgElevated,
   },
   bodyText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28 },
   editTrigger: {
@@ -200,7 +200,7 @@ const s = StyleSheet.create({
     borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.lg,
     padding: 18, fontSize: 16, color: colors.textPrimary, lineHeight: 26,
     minHeight: 240, textAlignVertical: 'top', marginBottom: 12,
-    backgroundColor: colors.bgCard,
+    backgroundColor: colors.bgElevated,
   },
   editBtns: { flexDirection: 'row', gap: 10, marginBottom: 28 },
   editBtn: {
@@ -212,7 +212,7 @@ const s = StyleSheet.create({
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 14 },
   virtueCard: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 22, marginBottom: 12, backgroundColor: colors.bgCard,
+    padding: 22, marginBottom: 12, backgroundColor: colors.bgElevated,
   },
   virtueTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 },
   virtueName: { fontSize: 22, fontWeight: '400', color: colors.textPrimary },
