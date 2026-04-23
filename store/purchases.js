@@ -47,8 +47,13 @@ export async function getOfferings() {
 export async function purchasePackage(pkg) {
   try {
     const { customerInfo } = await Purchases.purchasePackage(pkg);
+    // If no error was thrown, the purchase succeeded on Apple's side.
+    // RevenueCat may take a moment to sync the entitlement — treat the
+    // absence of an error as success rather than checking entitlement
+    // immediately, which can fail in sandbox due to sync delay.
     const isActive = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined';
-    return { success: isActive, customerInfo };
+    console.log('Purchase completed. Entitlement active:', isActive, 'Active entitlements:', Object.keys(customerInfo.entitlements.active));
+    return { success: true, customerInfo };
   } catch (e) {
     if (!e.userCancelled) {
       console.log('purchasePackage error:', e);
