@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
 import { colors } from '../constants/theme';
 import { hasOnboarded } from '../store/db';
-import { initializePurchases, getSubscriptionStatus } from '../store/purchases';
+import { initializePurchases } from '../store/purchases';
 
 function TabIcon({ name, color }) {
   return <Ionicons name={name} size={22} color={color} />;
@@ -13,34 +13,13 @@ function TabIcon({ name, color }) {
 
 function OnboardingGate() {
   const router = useRouter();
+  const segments = useSegments();
 
   useEffect(() => {
     async function check() {
-      try {
-        // Initialize RevenueCat — wrapped in try/catch so a failure
-        // never crashes the app
-        await initializePurchases();
-      } catch (e) {
-        console.log('RevenueCat init failed, proceeding without paywall:', e);
-      }
-
       const onboarded = await hasOnboarded();
       if (!onboarded) {
         router.replace('/onboarding');
-        return;
-      }
-
-      // DEV BYPASS — remove before next App Store submission
-      const DEV_BYPASS_PAYWALL = process.env.EXPO_PUBLIC_DEV_BYPASS === 'true';
-      if (!DEV_BYPASS_PAYWALL) {
-        try {
-          const status = await getSubscriptionStatus();
-          if (!status.isActive) {
-            router.replace('/paywall');
-          }
-        } catch (e) {
-          console.log('Subscription check failed, allowing access:', e);
-        }
       }
     }
     check();
@@ -50,6 +29,10 @@ function OnboardingGate() {
 }
 
 export default function Layout() {
+  useEffect(() => {
+    initializePurchases();
+  }, []);
+
   return (
     <SafeAreaProvider>
       <OnboardingGate />
@@ -82,9 +65,9 @@ export default function Layout() {
         <Tabs.Screen name="compass" options={{ href: null }} />
         <Tabs.Screen name="review" options={{ href: null }} />
         <Tabs.Screen name="settings" options={{ href: null }} />
-        <Tabs.Screen name="onboarding" options={{ href: null, tabBarStyle: { display: 'none' } }} />
+        <Tabs.Screen name="onboarding" options={{ href: null }} />
         <Tabs.Screen name="howto" options={{ href: null }} />
-        <Tabs.Screen name="paywall" options={{ href: null, tabBarStyle: { display: 'none' } }} />
+        <Tabs.Screen name="paywall" options={{ href: null }} />
       </Tabs>
     </SafeAreaProvider>
   );
