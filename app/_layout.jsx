@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
 import { colors } from '../constants/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { hasOnboarded } from '../store/db';
 import { initializePurchases } from '../store/purchases';
 
@@ -31,6 +32,11 @@ function OnboardingGate() {
 export default function Layout() {
   useEffect(() => {
     initializePurchases();
+    // Dev bypass: skip paywall during personal testing
+    // __DEV__ is automatically false in production builds
+    if (__DEV__) {
+      AsyncStorage.setItem('has_premium', 'true');
+    }
   }, []);
 
   return (
