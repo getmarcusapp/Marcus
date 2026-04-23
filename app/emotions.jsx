@@ -26,6 +26,8 @@ const DISTORTIONS = [
   { id: 'overgeneralizing', label: 'Overgeneralizing', q: 'Am I treating one event as a permanent pattern?' },
   { id: 'personalizing', label: 'Personalizing', q: 'Am I taking responsibility for things outside my control?' },
   { id: 'filtering', label: 'Filtering', q: 'Am I ignoring the good and fixating on the bad?' },
+  { id: 'emotional_reasoning', label: 'Emotional reasoning', q: 'Am I treating a feeling as proof that something is true?' },
+  { id: 'should_statements', label: 'Should statements', q: 'Am I imposing rigid rules on myself or others?' },
 ];
 
 // Situation-agnostic reframes
