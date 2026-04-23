@@ -4,9 +4,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
 import { colors } from '../constants/theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { hasOnboarded } from '../store/db';
 import { initializePurchases } from '../store/purchases';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function TabIcon({ name, color }) {
   return <Ionicons name={name} size={22} color={color} />;
@@ -32,9 +32,8 @@ function OnboardingGate() {
 export default function Layout() {
   useEffect(() => {
     initializePurchases();
-    // Dev bypass: skip paywall during personal testing
-    // __DEV__ is automatically false in production builds
-    if (__DEV__) {
+    // Bypass paywall in dev and beta builds — never runs in production
+    if (__DEV__ || process.env.EXPO_PUBLIC_IS_BETA === 'true') {
       AsyncStorage.setItem('has_premium', 'true');
     }
   }, []);
