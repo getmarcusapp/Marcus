@@ -73,6 +73,7 @@ function JournalEntryEditor({ entry, onSave, onCancel }) {
   const [answers, setAnswers] = useState(entry.answers || {});
   const [selectedVirtue, setSelectedVirtue] = useState(entry.virtue || virtues[0].id);
   const [openPrompt, setOpenPrompt] = useState(0);
+  const [openHint, setOpenHint] = useState(null);
 
   return (
     <View style={e.container}>
@@ -165,6 +166,7 @@ export default function JournalScreen() {
   const [answers, setAnswers] = useState({});
   const [selectedVirtue, setSelectedVirtue] = useState(virtues[0].id);
   const [openPrompt, setOpenPrompt] = useState(0);
+  const [openHint, setOpenHint] = useState(null);
   const [alreadySaved, setAlreadySaved] = useState(false);
   const [showVirtueDetail, setShowVirtueDetail] = useState(false);
   const [viewMode, setViewMode] = useState('write'); // 'write' | 'history'
