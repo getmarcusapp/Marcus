@@ -4,8 +4,7 @@ import {
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
   KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry, getTodayReading, getCompassDone } from '../store/db';
