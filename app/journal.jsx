@@ -211,13 +211,15 @@ export default function JournalScreen() {
 }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
-    >
-      <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe}>
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: colors.bg }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
         <ScrollView
+          contentInset={{ bottom: 40 }}
+          scrollIndicatorInsets={{ bottom: 40 }}
           style={s.scroll}
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
@@ -405,8 +407,8 @@ export default function JournalScreen() {
             </View>
           )}
         </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

@@ -6,6 +6,7 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
+import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { virtues } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone } from '../store/db';
@@ -188,7 +189,7 @@ export default function PracticeScreen() {
               onPress={async () => { router.push('/compass'); setCompassDone(true); await persistCompassDone(); }}
               activeOpacity={0.7}
             >
-              <View style={[s.dot, compassDone && s.dotDone]} />
+              <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
                 <Text style={[s.routineTitle, compassDone && s.titleDone]}>Stoic compass</Text>
                 <Text style={s.routineSub}>Your north star — read daily</Text>
@@ -210,7 +211,7 @@ export default function PracticeScreen() {
               onPress={() => router.push('/read')}
               activeOpacity={0.7}
             >
-              <View style={[s.dot, readingDone && s.dotDone]} />
+              <View style={[s.dot, readingDone && s.dotDone]}>{readingDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
                 <Text style={[s.routineTitle, readingDone && s.titleDone]}>Daily reading</Text>
                 <Text style={s.routineSub}>Ancient wisdom for this day</Text>
@@ -225,7 +226,7 @@ export default function PracticeScreen() {
               onPress={() => router.push({ pathname: '/journal', params: { type: 'morning' } })}
               activeOpacity={0.7}
             >
-              <View style={[s.dot, morningDone && s.dotDone]} />
+              <View style={[s.dot, morningDone && s.dotDone]}>{morningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
                 <Text style={[s.routineTitle, morningDone && s.titleDone]}>Morning journal</Text>
                 <Text style={s.routineSub}>5–10 min · reflect and intend</Text>
@@ -240,7 +241,7 @@ export default function PracticeScreen() {
               onPress={() => router.push({ pathname: '/journal', params: { type: 'evening' } })}
               activeOpacity={0.7}
             >
-              <View style={[s.dot, eveningDone && s.dotDone]} />
+              <View style={[s.dot, eveningDone && s.dotDone]}>{eveningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
                 <Text style={[s.routineTitle, eveningDone && s.titleDone]}>Evening journal</Text>
                 <Text style={s.routineSub}>10–15 min · examine and release</Text>
@@ -397,7 +398,7 @@ const s = StyleSheet.create({
   routineRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 18 },
   routineRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
   dot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.borderMid },
-  dotDone: { backgroundColor: colors.textPrimary, borderColor: colors.textPrimary },
+  dotDone: { backgroundColor: colors.accent, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
   routineContent: { flex: 1 },
   routineTitle: { fontSize: 15, fontWeight: '400', color: colors.textPrimary, marginBottom: 3 },
   titleDone: { color: colors.textDim, textDecorationLine: 'line-through' },
