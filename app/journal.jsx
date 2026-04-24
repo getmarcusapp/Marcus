@@ -11,18 +11,54 @@ import { virtues } from '../constants/virtues';
 import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry, getTodayReading, getCompassDone } from '../store/db';
 
 const morningPrompts = [
-  { num: 'I', q: 'What is in my control today — and what must I release?' },
-  { num: 'II', q: 'Where will courage be required of me today?' },
-  { num: 'III', q: 'What are you postponing that matters? Name one thing.' },
-  { num: 'IV', q: 'What difficulty might arise today, and how would a person of virtue meet it?' },
-  { num: 'V · Memento mori', q: 'The hourglass turns. What do you owe the day?' },
+  {
+    num: 'I',
+    q: 'What is in my control today — and what must I release?',
+    hint: "The Stoics divide all things into two categories: what is 'up to us' and what is not. Up to us: our judgments, intentions, how we respond. Not up to us: other people's behavior, outcomes, reputation, the weather, the economy.\n\nImportantly, your thoughts themselves are not fully in your control — they arise unbidden. What is in your control is whether you assent to a thought, dwell on it, act on it. The Stoic practice is not suppression but discernment: this impression is mine to engage with; that one I can let pass.\n\nReleasing what is not yours doesn't mean you don't care. It means you stop exhausting yourself on things you cannot move.",
+  },
+  {
+    num: 'II',
+    q: 'Where will courage be required of me today?',
+    hint: "Courage (andreia) is one of the four cardinal virtues — but the Stoics meant something precise by it. Not recklessness, not aggression. The willingness to act rightly even when it is uncomfortable, costly, or unpopular.\n\nCourage is required whenever you know what the right thing is but feel resistance to doing it: the difficult conversation you've been avoiding, the boundary you need to hold, the work that demands your honest effort when distraction is easier.\n\nAsking this in the morning puts you on alert. You've named the moment before it arrives. When it comes, you've already decided.",
+  },
+  {
+    num: 'III',
+    q: 'What are you postponing that matters? Name one thing.',
+    hint: "Seneca wrote that we suffer more in imagination than in reality — but he also observed that we are experts at deferring what matters in favor of what is urgent, easy, or comfortable.\n\nThe Stoics were deeply aware of mortality as a clarifying force. If you knew today was your last, what would you regret not having done? That regret is information. It points at what actually matters to you beneath the noise of daily preference.\n\nNaming one thing — just one — makes it real. The act of naming is the act of committing. Not to completing it today necessarily, but to acknowledging that it exists and that you are responsible for it.",
+  },
+  {
+    num: 'IV',
+    q: 'What difficulty might arise today, and how would a person of virtue meet it?',
+    hint: "This is premeditatio malorum — the premeditation of adversity. The Stoics practiced it daily. Marcus Aurelius began most mornings by mentally rehearsing the difficult people and situations he would face.\n\nModern research confirms what the Stoics intuited: negative visualization — mentally simulating obstacles before they occur — reduces anxiety and improves performance. It works because the obstacle loses its power to surprise you. You've already met it, already chosen your response.\n\nAsk: not 'what bad thing might happen' in a fearful way, but 'how would a person who embodies wisdom, courage, and justice meet this?' You're not predicting disaster. You're rehearsing virtue.",
+  },
+  {
+    num: 'V · Memento mori',
+    q: 'The hourglass turns. What do you owe the day?',
+    hint: "Memento mori — remember that you will die — is not morbid for the Stoics. It is clarifying. Marcus Aurelius returned to it constantly, not to generate despair but to burn away the trivial.\n\nThe Stoic observation is simple: your time is finite. Most of it will be ordinary. The question is whether you will show up to the ordinary with intention or let it pass unconsciously.\n\n'What do you owe the day?' is not about productivity. It is about presence and integrity. What does this day deserve from you — given that it exists, given that you exist, given that neither will last?",
+  },
 ];
 
 const eveningPrompts = [
-  { num: 'I · Examine', q: 'Where did I act in accordance with my virtue today?' },
-  { num: 'II · Confess', q: 'Where did I fall short? What would the Stoic have done?' },
-  { num: 'III · Release', q: 'What am I carrying that I must set down before I sleep?' },
-  { num: 'IV · Gratitude', q: 'Name one thing — however small — that deserves your thanks.' },
+  {
+    num: 'I · Examine',
+    q: 'Where did I act in accordance with my virtue today?',
+    hint: "The evening Examen begins with what went right — not as self-congratulation but as honest accounting. The Stoics believed virtue was not an abstract aspiration but something demonstrated in specific moments: how you treated a person who frustrated you, whether you kept your word, whether you were present.\n\nLooking for evidence of virtue is a skill. Most people are faster to notice their failures than their successes. Naming what you did well isn't vanity — it's recognizing the character you're building, reinforcing the pattern you want to continue.\n\nBe specific. 'I was patient' is less useful than 'I stayed calm when the meeting ran over and I still gave my colleague my full attention.'",
+  },
+  {
+    num: 'II · Confess',
+    q: 'Where did I fall short? What would the Stoic have done?',
+    hint: "The Stoics were unflinching self-examiners. Seneca wrote that we should 'censure' ourselves each evening — not to generate guilt but to learn. The goal is not punishment. It's accuracy.\n\nWhere you fell short tells you something true about yourself: a pattern of avoidance, a recurring trigger, a virtue you haven't yet developed. That information is valuable only if you look at it clearly rather than explaining it away or dwelling in shame.\n\nThe second question — what would the Stoic have done? — is the productive pivot. It transforms the failure from a verdict into a lesson. You're not broken. You're practicing.",
+  },
+  {
+    num: 'III · Release',
+    q: 'What am I carrying that I must set down before I sleep?',
+    hint: "Epictetus taught that many of our burdens are not ours to carry — we've picked them up through habit, obligation, or the failure to distinguish what is ours from what is not.\n\nSome things you carry are legitimate: responsibilities, relationships, real problems that need your attention tomorrow. But many are not — the conversation that looped all day, the slight that happened and cannot be undone, the worry about something you cannot control.\n\nSetting something down doesn't mean it disappears. It means you stop running it in the background when it serves no purpose. Sleep is not for processing. What needs to be carried tomorrow will be there tomorrow. What doesn't — let it go tonight.",
+  },
+  {
+    num: 'IV · Gratitude',
+    q: 'Name one thing — however small — that deserves your thanks.',
+    hint: "Stoic gratitude is not the forced positivity of modern self-help. It is a corrective to a perceptual error: we habituate to what we have and stop seeing it. The practice is attention, not cheerfulness.\n\nMarcus Aurelius wrote long passages cataloguing what specific people had taught him, what specific circumstances had given him. The specificity matters. 'I'm grateful for my health' is a thought. 'I noticed my body carried me through a hard day without complaint' is perception.\n\nOne thing. However small. The smaller the better, in some ways — it proves you were paying attention.",
+  },
 ];
 
 const virtueDetails = {
@@ -71,8 +107,23 @@ function JournalEntryEditor({ entry, onSave, onCancel }) {
           onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)}
           activeOpacity={0.8}
         >
-          <Text style={e.promptNum}>{prompt.num}</Text>
+          <View style={s.promptTopRow}>
+            <Text style={e.promptNum}>{prompt.num}</Text>
+            {prompt.hint && (
+              <TouchableOpacity
+                style={s.hintBtn}
+                onPress={() => setOpenHint(openHint === idx ? null : idx)}
+              >
+                <Text style={s.hintBtnText}>ⓘ</Text>
+              </TouchableOpacity>
+            )}
+          </View>
           <Text style={e.promptQ}>{prompt.q}</Text>
+          {openHint === idx && prompt.hint && (
+            <View style={s.hintBox}>
+              <Text style={s.hintText}>{prompt.hint}</Text>
+            </View>
+          )}
           {openPrompt === idx && (
             <View style={e.promptAnswer}>
               <TextInput
@@ -316,8 +367,23 @@ export default function JournalScreen() {
                     onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)}
                     activeOpacity={0.8}
                   >
-                    <Text style={s.promptNum}>{prompt.num}</Text>
+                    <View style={s.promptTopRow}>
+                      <Text style={s.promptNum}>{prompt.num}</Text>
+                      {prompt.hint && (
+                        <TouchableOpacity
+                          style={s.hintBtn}
+                          onPress={() => setOpenHint(openHint === idx ? null : idx)}
+                        >
+                          <Text style={s.hintBtnText}>ⓘ</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                     <Text style={s.promptQ}>{prompt.q}</Text>
+                    {openHint === idx && prompt.hint && (
+                      <View style={s.hintBox}>
+                        <Text style={s.hintText}>{prompt.hint}</Text>
+                      </View>
+                    )}
                     {openPrompt === idx && (
                       <View style={s.promptAnswer}>
                         <TextInput
@@ -496,10 +562,16 @@ const s = StyleSheet.create({
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
   promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
   promptCardOpen: { borderColor: colors.borderMid },
-  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase', marginBottom: 8 },
+  promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase' },
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
+  promptHeader: { marginBottom: 0 },
+  hintBtn: { padding: 4 },
+  hintBtnText: { fontSize: 16, color: colors.textDim },
+  hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
+  hintText: { fontSize: 13, color: colors.textMuted, lineHeight: 21, fontFamily: font.serif },
   anchorCard: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
     padding: 20, marginBottom: 12, backgroundColor: colors.bgCard,
