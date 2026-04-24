@@ -501,6 +501,11 @@ const e = StyleSheet.create({
   cancelBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
   saveBtn: { flex: 2, borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, padding: 14, alignItems: 'center', backgroundColor: colors.accentBg },
   saveBtnText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
+  promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  hintBtn: { padding: 4 },
+  hintBtnText: { fontSize: 16, color: colors.textDim },
+  hintBox: { marginTop: 12, padding: 12, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
+  hintText: { fontSize: 13, color: colors.textMuted, lineHeight: 21, fontFamily: font.serif },
 });
 
 const s = StyleSheet.create({
