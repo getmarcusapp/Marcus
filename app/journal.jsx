@@ -406,7 +406,7 @@ export default function JournalScreen() {
                   <Text style={s.anchorLabel}>{isMorning ? 'Morning anchor' : 'Evening anchor'}</Text>
                   <Text style={s.anchorText}>
                     {isMorning
-                      ? '"You\'ll encounter rudeness, selfishness, ingratitude today. But you share a divine reason with them. They are kin. Respond not with anger — but with understanding."'
+                      ? '"When you wake, say this to yourself: today I will meet people who are meddlesome, ungrateful, arrogant, deceitful, envious, and unsocial. They are this way because they cannot tell good from evil. But I have seen that the nature of good is beautiful, and the nature of evil ugly, and that the wrongdoer is kin to me — not of the same blood, but sharing in the same reason and the same portion of the divine. I cannot be harmed by any of them. No one can make me ugly. I cannot be angry at a kinsman or hate him. We were made for cooperation — like hands, like feet, like the rows of upper and lower teeth."'
                       : '"Ask yourself at day\'s end: What was ill done? What done? What left undone? Starting from the first, proceed through all three."'}
                   </Text>
                   <Text style={s.anchorAuthor}>
@@ -506,7 +506,7 @@ const e = StyleSheet.create({
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 16, color: colors.textDim },
   hintBox: { marginTop: 12, padding: 12, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
-  hintText: { fontSize: 13, color: colors.textMuted, lineHeight: 21, fontFamily: font.serif },
+  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
 });
 
 const s = StyleSheet.create({
@@ -577,13 +577,13 @@ const s = StyleSheet.create({
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 16, color: colors.textDim },
   hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
-  hintText: { fontSize: 13, color: colors.textMuted, lineHeight: 21, fontFamily: font.serif },
+  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
   anchorCard: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
     padding: 20, marginBottom: 12, backgroundColor: colors.bgCard,
   },
   anchorLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 10 },
-  anchorText: { fontSize: 15, color: colors.textSecondary, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 24 },
+  anchorText: { fontSize: 17, color: colors.textPrimary, fontFamily: font.serif, lineHeight: 28 },
   anchorAuthor: { fontSize: 11, color: colors.textDim, marginTop: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
   saveBtn: {
     borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
