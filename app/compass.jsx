@@ -103,7 +103,7 @@ export default function CompassScreen() {
                   multiline
                   value={draft}
                   onChangeText={setDraft}
-                  placeholderTextColor={colors.textGhost}
+                  placeholderTextColor={colors.textDim}
                 />
                 <View style={s.editBtns}>
                   <TouchableOpacity style={s.editBtn} onPress={() => setEditing(false)}>

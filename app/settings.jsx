@@ -10,21 +10,12 @@ import { requestNotificationPermissions, scheduleAllNotifications, cancelAllNoti
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
 const DEFAULT_SETTINGS = {
-  compassEnabled: false,
-  compassHour: 6,
-  compassMinute: 30,
   morningEnabled: true,
   morningHour: 7,
   morningMinute: 0,
-  readingEnabled: false,
-  readingHour: 7,
-  readingMinute: 30,
   eveningEnabled: true,
   eveningHour: 20,
   eveningMinute: 0,
-  middayEnabled: false,
-  middayHour: 12,
-  middayMinute: 0,
   reviewEnabled: true,
   reviewHour: 9,
   reviewMinute: 0,
@@ -83,6 +74,7 @@ export default function SettingsScreen() {
     AsyncStorage.getItem(NOTIF_SETTINGS_KEY).then(raw => {
       if (raw) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(raw) });
     });
+    // Check existing permission status
     import('expo-notifications').then(Notifications => {
       Notifications.getPermissionsAsync().then(({ status }) => {
         setPermissionGranted(status === 'granted');
@@ -97,6 +89,8 @@ export default function SettingsScreen() {
 
   async function handleSave() {
     await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, JSON.stringify(settings));
+
+    // Request permissions if not already granted
     if (!permissionGranted) {
       const granted = await requestNotificationPermissions();
       setPermissionGranted(granted);
@@ -110,18 +104,17 @@ export default function SettingsScreen() {
         return;
       }
     }
+
+    // Schedule notifications — wrap in try/catch so a scheduling error
+    // doesn't silently swallow the confirmation
     try {
       await scheduleAllNotifications();
     } catch (e) {
       console.log('Notification scheduling error:', e);
     }
+
     setSaved(true);
     Alert.alert('', 'Settings saved. Notifications scheduled.', [{ text: 'Done' }]);
-  }
-
-  async function handleClearReading() {
-    await AsyncStorage.removeItem('reading_today');
-    Alert.alert('', 'Reading cache cleared. Open the Read tab to generate a fresh one.');
   }
 
   async function handleResetOnboarding() {
@@ -133,11 +126,8 @@ export default function SettingsScreen() {
     await cancelAllNotifications();
     const updated = {
       ...settings,
-      compassEnabled: false,
       morningEnabled: false,
-      readingEnabled: false,
       eveningEnabled: false,
-      middayEnabled: false,
       reviewEnabled: false,
     };
     setSettings(updated);
@@ -166,33 +156,6 @@ export default function SettingsScreen() {
 
         <View style={s.body}>
 
-          <Text style={s.secLabel}>Compass</Text>
-          <View style={s.card}>
-            <View style={s.rowBetween}>
-              <View style={{ flex: 1 }}>
-                <Text style={s.rowTitle}>Daily Compass</Text>
-                <Text style={s.rowSub}>Read your north star before the day begins</Text>
-              </View>
-              <Switch
-                value={settings.compassEnabled}
-                onValueChange={v => update('compassEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.accent }}
-              />
-            </View>
-            {settings.compassEnabled && (
-              <View style={s.timeSection}>
-                <Text style={s.timeLabel}>Time</Text>
-                <Text style={s.timePreview}>{formatTime(settings.compassHour, settings.compassMinute)}</Text>
-                <TimeAdjuster
-                  hour={settings.compassHour}
-                  minute={settings.compassMinute}
-                  onHourChange={v => update('compassHour', v)}
-                  onMinuteChange={v => update('compassMinute', v)}
-                />
-              </View>
-            )}
-          </View>
-
           <Text style={s.secLabel}>Morning reflection</Text>
           <View style={s.card}>
             <View style={s.rowBetween}>
@@ -203,7 +166,8 @@ export default function SettingsScreen() {
               <Switch
                 value={settings.morningEnabled}
                 onValueChange={v => update('morningEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.accent }}
+                trackColor={{ false: colors.border, true: colors.borderStrong }}
+                thumbColor={settings.morningEnabled ? colors.textPrimary : colors.textDim}
               />
             </View>
             {settings.morningEnabled && (
@@ -223,33 +187,6 @@ export default function SettingsScreen() {
             )}
           </View>
 
-          <Text style={s.secLabel}>Daily reading</Text>
-          <View style={s.card}>
-            <View style={s.rowBetween}>
-              <View style={{ flex: 1 }}>
-                <Text style={s.rowTitle}>Reading reminder</Text>
-                <Text style={s.rowSub}>A nudge to receive today's wisdom</Text>
-              </View>
-              <Switch
-                value={settings.readingEnabled}
-                onValueChange={v => update('readingEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.accent }}
-              />
-            </View>
-            {settings.readingEnabled && (
-              <View style={s.timeSection}>
-                <Text style={s.timeLabel}>Time</Text>
-                <Text style={s.timePreview}>{formatTime(settings.readingHour, settings.readingMinute)}</Text>
-                <TimeAdjuster
-                  hour={settings.readingHour}
-                  minute={settings.readingMinute}
-                  onHourChange={v => update('readingHour', v)}
-                  onMinuteChange={v => update('readingMinute', v)}
-                />
-              </View>
-            )}
-          </View>
-
           <Text style={s.secLabel}>Evening reflection</Text>
           <View style={s.card}>
             <View style={s.rowBetween}>
@@ -260,7 +197,8 @@ export default function SettingsScreen() {
               <Switch
                 value={settings.eveningEnabled}
                 onValueChange={v => update('eveningEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.accent }}
+                trackColor={{ false: colors.border, true: colors.borderStrong }}
+                thumbColor={settings.eveningEnabled ? colors.textPrimary : colors.textDim}
               />
             </View>
             {settings.eveningEnabled && (
@@ -280,33 +218,6 @@ export default function SettingsScreen() {
             )}
           </View>
 
-          <Text style={s.secLabel}>Midday check-in</Text>
-          <View style={s.card}>
-            <View style={s.rowBetween}>
-              <View>
-                <Text style={s.rowTitle}>Pause & Notice</Text>
-                <Text style={s.rowSub}>A midday prompt to check in with yourself</Text>
-              </View>
-              <Switch
-                value={settings.middayEnabled}
-                onValueChange={v => update('middayEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.accent }}
-              />
-            </View>
-            {settings.middayEnabled && (
-              <View style={s.timeSection}>
-                <Text style={s.timeLabel}>Time</Text>
-                <Text style={s.timePreview}>{formatTime(settings.middayHour, settings.middayMinute)}</Text>
-                <TimeAdjuster
-                  hour={settings.middayHour}
-                  minute={settings.middayMinute}
-                  onHourChange={v => update('middayHour', v)}
-                  onMinuteChange={v => update('middayMinute', v)}
-                />
-              </View>
-            )}
-          </View>
-
           <Text style={s.secLabel}>Weekly review</Text>
           <View style={s.card}>
             <View style={s.rowBetween}>
@@ -317,7 +228,8 @@ export default function SettingsScreen() {
               <Switch
                 value={settings.reviewEnabled}
                 onValueChange={v => update('reviewEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.accent }}
+                trackColor={{ false: colors.border, true: colors.borderStrong }}
+                thumbColor={settings.reviewEnabled ? colors.textPrimary : colors.textDim}
               />
             </View>
             {settings.reviewEnabled && (
@@ -360,9 +272,7 @@ export default function SettingsScreen() {
             onPress={handleSave}
             activeOpacity={0.8}
           >
-            <Text style={[s.saveBtnText, saved && s.saveBtnTextDone]}>
-              {saved ? 'Notifications scheduled ✓' : 'Save & schedule notifications'}
-            </Text>
+            <Text style={[s.saveBtnText, saved && s.saveBtnTextDone]}>{saved ? 'Notifications scheduled ✓' : 'Save & schedule notifications'}</Text>
           </TouchableOpacity>
 
           <View style={s.notifNote}>
@@ -375,9 +285,6 @@ export default function SettingsScreen() {
           <Text style={s.secLabel}>Developer</Text>
           <TouchableOpacity style={s.dangerBtn} onPress={handleDisableAll} activeOpacity={0.8}>
             <Text style={s.dangerBtnText}>Cancel all notifications</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.dangerBtn} onPress={handleClearReading} activeOpacity={0.8}>
-            <Text style={s.dangerBtnText}>Clear today's reading cache</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.resetBtn} onPress={handleResetOnboarding} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Reset onboarding</Text>
@@ -401,11 +308,22 @@ const t = StyleSheet.create({
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  hero: { backgroundColor: colors.bgDeep, padding: spacing.xl, paddingTop: 36, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  hero: {
+    backgroundColor: colors.bgDeep,
+    padding: spacing.xl,
+    paddingTop: 36,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+  },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
-  permissionBanner: { backgroundColor: '#0a0f1a', borderBottomWidth: 0.5, borderBottomColor: '#1e2a3a', padding: spacing.lg },
+  permissionBanner: {
+    backgroundColor: '#0a0f1a',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#1e2a3a',
+    padding: spacing.lg,
+  },
   permissionTitle: { fontSize: 13, fontWeight: '600', color: '#7aaddd', marginBottom: 6 },
   permissionText: { fontSize: 13, color: '#3a5a7a', lineHeight: 20 },
   body: { padding: spacing.md },
@@ -413,7 +331,7 @@ const s = StyleSheet.create({
   card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rowTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 3 },
-  rowSub: { fontSize: 13, color: colors.textDim },
+  rowSub: { fontSize: 13, color: colors.textDim, marginBottom: 0 },
   timeSection: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
   timeLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 4, textAlign: 'center' },
   timePreview: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 10 },

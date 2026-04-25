@@ -485,7 +485,7 @@ const e = StyleSheet.create({
   headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, textTransform: 'uppercase', letterSpacing: 0.8 },
   headerDate: { fontSize: 13, color: colors.accentDim },
   virtueSection: { padding: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  sectionLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase', marginBottom: 10 },
+  sectionLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
   virtuePills: { flexDirection: 'row', gap: 6 },
   vpill: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center' },
   vpillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
