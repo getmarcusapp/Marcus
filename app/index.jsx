@@ -309,7 +309,7 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     alignItems: 'center',
   },
-  skullIcon: { width: 96, height: 96, marginBottom: 20, opacity: 0.9 },
+  skullIcon: { width: 140, height: 140, marginBottom: 20, opacity: 0.9 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
   heroDate: { fontSize: font.heroSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -1, marginBottom: 8, textAlign: 'center' },
   heroSub: { fontSize: font.subSize, color: colors.textMuted, textAlign: 'center' },

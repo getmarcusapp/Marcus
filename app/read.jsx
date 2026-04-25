@@ -337,7 +337,7 @@ const s = StyleSheet.create({
     padding: 48, alignItems: 'center', marginTop: 8,
     backgroundColor: colors.bgElevated,
   },
-  loadingSkull: { width: 120, height: 120, opacity: 0.85, marginBottom: 8, filter: undefined },
+  loadingSkull: { width: 160, height: 160, opacity: 0.9, marginBottom: 16 },
   loadingText: { fontSize: 14, color: colors.textMuted, marginTop: 4, fontFamily: font.serif, fontStyle: 'italic' },
   badgeRow: { flexDirection: 'row', gap: 8, marginBottom: 14, marginTop: 8 },
   virtueBadge: { borderWidth: 0.5, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 5 },
