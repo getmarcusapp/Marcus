@@ -120,7 +120,7 @@ export default function ReviewScreen() {
                       style={s.pbInput}
                       multiline
                       placeholder="Write honestly..."
-                      placeholderTextColor={colors.textGhost}
+                      placeholderTextColor={colors.textDim}
                       value={answers[p.key] || ''}
                       onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
                     />
@@ -167,7 +167,7 @@ export default function ReviewScreen() {
                 style={s.intentionInput}
                 multiline
                 placeholder="What one thing will you do differently? Write it as a commitment, not a wish..."
-                placeholderTextColor={colors.textGhost}
+                placeholderTextColor={colors.textDim}
                 value={intention}
                 onChangeText={setIntention}
               />
@@ -248,7 +248,7 @@ const s = StyleSheet.create({
   vpBtnActive: { backgroundColor: colors.bgElevated },
   vpBtnText: { fontSize: 15, color: colors.textDim },
   intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
-  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top', fontStyle: 'italic', fontFamily: font.serif },
+  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top' },
   sealBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
   sealBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
   sealBtnSub: { fontSize: 12, color: colors.textDim, marginTop: 5 },
