@@ -117,7 +117,7 @@
     font-size: 11px;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: var(--accent);
     margin-bottom: 20px;
   }
 
@@ -353,7 +353,7 @@
     font-size: 11px;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: var(--accent);
     margin-bottom: 20px;
     text-align: center;
   }
@@ -403,7 +403,7 @@
     font-weight: 600;
   }
 
-  .diff-card.bad .diff-card-label { color: #664444; }
+  .diff-card.bad .diff-card-label { color: #e8a0a0; }
   .diff-card.good .diff-card-label { color: var(--accent); }
 
   .diff-card ul {
@@ -421,7 +421,7 @@
     align-items: flex-start;
   }
 
-  .diff-card.bad li { color: #664444; }
+  .diff-card.bad li { color: #e8a0a0; }
   .diff-card.good li { color: var(--text-secondary); }
 
   .diff-card li .icon {
@@ -536,6 +536,75 @@
   }
 
   .memento-body p + p { margin-top: 16px; }
+
+
+  /* ─── FAQ ───────────────────────────────────────────── */
+  .faq {
+    background: var(--bg);
+    padding: 100px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .faq-inner {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .faq-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .faq-title {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 60px;
+    text-align: center;
+  }
+  .faq-item {
+    border-top: 1px solid var(--border);
+    padding: 28px 0;
+  }
+  .faq-item:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+  .faq-question {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    line-height: 1.4;
+  }
+  .faq-question::after {
+    content: '+';
+    color: var(--accent);
+    font-size: 22px;
+    font-weight: 300;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .faq-item.open .faq-question::after {
+    transform: rotate(45deg);
+  }
+  .faq-answer {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    display: none;
+    padding-right: 32px;
+  }
+  .faq-item.open .faq-answer {
+    display: block;
+  }
 
   /* ─── FINAL CTA ─────────────────────────────────────── */
   .final-cta {
@@ -1221,6 +1290,56 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
 
 
 <!-- FINAL CTA -->
+<!-- FAQ -->
+<section class="faq">
+  <div class="faq-inner">
+    <p class="faq-eyebrow">Common questions</p>
+    <h2 class="faq-title">If you're on the fence,<br>read this first.</h2>
+
+    <div class="faq-item open">
+      <div class="faq-question" onclick="toggleFaq(this)">Is this just another journaling app?</div>
+      <div class="faq-answer">No. Journaling apps give you a blank page. Marcus gives you a structured daily examination rooted in a two-thousand-year-old philosophical system — the same one Marcus Aurelius actually used. The difference is the same as the difference between wandering and navigating. The prompts are specific, sequential, and philosophically grounded. They are designed to surface what other apps let you avoid.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">I've tried habit trackers and they never stick. Why would this be different?</div>
+      <div class="faq-answer">Because Marcus is not a habit tracker. It does not optimize for the checkmark. It optimizes for character — and character does not disappear when you miss a day. If you break a three-week streak, your history is intact, your data is safe, and the Stoic response is the same one it has always been: begin again. Shame is not part of the practice. Resumption is.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Do I need to know anything about Stoicism?</div>
+      <div class="faq-answer">No prior knowledge is required. The app teaches the philosophy through the practice itself. Each prompt, each reflection, each weekly review is grounded in the four cardinal virtues — wisdom, courage, temperance, justice — which the app explains in context. The How It Works section goes deeper for those who want it. But you can begin with no background and the practice will make sense from day one.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">How much time does it actually take?</div>
+      <div class="faq-answer">The full daily practice — compass, daily reading with insight, morning journal, evening journal — takes between fifteen and thirty minutes total, split across morning and evening. The compass takes sixty seconds. The daily reading takes five minutes. Each journal session takes ten to fifteen minutes if you engage honestly. Less if you don't. You get out what you put in.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is my data private? Does Marcus collect anything?</div>
+      <div class="faq-answer">Your journal entries, emotion logs, and practice data are stored locally on your device. Marcus does not have a backend server. Your data never leaves your phone unless you choose to export it yourself. No account is required to use the app. Marcus cannot read your journal — and would not if it could.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">What happens if I cancel? Do I lose my data?</div>
+      <div class="faq-answer">Your data stays on your device regardless of your subscription status. Cancelling removes access to premium features going forward — it does not delete anything. Your journal entries, your emotion log, your compass, your streak history — all of it remains on your phone, yours to keep.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is the 7-day trial actually free? Do I need a credit card?</div>
+      <div class="faq-answer">Yes — it is a genuine free trial through Apple. You download the app, begin the practice, and are not charged until the trial ends. Apple handles billing. You can cancel before the trial ends and will not be charged anything. No credit card details are entered anywhere other than your existing Apple ID.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is $7.99/month worth it?</div>
+      <div class="faq-answer">That depends on what you think a daily practice is worth. At $7.99/month you are paying 26 cents a day. The annual plan brings that to 16 cents a day — less than a quarter, for a structured daily system that compounds over years. You will spend more than that on coffee this morning. The question is not whether it is expensive. The question is whether you will use it. The trial answers that.</div>
+    </div>
+
+  </div>
+</section>
+
+
 <section class="final-cta" id="pricing">
   <div class="final-cta-inner">
     <p class="final-eyebrow">Begin your practice</p>
@@ -1297,6 +1416,12 @@ function goSubscribe(inputId) {
 }
 </script>
 <script>
+
+function toggleFaq(el) {
+  const item = el.parentElement;
+  item.classList.toggle('open');
+}
+
 // Nav
 function toggleMenu() {
   const m = document.getElementById('mobile-menu');
