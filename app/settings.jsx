@@ -131,47 +131,54 @@ export default function SettingsScreen() {
       const streak = await getStreak();
       const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-      let text = `MARCUS — PRACTICE EXPORT\n`;
-      text += `Exported ${dateStr}\n`;
-      text += `Current streak: ${streak.count} days | Longest: ${streak.longest} days | Total: ${streak.total} days\n`;
-      text += `\n${'─'.repeat(50)}\n\n`;
+      const divider = '─'.repeat(40);
+      let text = 'MARCUS — PRACTICE EXPORT\n';
+      text += 'Exported ' + dateStr + '\n';
+      text += 'Current streak: ' + (streak.current || 0) + ' days';
+      text += ' | Longest: ' + (streak.longest || 0) + ' days';
+      text += ' | Total days: ' + (streak.totalDays || 0) + '\n';
+      text += '\n' + divider + '\n\n';
 
       // Journal entries
-      text += `JOURNAL ENTRIES (${journals.length} total)\n\n`;
+      text += 'JOURNAL ENTRIES (' + journals.length + ' total)\n\n';
       const byDate = {};
       journals.forEach(j => {
         const d = j.date || 'Unknown date';
         if (!byDate[d]) byDate[d] = [];
         byDate[d].push(j);
       });
-      Object.keys(byDate).sort().reverse().slice(0, 90).forEach(date => {
+      const sortedDates = Object.keys(byDate).slice(0, 90);
+      sortedDates.forEach(date => {
         byDate[date].forEach(j => {
-          text += `${date} — ${j.type === 'morning' ? 'Morning' : 'Evening'}\n`;
-          if (j.virtue) text += `Virtue: ${j.virtue}\n`;
+          text += date + ' — ' + (j.type === 'morning' ? 'Morning' : 'Evening') + '\n';
+          if (j.virtue) text += 'Virtue: ' + j.virtue + '\n';
           if (j.answers) {
-            Object.entries(j.answers).forEach(([k, v]) => {
-              if (v && v.trim()) text += `  Q${parseInt(k)+1}: ${v.trim()}\n`;
+            const prompts = Object.entries(j.answers);
+            prompts.forEach(([k, v]) => {
+              if (v && v.trim()) text += '  Q' + (parseInt(k) + 1) + ': ' + v.trim() + '\n';
             });
           }
-          text += `\n`;
+          text += '\n';
         });
       });
 
       // Emotion triggers
       if (triggers.length > 0) {
-        text += `${'─'.repeat(50)}\n\n`;
-        text += `EMOTION TRIGGERS (${triggers.length} total)\n\n`;
+        text += divider + '\n\n';
+        text += 'EMOTION TRIGGERS (' + triggers.length + ' total)\n\n';
         triggers.slice(0, 50).forEach(t => {
-          text += `${t.date || 'Unknown'} — ${t.emotion || 'Unknown emotion'} (intensity: ${t.intensity || '?'}/10)\n`;
-          if (t.trigger) text += `  Trigger: ${t.trigger}\n`;
-          if (t.reaction) text += `  Reaction: ${t.reaction}\n`;
-          if (t.response) text += `  Chosen response: ${t.response}\n`;
-          text += `\n`;
+          text += (t.date || 'Unknown') + ' — ' + (t.emotion || 'Unknown emotion');
+          text += ' (intensity: ' + (t.intensity || '?') + '/10)\n';
+          if (t.trigger) text += '  Trigger: ' + t.trigger + '\n';
+          if (t.reaction) text += '  Reaction: ' + t.reaction + '\n';
+          if (t.response) text += '  Response: ' + t.response + '\n';
+          text += '\n';
         });
       }
 
       await Share.share({ message: text, title: 'Marcus Practice Export' });
     } catch (e) {
+      console.log('Export error:', e);
       Alert.alert('Export failed', 'Could not export your data. Please try again.');
     }
   }
