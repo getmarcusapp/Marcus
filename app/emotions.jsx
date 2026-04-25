@@ -316,7 +316,17 @@ export default function EmotionsScreen() {
             <View>
               {history.length === 0 ? (
                 <View style={s.empty}>
-                  <Text style={s.emptyText}>No triggers logged yet.{'\n'}The practice begins when you do.</Text>
+                  <Text style={s.emptyIcon}>⚡</Text>
+                  <Text style={s.emptyTitle}>No triggers logged yet</Text>
+                  <Text style={s.emptyText}>
+                    When a strong emotion arises — anger, anxiety, frustration, shame — open this logger before you react.{'
+
+'}
+                    Name the emotion, rate the intensity, describe what triggered it, and note your automatic reaction. Then read the Stoic reframe and choose your response.{'
+
+'}
+                    The space between stimulus and response is where the practice lives.
+                  </Text>
                 </View>
               ) : (
                 history.map(entry => {
@@ -481,8 +491,10 @@ const s = StyleSheet.create({
   histDistortionText: { fontSize: 11, textTransform: 'capitalize', letterSpacing: 0.3, fontWeight: '500' },
   histTrigger: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
   histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, lineHeight: 22 },
-  empty: { padding: 60, alignItems: 'center', backgroundColor: colors.bgCard },
-  emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
+  empty: { padding: 40, alignItems: 'center', backgroundColor: colors.bgCard },
+  emptyIcon: { fontSize: 32, marginBottom: 16, opacity: 0.4 },
+  emptyTitle: { fontSize: 17, fontWeight: '500', color: colors.textSecondary, marginBottom: 12, textAlign: 'center' },
+  emptyText: { fontSize: 14, color: colors.textDim, textAlign: 'center', lineHeight: 22 },
   editCard: { borderWidth: 1, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden' },
   editCardHeader: { padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   editCardTitle: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },

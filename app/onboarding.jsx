@@ -34,7 +34,8 @@ export default function OnboardingScreen() {
   const steps = [
     <WelcomeStep onNext={() => setStep(1)} />,
     <PhilosophyStep onNext={() => setStep(2)} />,
-    <CompassStep compass={compass} setCompass={setCompass} onNext={() => setStep(3)} onSkip={handleSkipCompass} />,
+    <CompassStep compass={compass} setCompass={setCompass} onNext={() => setStep(3)} onSkip={() => setStep(3)} />,
+    <PracticePreviewStep onNext={() => setStep(4)} />,
     <ReadyStep onFinish={handleFinish} />,
   ];
 
@@ -168,6 +169,57 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
   );
 }
 
+function PracticePreviewStep({ onNext }) {
+  const items = [
+    { title: 'Stoic compass', sub: 'Your north star — read daily', tag: 'NOW' },
+    { title: 'Daily reading', sub: 'Ancient wisdom for this day', tag: 'READ' },
+    { title: 'Morning journal', sub: '5–10 min · reflect and intend', tag: 'NOW' },
+    { title: 'Evening journal', sub: '10–15 min · examine and release', tag: 'LATER' },
+  ];
+
+  return (
+    <SafeAreaView style={s.safe}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+        <View style={s.previewHero}>
+          <Text style={s.previewEyebrow}>Your daily practice</Text>
+          <Text style={s.previewTitle}>This is what{'
+'}each day looks like.</Text>
+          <Text style={s.previewSub}>Four elements. Twenty minutes. Done with intention.</Text>
+        </View>
+
+        <View style={s.previewBody}>
+          <View style={s.previewCard}>
+            {items.map((item, idx) => (
+              <View key={idx} style={[s.previewRow, idx < items.length - 1 && s.previewRowBorder]}>
+                <View style={s.previewDot} />
+                <View style={s.previewContent}>
+                  <Text style={s.previewItemTitle}>{item.title}</Text>
+                  <Text style={s.previewItemSub}>{item.sub}</Text>
+                </View>
+                <View style={s.previewTag}>
+                  <Text style={s.previewTagText}>{item.tag}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={s.previewNote}>
+            <Text style={s.previewNoteText}>
+              Complete all four and the day is sealed. Your streak grows. The practice compounds.
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      <View style={s.footer}>
+        <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
+          <Text style={s.primaryBtnText}>Begin your practice →</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+}
+
 function ReadyStep({ onFinish }) {
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -242,6 +294,32 @@ const s = StyleSheet.create({
   },
 
   // Ready
+  // Practice Preview
+  previewHero: {
+    backgroundColor: colors.bgDeep,
+    padding: 36,
+    paddingTop: 48,
+    paddingBottom: 32,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    alignItems: 'center',
+  },
+  previewEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' },
+  previewTitle: { fontSize: 36, fontWeight: '300', color: colors.textPrimary, letterSpacing: -1.5, marginBottom: 12, textAlign: 'center', lineHeight: 42 },
+  previewSub: { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
+  previewBody: { padding: 20 },
+  previewCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, overflow: 'hidden', marginBottom: 16 },
+  previewRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
+  previewRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  previewDot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.borderMid },
+  previewContent: { flex: 1 },
+  previewItemTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
+  previewItemSub: { fontSize: 13, color: colors.textDim },
+  previewTag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
+  previewTagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
+  previewNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, backgroundColor: colors.bgDeep },
+  previewNoteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
+
   readySkull: { width: 110, height: 110, marginBottom: 28, opacity: 1 },
   readyEyebrow: {
     fontSize: font.labelSize,

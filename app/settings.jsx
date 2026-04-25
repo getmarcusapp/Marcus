@@ -4,6 +4,7 @@ import {
   StyleSheet, SafeAreaView, Switch, Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getJournals, getTriggers, getStreak } from '../store/db';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { requestNotificationPermissions, scheduleAllNotifications, cancelAllNotifications } from '../notifications';
 
@@ -121,6 +122,58 @@ export default function SettingsScreen() {
 
     setSaved(true);
     Alert.alert('', 'Settings saved. Notifications scheduled.', [{ text: 'Done' }]);
+  }
+
+  async function handleExport() {
+    try {
+      const journals = await getJournals();
+      const triggers = await getTriggers();
+      const streak = await getStreak();
+      const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      let text = `MARCUS — PRACTICE EXPORT\n`;
+      text += `Exported ${dateStr}\n`;
+      text += `Current streak: ${streak.count} days | Longest: ${streak.longest} days | Total: ${streak.total} days\n`;
+      text += `\n${'─'.repeat(50)}\n\n`;
+
+      // Journal entries
+      text += `JOURNAL ENTRIES (${journals.length} total)\n\n`;
+      const byDate = {};
+      journals.forEach(j => {
+        const d = j.date || 'Unknown date';
+        if (!byDate[d]) byDate[d] = [];
+        byDate[d].push(j);
+      });
+      Object.keys(byDate).sort().reverse().slice(0, 90).forEach(date => {
+        byDate[date].forEach(j => {
+          text += `${date} — ${j.type === 'morning' ? 'Morning' : 'Evening'}\n`;
+          if (j.virtue) text += `Virtue: ${j.virtue}\n`;
+          if (j.answers) {
+            Object.entries(j.answers).forEach(([k, v]) => {
+              if (v && v.trim()) text += `  Q${parseInt(k)+1}: ${v.trim()}\n`;
+            });
+          }
+          text += `\n`;
+        });
+      });
+
+      // Emotion triggers
+      if (triggers.length > 0) {
+        text += `${'─'.repeat(50)}\n\n`;
+        text += `EMOTION TRIGGERS (${triggers.length} total)\n\n`;
+        triggers.slice(0, 50).forEach(t => {
+          text += `${t.date || 'Unknown'} — ${t.emotion || 'Unknown emotion'} (intensity: ${t.intensity || '?'}/10)\n`;
+          if (t.trigger) text += `  Trigger: ${t.trigger}\n`;
+          if (t.reaction) text += `  Reaction: ${t.reaction}\n`;
+          if (t.response) text += `  Chosen response: ${t.response}\n`;
+          text += `\n`;
+        });
+      }
+
+      await Share.share({ message: text, title: 'Marcus Practice Export' });
+    } catch (e) {
+      Alert.alert('Export failed', 'Could not export your data. Please try again.');
+    }
   }
 
   async function handleResetOnboarding() {
@@ -350,6 +403,12 @@ export default function SettingsScreen() {
             </Text>
           </View>
 
+          <Text style={s.secLabel}>Data</Text>
+          <TouchableOpacity style={s.exportBtn} onPress={handleExport} activeOpacity={0.8}>
+            <Text style={s.exportBtnTitle}>Export your practice data</Text>
+            <Text style={s.exportBtnSub}>Share journal entries and emotion logs as text</Text>
+          </TouchableOpacity>
+
           <Text style={s.secLabel}>Developer</Text>
           <TouchableOpacity style={s.dangerBtn} onPress={handleDisableAll} activeOpacity={0.8}>
             <Text style={s.dangerBtnText}>Cancel all notifications</Text>
@@ -417,6 +476,9 @@ const s = StyleSheet.create({
   notifNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgDeep },
   notifNoteTitle: { fontSize: 13, fontWeight: '600', color: colors.textMuted, marginBottom: 8 },
   notifNoteText: { fontSize: 13, color: colors.textDim, lineHeight: 20 },
+  exportBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
+  exportBtnTitle: { fontSize: 15, fontWeight: '500', color: colors.textSecondary, marginBottom: 4 },
+  exportBtnSub: { fontSize: 13, color: colors.textDim },
   dangerBtn: { borderWidth: 0.5, borderColor: '#2a1a1a', borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: '#0d0808', marginBottom: 10 },
   dangerBtnText: { fontSize: 12, color: '#884444', letterSpacing: 1, textTransform: 'uppercase' },
   resetBtn: { borderWidth: 0.5, borderColor: '#3a2020', borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: '#1a0a0a', marginBottom: 32 },

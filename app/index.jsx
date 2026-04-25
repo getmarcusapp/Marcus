@@ -33,7 +33,11 @@ export default function PracticeScreen() {
   const today = todayDate;
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const [todayVirtue, setTodayVirtue] = useState(virtues[today.getDate() % 4]);
-  const isReviewDay = today.getDay() === reviewDay;
+  // Show weekly review for 3 days: the review day + 2 days after
+  const dayOfWeek = today.getDay();
+  const isReviewDay = dayOfWeek === reviewDay ||
+    ((dayOfWeek - reviewDay + 7) % 7 === 1) ||
+    ((dayOfWeek - reviewDay + 7) % 7 === 2);
 
   const quote = getDailyQuote(morningQuotes);
   const sealQuote = getDailyQuote(mementoMoriQuotes, 7);
@@ -72,6 +76,7 @@ export default function PracticeScreen() {
   const completed = [compassDone, readingDone, morningDone, eveningDone, isReviewDay ? false : null]
     .filter(v => v === true).length;
   const allDone = completed >= 4 && (!isReviewDay || completed >= 5);
+  const morningComplete = !allDone && compassDone && readingDone && morningDone && !eveningDone;
   const progress = Math.min(completed / (isReviewDay ? 5 : 4), 1);
 
   if (allDone) {
@@ -152,6 +157,13 @@ export default function PracticeScreen() {
           <Text style={s.quoteText}>{quote.text}"</Text>
           <Text style={s.quoteAttr}>— {quote.author.toUpperCase()}, {quote.source.toUpperCase()}</Text>
         </View>
+
+        {morningComplete && (
+          <View style={s.morningCompleteCard}>
+            <Text style={s.morningCompleteEyebrow}>Morning practice complete</Text>
+            <Text style={s.morningCompleteText}>You have set your intention. Return this evening to examine the day.</Text>
+          </View>
+        )}
 
         <View style={s.body}>
 
@@ -432,4 +444,13 @@ const s = StyleSheet.create({
   virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif, marginBottom: 10 },
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif },
   virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 12, letterSpacing: 0.5 },
+  morningCompleteCard: {
+    backgroundColor: colors.accentBg,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.accentDim,
+    padding: spacing.xl,
+    paddingVertical: 18,
+  },
+  morningCompleteEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 6 },
+  morningCompleteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
 });

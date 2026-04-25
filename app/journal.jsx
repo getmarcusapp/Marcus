@@ -426,7 +426,16 @@ export default function JournalScreen() {
             <View style={s.body}>
               {history.length === 0 ? (
                 <View style={s.empty}>
-                  <Text style={s.emptyText}>No entries yet.{'\n'}Your reflections will appear here.</Text>
+                  <Text style={s.emptyIcon}>☽</Text>
+                  <Text style={s.emptyTitle}>No entries yet</Text>
+                  <Text style={s.emptyText}>
+                    Your {isMorning ? 'morning' : 'evening'} journal entries will appear here after you complete today's practice.{'
+
+'}
+                    {isMorning
+                      ? 'The morning journal has five prompts: what is in your control, where courage is required, what you are postponing, what difficulty might arise, and what you owe the day.'
+                      : 'The evening journal has four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}
+                  </Text>
                 </View>
               ) : (
                 history.map(entry => (
@@ -591,8 +600,10 @@ const s = StyleSheet.create({
   },
   saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
   saveBtnSub: { fontSize: 12, color: colors.textMuted, marginTop: 5 },
-  empty: { padding: 60, alignItems: 'center', backgroundColor: colors.bgCard },
-  emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
+  empty: { padding: 40, alignItems: 'center', backgroundColor: colors.bgCard },
+  emptyIcon: { fontSize: 32, marginBottom: 16, opacity: 0.4 },
+  emptyTitle: { fontSize: 17, fontWeight: '500', color: colors.textSecondary, marginBottom: 12, textAlign: 'center' },
+  emptyText: { fontSize: 14, color: colors.textDim, textAlign: 'center', lineHeight: 22 },
   histEntry: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden', backgroundColor: colors.bgElevated },
   histEntryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: colors.bgCard, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   histEntryDate: { fontSize: 15, fontWeight: '500', color: colors.textPrimary, marginBottom: 3 },
