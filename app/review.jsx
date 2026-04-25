@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
@@ -54,7 +55,18 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} keyboardDismissMode="on-drag">
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: colors.bg }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        <ScrollView
+          style={s.scroll}
+          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="on-drag"
+          contentInset={{ bottom: 40 }}
+          scrollIndicatorInsets={{ bottom: 40 }}
+        >
 
         <View style={s.hero}>
           <Text style={s.eyebrow}>Weekly review</Text>
@@ -203,7 +215,8 @@ export default function ReviewScreen() {
           </View>
         )}
 
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
