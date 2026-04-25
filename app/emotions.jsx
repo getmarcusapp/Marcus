@@ -319,13 +319,7 @@ export default function EmotionsScreen() {
                   <Text style={s.emptyIcon}>⚡</Text>
                   <Text style={s.emptyTitle}>No triggers logged yet</Text>
                   <Text style={s.emptyText}>
-                    When a strong emotion arises — anger, anxiety, frustration, shame — open this logger before you react.{'
-
-'}
-                    Name the emotion, rate the intensity, describe what triggered it, and note your automatic reaction. Then read the Stoic reframe and choose your response.{'
-
-'}
-                    The space between stimulus and response is where the practice lives.
+                    {'When a strong emotion arises — anger, anxiety, frustration, shame — open this logger before you react.\n\nName the emotion, rate the intensity, describe what triggered it, and note your automatic reaction. Then read the Stoic reframe and choose your response.\n\nThe space between stimulus and response is where the practice lives.'}
                   </Text>
                 </View>
               ) : (
