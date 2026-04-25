@@ -13,6 +13,12 @@ const DEFAULT_SETTINGS = {
   morningEnabled: true,
   morningHour: 7,
   morningMinute: 0,
+  compassEnabled: true,
+  compassHour: 7,
+  compassMinute: 30,
+  middayEnabled: false,
+  middayHour: 12,
+  middayMinute: 0,
   eveningEnabled: true,
   eveningHour: 20,
   eveningMinute: 0,
@@ -187,6 +193,68 @@ export default function SettingsScreen() {
             )}
           </View>
 
+          <Text style={s.secLabel}>Compass</Text>
+          <View style={s.card}>
+            <View style={s.rowBetween}>
+              <View>
+                <Text style={s.rowTitle}>Compass reminder</Text>
+                <Text style={s.rowSub}>Daily · read before the day begins</Text>
+              </View>
+              <Switch
+                value={settings.compassEnabled}
+                onValueChange={v => update('compassEnabled', v)}
+                trackColor={{ false: colors.border, true: colors.borderStrong }}
+                thumbColor={settings.compassEnabled ? colors.textPrimary : colors.textDim}
+              />
+            </View>
+            {settings.compassEnabled && (
+              <View style={s.timeSection}>
+                <Text style={s.timeLabel}>Remind me at</Text>
+                <TimeAdjuster
+                  hour={settings.compassHour}
+                  minute={settings.compassMinute}
+                  onHourChange={v => update('compassHour', v)}
+                  onMinuteChange={v => update('compassMinute', v)}
+                />
+                <Text style={s.timePreview}>{formatTime(settings.compassHour, settings.compassMinute)}</Text>
+                <View style={s.sampleMsg}>
+                  <Text style={s.sampleText}>"Before you begin — read your compass. Remember who you are trying to be."</Text>
+                </View>
+              </View>
+            )}
+          </View>
+
+          <Text style={s.secLabel}>Mid-day check-in</Text>
+          <View style={s.card}>
+            <View style={s.rowBetween}>
+              <View>
+                <Text style={s.rowTitle}>Mid-day pause</Text>
+                <Text style={s.rowSub}>Daily · examine before the afternoon</Text>
+              </View>
+              <Switch
+                value={settings.middayEnabled}
+                onValueChange={v => update('middayEnabled', v)}
+                trackColor={{ false: colors.border, true: colors.borderStrong }}
+                thumbColor={settings.middayEnabled ? colors.textPrimary : colors.textDim}
+              />
+            </View>
+            {settings.middayEnabled && (
+              <View style={s.timeSection}>
+                <Text style={s.timeLabel}>Remind me at</Text>
+                <TimeAdjuster
+                  hour={settings.middayHour}
+                  minute={settings.middayMinute}
+                  onHourChange={v => update('middayHour', v)}
+                  onMinuteChange={v => update('middayMinute', v)}
+                />
+                <Text style={s.timePreview}>{formatTime(settings.middayHour, settings.middayMinute)}</Text>
+                <View style={s.sampleMsg}>
+                  <Text style={s.sampleText}>"Pause. How has the morning gone? Have you acted in accordance with your values?"</Text>
+                </View>
+              </View>
+            )}
+          </View>
+
           <Text style={s.secLabel}>Evening reflection</Text>
           <View style={s.card}>
             <View style={s.rowBetween}>
@@ -327,7 +395,7 @@ const s = StyleSheet.create({
   permissionTitle: { fontSize: 13, fontWeight: '600', color: '#7aaddd', marginBottom: 6 },
   permissionText: { fontSize: 13, color: '#3a5a7a', lineHeight: 20 },
   body: { padding: spacing.md },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginTop: 20, marginBottom: 10 },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 20, marginBottom: 10 },
   card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rowTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 3 },
