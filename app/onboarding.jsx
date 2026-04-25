@@ -182,8 +182,7 @@ function PracticePreviewStep({ onNext }) {
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={s.previewHero}>
           <Text style={s.previewEyebrow}>Your daily practice</Text>
-          <Text style={s.previewTitle}>This is what{'
-'}each day looks like.</Text>
+          <Text style={s.previewTitle}>{`This is what\neach day looks like.`}</Text>
           <Text style={s.previewSub}>Four elements. Twenty minutes. Done with intention.</Text>
         </View>
 
