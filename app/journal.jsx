@@ -429,12 +429,7 @@ export default function JournalScreen() {
                   <Text style={s.emptyIcon}>☽</Text>
                   <Text style={s.emptyTitle}>No entries yet</Text>
                   <Text style={s.emptyText}>
-                    Your {isMorning ? 'morning' : 'evening'} journal entries will appear here after you complete today's practice.{'
-
-'}
-                    {isMorning
-                      ? 'The morning journal has five prompts: what is in your control, where courage is required, what you are postponing, what difficulty might arise, and what you owe the day.'
-                      : 'The evening journal has four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}
+                    {`Your ${isMorning ? 'morning' : 'evening'} journal entries will appear here after you complete today's practice.\n\n${isMorning ? 'The morning journal has five prompts: what is in your control, where courage is required, what you are postponing, what difficulty might arise, and what you owe the day.' : 'The evening journal has four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}`}
                   </Text>
                 </View>
               ) : (
