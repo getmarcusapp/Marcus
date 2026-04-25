@@ -221,28 +221,38 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                   </View>
 
                   <View style={s.insightCard}>
-                    <Text style={s.insightLabel}>Your insight</Text>
-                    <Text style={s.insightSub}>What does this mean for you today?</Text>
+                    <View style={s.insightLabelRow}>
+                      <Text style={s.insightLabel}>Your insight</Text>
+                      {insightSaved && (
+                        <TouchableOpacity onPress={() => setInsightSaved(false)} activeOpacity={0.7}>
+                          <Text style={s.insightEditBtn}>Edit</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    {!insightSaved && (
+                      <Text style={s.insightSub}>What does this mean for you today?</Text>
+                    )}
                     <TextInput
-                      style={s.insightInput}
+                      style={[s.insightInput, insightSaved && s.insightInputSaved]}
                       multiline
                       placeholder="Write your reaction, insight, or intention..."
                       placeholderTextColor={colors.textDim}
                       value={insight}
-                      onChangeText={text => { setInsight(text); setInsightSaved(false); }}
+                      onChangeText={text => setInsight(text)}
                       scrollEnabled={false}
+                      editable={!insightSaved}
                     />
                   </View>
 
-                  <TouchableOpacity
-                    style={[s.saveBtn, insightSaved && s.saveBtnDone]}
-                    onPress={handleSaveInsight}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={s.saveBtnText}>
-                      {insightSaved ? 'Insight saved' : 'Save insight'}
-                    </Text>
-                  </TouchableOpacity>
+                  {!insightSaved && (
+                    <TouchableOpacity
+                      style={s.saveBtn}
+                      onPress={handleSaveInsight}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={s.saveBtnText}>Save insight</Text>
+                    </TouchableOpacity>
+                  )}
 
                   <TouchableOpacity style={s.refreshBtn} onPress={generateReading} activeOpacity={0.8}>
                     <Text style={s.refreshBtnText}>Generate new reading</Text>
@@ -362,6 +372,9 @@ const s = StyleSheet.create({
     fontSize: 16, color: colors.textPrimary, lineHeight: 26,
     minHeight: 120, textAlignVertical: 'top', paddingBottom: 16,
   },
+  insightInputSaved: { color: colors.textSecondary, minHeight: 0 },
+  insightLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  insightEditBtn: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
   saveBtn: {
     borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
     padding: 18, alignItems: 'center', backgroundColor: colors.bgElevated, marginBottom: 10,
