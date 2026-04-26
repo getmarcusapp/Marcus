@@ -112,6 +112,14 @@ function PhilosophyStep({ onNext }) {
 }
 
 function CompassStep({ compass, setCompass, onNext, onSkip }) {
+  const [openHint, setOpenHint] = React.useState(null);
+
+  const HINTS = {
+    why: "The Stoics held that virtue — not outcome — is the only true good. Your Why should reflect what is in your control: your character, your intentions, how you show up.\n\nA Stoic Why doesn't depend on external circumstances. 'I want to be respected' is external. 'I want to act with integrity regardless of outcome' is internal — and is yours to achieve regardless of what happens around you.",
+    overcome: "Name a pattern you can observe in yourself — not a circumstance or another person. Those are outside your control. What you can overcome is your habitual response to them.\n\n'I want to overcome anxiety' is still external (anxiety is an emotion, not an action). 'I want to overcome my habit of treating anxiety as a verdict' is internal — that is where the Stoic practice lives.",
+    aspire: "Aspiration in Stoic terms is the cultivation of virtue: wisdom, courage, temperance, justice. The test is whether your aspiration describes who you are becoming, not what you are getting.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.' Your aspiration is the first part of that.",
+  };
+
   return (
     <SafeAreaView style={s.safe}>
       <KeyboardAvoidingView
@@ -136,18 +144,42 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
 
           <View style={s.stepBody}>
             {[
-              { key: 'why', label: 'Why I practice', sub: 'What draws you to Stoicism?' },
-              { key: 'overcome', label: 'What I want to overcome', sub: 'What patterns or struggles brought you here?' },
-              { key: 'aspire', label: 'Who I aspire to be', sub: 'What does the best version of you look like?' },
+              {
+                key: 'why', label: 'Why I practice', sub: 'What draws you to Stoicism?',
+                placeholder: 'e.g. To act with integrity regardless of outcome. To be the kind of person my future self would be proud of.',
+              },
+              {
+                key: 'overcome', label: 'What I want to overcome', sub: 'What patterns or struggles brought you here?',
+                placeholder: 'e.g. My tendency to avoid difficult conversations. Mistaking busyness for progress.',
+              },
+              {
+                key: 'aspire', label: 'Who I aspire to be', sub: 'What does the best version of you look like?',
+                placeholder: 'e.g. To respond to difficulty with reason rather than reaction. To be present with the people I love.',
+              },
             ].map(field => (
               <View key={field.key} style={s.compassField}>
-                <Text style={s.compassFieldLabel}>{field.label}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <Text style={s.compassFieldLabel}>{field.label}</Text>
+                  <TouchableOpacity
+                    onPress={() => setOpenHint(openHint === field.key ? null : field.key)}
+                    style={{ padding: 4 }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={{ fontSize: 17, color: colors.textDim }}>ⓘ</Text>
+                  </TouchableOpacity>
+                </View>
                 <Text style={s.compassFieldSub}>{field.sub}</Text>
+                {openHint === field.key && (
+                  <View style={{ backgroundColor: colors.bg, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, padding: 14, marginBottom: 10 }}>
+                    <Text style={{ fontSize: 13, color: colors.textMuted, lineHeight: 21 }}>{HINTS[field.key]}</Text>
+                  </View>
+                )}
                 <TextInput
                   style={s.compassInput}
                   multiline
                   value={compass[field.key]}
                   onChangeText={text => setCompass(prev => ({ ...prev, [field.key]: text }))}
+                  placeholder={field.placeholder}
                   placeholderTextColor={colors.textDim}
                   scrollEnabled={false}
                 />
