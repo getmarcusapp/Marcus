@@ -28,16 +28,21 @@ export default function PracticeScreen() {
   const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
   const [todayDate, setTodayDate] = useState(new Date());
   const [reviewDay, setReviewDay] = useState(0);
+  const [totalDays, setTotalDays] = useState(0);
   const [virtueExpanded, setVirtueExpanded] = useState(false);
 
   const today = todayDate;
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const [todayVirtue, setTodayVirtue] = useState(virtues[today.getDate() % 4]);
   // Show weekly review for 3 days: the review day + 2 days after
+  // Requires minimum 3 completed practice days before surfacing
   const dayOfWeek = today.getDay();
-  const isReviewDay = dayOfWeek === reviewDay ||
+  const hasEnoughPractice = totalDays >= 3;
+  const isReviewDay = hasEnoughPractice && (
+    dayOfWeek === reviewDay ||
     ((dayOfWeek - reviewDay + 7) % 7 === 1) ||
-    ((dayOfWeek - reviewDay + 7) % 7 === 2);
+    ((dayOfWeek - reviewDay + 7) % 7 === 2)
+  );
 
   const quote = getDailyQuote(morningQuotes);
   const sealQuote = getDailyQuote(mementoMoriQuotes, 7);
@@ -52,6 +57,7 @@ export default function PracticeScreen() {
       const reading = await getTodayReading();
       const compassToday = await getCompassDone();
       const s = await getStreak();
+      setTotalDays(s.totalDays || 0);
       const settings = await AsyncStorage.getItem('notification_settings');
       if (settings) {
         const parsed = JSON.parse(settings);
