@@ -365,6 +365,31 @@ export default function EmotionsScreen() {
             placeholderTextColor={colors.textDim}
             scrollEnabled={false}
           />
+          <View style={s.editDivider} />
+          <Text style={s.editFieldLabel}>Cognitive distortions</Text>
+          <Text style={[s.editFieldLabel, { fontSize: 12, color: colors.textDim, fontWeight: '400', marginTop: -8, marginBottom: 12 }]}>Tap to add or remove</Text>
+          <View style={s.distortionGrid}>
+            {DISTORTIONS.map(d => {
+              const isSelected = (editingEntry.distortions || []).includes(d.id);
+              return (
+                <TouchableOpacity
+                  key={d.id}
+                  style={[s.distortionPill, isSelected && { backgroundColor: ec.bg, borderColor: ec.border }]}
+                  onPress={() => {
+                    const current = editingEntry.distortions || [];
+                    const updated = isSelected
+                      ? current.filter(x => x !== d.id)
+                      : [...current, d.id];
+                    setEditingEntry(prev => ({ ...prev, distortions: updated }));
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[s.distortionLabel, isSelected && { color: ec.text }]}>{d.label}</Text>
+                  <Text style={[s.distortionQ, isSelected && { color: ec.text }]}>{d.q}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
         <View style={s.editBtnRow}>
           <TouchableOpacity style={s.editCancelBtn} onPress={() => setEditingEntry(null)} activeOpacity={0.7}>
