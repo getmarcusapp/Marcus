@@ -8,6 +8,18 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveReview, getReviews, getJournals, getTriggers } from '../store/db';
 
+const EMOTION_LABELS = {
+  anger: 'Anger', anxiety: 'Anxiety', frustration: 'Frustration',
+  shame: 'Shame', avoidance: 'Avoidance', envy: 'Envy',
+  grief: 'Grief', fear: 'Fear', other: 'Other',
+};
+const DISTORTION_LABELS = {
+  catastrophizing: 'Catastrophizing', mind_reading: 'Mind-reading',
+  overgeneralizing: 'Overgeneralizing', personalizing: 'Personalizing',
+  filtering: 'Filtering', emotional_reasoning: 'Emotional reasoning',
+  should_statements: 'Should statements',
+};
+
 const reviewPrompts = [
   { label: 'What went well?', sub: 'Where did you act with virtue this week?', key: 'wentWell' },
   { label: 'Where did I stray?', sub: 'Where did you fall short of your own standard?', key: 'strayed' },
@@ -24,6 +36,8 @@ export default function ReviewScreen() {
   const [openPrompt, setOpenPrompt] = useState(0);
   const [history, setHistory] = useState([]);
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
+  const [emotionBreakdown, setEmotionBreakdown] = useState([]); // [{emotion, count, avgIntensity}]
+  const [distortionBreakdown, setDistortionBreakdown] = useState([]); // [{id, label, count}]
 
   useEffect(() => {
     async function load() {
@@ -36,6 +50,37 @@ export default function ReviewScreen() {
       const weekTriggers = triggers.filter(t => new Date(t.date).getTime() > weekAgo);
       const reframed = weekTriggers.filter(t => t.chosenResponse && t.chosenResponse.trim().length > 0);
       setStats({ journaled: weekJournals.length, triggers: weekTriggers.length, reframed: reframed.length });
+
+      // Emotion frequency + average intensity
+      const emotionMap = {};
+      weekTriggers.forEach(t => {
+        const key = t.emotion || 'other';
+        if (!emotionMap[key]) emotionMap[key] = { count: 0, totalIntensity: 0 };
+        emotionMap[key].count += 1;
+        emotionMap[key].totalIntensity += (t.intensity || 5);
+      });
+      const emotionList = Object.entries(emotionMap)
+        .map(([emotion, data]) => ({
+          emotion,
+          label: EMOTION_LABELS[emotion] || emotion,
+          count: data.count,
+          avgIntensity: Math.round(data.totalIntensity / data.count),
+        }))
+        .sort((a, b) => b.count - a.count);
+      setEmotionBreakdown(emotionList);
+
+      // Distortion frequency
+      const distMap = {};
+      weekTriggers.forEach(t => {
+        (t.distortions || []).forEach(d => {
+          distMap[d] = (distMap[d] || 0) + 1;
+        });
+      });
+      const distList = Object.entries(distMap)
+        .map(([id, count]) => ({ id, label: DISTORTION_LABELS[id] || id, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+      setDistortionBreakdown(distList);
     }
     load();
   }, []);
@@ -140,6 +185,46 @@ export default function ReviewScreen() {
                 )}
               </TouchableOpacity>
             ))}
+
+
+            {emotionBreakdown.length > 0 && (
+              <View style={s.insightCard}>
+                <Text style={s.insightCardTitle}>Emotions this week</Text>
+                {emotionBreakdown.map((item, idx) => (
+                  <View key={idx} style={s.insightRow}>
+                    <View style={s.insightRowLeft}>
+                      <Text style={s.insightEmotionLabel}>{item.label}</Text>
+                      <View style={s.insightBar}>
+                        <View style={[s.insightBarFill, {
+                          width: `${Math.round((item.count / (emotionBreakdown[0]?.count || 1)) * 100)}%`,
+                          backgroundColor: item.avgIntensity >= 7 ? colors.virtueBad : item.avgIntensity >= 4 ? colors.accent : colors.borderStrong,
+                        }]} />
+                      </View>
+                    </View>
+                    <View style={s.insightRowRight}>
+                      <Text style={s.insightCount}>{item.count}×</Text>
+                      <Text style={s.insightIntensity}>avg {item.avgIntensity}/10</Text>
+                    </View>
+                  </View>
+                ))}
+                <Text style={s.insightFootnote}>Bar color reflects average intensity: gold = moderate, red = high</Text>
+              </View>
+            )}
+
+            {distortionBreakdown.length > 0 && (
+              <View style={s.insightCard}>
+                <Text style={s.insightCardTitle}>Recurring distortions</Text>
+                {distortionBreakdown.map((item, idx) => (
+                  <View key={idx} style={[s.insightRow, { alignItems: 'center', marginBottom: 10 }]}>
+                    <Text style={[s.insightEmotionLabel, { flex: 1, marginBottom: 0 }]}>{item.label}</Text>
+                    <View style={s.insightPill}>
+                      <Text style={s.insightPillText}>{item.count}×</Text>
+                    </View>
+                  </View>
+                ))}
+                <Text style={s.insightFootnote}>These patterns deserve attention in your intention below.</Text>
+              </View>
+            )}
 
             <Text style={s.secLabel}>Virtue ledger</Text>
             <View style={s.virtueRow}>
@@ -261,6 +346,19 @@ const s = StyleSheet.create({
   vpBtnActive: { backgroundColor: colors.bgElevated },
   vpBtnText: { fontSize: 15, color: colors.textDim },
   intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
+  insightCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
+  insightCardTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 16 },
+  insightRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 },
+  insightRowLeft: { flex: 1, marginRight: 12 },
+  insightRowRight: { alignItems: 'flex-end' },
+  insightEmotionLabel: { fontSize: 14, color: colors.textSecondary, marginBottom: 6 },
+  insightBar: { height: 3, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' },
+  insightBarFill: { height: 3, borderRadius: 2 },
+  insightCount: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, marginBottom: 2 },
+  insightIntensity: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5 },
+  insightPill: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
+  insightPillText: { fontSize: 12, color: colors.textMuted },
+  insightFootnote: { fontSize: 11, color: colors.textDim, marginTop: 4, fontStyle: 'italic' },
   intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top' },
   sealBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
   sealBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
