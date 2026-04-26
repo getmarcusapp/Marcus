@@ -8,6 +8,33 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { getCompass, saveCompass, getTodayReading, getTodayJournal } from '../store/db';
 
+const COMPASS_HINTS = {
+  why: {
+    placeholder: "e.g. To act with integrity regardless of outcome. To be the kind of person my future self would be proud of.",
+    hint: "The Stoics distinguished sharply between what is 'up to us' and what is not. Your Why should live entirely in the first category — character, intention, how you show up — not outcomes, status, or what others think of you.
+
+Ask: is this something I could achieve even if everything around me went wrong? If yes, it is a Stoic Why. If it depends on external circumstances going your way, return to what is in your control.
+
+Marcus Aurelius' unspoken Why was simple: to be a just and rational man, regardless of whether his empire prospered.",
+  },
+  aspire: {
+    placeholder: "e.g. To respond to difficulty with reason rather than reaction. To be present with the people I love.",
+    hint: "Aspiration in Stoic terms is the cultivation of virtue — not achievement of outcomes. The four virtues are wisdom (right judgment), courage (right action despite fear), temperance (right proportion), and justice (right relationship with others).
+
+The test: does your aspiration describe who you are becoming, or what you are getting? 'I aspire to be promoted' is external. 'I aspire to do work worthy of recognition' is internal.
+
+Epictetus: 'First say to yourself what you would be; then do what you have to do.'",
+  },
+  overcome: {
+    placeholder: "e.g. My tendency to avoid difficult conversations. Mistaking busyness for progress.",
+    hint: "The Stoics called our habitual patterns of error 'passions' — not emotions themselves, but emotions given uncritical assent. Anger that is acted on without examination. Anxiety that is treated as fact rather than impression.
+
+What you name here should be a pattern you can observe in yourself — not a personality flaw to eliminate, but an impression to examine more carefully when it arises.
+
+Importantly: the obstacle is not 'other people' or 'circumstances.' Those are outside your control. What you can overcome is your own judgment about them. That is where the practice lives.",
+  },
+};
+
 const tabs = ['Why', 'Overcome', 'Aspire', 'Virtues'];
 const tabKeys = ['why', 'overcome', 'aspire'];
 
@@ -17,6 +44,7 @@ export default function CompassScreen() {
   const [compass, setCompass] = useState(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
+  const [hintOpen, setHintOpen] = useState(false);
   const [readingDone, setReadingDone] = useState(false);
   const [morningDone, setMorningDone] = useState(false);
 
@@ -87,7 +115,7 @@ export default function CompassScreen() {
             <TouchableOpacity
               key={t}
               style={[s.navPill, activeTab === i && s.navPillActive]}
-              onPress={() => { setActiveTab(i); setEditing(false); }}
+              onPress={() => { setActiveTab(i); setEditing(false); setHintOpen(false); }}
             >
               <Text style={[s.navPillText, activeTab === i && s.navPillTextActive]}>{t}</Text>
             </TouchableOpacity>
@@ -98,11 +126,23 @@ export default function CompassScreen() {
           {activeTab < 3 ? (
             editing ? (
               <View>
+                <View style={s.hintRow}>
+                  <Text style={s.hintLabel}>{tabs[activeTab]}</Text>
+                  <TouchableOpacity style={s.hintBtn} onPress={() => setHintOpen(!hintOpen)} activeOpacity={0.7}>
+                    <Text style={s.hintBtnText}>ⓘ</Text>
+                  </TouchableOpacity>
+                </View>
+                {hintOpen && COMPASS_HINTS[tabKeys[activeTab]] && (
+                  <View style={s.hintBox}>
+                    <Text style={s.hintText}>{COMPASS_HINTS[tabKeys[activeTab]].hint}</Text>
+                  </View>
+                )}
                 <TextInput
                   style={s.editInput}
                   multiline
                   value={draft}
                   onChangeText={setDraft}
+                  placeholder={COMPASS_HINTS[tabKeys[activeTab]]?.placeholder || ''}
                   placeholderTextColor={colors.textDim}
                 />
                 <View style={s.editBtns}>
@@ -116,6 +156,17 @@ export default function CompassScreen() {
               </View>
             ) : (
               <View>
+                <View style={s.hintRow}>
+                  <Text style={s.hintLabel}>{tabs[activeTab]}</Text>
+                  <TouchableOpacity style={s.hintBtn} onPress={() => setHintOpen(!hintOpen)} activeOpacity={0.7}>
+                    <Text style={s.hintBtnText}>ⓘ</Text>
+                  </TouchableOpacity>
+                </View>
+                {hintOpen && COMPASS_HINTS[tabKeys[activeTab]] && (
+                  <View style={s.hintBox}>
+                    <Text style={s.hintText}>{COMPASS_HINTS[tabKeys[activeTab]].hint}</Text>
+                  </View>
+                )}
                 <View style={s.textCard}>
                   <Text style={s.bodyText}>{compass[tabKeys[activeTab]]}</Text>
                 </View>
