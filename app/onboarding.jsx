@@ -52,9 +52,8 @@ function WelcomeStep({ onNext }) {
         <View style={s.welcomeDivider} />
         <Text style={s.welcomeTagline}>
           “The impediment to action advances action. What stands in the way becomes the way.”
-          {'— Marcus Aurelius, Meditations V.20'}
         </Text>
-        <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations</Text>
+        <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations V.20</Text>
       </View>
       <View style={s.footer}>
         <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
