@@ -259,4 +259,11 @@ const s = StyleSheet.create({
   virtueDesc: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
   virtueDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   virtueQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
+  // Hint styles
+  hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  hintLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
+  hintBtn: { padding: 6 },
+  hintBtnText: { fontSize: 20, color: colors.accent },
+  hintBox: { backgroundColor: colors.bgDeep, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, marginBottom: 14 },
+  hintText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
 });
