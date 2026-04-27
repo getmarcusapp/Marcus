@@ -44,6 +44,7 @@ export default function ReadScreen() {
   const [log, setLog] = useState([]);
   const [searchQ, setSearchQ] = useState('');
   const [filterAuthor, setFilterAuthor] = useState('all');
+  const [filterMonth, setFilterMonth] = useState('all');
   const [insightSaved, setInsightSaved] = useState(false);
 
   useFocusEffect(useCallback(() => {
@@ -132,19 +133,41 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
     }
   }
 
-  // Unique authors from log for filter pills
+  // Unique authors and months from log for filter pills
   const authors = ['all', ...new Set(log.map(e => e.reading?.author).filter(Boolean))];
+  const availableMonths = [...new Set(log.map(e => {
+    const d = new Date(e.date);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  }))].sort().reverse();
 
   const filteredLog = log
     .filter(e => {
       if (filterAuthor !== 'all' && e.reading?.author !== filterAuthor) return false;
+      if (filterMonth !== 'all') {
+        const d = new Date(e.date);
+        const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        if (key !== filterMonth) return false;
+      }
       if (searchQ.trim()) {
         const q = searchQ.toLowerCase();
-        const text = [e.reading?.quote, e.insight, e.reading?.theme].join(' ').toLowerCase();
+        const text = [e.reading?.quote, e.insight, e.reading?.theme, e.reading?.author].join(' ').toLowerCase();
         if (!text.includes(q)) return false;
       }
       return true;
     });
+
+  // Group by month for display
+  function groupLogByMonth(entries) {
+    const groups = {};
+    entries.forEach(entry => {
+      const d = new Date(entry.date);
+      const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      if (!groups[key]) groups[key] = { label, entries: [] };
+      groups[key].entries.push(entry);
+    });
+    return Object.keys(groups).sort().reverse().map(k => groups[k]);
+  }
 
   return (
     <SafeAreaView style={s.safe}>
@@ -308,6 +331,24 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                   ))}
                 </ScrollView>
               </View>
+              {availableMonths.length > 1 && (
+                <View style={[s.filterRow, { paddingTop: 0 }]}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}>
+                    <TouchableOpacity style={[s.filterPill, filterMonth === 'all' && s.filterPillActive]} onPress={() => setFilterMonth('all')} activeOpacity={0.7}>
+                      <Text style={[s.filterPillText, filterMonth === 'all' && s.filterPillTextActive]}>All time</Text>
+                    </TouchableOpacity>
+                    {availableMonths.map(mk => {
+                      const d = new Date(mk + '-01');
+                      const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                      return (
+                        <TouchableOpacity key={mk} style={[s.filterPill, filterMonth === mk && s.filterPillActive]} onPress={() => setFilterMonth(mk)} activeOpacity={0.7}>
+                          <Text style={[s.filterPillText, filterMonth === mk && s.filterPillTextActive]}>{label}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              )}
               {filteredLog.length !== log.length && (
                 <Text style={[s.filterCount, { paddingHorizontal: 16, paddingBottom: 8 }]}>{filteredLog.length} of {log.length} readings</Text>
               )}
@@ -321,7 +362,10 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                   <Text style={s.emptyText}>No readings saved yet.{'\n'}Save your first insight to begin the archive.</Text>
                 </View>
               ) : (
-                filteredLog.map(entry => (
+                groupLogByMonth(filteredLog).map(group => (
+                  <View key={group.label}>
+                    <View style={s.monthHeader}><Text style={s.monthHeaderText}>{group.label}</Text></View>
+                    {group.entries.map(entry => (
                   <View key={entry.id} style={s.archiveRow}>
                     <View style={s.archiveTop}>
                       <Text style={s.archiveDate}>{entry.date}</Text>
@@ -332,7 +376,7 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                       )}
                     </View>
                     {entry.reading?.theme && (
-                      <Text style={s.archiveTheme}>{entry.reading.theme}</Text>
+                      {entry.reading?.theme && <Text style={s.archiveTheme}>{entry.reading.theme}</Text>}
                     )}
                     {entry.reading?.quote && (
                       <Text style={s.archiveQuote}>"{entry.reading.quote.slice(0, 100)}..."</Text>
@@ -439,6 +483,16 @@ const s = StyleSheet.create({
   },
   generateBtnText: { fontSize: 14, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
   empty: { padding: 60, alignItems: 'center', backgroundColor: colors.bgCard },
+  searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
+  searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
+  filterRow: { paddingVertical: 6 },
+  filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
+  filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
+  filterPillText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3 },
+  filterPillTextActive: { color: colors.accent },
+  filterCount: { fontSize: 12, color: colors.textMuted },
+  monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
   emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
   archiveRow: { padding: 20, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
   archiveTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },

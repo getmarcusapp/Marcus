@@ -156,6 +156,20 @@ function JournalEntryEditor({ entry, onSave, onCancel }) {
   );
 }
 
+
+// Group entries by month for chronological browsing
+function groupByMonth(entries) {
+  const groups = {};
+  entries.forEach(entry => {
+    const d = new Date(entry.date);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    if (!groups[key]) groups[key] = { label, entries: [] };
+    groups[key].entries.push(entry);
+  });
+  return Object.keys(groups).sort().reverse().map(k => groups[k]);
+}
+
 export default function JournalScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -174,6 +188,7 @@ export default function JournalScreen() {
   const [searchQ, setSearchQ] = useState('');
   const [filterVirtue, setFilterVirtue] = useState('all');
   const [sortMode, setSortMode] = useState('date'); // 'date' | 'virtue'
+  const [filterMonth, setFilterMonth] = useState('all');
   const [editingEntry, setEditingEntry] = useState(null);
 
   useFocusEffect(useCallback(() => {
@@ -266,9 +281,20 @@ export default function JournalScreen() {
 }
 
   // Filtered + sorted history
+  // Available months from history
+  const availableMonths = [...new Set(history.map(e => {
+    const d = new Date(e.date);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  }))].sort().reverse();
+
   const filteredHistory = history
     .filter(e => {
       if (filterVirtue !== 'all' && e.virtue !== filterVirtue) return false;
+      if (filterMonth !== 'all') {
+        const d = new Date(e.date);
+        const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        if (key !== filterMonth) return false;
+      }
       if (searchQ.trim()) {
         const q = searchQ.toLowerCase();
         const text = Object.values(e.answers || {}).join(' ').toLowerCase();
@@ -470,6 +496,33 @@ export default function JournalScreen() {
                   ))}
                 </ScrollView>
               </View>
+              {availableMonths.length > 1 && (
+                <View style={[s.filterRow, { paddingTop: 0 }]}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}>
+                    <TouchableOpacity
+                      style={[s.filterPill, filterMonth === 'all' && s.filterPillActive]}
+                      onPress={() => setFilterMonth('all')}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.filterPillText, filterMonth === 'all' && s.filterPillTextActive]}>All time</Text>
+                    </TouchableOpacity>
+                    {availableMonths.map(mk => {
+                      const d = new Date(mk + '-01');
+                      const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                      return (
+                        <TouchableOpacity
+                          key={mk}
+                          style={[s.filterPill, filterMonth === mk && s.filterPillActive]}
+                          onPress={() => setFilterMonth(mk)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={[s.filterPillText, filterMonth === mk && s.filterPillTextActive]}>{label}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              )}
               <View style={s.sortRow}>
                 <TouchableOpacity onPress={() => setSortMode(sortMode === 'date' ? 'virtue' : 'date')} style={s.sortBtn}>
                   <Text style={s.sortBtnText}>Sort: {sortMode === 'date' ? 'Date ↓' : 'Virtue A–Z'}</Text>
@@ -493,7 +546,10 @@ export default function JournalScreen() {
                   </Text>
                 </View>
               ) : (
-                filteredHistory.map(entry => (
+                groupByMonth(filteredHistory).map(group => (
+                  <View key={group.label}>
+                    <View style={s.monthHeader}><Text style={s.monthHeaderText}>{group.label}</Text></View>
+                    {group.entries.map(entry => (
                   <View key={entry.id}>
                     {editingEntry?.id === entry.id ? (
                       <JournalEntryEditor
@@ -591,7 +647,7 @@ const s = StyleSheet.create({
   sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8 },
   tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep },
   searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
-  searchInput: { backgroundColor: colors.bgElevated, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
+  searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
   filterRow: { paddingVertical: 6 },
   filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
   filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
@@ -601,6 +657,8 @@ const s = StyleSheet.create({
   sortBtn: { padding: 4 },
   sortBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
   filterCount: { fontSize: 12, color: colors.textMuted },
+  monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
   tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },

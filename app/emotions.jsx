@@ -66,6 +66,19 @@ function IntensitySlider({ value, onChange }) {
   );
 }
 
+
+function groupByMonth(entries) {
+  const groups = {};
+  entries.forEach(entry => {
+    const d = new Date(entry.date);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    if (!groups[key]) groups[key] = { label, entries: [] };
+    groups[key].entries.push(entry);
+  });
+  return Object.keys(groups).sort().reverse().map(k => groups[k]);
+}
+
 export default function EmotionsScreen() {
   const [tab, setTab] = useState('log');
   const [timing, setTiming] = useState('past'); // 'now' or 'past'
@@ -81,6 +94,7 @@ export default function EmotionsScreen() {
   const [filterDistortion, setFilterDistortion] = useState('all');
   const [filterIntensity, setFilterIntensity] = useState(0); // 0 = all, 7 = high only
   const [sortMode, setSortMode] = useState('date'); // 'date' | 'intensity'
+  const [filterMonth, setFilterMonth] = useState('all');
   const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => { getTriggers().then(setHistory); }, []);
@@ -132,9 +146,19 @@ export default function EmotionsScreen() {
   }
 }
 
+  const availableMonths = [...new Set(history.map(e => {
+    const d = new Date(e.date);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  }))].sort().reverse();
+
   const filteredHistory = history
     .filter(e => {
       if (filterEmotion !== 'all' && e.emotion !== filterEmotion) return false;
+      if (filterMonth !== 'all') {
+        const d = new Date(e.date);
+        const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        if (key !== filterMonth) return false;
+      }
       if (filterDistortion !== 'all' && !(e.distortions || []).includes(filterDistortion)) return false;
       if (filterIntensity > 0 && (e.intensity || 0) < filterIntensity) return false;
       if (searchQ.trim()) {
@@ -348,7 +372,7 @@ export default function EmotionsScreen() {
               </View>
               <View style={s.filterRow}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}>
-                  {['all', ...EMOTIONS.map(e => e.id)].map(em => (
+                  {['all', ...emotions.map(e => e.id)].map(em => (
                     <TouchableOpacity
                       key={em}
                       style={[s.filterPill, filterEmotion === em && s.filterPillActive]}
@@ -356,7 +380,7 @@ export default function EmotionsScreen() {
                       activeOpacity={0.7}
                     >
                       <Text style={[s.filterPillText, filterEmotion === em && s.filterPillTextActive]}>
-                        {em === 'all' ? 'All emotions' : EMOTIONS.find(x => x.id === em)?.label || em}
+                        {em === 'all' ? 'All emotions' : emotions.find(x => x.id === em)?.label || em}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -392,7 +416,10 @@ export default function EmotionsScreen() {
                   </Text>
                 </View>
               ) : (
-                filteredHistory.map(entry => {
+                groupByMonth(filteredHistory).map(group => (
+                  <View key={group.label}>
+                    <View style={s.monthHeader}><Text style={s.monthHeaderText}>{group.label}</Text></View>
+                    {group.entries.map(entry => {
   const ec = EMOTION_COLORS[entry.emotion] || EMOTION_COLORS.other;
 
   if (editingEntry?.id === entry.id) {
@@ -581,7 +608,7 @@ const s = StyleSheet.create({
   histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, lineHeight: 22 },
   empty: { padding: 40, alignItems: 'center', backgroundColor: colors.bgCard },
   searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8, backgroundColor: colors.bgCard },
-  searchInput: { backgroundColor: colors.bgElevated, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
+  searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
   filterRow: { paddingVertical: 6, backgroundColor: colors.bgCard },
   filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgElevated },
   filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
@@ -591,6 +618,8 @@ const s = StyleSheet.create({
   sortBtn: { padding: 4 },
   sortBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
   filterCount: { fontSize: 12, color: colors.textMuted },
+  monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
   emptyIcon: { fontSize: 32, marginBottom: 16, opacity: 0.4 },
   emptyTitle: { fontSize: 17, fontWeight: '500', color: colors.textSecondary, marginBottom: 12, textAlign: 'center' },
   emptyText: { fontSize: 14, color: colors.textDim, textAlign: 'center', lineHeight: 22 },
