@@ -51,8 +51,8 @@ function WelcomeStep({ onNext }) {
         <Text style={s.welcomeSub}>A Stoic practice app</Text>
         <View style={s.welcomeDivider} />
         <Text style={s.welcomeTagline}>
-          "“The impediment to action advances action. What stands in the way becomes the way.”
-          — Marcus Aurelius, Meditations V.20"
+          “The impediment to action advances action. What stands in the way becomes the way.”
+          {'— Marcus Aurelius, Meditations V.20'}
         </Text>
         <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations</Text>
       </View>
@@ -166,7 +166,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
                     style={{ padding: 4 }}
                     activeOpacity={0.7}
                   >
-                    <Text style={{ fontSize: 17, color: colors.textDim }}>ⓘ</Text>
+                    <Text style={{ fontSize: 18, color: colors.accent }}>ⓘ</Text>
                   </TouchableOpacity>
                 </View>
                 <Text style={s.compassFieldSub}>{field.sub}</Text>
@@ -206,8 +206,8 @@ function PracticePreviewStep({ onNext }) {
   const items = [
     { title: 'Stoic compass', sub: 'Your north star — read daily', tag: 'NOW' },
     { title: 'Daily reading', sub: 'Ancient wisdom for this day', tag: 'READ' },
-    { title: 'Morning journal', sub: '5–10 min · reflect and intend', tag: 'NOW' },
-    { title: 'Evening journal', sub: '10–15 min · examine and release', tag: 'LATER' },
+    { title: 'Morning journal', sub: 'Reflect and intend', tag: 'NOW' },
+    { title: 'Evening journal', sub: 'Examine and release', tag: 'LATER' },
   ];
 
   return (
@@ -216,7 +216,7 @@ function PracticePreviewStep({ onNext }) {
         <View style={s.previewHero}>
           <Text style={s.previewEyebrow}>Your daily practice</Text>
           <Text style={s.previewTitle}>{`This is what\neach day looks like.`}</Text>
-          <Text style={s.previewSub}>Four elements. Twenty minutes. Done with intention.</Text>
+          <Text style={s.previewSub}>Four elements. Done with intention.</Text>
         </View>
 
         <View style={s.previewBody}>
