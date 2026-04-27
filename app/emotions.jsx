@@ -533,11 +533,13 @@ export default function EmotionsScreen() {
       </TouchableOpacity>
     </View>
   );
-})
+})}
+                  </View>
+                ))
               )}
+
             </View>
           )}
-
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

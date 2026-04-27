@@ -159,8 +159,7 @@ export default function PracticeScreen() {
         </View>
 
         <View style={s.quoteCard}>
-          <Text style={s.quoteOpen}>"</Text>
-          <Text style={s.quoteText}>{quote.text}"</Text>
+          <Text style={s.quoteText}>“{quote.text}”</Text>
           <Text style={s.quoteAttr}>— {quote.author.toUpperCase()}, {quote.source.toUpperCase()}</Text>
         </View>
 
@@ -379,7 +378,6 @@ const s = StyleSheet.create({
     padding: spacing.xl,
     paddingVertical: 22,
   },
-  quoteOpen: { fontSize: 36, color: colors.borderStrong, fontFamily: font.serif, lineHeight: 28, marginBottom: -4 },
   quoteText: { fontSize: 18, color: colors.textPrimary, lineHeight: 30, fontFamily: font.serif },
   quoteAttr: { fontSize: 11, color: colors.textMuted, marginTop: 12, letterSpacing: 1.5 },
 

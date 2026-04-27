@@ -364,29 +364,33 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
               ) : (
                 groupLogByMonth(filteredLog).map(group => (
                   <View key={group.label}>
-                    <View style={s.monthHeader}><Text style={s.monthHeaderText}>{group.label}</Text></View>
-                    {group.entries.map(entry => (
-                  <View key={entry.id} style={s.archiveRow}>
-                    <View style={s.archiveTop}>
-                      <Text style={s.archiveDate}>{entry.date}</Text>
-                      {entry.reading?.virtue && (
-                        <Text style={[s.archiveVirtue, { color: virtueColor[entry.reading.virtue] || colors.textDim }]}>
-                          {entry.reading.virtue}
-                        </Text>
-                      )}
+                    <View style={s.monthHeader}>
+                      <Text style={s.monthHeaderText}>{group.label}</Text>
                     </View>
-                    {entry.reading?.theme && (
-                      {entry.reading?.theme && <Text style={s.archiveTheme}>{entry.reading.theme}</Text>}
-                    )}
-                    {entry.reading?.quote && (
-                      <Text style={s.archiveQuote}>"{entry.reading.quote.slice(0, 100)}..."</Text>
-                    )}
-                    {entry.insight && (
-                      <View style={s.archiveInsightBlock}>
-                        <Text style={s.archiveInsightLabel}>Your insight</Text>
-                        <Text style={s.archiveInsight}>{entry.insight}</Text>
+                    {group.entries.map(entry => (
+                      <View key={entry.id} style={s.archiveRow}>
+                        <View style={s.archiveTop}>
+                          <Text style={s.archiveDate}>{entry.date}</Text>
+                          {entry.reading?.virtue && (
+                            <Text style={[s.archiveVirtue, { color: virtueColor[entry.reading.virtue] || colors.textDim }]}>
+                              {entry.reading.virtue}
+                            </Text>
+                          )}
+                        </View>
+                        {entry.reading?.theme && (
+                          <Text style={s.archiveTheme}>{entry.reading.theme}</Text>
+                        )}
+                        {entry.reading?.quote && (
+                          <Text style={s.archiveQuote}>"{entry.reading.quote.slice(0, 100)}..."</Text>
+                        )}
+                        {entry.insight && (
+                          <View style={s.archiveInsightBlock}>
+                            <Text style={s.archiveInsightLabel}>Your insight</Text>
+                            <Text style={s.archiveInsight}>{entry.insight}</Text>
+                          </View>
+                        )}
                       </View>
-                    )}
+                    ))}
                   </View>
                 ))
               )}

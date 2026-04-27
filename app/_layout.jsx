@@ -63,10 +63,10 @@ export default function Layout() {
         })}
       >
         <Tabs.Screen name="index" options={{ title: 'Practice', tabBarIcon: ({ color }) => <TabIcon name="flame-outline" color={color} /> }} />
-        <Tabs.Screen name="read" options={{ title: 'Read', tabBarIcon: ({ color }) => <TabIcon name="book-outline" color={color} /> }} />
+        <Tabs.Screen name="journal" options={{ title: 'Journal', tabBarIcon: ({ color }) => <TabIcon name="create-outline" color={color} /> }} />
         <Tabs.Screen name="emotions" options={{ title: 'Emotions', tabBarIcon: ({ color }) => <TabIcon name="heart-outline" color={color} /> }} />
         <Tabs.Screen name="more" options={{ title: 'More', tabBarIcon: ({ color }) => <TabIcon name="menu-outline" color={color} /> }} />
-        <Tabs.Screen name="journal" options={{ href: null }} />
+        <Tabs.Screen name="read" options={{ href: null }} />
         <Tabs.Screen name="compass" options={{ href: null }} />
         <Tabs.Screen name="review" options={{ href: null }} />
         <Tabs.Screen name="settings" options={{ href: null }} />

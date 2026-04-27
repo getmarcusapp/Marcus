@@ -173,8 +173,10 @@ function groupByMonth(entries) {
 export default function JournalScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const type = params?.type || 'morning';
-  const isMorning = type !== 'evening';
+  const fromPractice = !!params?.type;
+  const defaultType = params?.type || (new Date().getHours() < 13 ? 'morning' : 'evening');
+  const [sessionType, setSessionType] = useState(defaultType);
+  const isMorning = sessionType !== 'evening';
   const prompts = isMorning ? morningPrompts : eveningPrompts;
 
   const [answers, setAnswers] = useState({});
@@ -190,6 +192,17 @@ export default function JournalScreen() {
   const [sortMode, setSortMode] = useState('date'); // 'date' | 'virtue'
   const [filterMonth, setFilterMonth] = useState('all');
   const [editingEntry, setEditingEntry] = useState(null);
+
+  useEffect(() => {
+    async function reload() {
+      const existing = await getTodayJournal(isMorning ? 'morning' : 'evening');
+      if (existing) { setAnswers(existing.answers || {}); setSelectedVirtue(existing.virtue || virtues[0].id); setAlreadySaved(true); }
+      else { setAnswers({}); setSelectedVirtue(virtues[0].id); setAlreadySaved(false); }
+      const all = await getJournals();
+      setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
+    }
+    reload();
+  }, [sessionType]);
 
   useFocusEffect(useCallback(() => {
     async function load() {
@@ -207,7 +220,7 @@ export default function JournalScreen() {
       setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
     }
     load();
-  }, [type]));
+  }, [sessionType]));
 
   const answeredCount = Object.values(answers).filter(v => v && v.trim().length > 0).length;
   const selectedVirtueObj = virtues.find(v => v.id === selectedVirtue);
@@ -323,17 +336,28 @@ export default function JournalScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={s.header}>
-            <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
-              <Text style={s.backArrow}>‹</Text>
-              <Text style={s.backLabel}>Practice</Text>
-            </TouchableOpacity>
+            {fromPractice && (
+              <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
+                <Text style={s.backArrow}>‹</Text>
+                <Text style={s.backLabel}>Practice</Text>
+              </TouchableOpacity>
+            )}
+            {!fromPractice && (
+              <View style={s.typeToggle}>
+                {['morning', 'evening'].map(t => (
+                  <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setViewMode('write'); setOpenPrompt(0); setOpenHint(null); }} activeOpacity={0.7}>
+                    <Text style={[s.typeBtnText, sessionType === t && s.typeBtnTextActive]}>{t === 'morning' ? '☽  Morning' : '◑  Evening'}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
             <Text style={s.eyebrow}>{isMorning ? 'Morning reflection' : 'Evening reflection'}</Text>
             <Text style={s.title}>
               {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
               {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
             </Text>
             <Text style={s.sub}>
-              {isMorning ? '5–10 minutes · Before the world begins' : '10–15 minutes · Before the day closes'}
+              {isMorning ? 'Before the world begins' : 'Before the day closes'}
             </Text>
           </View>
 
@@ -589,6 +613,8 @@ export default function JournalScreen() {
                       </View>
                     )}
                   </View>
+                ))}
+                  </View>
                 ))
               )}
             </View>
@@ -639,6 +665,11 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
+  typeToggle: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  typeBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgCard },
+  typeBtnActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
+  typeBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.5 },
+  typeBtnTextActive: { color: colors.accent, fontWeight: '500' },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
   backArrow: { fontSize: 24, color: colors.accent },
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
