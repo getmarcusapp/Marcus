@@ -20,7 +20,7 @@ const sections = [
     content: 'The compass is the foundation of your practice. It has three sections:\n\nWhy I practice: What draws you to Stoicism? What brought you here?\n\nWhat I want to overcome: The patterns, fears, and struggles you want to work through.\n\nWho I aspire to be: The person you are building toward.\n\nRead your compass every morning before journaling. It takes 60 seconds and reorients everything that follows. Edit it anytime from the More tab as your answers evolve.',
   },
   {
-    title: 'The four virtues',
+    title: 'The four Virtues',
     content: 'Stoicism centers on four cardinal virtues. Each morning you choose one as your focus. The names in parentheses are the original Greek terms.\n\nWisdom (Sophia): Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage (Andreia): Doing the right thing even when it is hard or costly.\n\nModeration (Sophrosyne): Neither too much nor too little. Temperance in all things.\n\nJustice (Dikaiosyne): Acting rightly toward others. Community, fairness, duty.\n\nOver time, tracking which virtues you embody and which you struggle with reveals patterns worth examining.',
   },
   {
