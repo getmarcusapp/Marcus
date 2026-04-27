@@ -270,7 +270,7 @@ const s = StyleSheet.create({
   restoreText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.3 },
 
   legal: {
-    fontSize: 11, color: colors.textGhost, textAlign: 'center',
-    lineHeight: 17, marginHorizontal: spacing.xl, marginTop: 8,
+    fontSize: 12, color: colors.textDim, textAlign: 'center',
+    lineHeight: 18, marginHorizontal: spacing.xl, marginTop: 8,
   },
 });
