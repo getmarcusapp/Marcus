@@ -208,7 +208,7 @@ export default function PracticeScreen() {
               <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
                 <Text style={[s.routineTitle, compassDone && s.titleDone]}>Stoic compass</Text>
-                <Text style={s.routineSub}>Your north star — read daily</Text>
+                <Text style={s.routineSub}>Your North Star — read daily</Text>
               </View>
               <View style={s.tagRow}>
                 {compassDone && (
