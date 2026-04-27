@@ -84,7 +84,8 @@ export default function CompassScreen() {
           </TouchableOpacity>
           <Text style={s.eyebrow}>My stoic compass</Text>
           <Text style={s.title}>Your north star</Text>
-          <Text style={s.heroQuote}>"Know thyself — then act accordingly."</Text>
+          <Text style={s.heroQuote}>“Know, first, who you are, and then adorn yourself accordingly.”</Text>
+          <Text style={s.heroAttr}>— Epictetus, Discourses</Text>
         </View>
 
         <View style={s.nextRow}>
@@ -202,7 +203,8 @@ const s = StyleSheet.create({
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10 },
-  heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24 },
+  heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24, marginBottom: 6 },
+  heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
   nextRow: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
