@@ -51,7 +51,8 @@ function WelcomeStep({ onNext }) {
         <Text style={s.welcomeSub}>A Stoic practice app</Text>
         <View style={s.welcomeDivider} />
         <Text style={s.welcomeTagline}>
-          "The impediment to action advances action.{'\n'}What stands in the way becomes the way."
+          "“The impediment to action advances action. What stands in the way becomes the way.”
+          — Marcus Aurelius, Meditations V.20"
         </Text>
         <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations</Text>
       </View>

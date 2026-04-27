@@ -104,8 +104,7 @@ export default function PracticeScreen() {
           </View>
 
           <View style={s.sealedCard}>
-            <Text style={s.sealedQuoteOpen}>"</Text>
-            <Text style={s.sealedQuoteText}>{sealQuote.text}"</Text>
+            <Text style={s.sealedQuoteText}>“{sealQuote.text}”</Text>
             <View style={s.sealedQuoteRule} />
             <Text style={s.sealedQuoteAttr}>— {sealQuote.author.toUpperCase()}, {sealQuote.source.toUpperCase()}</Text>
           </View>
@@ -354,7 +353,6 @@ const s = StyleSheet.create({
     padding: spacing.xl,
     paddingVertical: 26,
   },
-  sealedQuoteOpen: { fontSize: 40, color: colors.accentDim, fontFamily: font.serif, lineHeight: 32, marginBottom: -4 },
   sealedQuoteText: { fontSize: 18, color: colors.textSecondary, lineHeight: 30, fontStyle: 'italic', fontFamily: font.serif },
   sealedQuoteRule: { height: 0.5, backgroundColor: colors.accentDim, marginVertical: 16 },
   sealedQuoteAttr: { fontSize: 10, color: colors.accentDim, letterSpacing: 1.5 },

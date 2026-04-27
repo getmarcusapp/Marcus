@@ -385,8 +385,8 @@ export default function JournalScreen() {
               <View style={s.mementoStrip}>
                 <Text style={s.mementoText}>
                   {isMorning
-                    ? '"This day will not come again. What will you make of the hours you are given?"'
-                    : '"Did you live well today? Not perfectly — but with intention?"'}
+                    ? 'This day will not come again. What will you make of the hours you are given?'
+                    : 'Did you live well today? Not perfectly — but with intention?'}
                 </Text>
                 <Text style={s.mementoSub}>
                   {isMorning ? 'Memento mori · Carpe diem' : 'The day closes · Examine thyself'}
