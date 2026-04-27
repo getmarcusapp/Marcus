@@ -13,7 +13,7 @@ const sections = [
   },
   {
     title: 'The daily practice',
-    content: 'Each day has four core elements:\n\n1. Stoic compass — Read your personal north star to anchor your intentions.\n\n2. Daily reading — A quote and reflection from Marcus Aurelius, Epictetus, or Seneca. Generated fresh each day.\n\n3. Morning journal — Set your virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening journal — Examine how you acted, confess where you fell short, and release what you carry before sleep.',
+    content: 'Each day has four core elements:\n\n1. Stoic compass — Read your personal North Star to anchor your intentions.\n\n2. Daily reading — A quote and reflection from Marcus Aurelius, Epictetus, or Seneca. Generated fresh each day.\n\n3. Morning journal — Set your virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening journal — Examine how you acted, confess where you fell short, and release what you carry before sleep.',
   },
   {
     title: 'The Stoic compass',
@@ -21,7 +21,7 @@ const sections = [
   },
   {
     title: 'The four virtues',
-    content: 'Stoicism centers on four cardinal virtues. Each morning you choose one as your focus:\n\nWisdom (Sophia) — Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage (Andreia) — Doing the right thing even when it is hard or costly.\n\nModeration (Sophrosyne) — Neither too much nor too little. Temperance in all things.\n\nJustice (Dikaiosyne) — Acting rightly toward others. Community, fairness, duty.\n\nOver time, tracking which virtues you embody and which you struggle with reveals patterns worth examining.',
+    content: 'Stoicism centers on four cardinal virtues. Each morning you choose one as your focus. The names in parentheses are the original Greek terms.\n\nWisdom (Sophia): Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage (Andreia): Doing the right thing even when it is hard or costly.\n\nModeration (Sophrosyne): Neither too much nor too little. Temperance in all things.\n\nJustice (Dikaiosyne): Acting rightly toward others. Community, fairness, duty.\n\nOver time, tracking which virtues you embody and which you struggle with reveals patterns worth examining.',
   },
   {
     title: 'The emotion logger',
@@ -29,7 +29,7 @@ const sections = [
   },
   {
     title: 'Cognitive distortions — the seven',
-    content: 'Cognitive distortions are habitual errors in thinking that generate unnecessary suffering. They were first named by Aaron Beck in the 1950s — who built cognitive behavioral therapy by citing Epictetus directly. The patterns are the same ones the Stoics identified two thousand years earlier.\n\nMarcos tracks seven:\n\n1. Catastrophizing — Imagining the worst possible outcome when evidence doesn\'t support it. Epictetus: "Men are disturbed not by things, but by their judgments about things." The catastrophe is almost always a judgment, not a fact.\n\n2. Mind-reading — Assuming you know what others think or feel without evidence. Marcus Aurelius practiced constantly observing his own assumptions about others\' motives. Most are projections.\n\n3. Overgeneralizing — Treating one event as a permanent pattern. "I always fail at this." "People never change." The Stoic corrective: attend to what is actually in front of you, not the story you\'ve constructed around it.\n\n4. Personalizing — Taking responsibility for things outside your control. The dichotomy of control is the foundation of Stoic practice. What is mine to own? What is not? Personalizing collapses that distinction.\n\n5. Filtering — Fixating on the negative while dismissing the positive. The Stoics practiced gratitude not as optimism, but as accurate perception — seeing what is actually present, not just what is wrong.\n\n6. Emotional reasoning — Treating a feeling as proof that something is true. "I feel ashamed, therefore I must have done something shameful." Emotions are impressions — data worth examining, not verdicts to accept without scrutiny.\n\n7. Should statements — Rigid rules about how you or others must behave. "He should have known better." "I should be further along." These generate resentment and guilt in equal measure. The Stoic asks instead: what does this situation actually require?',
+    content: 'Cognitive distortions are habitual errors in thinking that generate unnecessary suffering. They were first named by Aaron Beck in the 1950s — who built cognitive behavioral therapy by citing Epictetus directly. The patterns are the same ones the Stoics identified two thousand years earlier.\n\nMarcus tracks seven:\n\n1. Catastrophizing — Imagining the worst possible outcome when evidence doesn\'t support it. Epictetus: "Men are disturbed not by things, but by their judgments about things." The catastrophe is almost always a judgment, not a fact.\n\n2. Mind-reading — Assuming you know what others think or feel without evidence. Marcus Aurelius practiced constantly observing his own assumptions about others\' motives. Most are projections.\n\n3. Overgeneralizing — Treating one event as a permanent pattern. "I always fail at this." "People never change." The Stoic corrective: attend to what is actually in front of you, not the story you\'ve constructed around it.\n\n4. Personalizing — Taking responsibility for things outside your control. The dichotomy of control is the foundation of Stoic practice. What is mine to own? What is not? Personalizing collapses that distinction.\n\n5. Filtering — Fixating on the negative while dismissing the positive. The Stoics practiced gratitude not as optimism, but as accurate perception — seeing what is actually present, not just what is wrong.\n\n6. Emotional reasoning — Treating a feeling as proof that something is true. "I feel ashamed, therefore I must have done something shameful." Emotions are impressions — data worth examining, not verdicts to accept without scrutiny.\n\n7. Should statements — Rigid rules about how you or others must behave. "He should have known better." "I should be further along." These generate resentment and guilt in equal measure. The Stoic asks instead: what does this situation actually require?',
   },
   {
     title: 'The weekly review',
@@ -37,11 +37,11 @@ const sections = [
   },
   {
     title: 'About streaks',
-    content: 'Marcus tracks three streak metrics:\n\nCurrent streak — Your active run of consecutive days completing the core practice (compass + reading + morning journal). This resets if you miss a day.\n\nLongest streak — Your best ever run. This never resets.\n\nTotal days practiced — Your cumulative count of practice days, ever.\n\nIf you break your current streak, the app won\'t berate you. The Stoic response to a missed day is simple: begin again.',
+    content: 'Marcus tracks three streak metrics:\n\nCurrent streak: Your active run of consecutive days completing the core practice (compass + reading + morning journal). This resets if you miss a day.\n\nLongest streak: Your best ever run. This never resets.\n\nTotal days practiced: Your cumulative count of practice days, ever.\n\nIf you break your current streak, the app won\'t berate you. The Stoic response to a missed day is simple: begin again.',
   },
   {
     title: 'Memento mori',
-    content: '"Memento mori" means remember that you will die. It is not morbid — it is clarifying.\n\nThe Stoics used awareness of death to sharpen their attention to the present. If you knew this was your last week, what would you stop wasting time on? What would you start doing immediately?\n\nThe skull in Marcus is not decoration. It is a daily reminder that time is finite and the practice matters.',
+    content: '"Memento mori" means remember that you will die. This is not morbid — it is clarifying.\n\nThe Stoics used awareness of death to sharpen their attention to the present. If you knew this was your last week, what would you stop wasting time on? What would you start doing immediately?\n\nThe skull in Marcus is not decoration. It is a daily reminder that time is finite and the practice matters.',
   },
 ];
 

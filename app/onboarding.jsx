@@ -11,7 +11,7 @@ import { saveCompass, setHasOnboarded } from '../store/db';
 const DEFAULT_COMPASS = {
   why: 'I am drawn to Stoicism because it offers something rare — a practical philosophy for living well, tested across centuries. Not theory. Not productivity hacks. A system for becoming someone you respect.',
   overcome: 'I want to worry less about what I cannot control. To respond instead of react. To free myself from the anxiety of other people\'s opinions and the tyranny of my own undisciplined mind.',
-  aspire: 'I want to meet adversity with calm and fortune with humility. To live each day with intention — not perfectly, but deliberately. To be someone who acts in accordance with their values, even when it\'s hard.',
+  aspire: 'I want to meet adversity with calm, and fortune with humility. To live each day with intention — not perfectly, but deliberately. To be someone who acts in accordance with their values, even when it\'s hard.',
 };
 
 export default function OnboardingScreen() {
@@ -98,7 +98,7 @@ function PhilosophyStep({ onNext }) {
           <Text style={s.practiceHeading}>Your daily practice</Text>
 
           {[
-            { title: 'Stoic compass', desc: 'Your personal north star — why you practice, what you want to overcome, who you aspire to be.' },
+            { title: 'Stoic compass', desc: 'Your personal North Star — why you practice, what you want to overcome, who you aspire to be.' },
             { title: 'Daily reading', desc: 'A quote and reflection from Marcus Aurelius, Epictetus, or Seneca. Ancient wisdom for today.' },
             { title: 'Morning journal', desc: 'Set your intention, choose your virtue focus, and prepare for what the day requires.' },
             { title: 'Evening journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
@@ -149,9 +149,9 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
         >
           <View style={s.stepHero}>
             <Text style={s.stepEyebrow}>Your compass</Text>
-            <Text style={s.stepTitle}>Set your{'\n'}north star</Text>
+            <Text style={s.stepTitle}>Set your{'\n'}North Star</Text>
             <Text style={s.stepSub}>
-              These three questions anchor your daily practice. They come pre-filled — edit them to make them yours, or leave them and customize later.
+              These three questions anchor your daily practice. They come pre-filled — edit each one to make it yours, or leave the defaults and customize later.
             </Text>
           </View>
 
@@ -216,7 +216,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
 
 function PracticePreviewStep({ onNext }) {
   const items = [
-    { title: 'Stoic compass', sub: 'Your north star — read daily', tag: 'NOW' },
+    { title: 'Stoic compass', sub: 'Your North Star — read daily', tag: 'NOW' },
     { title: 'Daily reading', sub: 'Ancient wisdom for this day', tag: 'READ' },
     { title: 'Morning journal', sub: 'Reflect and intend', tag: 'NOW' },
     { title: 'Evening journal', sub: 'Examine and release', tag: 'LATER' },
@@ -228,7 +228,7 @@ function PracticePreviewStep({ onNext }) {
         <View style={s.previewHero}>
           <Text style={s.previewEyebrow}>Your daily practice</Text>
           <Text style={s.previewTitle}>{`This is what\neach day looks like.`}</Text>
-          <Text style={s.previewSub}>Four elements. Done with intention.</Text>
+          <Text style={s.previewSub}>Four elements. Executed with intention.</Text>
         </View>
 
         <View style={s.previewBody}>

@@ -251,6 +251,7 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                     <View style={s.quoteRule} />
                     <Text style={s.quoteAuthor}>— {reading.author}</Text>
                     {reading.work && <Text style={s.quoteWork}>{reading.work}</Text>}
+                    <Text style={s.readingSourceNote}>Readings draw from Stoic texts and works across traditions from which Stoic insight can be drawn — in the spirit of Ryan Holiday's Daily Stoic.</Text>
                   </View>
 
                   <View style={s.reflectionCard}>
@@ -449,6 +450,7 @@ const s = StyleSheet.create({
   quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontFamily: font.serif },
   quoteRule: { height: 0.5, backgroundColor: colors.border, marginVertical: 16 },
   quoteAuthor: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
+  readingSourceNote: { fontSize: 11, color: colors.textDim, marginTop: 14, lineHeight: 17, fontStyle: 'italic' },
   quoteWork: { fontSize: 12, color: colors.textDim, marginTop: 3 },
   // Reflection — light
   reflectionCard: {
