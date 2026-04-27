@@ -492,7 +492,8 @@ export default function JournalScreen() {
                     {`Your ${isMorning ? 'morning' : 'evening'} journal entries will appear here after you complete today's practice.\n\n${isMorning ? 'The morning journal has five prompts: what is in your control, where courage is required, what you are postponing, what difficulty might arise, and what you owe the day.' : 'The evening journal has four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}`}
                   </Text>
                 </View>
-              filteredHistory.map(entry => (
+              ) : (
+                filteredHistory.map(entry => (
                   <View key={entry.id}>
                     {editingEntry?.id === entry.id ? (
                       <JournalEntryEditor

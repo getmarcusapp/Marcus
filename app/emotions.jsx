@@ -391,6 +391,7 @@ export default function EmotionsScreen() {
                     {'When a strong emotion arises — anger, anxiety, frustration, shame — open this logger before you react.\n\nName the emotion, rate the intensity, describe what triggered it, and note your automatic reaction. Then read the Stoic reframe and choose your response.\n\nThe space between stimulus and response is where the practice lives.'}
                   </Text>
                 </View>
+              ) : (
                 filteredHistory.map(entry => {
   const ec = EMOTION_COLORS[entry.emotion] || EMOTION_COLORS.other;
 

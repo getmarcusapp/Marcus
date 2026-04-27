@@ -320,6 +320,7 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                 <View style={s.empty}>
                   <Text style={s.emptyText}>No readings saved yet.{'\n'}Save your first insight to begin the archive.</Text>
                 </View>
+              ) : (
                 filteredLog.map(entry => (
                   <View key={entry.id} style={s.archiveRow}>
                     <View style={s.archiveTop}>

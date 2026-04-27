@@ -316,6 +316,7 @@ export default function ReviewScreen() {
               <View style={s.empty}>
                 <Text style={s.emptyText}>No reviews yet.{'\n'}Complete your first week.</Text>
               </View>
+            ) : (
               filteredHistory.map(entry => (
                 <View key={entry.id} style={s.histRow}>
                   <View style={s.histTop}>
