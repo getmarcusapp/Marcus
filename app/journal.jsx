@@ -427,6 +427,7 @@ export default function JournalScreen() {
                     )}
                     {showVirtueDetail && virtueDetail && (
                       <View style={s.virtueDetailCard}>
+                        <Text style={s.virtueGreekNote}>{virtueDetail?.latin} is the original Greek name for {selectedVirtueObj?.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
                         <Text style={s.virtueDetailText}>{virtueDetail.definition}</Text>
                         <View style={s.virtueDetailDivider} />
                         <Text style={s.virtueDetailQuestion}>"{virtueDetail.question}"</Text>
