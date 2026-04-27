@@ -177,6 +177,13 @@ export default function JournalScreen() {
   const defaultType = params?.type || (new Date().getHours() < 13 ? 'morning' : 'evening');
   const [sessionType, setSessionType] = useState(defaultType);
   const isMorning = sessionType !== 'evening';
+
+  // Sync sessionType when navigating here explicitly from practice with a type param
+  useEffect(() => {
+    if (params?.type) {
+      setSessionType(params.type);
+    }
+  }, [params?.type]);
   const prompts = isMorning ? morningPrompts : eveningPrompts;
 
   const [answers, setAnswers] = useState({});
