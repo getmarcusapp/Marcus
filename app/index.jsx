@@ -209,7 +209,7 @@ export default function PracticeScreen() {
               <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
                 <Text style={[s.routineTitle, compassDone && s.titleDone]}>Stoic compass</Text>
-                <Text style={s.routineSub}>Your north star — read daily</Text>
+                <Text style={s.routineSub}>Your North Star — read daily</Text>
               </View>
               <View style={s.tagRow}>
                 {compassDone && (
@@ -448,6 +448,7 @@ const s = StyleSheet.create({
   virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif, marginBottom: 10 },
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif },
   virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 12, letterSpacing: 0.5 },
+  virtueGreekNote: { fontSize: 13, color: colors.accent, fontStyle: 'italic', marginBottom: 12, lineHeight: 20 },
   virtueGreekNote: { fontSize: 13, color: colors.accent, fontStyle: 'italic', marginBottom: 12, lineHeight: 20 },
   morningCompleteCard: {
     backgroundColor: colors.accentBg,
