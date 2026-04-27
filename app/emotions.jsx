@@ -40,7 +40,7 @@ const stoicReframesUpdated = {
   envy: "You are measuring your inner life against another's outer life. You do not know their interior. Tend your own.",
   grief: "Grief is love with nowhere to go. Honor it. The Stoic does not suppress feeling — only the slavery to feeling.",
   fear: "Fear imagines futures that have not arrived. Return to what is actually in front of you, in this moment. What does now require?",
-  other: "Pause. Name what you are actually feeling beneath the surface. Then ask: what would a person of virtue do here?",
+  other: "Pause. Name what you are actually feeling beneath the surface. Then ask: what would a person of Virtue do here?",
 };
 
 function IntensitySlider({ value, onChange }) {

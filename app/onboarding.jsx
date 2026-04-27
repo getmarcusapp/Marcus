@@ -100,7 +100,7 @@ function PhilosophyStep({ onNext }) {
           {[
             { title: 'Stoic compass', desc: 'Your personal North Star — why you practice, what you want to overcome, who you aspire to be.' },
             { title: 'Daily reading', desc: 'A quote and reflection from Marcus Aurelius, Epictetus, or Seneca. Ancient wisdom for today.' },
-            { title: 'Morning journal', desc: 'Set your intention, choose your virtue focus, and prepare for what the day requires.' },
+            { title: 'Morning journal', desc: 'Set your intention, choose your Virtue focus, and prepare for what the day requires.' },
             { title: 'Evening journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
             { title: 'Emotion logger', desc: 'When strong emotions arise, log the trigger, examine your thinking, and choose your response.' },
             { title: 'Weekly review', desc: 'Once a week, examine your patterns, assess your virtues, and set your intention forward.' },
@@ -128,9 +128,9 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
   const [openHint, setOpenHint] = React.useState(null);
 
   const HINTS = {
-    why: "The Stoics held that virtue — not outcome — is the only true good. Your Why should reflect what is in your control: your character, your intentions, how you show up.\n\nA Stoic Why doesn't depend on external circumstances. 'I want to be respected' is external. 'I want to act with integrity regardless of outcome' is internal — yours to achieve regardless of what happens around you.",
+    why: "The Stoics held that Virtue — not outcome — is the only true good. Your Why should reflect what is in your control: your character, your intentions, how you show up.\n\nA Stoic Why doesn't depend on external circumstances. 'I want to be respected' is external. 'I want to act with integrity regardless of outcome' is internal — yours to achieve regardless of what happens around you.",
     overcome: "Name a pattern you can observe in yourself — not a circumstance or another person. Those are outside your control. What you can overcome is your habitual response to them.\n\n'I want to overcome anxiety' is external. 'I want to stop treating anxiety as a verdict rather than an impression' is internal — that is where the Stoic practice lives.",
-    aspire: "Aspiration in Stoic terms is the cultivation of virtue: wisdom, courage, temperance, justice. The test is whether your aspiration describes who you are becoming, not what you are getting.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.'",
+    aspire: "Aspiration in Stoic terms is the cultivation of Virtue: wisdom, courage, temperance, justice. The test is whether your aspiration describes who you are becoming, not what you are getting.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.'",
   };
 
   return (

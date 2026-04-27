@@ -15,7 +15,7 @@ const COMPASS_HINTS = {
   },
   aspire: {
     placeholder: "e.g. To respond to difficulty with reason rather than reaction. To be present with the people I love.",
-    hint: "Aspiration in Stoic terms is the cultivation of virtue — not achievement of outcomes. The four virtues are wisdom, courage, temperance, and justice.\n\nThe test: does your aspiration describe who you are becoming, or what you are getting? 'I aspire to be promoted' is external. 'I aspire to do work worthy of recognition' is internal.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.'",
+    hint: "Aspiration in Stoic terms is the cultivation of Virtue — not achievement of outcomes. The four Virtues are Wisdom, Courage, Temperance, and Justice.\n\nThe test: does your aspiration describe who you are becoming, or what you are getting? 'I aspire to be promoted' is external. 'I aspire to do work worthy of recognition' is internal.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.'",
   },
   overcome: {
     placeholder: "e.g. My tendency to avoid difficult conversations. Mistaking busyness for progress.",

@@ -21,7 +21,7 @@ const DISTORTION_LABELS = {
 };
 
 const reviewPrompts = [
-  { label: 'What went well?', sub: 'Where did you act with virtue this week?', key: 'wentWell' },
+  { label: 'What went well?', sub: 'Where did you act with Virtue this week?', key: 'wentWell' },
   { label: 'Where did I stray?', sub: 'Where did you fall short of your own standard?', key: 'strayed' },
   { label: 'Recurring challenges', sub: 'What patterns keep showing up? What is unresolved?', key: 'challenges' },
   { label: 'Body and discipline', sub: 'How did you treat your physical self — sleep, movement, food, restraint?', key: 'body' },
@@ -238,7 +238,7 @@ export default function ReviewScreen() {
               </View>
             )}
 
-            <Text style={s.secLabel}>Virtue ledger</Text>
+            <Text style={s.secLabel}>Virtue Ledger</Text>
             <View style={s.virtueRow}>
               <View style={s.virtuePicker}>
                 <Text style={s.vpLabel}>Most embodied</Text>

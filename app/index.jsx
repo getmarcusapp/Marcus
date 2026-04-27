@@ -13,10 +13,10 @@ import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCom
 import { refreshNotificationsForToday } from '../notifications';
 
 const virtueDetails = {
-  wisdom: { definition: 'The virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
-  courage: { definition: 'The virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
-  moderation: { definition: 'The virtue of temperance and balance. Neither indulgence nor deprivation — the disciplined middle path.', question: 'Where am I in excess today?' },
-  justice: { definition: 'The virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
+  wisdom: { definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
+  courage: { definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
+  moderation: { definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation — the disciplined middle path.', question: 'Where am I in excess today?' },
+  justice: { definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
 };
 
 export default function PracticeScreen() {

@@ -27,8 +27,8 @@ const morningPrompts = [
   },
   {
     num: 'IV',
-    q: 'What difficulty might arise today, and how would a person of virtue meet it?',
-    hint: "This is premeditatio malorum — the premeditation of adversity. The Stoics practiced it daily. Marcus Aurelius began most mornings by mentally rehearsing the difficult people and situations he would face.\n\nModern research confirms what the Stoics intuited: negative visualization — mentally simulating obstacles before they occur — reduces anxiety and improves performance. It works because the obstacle loses its power to surprise you. You've already met it, already chosen your response.\n\nAsk: not 'what bad thing might happen' in a fearful way, but 'how would a person who embodies wisdom, courage, and justice meet this?' You're not predicting disaster. You're rehearsing virtue.",
+    q: 'What difficulty might arise today, and how would a person of Virtue meet it?',
+    hint: "This is premeditatio malorum — the premeditation of adversity. The Stoics practiced it daily. Marcus Aurelius began most mornings by mentally rehearsing the difficult people and situations he would face.\n\nModern research confirms what the Stoics intuited: negative visualization — mentally simulating obstacles before they occur — reduces anxiety and improves performance. It works because the obstacle loses its power to surprise you. You've already met it, already chosen your response.\n\nAsk: not 'what bad thing might happen' in a fearful way, but 'how would a person who embodies wisdom, courage, and justice meet this?' You're not predicting disaster. You're rehearsing Virtue.",
   },
   {
     num: 'V · Memento mori',
@@ -40,13 +40,13 @@ const morningPrompts = [
 const eveningPrompts = [
   {
     num: 'I · Examine',
-    q: 'Where did I act in accordance with my virtue today?',
-    hint: "The evening Examen begins with what went right — not as self-congratulation but as honest accounting. The Stoics believed virtue was not an abstract aspiration but something demonstrated in specific moments: how you treated a person who frustrated you, whether you kept your word, whether you were present.\n\nLooking for evidence of virtue is a skill. Most people are faster to notice their failures than their successes. Naming what you did well isn't vanity — it's recognizing the character you're building, reinforcing the pattern you want to continue.\n\nBe specific. 'I was patient' is less useful than 'I stayed calm when the meeting ran over and I still gave my colleague my full attention.'",
+    q: 'Where did I act in accordance with my Virtue today?',
+    hint: "The evening Examen begins with what went right — not as self-congratulation but as honest accounting. The Stoics believed Virtue was not an abstract aspiration but something demonstrated in specific moments: how you treated a person who frustrated you, whether you kept your word, whether you were present.\n\nLooking for evidence of Virtue is a skill. Most people are faster to notice their failures than their successes. Naming what you did well isn't vanity — it's recognizing the character you're building, reinforcing the pattern you want to continue.\n\nBe specific. 'I was patient' is less useful than 'I stayed calm when the meeting ran over and I still gave my colleague my full attention.'",
   },
   {
     num: 'II · Confess',
     q: 'Where did I fall short? What would the Stoic have done?',
-    hint: "The Stoics were unflinching self-examiners. Seneca wrote that we should 'censure' ourselves each evening — not to generate guilt but to learn. The goal is not punishment. It's accuracy.\n\nWhere you fell short tells you something true about yourself: a pattern of avoidance, a recurring trigger, a virtue you haven't yet developed. That information is valuable only if you look at it clearly rather than explaining it away or dwelling in shame.\n\nThe second question — what would the Stoic have done? — is the productive pivot. It transforms the failure from a verdict into a lesson. You're not broken. You're practicing.",
+    hint: "The Stoics were unflinching self-examiners. Seneca wrote that we should 'censure' ourselves each evening — not to generate guilt but to learn. The goal is not punishment. It's accuracy.\n\nWhere you fell short tells you something true about yourself: a pattern of avoidance, a recurring trigger, a Virtue you haven't yet developed. That information is valuable only if you look at it clearly rather than explaining it away or dwelling in shame.\n\nThe second question — what would the Stoic have done? — is the productive pivot. It transforms the failure from a verdict into a lesson. You're not broken. You're practicing.",
   },
   {
     num: 'III · Release',
@@ -61,10 +61,10 @@ const eveningPrompts = [
 ];
 
 const virtueDetails = {
-  wisdom: { latin: 'Sophia', definition: 'The virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
-  courage: { latin: 'Andreia', definition: 'The virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
-  moderation: { latin: 'Sophrosyne', definition: 'The virtue of temperance and balance. Neither indulgence nor deprivation — the disciplined middle path.', question: 'Where am I in excess today?' },
-  justice: { latin: 'Dikaiosyne', definition: 'The virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
+  wisdom: { latin: 'Sophia', definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
+  courage: { latin: 'Andreia', definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
+  moderation: { latin: 'Sophrosyne', definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation — the disciplined middle path.', question: 'Where am I in excess today?' },
+  justice: { latin: 'Dikaiosyne', definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
 };
 
 function JournalEntryEditor({ entry, onSave, onCancel }) {
@@ -84,7 +84,7 @@ function JournalEntryEditor({ entry, onSave, onCancel }) {
 
       {isMorning && (
         <View style={e.virtueSection}>
-          <Text style={e.sectionLabel}>Virtue focus</Text>
+          <Text style={e.sectionLabel}>Virtue Focus</Text>
           <View style={e.virtuePills}>
             {virtues.map(v => (
               <TouchableOpacity
@@ -396,7 +396,7 @@ export default function JournalScreen() {
               <View style={s.body}>
                 {isMorning && (
                   <View style={s.virtueSection}>
-                    <Text style={s.secLabel}>Today's virtue focus</Text>
+                    <Text style={s.secLabel}>Today's Virtue Focus</Text>
                     <View style={s.virtuePills}>
                       {virtues.map(v => (
                         <TouchableOpacity
