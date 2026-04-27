@@ -251,7 +251,7 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                     <View style={s.quoteRule} />
                     <Text style={s.quoteAuthor}>— {reading.author}</Text>
                     {reading.work && <Text style={s.quoteWork}>{reading.work}</Text>}
-                    <Text style={s.readingSourceNote}>Readings draw from Stoic texts and works across traditions from which Stoic insight can be drawn — in the spirit of Ryan Holiday's Daily Stoic.</Text>
+                    <Text style={s.readingSourceNote}>Not every reading comes from a Stoic text. Each is chosen because it carries a lesson the Stoics would recognize.</Text>
                   </View>
 
                   <View style={s.reflectionCard}>
