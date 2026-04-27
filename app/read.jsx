@@ -247,8 +247,7 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                   </View>
 
                   <View style={s.quoteCard}>
-                    <Text style={s.quoteMark}>"</Text>
-                    <Text style={s.quoteText}>{reading.quote}"</Text>
+                    <Text style={s.quoteText}>“{reading.quote}”</Text>
                     <View style={s.quoteRule} />
                     <Text style={s.quoteAuthor}>— {reading.author}</Text>
                     {reading.work && <Text style={s.quoteWork}>{reading.work}</Text>}
@@ -447,7 +446,6 @@ const s = StyleSheet.create({
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
     padding: 22, marginBottom: 12, backgroundColor: colors.bgDeep,
   },
-  quoteMark: { fontSize: 40, color: colors.borderStrong, lineHeight: 32, fontFamily: font.serif, marginBottom: -4 },
   quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontFamily: font.serif },
   quoteRule: { height: 0.5, backgroundColor: colors.border, marginVertical: 16 },
   quoteAuthor: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
