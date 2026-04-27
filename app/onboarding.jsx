@@ -39,7 +39,20 @@ export default function OnboardingScreen() {
     <ReadyStep onFinish={handleFinish} />,
   ];
 
-  return steps[step];
+  return (
+    <View style={{ flex: 1 }}>
+      {step > 0 && step < 4 && (
+        <TouchableOpacity
+          onPress={() => setStep(step - 1)}
+          style={s.onboardingBack}
+          activeOpacity={0.7}
+        >
+          <Text style={s.onboardingBackText}>‹ Back</Text>
+        </TouchableOpacity>
+      )}
+      {steps[step]}
+    </View>
+  );
 }
 
 function WelcomeStep({ onNext }) {
@@ -383,6 +396,18 @@ const s = StyleSheet.create({
     textAlign: 'center',
   },
 
+  onboardingBack: {
+    position: 'absolute',
+    top: 56,
+    left: 20,
+    zIndex: 10,
+    padding: 8,
+  },
+  onboardingBackText: {
+    fontSize: 15,
+    color: colors.accent,
+    letterSpacing: 0.3,
+  },
   // Step screens
   stepHero: {
     backgroundColor: colors.bgDeep,
