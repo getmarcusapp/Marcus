@@ -342,15 +342,13 @@ export default function JournalScreen() {
                 <Text style={s.backLabel}>Practice</Text>
               </TouchableOpacity>
             )}
-            {!fromPractice && (
-              <View style={s.typeToggle}>
+            <View style={s.typeToggle}>
                 {['morning', 'evening'].map(t => (
                   <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setViewMode('write'); setOpenPrompt(0); setOpenHint(null); }} activeOpacity={0.7}>
                     <Text style={[s.typeBtnText, sessionType === t && s.typeBtnTextActive]}>{t === 'morning' ? '☽  Morning' : '◑  Evening'}</Text>
                   </TouchableOpacity>
                 ))}
-              </View>
-            )}
+            </View>
             <Text style={s.eyebrow}>{isMorning ? 'Morning reflection' : 'Evening reflection'}</Text>
             <Text style={s.title}>
               {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
