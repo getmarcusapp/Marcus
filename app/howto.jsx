@@ -21,7 +21,7 @@ const sections = [
   },
   {
     title: 'The four Virtues',
-    content: 'Stoicism centers on four cardinal virtues. Each morning you choose one as your focus. The names in parentheses are the original Greek terms.\n\nWisdom (Sophia): Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage (Andreia): Doing the right thing even when it is hard or costly.\n\nModeration (Sophrosyne): Neither too much nor too little. Temperance in all things.\n\nJustice (Dikaiosyne): Acting rightly toward others. Community, fairness, duty.\n\nOver time, tracking which virtues you embody and which you struggle with reveals patterns worth examining.',
+    content: 'Stoicism centers on four cardinal virtues. Each morning you choose one as your focus. The names in parentheses are the original Greek terms.\n\nWisdom (Sophia, soh-FEE-ah): Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage (Andreia, an-DRAY-ah): Doing the right thing even when it is hard or costly.\n\nModeration (Sophrosyne, soh-FROH-sih-nee): Neither too much nor too little. Temperance in all things.\n\nJustice (Dikaiosyne, dee-KAY-oh-sih-nee): Acting rightly toward others. Community, fairness, duty.\n\nOver time, tracking which virtues you embody and which you struggle with reveals patterns worth examining.',
   },
   {
     title: 'The emotion logger',

@@ -12,6 +12,13 @@ import { virtues } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone } from '../store/db';
 import { refreshNotificationsForToday } from '../notifications';
 
+const virtuePronunciations = {
+  sophia: 'soh-FEE-ah',
+  andreia: 'an-DRAY-ah',
+  sophrosyne: 'soh-FROH-sih-nee',
+  dikaiosyne: 'dee-KAY-oh-sih-nee',
+};
+
 const virtueDetails = {
   wisdom: { definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
   courage: { definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
@@ -127,7 +134,7 @@ export default function PracticeScreen() {
               {virtueExpanded && (
                 <View style={s.virtueDetail}>
                   <View style={s.virtueDivider} />
-                  <Text style={s.virtueGreekNote}>{todayVirtue.latin} is the original Greek name for {todayVirtue.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
+                  <Text style={s.virtueGreekNote}>{todayVirtue.latin} ({virtuePronunciations[todayVirtue.latin.toLowerCase()]}) is the original Greek name for {todayVirtue.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
                   <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
                   <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
                 </View>
@@ -299,7 +306,7 @@ export default function PracticeScreen() {
             {virtueExpanded && (
               <View style={s.virtueDetail}>
                 <View style={s.virtueDivider} />
-                <Text style={s.virtueGreekNote}>{todayVirtue.latin} is the original Greek name for {todayVirtue.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
+                <Text style={s.virtueGreekNote}>{todayVirtue.latin} ({virtuePronunciations[todayVirtue.latin.toLowerCase()]}) is the original Greek name for {todayVirtue.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
                 <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
                 <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
               </View>

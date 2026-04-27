@@ -60,6 +60,13 @@ const eveningPrompts = [
   },
 ];
 
+const virtuePronunciations = {
+  sophia: 'soh-FEE-ah',
+  andreia: 'an-DRAY-ah',
+  sophrosyne: 'soh-FROH-sih-nee',
+  dikaiosyne: 'dee-KAY-oh-sih-nee',
+};
+
 const virtueDetails = {
   wisdom: { latin: 'Sophia', definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
   courage: { latin: 'Andreia', definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
@@ -427,7 +434,7 @@ export default function JournalScreen() {
                     )}
                     {showVirtueDetail && virtueDetail && (
                       <View style={s.virtueDetailCard}>
-                        <Text style={s.virtueGreekNote}>{virtueDetail?.latin} is the original Greek name for {selectedVirtueObj?.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
+                        <Text style={s.virtueGreekNote}>{virtueDetail?.latin} ({virtuePronunciations[virtueDetail?.latin?.toLowerCase()]}) is the original Greek name for {selectedVirtueObj?.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
                         <Text style={s.virtueDetailText}>{virtueDetail.definition}</Text>
                         <View style={s.virtueDetailDivider} />
                         <Text style={s.virtueDetailQuestion}>"{virtueDetail.question}"</Text>
