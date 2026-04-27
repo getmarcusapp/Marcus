@@ -299,6 +299,7 @@ export default function PracticeScreen() {
             {virtueExpanded && (
               <View style={s.virtueDetail}>
                 <View style={s.virtueDivider} />
+                <Text style={s.virtueGreekNote}>{todayVirtue.latin} is the original Greek name for {todayVirtue.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
                 <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
                 <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
               </View>

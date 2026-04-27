@@ -733,6 +733,7 @@ const s = StyleSheet.create({
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
     padding: 18, marginBottom: 8, backgroundColor: colors.bgCard,
   },
+  virtueGreekNote: { fontSize: 13, color: colors.accent, fontStyle: 'italic', marginBottom: 12, lineHeight: 20 },
   virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
   virtueDetailDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
