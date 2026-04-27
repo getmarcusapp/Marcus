@@ -246,7 +246,7 @@ export default function PracticeScreen() {
               <View style={[s.dot, morningDone && s.dotDone]}>{morningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
                 <Text style={[s.routineTitle, morningDone && s.titleDone]}>Morning journal</Text>
-                <Text style={s.routineSub}>5–10 min · reflect and intend</Text>
+                <Text style={s.routineSub}>Reflect and intend</Text>
               </View>
               <View style={[s.tag, morningDone ? s.tagDone : s.tagNow]}>
                 <Text style={[s.tagText, !morningDone && s.tagTextNow]}>{morningDone ? 'DONE' : 'NOW'}</Text>
@@ -261,7 +261,7 @@ export default function PracticeScreen() {
               <View style={[s.dot, eveningDone && s.dotDone]}>{eveningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
                 <Text style={[s.routineTitle, eveningDone && s.titleDone]}>Evening journal</Text>
-                <Text style={s.routineSub}>10–15 min · examine and release</Text>
+                <Text style={s.routineSub}>Examine and release</Text>
               </View>
               <View style={[s.tag, eveningDone ? s.tagDone : s.tagLater]}>
                 <Text style={s.tagText}>{eveningDone ? 'DONE' : 'LATER'}</Text>
@@ -277,7 +277,7 @@ export default function PracticeScreen() {
                 <View style={s.dot} />
                 <View style={s.routineContent}>
                   <Text style={s.routineTitle}>Weekly review</Text>
-                  <Text style={s.routineSub}>15–30 min · seal the week</Text>
+                  <Text style={s.routineSub}>Seal the week</Text>
                 </View>
                 <View style={[s.tag, s.tagAccent]}>
                   <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
