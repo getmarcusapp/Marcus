@@ -35,6 +35,8 @@ export default function ReviewScreen() {
   const [intention, setIntention] = useState('');
   const [openPrompt, setOpenPrompt] = useState(0);
   const [history, setHistory] = useState([]);
+  const [filterRange, setFilterRange] = useState('all'); // 'all' | 'month' | 'week'
+  const [filterVirtue, setFilterVirtue] = useState('all');
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
   const [emotionBreakdown, setEmotionBreakdown] = useState([]); // [{emotion, count, avgIntensity}]
   const [distortionBreakdown, setDistortionBreakdown] = useState([]); // [{id, label, count}]
@@ -97,6 +99,16 @@ export default function ReviewScreen() {
     setHistory(updated);
     Alert.alert('', 'Week sealed.', [{ text: 'Done', onPress: () => setTab('history') }]);
   }
+
+  const filteredHistory = history.filter(e => {
+    if (filterVirtue !== 'all' && e.bestVirtue !== filterVirtue && e.worstVirtue !== filterVirtue) return false;
+    if (filterRange !== 'all') {
+      const days = filterRange === 'week' ? 7 : 30;
+      const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+      if (new Date(e.date).getTime() < cutoff) return false;
+    }
+    return true;
+  });
 
   return (
     <SafeAreaView style={s.safe}>
@@ -278,12 +290,33 @@ export default function ReviewScreen() {
           </View>
         ) : (
           <View>
-            {history.length === 0 ? (
+            <View style={s.filterRow}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 8 }}>
+                {[['all','All time'],['month','This month'],['week','This week']].map(([val, label]) => (
+                  <TouchableOpacity
+                    key={val}
+                    style={[s.filterPill, filterRange === val && s.filterPillActive]}
+                    onPress={() => setFilterRange(val)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[s.filterPillText, filterRange === val && s.filterPillTextActive]}>{label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+            {filteredHistory.length !== history.length && (
+              <Text style={[s.filterCount, { paddingHorizontal: 16, paddingBottom: 8 }]}>{filteredHistory.length} of {history.length} reviews</Text>
+            )}
+
+            {filteredHistory.length === 0 && history.length > 0 ? (
+              <View style={s.empty}>
+                <Text style={s.emptyText}>No reviews in this range.</Text>
+              </View>
+            ) : filteredHistory.length === 0 ? (
               <View style={s.empty}>
                 <Text style={s.emptyText}>No reviews yet.{'\n'}Complete your first week.</Text>
               </View>
-            ) : (
-              history.map(entry => (
+              filteredHistory.map(entry => (
                 <View key={entry.id} style={s.histRow}>
                   <View style={s.histTop}>
                     <Text style={s.histDate}>Week of {entry.weekOf}</Text>
@@ -371,5 +404,11 @@ const s = StyleSheet.create({
   histWorst: { fontSize: 14, color: colors.virtueBad, marginBottom: 4 },
   histPreview: { fontSize: 14, color: colors.textDim, lineHeight: 22, fontStyle: 'italic', fontFamily: font.serif, marginTop: 6 },
   empty: { padding: 60, alignItems: 'center' },
+  filterRow: { paddingVertical: 8 },
+  filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
+  filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
+  filterPillText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3 },
+  filterPillTextActive: { color: colors.accent },
+  filterCount: { fontSize: 12, color: colors.textMuted },
   emptyText: { fontSize: 16, color: colors.textDim, fontStyle: 'italic', textAlign: 'center', lineHeight: 26 },
 });

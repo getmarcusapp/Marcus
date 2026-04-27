@@ -171,6 +171,9 @@ export default function JournalScreen() {
   const [showVirtueDetail, setShowVirtueDetail] = useState(false);
   const [viewMode, setViewMode] = useState('write'); // 'write' | 'history'
   const [history, setHistory] = useState([]);
+  const [searchQ, setSearchQ] = useState('');
+  const [filterVirtue, setFilterVirtue] = useState('all');
+  const [sortMode, setSortMode] = useState('date'); // 'date' | 'virtue'
   const [editingEntry, setEditingEntry] = useState(null);
 
   useFocusEffect(useCallback(() => {
@@ -261,6 +264,22 @@ export default function JournalScreen() {
     Alert.alert('', 'Entry updated.');
   }
 }
+
+  // Filtered + sorted history
+  const filteredHistory = history
+    .filter(e => {
+      if (filterVirtue !== 'all' && e.virtue !== filterVirtue) return false;
+      if (searchQ.trim()) {
+        const q = searchQ.toLowerCase();
+        const text = Object.values(e.answers || {}).join(' ').toLowerCase();
+        if (!text.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortMode === 'virtue') return (a.virtue || '').localeCompare(b.virtue || '');
+      return new Date(b.date) - new Date(a.date);
+    });
 
   return (
     <SafeAreaView style={s.safe}>
@@ -424,7 +443,48 @@ export default function JournalScreen() {
             </>
           ) : (
             <View style={s.body}>
-              {history.length === 0 ? (
+              {/* Search + Filter bar */}
+              <View style={s.searchBar}>
+                <TextInput
+                  style={s.searchInput}
+                  placeholder="Search entries..."
+                  placeholderTextColor={colors.textDim}
+                  value={searchQ}
+                  onChangeText={setSearchQ}
+                  clearButtonMode="while-editing"
+                />
+              </View>
+              <View style={s.filterRow}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}>
+                  {['all', ...virtues.map(v => v.id)].map(v => (
+                    <TouchableOpacity
+                      key={v}
+                      style={[s.filterPill, filterVirtue === v && s.filterPillActive]}
+                      onPress={() => setFilterVirtue(v)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.filterPillText, filterVirtue === v && s.filterPillTextActive]}>
+                        {v === 'all' ? 'All virtues' : virtues.find(x => x.id === v)?.name || v}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              <View style={s.sortRow}>
+                <TouchableOpacity onPress={() => setSortMode(sortMode === 'date' ? 'virtue' : 'date')} style={s.sortBtn}>
+                  <Text style={s.sortBtnText}>Sort: {sortMode === 'date' ? 'Date ↓' : 'Virtue A–Z'}</Text>
+                </TouchableOpacity>
+                {filteredHistory.length !== history.length && (
+                  <Text style={s.filterCount}>{filteredHistory.length} of {history.length}</Text>
+                )}
+              </View>
+
+              {filteredHistory.length === 0 && history.length > 0 ? (
+                <View style={s.empty}>
+                  <Text style={s.emptyTitle}>No matches</Text>
+                  <Text style={s.emptyText}>Try a different search or filter.</Text>
+                </View>
+              ) : filteredHistory.length === 0 ? (
                 <View style={s.empty}>
                   <Text style={s.emptyIcon}>☽</Text>
                   <Text style={s.emptyTitle}>No entries yet</Text>
@@ -432,8 +492,7 @@ export default function JournalScreen() {
                     {`Your ${isMorning ? 'morning' : 'evening'} journal entries will appear here after you complete today's practice.\n\n${isMorning ? 'The morning journal has five prompts: what is in your control, where courage is required, what you are postponing, what difficulty might arise, and what you owe the day.' : 'The evening journal has four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}`}
                   </Text>
                 </View>
-              ) : (
-                history.map(entry => (
+              filteredHistory.map(entry => (
                   <View key={entry.id}>
                     {editingEntry?.id === entry.id ? (
                       <JournalEntryEditor
@@ -530,6 +589,17 @@ const s = StyleSheet.create({
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36 },
   sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8 },
   tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep },
+  searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
+  searchInput: { backgroundColor: colors.bgElevated, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
+  filterRow: { paddingVertical: 6 },
+  filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
+  filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
+  filterPillText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3 },
+  filterPillTextActive: { color: colors.accent },
+  sortRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8 },
+  sortBtn: { padding: 4 },
+  sortBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
+  filterCount: { fontSize: 12, color: colors.textMuted },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
   tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },

@@ -42,6 +42,8 @@ export default function ReadScreen() {
   const [insight, setInsight] = useState('');
   const [loading, setLoading] = useState(false);
   const [log, setLog] = useState([]);
+  const [searchQ, setSearchQ] = useState('');
+  const [filterAuthor, setFilterAuthor] = useState('all');
   const [insightSaved, setInsightSaved] = useState(false);
 
   useFocusEffect(useCallback(() => {
@@ -129,6 +131,20 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
       ]);
     }
   }
+
+  // Unique authors from log for filter pills
+  const authors = ['all', ...new Set(log.map(e => e.reading?.author).filter(Boolean))];
+
+  const filteredLog = log
+    .filter(e => {
+      if (filterAuthor !== 'all' && e.reading?.author !== filterAuthor) return false;
+      if (searchQ.trim()) {
+        const q = searchQ.toLowerCase();
+        const text = [e.reading?.quote, e.insight, e.reading?.theme].join(' ').toLowerCase();
+        if (!text.includes(q)) return false;
+      }
+      return true;
+    });
 
   return (
     <SafeAreaView style={s.safe}>
@@ -266,12 +282,45 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
             </View>
           ) : (
             <View>
-              {log.length === 0 ? (
+              <View style={s.searchBar}>
+                <TextInput
+                  style={s.searchInput}
+                  placeholder="Search quotes or insights..."
+                  placeholderTextColor={colors.textDim}
+                  value={searchQ}
+                  onChangeText={setSearchQ}
+                  clearButtonMode="while-editing"
+                />
+              </View>
+              <View style={s.filterRow}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}>
+                  {authors.map(a => (
+                    <TouchableOpacity
+                      key={a}
+                      style={[s.filterPill, filterAuthor === a && s.filterPillActive]}
+                      onPress={() => setFilterAuthor(a)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.filterPillText, filterAuthor === a && s.filterPillTextActive]}>
+                        {a === 'all' ? 'All authors' : a}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              {filteredLog.length !== log.length && (
+                <Text style={[s.filterCount, { paddingHorizontal: 16, paddingBottom: 8 }]}>{filteredLog.length} of {log.length} readings</Text>
+              )}
+
+              {filteredLog.length === 0 && log.length > 0 ? (
+                <View style={s.empty}>
+                  <Text style={s.emptyText}>No readings match your search.</Text>
+                </View>
+              ) : filteredLog.length === 0 ? (
                 <View style={s.empty}>
                   <Text style={s.emptyText}>No readings saved yet.{'\n'}Save your first insight to begin the archive.</Text>
                 </View>
-              ) : (
-                log.map(entry => (
+                filteredLog.map(entry => (
                   <View key={entry.id} style={s.archiveRow}>
                     <View style={s.archiveTop}>
                       <Text style={s.archiveDate}>{entry.date}</Text>

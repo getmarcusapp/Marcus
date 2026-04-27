@@ -76,6 +76,11 @@ export default function EmotionsScreen() {
   const [chosenResponse, setChosenResponse] = useState('');
   const [selectedDistortions, setSelectedDistortions] = useState([]);
   const [history, setHistory] = useState([]);
+  const [searchQ, setSearchQ] = useState('');
+  const [filterEmotion, setFilterEmotion] = useState('all');
+  const [filterDistortion, setFilterDistortion] = useState('all');
+  const [filterIntensity, setFilterIntensity] = useState(0); // 0 = all, 7 = high only
+  const [sortMode, setSortMode] = useState('date'); // 'date' | 'intensity'
   const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => { getTriggers().then(setHistory); }, []);
@@ -126,6 +131,23 @@ export default function EmotionsScreen() {
     Alert.alert('', 'Entry updated.');
   }
 }
+
+  const filteredHistory = history
+    .filter(e => {
+      if (filterEmotion !== 'all' && e.emotion !== filterEmotion) return false;
+      if (filterDistortion !== 'all' && !(e.distortions || []).includes(filterDistortion)) return false;
+      if (filterIntensity > 0 && (e.intensity || 0) < filterIntensity) return false;
+      if (searchQ.trim()) {
+        const q = searchQ.toLowerCase();
+        const text = [e.trigger, e.reaction, e.chosenResponse].join(' ').toLowerCase();
+        if (!text.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => sortMode === 'intensity'
+      ? (b.intensity || 0) - (a.intensity || 0)
+      : new Date(b.date) - new Date(a.date)
+    );
 
   return (
     <SafeAreaView style={s.safe}>
@@ -314,7 +336,54 @@ export default function EmotionsScreen() {
             </View>
           ) : (
             <View>
-              {history.length === 0 ? (
+              <View style={s.searchBar}>
+                <TextInput
+                  style={s.searchInput}
+                  placeholder="Search triggers..."
+                  placeholderTextColor={colors.textDim}
+                  value={searchQ}
+                  onChangeText={setSearchQ}
+                  clearButtonMode="while-editing"
+                />
+              </View>
+              <View style={s.filterRow}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}>
+                  {['all', ...EMOTIONS.map(e => e.id)].map(em => (
+                    <TouchableOpacity
+                      key={em}
+                      style={[s.filterPill, filterEmotion === em && s.filterPillActive]}
+                      onPress={() => setFilterEmotion(em)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.filterPillText, filterEmotion === em && s.filterPillTextActive]}>
+                        {em === 'all' ? 'All emotions' : EMOTIONS.find(x => x.id === em)?.label || em}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity
+                    style={[s.filterPill, filterIntensity >= 7 && s.filterPillActive]}
+                    onPress={() => setFilterIntensity(filterIntensity >= 7 ? 0 : 7)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[s.filterPillText, filterIntensity >= 7 && s.filterPillTextActive]}>High intensity</Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              </View>
+              <View style={s.sortRow}>
+                <TouchableOpacity onPress={() => setSortMode(sortMode === 'date' ? 'intensity' : 'date')} style={s.sortBtn}>
+                  <Text style={s.sortBtnText}>Sort: {sortMode === 'date' ? 'Date ↓' : 'Intensity ↓'}</Text>
+                </TouchableOpacity>
+                {filteredHistory.length !== history.length && (
+                  <Text style={s.filterCount}>{filteredHistory.length} of {history.length}</Text>
+                )}
+              </View>
+
+              {filteredHistory.length === 0 && history.length > 0 ? (
+                <View style={s.empty}>
+                  <Text style={s.emptyTitle}>No matches</Text>
+                  <Text style={s.emptyText}>Try a different search or filter.</Text>
+                </View>
+              ) : filteredHistory.length === 0 ? (
                 <View style={s.empty}>
                   <Text style={s.emptyIcon}>⚡</Text>
                   <Text style={s.emptyTitle}>No triggers logged yet</Text>
@@ -322,8 +391,7 @@ export default function EmotionsScreen() {
                     {'When a strong emotion arises — anger, anxiety, frustration, shame — open this logger before you react.\n\nName the emotion, rate the intensity, describe what triggered it, and note your automatic reaction. Then read the Stoic reframe and choose your response.\n\nThe space between stimulus and response is where the practice lives.'}
                   </Text>
                 </View>
-              ) : (
-                history.map(entry => {
+                filteredHistory.map(entry => {
   const ec = EMOTION_COLORS[entry.emotion] || EMOTION_COLORS.other;
 
   if (editingEntry?.id === entry.id) {
@@ -511,6 +579,17 @@ const s = StyleSheet.create({
   histTrigger: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
   histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, lineHeight: 22 },
   empty: { padding: 40, alignItems: 'center', backgroundColor: colors.bgCard },
+  searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8, backgroundColor: colors.bgCard },
+  searchInput: { backgroundColor: colors.bgElevated, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
+  filterRow: { paddingVertical: 6, backgroundColor: colors.bgCard },
+  filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgElevated },
+  filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
+  filterPillText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3 },
+  filterPillTextActive: { color: colors.accent },
+  sortRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8, backgroundColor: colors.bgCard },
+  sortBtn: { padding: 4 },
+  sortBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
+  filterCount: { fontSize: 12, color: colors.textMuted },
   emptyIcon: { fontSize: 32, marginBottom: 16, opacity: 0.4 },
   emptyTitle: { fontSize: 17, fontWeight: '500', color: colors.textSecondary, marginBottom: 12, textAlign: 'center' },
   emptyText: { fontSize: 14, color: colors.textDim, textAlign: 'center', lineHeight: 22 },
