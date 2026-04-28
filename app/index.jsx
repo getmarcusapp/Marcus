@@ -35,6 +35,7 @@ export default function PracticeScreen() {
   const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
   const [todayDate, setTodayDate] = useState(new Date());
   const [reviewDay, setReviewDay] = useState(0);
+  const [reviewDone, setReviewDone] = useState(false);
   const [totalDays, setTotalDays] = useState(0);
   const [virtueExpanded, setVirtueExpanded] = useState(false);
 
@@ -69,6 +70,11 @@ export default function PracticeScreen() {
       if (settings) {
         const parsed = JSON.parse(settings);
         if (parsed.reviewDay !== undefined) setReviewDay(parsed.reviewDay);
+      // Check if weekly review was completed this review window
+      const reviews = await getReviews();
+      const weekAgo = Date.now() - 3 * 24 * 60 * 60 * 1000; // 3-day window
+      const reviewedThisWindow = reviews.some(r => new Date(r.date).getTime() > weekAgo);
+      setReviewDone(reviewedThisWindow);
       }
       setMorningDone(!!morning);
       setEveningDone(!!evening);
@@ -86,7 +92,7 @@ export default function PracticeScreen() {
   }, []));
 
   const totalItems = isReviewDay ? 5 : 4;
-  const completed = [compassDone, readingDone, morningDone, eveningDone, isReviewDay ? false : null]
+  const completed = [compassDone, readingDone, morningDone, eveningDone, isReviewDay ? reviewDone : null]
     .filter(v => v === true).length;
   const allDone = completed >= 4 && (!isReviewDay || completed >= 5);
   const morningComplete = !allDone && compassDone && readingDone && morningDone && !eveningDone;
@@ -103,7 +109,7 @@ export default function PracticeScreen() {
               style={s.skullIconSealed}
               resizeMode="contain"
             />
-            <Text style={s.sealedEyebrow}>Practice complete</Text>
+            <Text style={s.sealedEyebrow}>{reviewDone && isReviewDay ? 'Week sealed' : 'Practice complete'}</Text>
             <Text style={s.sealedDate}>{dateStr}</Text>
             <Text style={s.sealedStreak}>
               {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}

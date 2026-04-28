@@ -35,11 +35,10 @@ export default function ReviewScreen() {
   const [intention, setIntention] = useState('');
   const [openPrompt, setOpenPrompt] = useState(0);
   const [history, setHistory] = useState([]);
-  const [filterRange, setFilterRange] = useState('all'); // 'all' | 'month' | 'week'
-  const [filterVirtue, setFilterVirtue] = useState('all');
+  const [filterRange, setFilterRange] = useState('all');
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
-  const [emotionBreakdown, setEmotionBreakdown] = useState([]); // [{emotion, count, avgIntensity}]
-  const [distortionBreakdown, setDistortionBreakdown] = useState([]); // [{id, label, count}]
+  const [emotionBreakdown, setEmotionBreakdown] = useState([]);
+  const [distortionBreakdown, setDistortionBreakdown] = useState([]);
 
   useEffect(() => {
     async function load() {
@@ -53,7 +52,6 @@ export default function ReviewScreen() {
       const reframed = weekTriggers.filter(t => t.chosenResponse && t.chosenResponse.trim().length > 0);
       setStats({ journaled: weekJournals.length, triggers: weekTriggers.length, reframed: reframed.length });
 
-      // Emotion frequency + average intensity
       const emotionMap = {};
       weekTriggers.forEach(t => {
         const key = t.emotion || 'other';
@@ -71,7 +69,6 @@ export default function ReviewScreen() {
         .sort((a, b) => b.count - a.count);
       setEmotionBreakdown(emotionList);
 
-      // Distortion frequency
       const distMap = {};
       weekTriggers.forEach(t => {
         (t.distortions || []).forEach(d => {
@@ -101,7 +98,6 @@ export default function ReviewScreen() {
   }
 
   const filteredHistory = history.filter(e => {
-    if (filterVirtue !== 'all' && e.bestVirtue !== filterVirtue && e.worstVirtue !== filterVirtue) return false;
     if (filterRange !== 'all') {
       const days = filterRange === 'week' ? 7 : 30;
       const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
@@ -115,14 +111,14 @@ export default function ReviewScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: colors.bg }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
           style={s.scroll}
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
-          contentInset={{ bottom: 40 }}
-          scrollIndicatorInsets={{ bottom: 40 }}
+          contentInset={{ bottom: 60 }}
+          scrollIndicatorInsets={{ bottom: 60 }}
         >
 
         <View style={s.hero}>
@@ -133,7 +129,7 @@ export default function ReviewScreen() {
               : 'Your archive'}
           </Text>
           <Text style={s.sub}>
-            {tab === 'current' ? '15–30 min · Sunday reckoning' : 'The examined life, recorded'}
+            {tab === 'current' ? 'Sunday reckoning' : 'The examined life, recorded'}
           </Text>
         </View>
 
@@ -154,6 +150,7 @@ export default function ReviewScreen() {
         {tab === 'current' ? (
           <View style={s.body}>
 
+            {/* Stats row */}
             <View style={s.statRow}>
               <View style={s.stat}>
                 <Text style={s.statNum}>{stats.journaled}</Text>
@@ -169,36 +166,7 @@ export default function ReviewScreen() {
               </View>
             </View>
 
-            {reviewPrompts.map((p, idx) => (
-              <TouchableOpacity
-                key={p.key}
-                style={[s.promptBlock, openPrompt === idx && s.promptBlockOpen]}
-                onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)}
-                activeOpacity={0.8}
-              >
-                <View style={s.pbHeader}>
-  <View style={s.pbLabelWrap}>
-    <Text style={s.pbLabel}>{p.label}</Text>
-    <Text style={s.pbSub}>{p.sub}</Text>
-  </View>
-  <Text style={s.pbChev}>{openPrompt === idx ? '∨' : '›'}</Text>
-</View>
-                {openPrompt === idx && (
-                  <View style={s.pbBody}>
-                    <TextInput
-                      style={s.pbInput}
-                      multiline
-                      placeholder="Write honestly..."
-                      placeholderTextColor={colors.textDim}
-                      value={answers[p.key] || ''}
-                      onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
-                    />
-                  </View>
-                )}
-              </TouchableOpacity>
-            ))}
-
-
+            {/* Emotion data first — informs reflection */}
             {emotionBreakdown.length > 0 && (
               <View style={s.insightCard}>
                 <Text style={s.insightCardTitle}>Emotions this week</Text>
@@ -234,44 +202,80 @@ export default function ReviewScreen() {
                     </View>
                   </View>
                 ))}
-                <Text style={s.insightFootnote}>These patterns deserve attention in your intention below.</Text>
+                <Text style={s.insightFootnote}>Let these patterns inform your reflection below.</Text>
               </View>
             )}
 
-            <Text style={s.secLabel}>Virtue Ledger</Text>
-            <View style={s.virtueRow}>
-              <View style={s.virtuePicker}>
-                <Text style={s.vpLabel}>Most embodied</Text>
-                {virtues.map(v => (
-                  <TouchableOpacity
-                    key={v.id}
-                    style={[s.vpBtn, bestVirtue === v.id && s.vpBtnActive]}
-                    onPress={() => setBestVirtue(v.id)}
-                  >
-                    <Text style={[s.vpBtnText, bestVirtue === v.id && { color: colors.virtueGood, fontWeight: '600' }]}>
-                      {v.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={s.virtuePicker}>
-                <Text style={s.vpLabel}>Least embodied</Text>
-                {virtues.map(v => (
-                  <TouchableOpacity
-                    key={v.id}
-                    style={[s.vpBtn, worstVirtue === v.id && s.vpBtnActive]}
-                    onPress={() => setWorstVirtue(v.id)}
-                  >
-                    <Text style={[s.vpBtnText, worstVirtue === v.id && { color: colors.virtueBad, fontWeight: '600' }]}>
-                      {v.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+            {/* Reflection prompts */}
+            {reviewPrompts.map((p, idx) => (
+              <TouchableOpacity
+                key={p.key}
+                style={[s.promptBlock, openPrompt === idx && s.promptBlockOpen]}
+                onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)}
+                activeOpacity={0.8}
+              >
+                <View style={s.pbHeader}>
+                  <View style={s.pbLabelWrap}>
+                    <Text style={s.pbLabel}>{p.label}</Text>
+                    <Text style={s.pbSub}>{p.sub}</Text>
+                  </View>
+                  <Text style={s.pbChev}>{openPrompt === idx ? '∨' : '›'}</Text>
+                </View>
+                {openPrompt === idx && (
+                  <View style={s.pbBody}>
+                    <TextInput
+                      style={s.pbInput}
+                      multiline
+                      placeholder="Write honestly..."
+                      placeholderTextColor={colors.textDim}
+                      value={answers[p.key] || ''}
+                      onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
+                      scrollEnabled={false}
+                    />
+                  </View>
+                )}
+              </TouchableOpacity>
+            ))}
+
+            {/* Virtue Ledger — styled as insight card for consistency */}
+            <View style={s.insightCard}>
+              <Text style={s.insightCardTitle}>Virtue Ledger</Text>
+              <Text style={s.insightFootnote}>Which Virtue did you most and least embody this week?</Text>
+              <View style={s.virtueRow}>
+                <View style={s.virtuePicker}>
+                  <Text style={s.vpLabel}>Most embodied</Text>
+                  {virtues.map(v => (
+                    <TouchableOpacity
+                      key={v.id}
+                      style={[s.vpBtn, bestVirtue === v.id && s.vpBtnActive]}
+                      onPress={() => setBestVirtue(v.id)}
+                    >
+                      <Text style={[s.vpBtnText, bestVirtue === v.id && { color: colors.virtueGood, fontWeight: '600' }]}>
+                        {v.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <View style={s.virtuePicker}>
+                  <Text style={s.vpLabel}>Least embodied</Text>
+                  {virtues.map(v => (
+                    <TouchableOpacity
+                      key={v.id}
+                      style={[s.vpBtn, worstVirtue === v.id && s.vpBtnActive]}
+                      onPress={() => setWorstVirtue(v.id)}
+                    >
+                      <Text style={[s.vpBtnText, worstVirtue === v.id && { color: colors.virtueBad, fontWeight: '600' }]}>
+                        {v.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
             </View>
 
+            {/* Intention — last, as the output of all reflection above */}
             <View style={s.intentionCard}>
-              <Text style={s.secLabel}>Intention for next week</Text>
+              <Text style={s.insightCardTitle}>Intention for next week</Text>
               <TextInput
                 style={s.intentionInput}
                 multiline
@@ -279,6 +283,7 @@ export default function ReviewScreen() {
                 placeholderTextColor={colors.textDim}
                 value={intention}
                 onChangeText={setIntention}
+                scrollEnabled={false}
               />
             </View>
 
@@ -359,29 +364,24 @@ const s = StyleSheet.create({
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
   tabBtnTextActive: { color: colors.textSecondary },
   body: { padding: spacing.md },
+  // Stats
   statRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   stat: { flex: 1, backgroundColor: colors.bgCard, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, alignItems: 'center' },
   statNum: { fontSize: 30, fontWeight: '600', color: colors.textSecondary, marginBottom: 6 },
   statLbl: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase', textAlign: 'center', lineHeight: 16 },
+  // Prompts
   promptBlock: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden' },
   promptBlockOpen: { backgroundColor: colors.bgCard, borderColor: colors.borderMid },
   pbHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 18, backgroundColor: colors.bgDeep },
   pbLabelWrap: { flex: 1 },
   pbLabel: { fontSize: 14, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8 },
-  pbSub: { fontSize: 13, color: colors.textDim, marginTop: 3, fontStyle: 'italic' },
+  pbSub: { fontSize: 13, color: colors.textDim, marginTop: 3 },
   pbChev: { fontSize: 20, color: colors.textDim },
   pbBody: { padding: 18, borderTopWidth: 0.5, borderTopColor: colors.border },
-  pbInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 80, textAlignVertical: 'top', fontStyle: 'italic', fontFamily: font.serif },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 12, marginTop: 4 },
-  virtueRow: { flexDirection: 'row', gap: 10, marginBottom: 18 },
-  virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, overflow: 'hidden' },
-  vpLabel: { fontSize: 10, letterSpacing: 1.5, color: colors.textDim, textTransform: 'uppercase', padding: 12, paddingHorizontal: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  vpBtn: { padding: 13, paddingHorizontal: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  vpBtnActive: { backgroundColor: colors.bgElevated },
-  vpBtnText: { fontSize: 15, color: colors.textDim },
-  intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
+  pbInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 80, textAlignVertical: 'top' },
+  // Insight cards (shared by emotions, distortions, virtue ledger)
   insightCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
-  insightCardTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 16 },
+  insightCardTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12 },
   insightRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 },
   insightRowLeft: { flex: 1, marginRight: 12 },
   insightRowRight: { alignItems: 'flex-end' },
@@ -392,24 +392,36 @@ const s = StyleSheet.create({
   insightIntensity: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5 },
   insightPill: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
   insightPillText: { fontSize: 12, color: colors.textMuted },
-  insightFootnote: { fontSize: 11, color: colors.textDim, marginTop: 4, fontStyle: 'italic' },
-  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top' },
+  insightFootnote: { fontSize: 11, color: colors.textDim, marginTop: 4, marginBottom: 8 },
+  // Virtue ledger (inside insightCard)
+  virtueRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' },
+  vpLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', padding: 12, paddingHorizontal: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  vpBtn: { padding: 13, paddingHorizontal: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  vpBtnActive: { backgroundColor: colors.bgElevated },
+  vpBtnText: { fontSize: 15, color: colors.textDim },
+  // Intention
+  intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
+  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top', marginTop: 12 },
+  // Seal button
   sealBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
   sealBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
   sealBtnSub: { fontSize: 12, color: colors.textDim, marginTop: 5 },
+  // History
   histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   histTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   histDate: { fontSize: 17, fontWeight: '600', color: colors.textSecondary },
   histStreak: { fontSize: 13, color: colors.textDim },
   histBest: { fontSize: 14, color: colors.virtueGood, marginBottom: 4 },
   histWorst: { fontSize: 14, color: colors.virtueBad, marginBottom: 4 },
-  histPreview: { fontSize: 14, color: colors.textDim, lineHeight: 22, fontStyle: 'italic', fontFamily: font.serif, marginTop: 6 },
+  histPreview: { fontSize: 14, color: colors.textDim, lineHeight: 22, marginTop: 6 },
+  // Archive filters
   empty: { padding: 60, alignItems: 'center' },
+  emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
   filterRow: { paddingVertical: 8 },
   filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
   filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
   filterPillText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3 },
   filterPillTextActive: { color: colors.accent },
   filterCount: { fontSize: 12, color: colors.textMuted },
-  emptyText: { fontSize: 16, color: colors.textDim, fontStyle: 'italic', textAlign: 'center', lineHeight: 26 },
 });
