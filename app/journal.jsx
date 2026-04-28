@@ -30,11 +30,6 @@ const morningPrompts = [
     q: 'What difficulty might arise today, and how would a person of Virtue meet it?',
     hint: "This is premeditatio malorum — the premeditation of adversity. The Stoics practiced it daily. Marcus Aurelius began most mornings by mentally rehearsing the difficult people and situations he would face.\n\nModern research confirms what the Stoics intuited: negative visualization — mentally simulating obstacles before they occur — reduces anxiety and improves performance. It works because the obstacle loses its power to surprise you. You've already met it, already chosen your response.\n\nAsk: not 'what bad thing might happen' in a fearful way, but 'how would a person who embodies wisdom, courage, and justice meet this?' You're not predicting disaster. You're rehearsing Virtue.",
   },
-  {
-    num: 'V · Memento mori',
-    q: 'The hourglass turns. What do you owe the day?',
-    hint: "Memento mori — remember that you will die — is not morbid for the Stoics. It is clarifying. Marcus Aurelius returned to it constantly, not to generate despair but to burn away the trivial.\n\nThe Stoic observation is simple: your time is finite. Most of it will be ordinary. The question is whether you will show up to the ordinary with intention or let it pass unconsciously.\n\n'What do you owe the day?' is not about productivity. It is about presence and integrity. What does this day deserve from you — given that it exists, given that you exist, given that neither will last?",
-  },
 ];
 
 const eveningPrompts = [
@@ -579,7 +574,7 @@ export default function JournalScreen() {
                   <Text style={s.emptyIcon}>☽</Text>
                   <Text style={s.emptyTitle}>No entries yet</Text>
                   <Text style={s.emptyText}>
-                    {`Your ${isMorning ? 'morning' : 'evening'} journal entries will appear here after you complete today's practice.\n\n${isMorning ? 'The morning journal has five prompts: what is in your control, where courage is required, what you are postponing, what difficulty might arise, and what you owe the day.' : 'The evening journal has four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}`}
+                    {`Your ${isMorning ? 'morning' : 'evening'} journal entries will appear here after you complete today's practice.\n\n${isMorning ? 'The morning journal has four prompts: what is in your control, where courage is required, what you are postponing, and what difficulty might arise.' : 'The evening journal has four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}`}
                   </Text>
                 </View>
               ) : (
