@@ -171,7 +171,6 @@ export default function CompassScreen() {
                 <View key={v.id} style={s.virtueCard}>
                   <View style={s.virtueTop}>
                     <Text style={s.virtueName}>{v.name}</Text>
-                    <Text style={s.virtueGreekName}>{v.greek}</Text>
                   </View>
                   <Text style={s.virtueDesc}>{v.desc}</Text>
                   <View style={s.virtueDivider} />
@@ -257,7 +256,6 @@ const s = StyleSheet.create({
   },
   virtueTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 },
   virtueName: { fontSize: 22, fontWeight: '400', color: colors.textPrimary },
-  virtueGreekName: { fontSize: 13, color: colors.textMuted },
   virtueDesc: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
   virtueDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   virtueQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },

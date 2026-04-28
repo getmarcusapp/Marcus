@@ -2,28 +2,24 @@ export const virtues = [
   {
     id: 'wisdom',
     name: 'Wisdom',
-    greek: 'Sophia',
     desc: 'Discernment, insight, and right judgment. See clearly — not through bias or fear.',
     question: 'Am I perceiving this clearly, or through ego?',
   },
   {
     id: 'courage',
     name: 'Courage',
-    greek: 'Andreia',
     desc: 'Do the right thing even when it is hard or costly.',
     question: 'What am I avoiding out of fear?',
   },
   {
     id: 'moderation',
     name: 'Temperance',
-    greek: 'Sophrosyne',
     desc: 'Neither too much nor too little of anything. The disciplined middle path.',
     question: 'Where am I in excess today?',
   },
   {
     id: 'justice',
     name: 'Justice',
-    greek: 'Dikaiosyne',
     desc: 'Act rightly toward others. Community, fairness, duty.',
     question: 'Did I treat others well today?',
   },

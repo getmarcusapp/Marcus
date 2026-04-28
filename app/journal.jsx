@@ -63,10 +63,10 @@ const virtuePronunciations = {
 };
 
 const virtueDetails = {
-  wisdom: { latin: 'Sophia', definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
-  courage: { latin: 'Andreia', definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
-  moderation: { latin: 'Sophrosyne', definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation — the disciplined middle path.', question: 'Where am I in excess today?' },
-  justice: { latin: 'Dikaiosyne', definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
+  wisdom: {definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
+  courage: {definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
+  moderation: {definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation — the disciplined middle path.', question: 'Where am I in excess today?' },
+  justice: {definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
 };
 
 function JournalEntryEditor({ entry, onSave, onCancel }) {
@@ -429,7 +429,6 @@ export default function JournalScreen() {
                     )}
                     {showVirtueDetail && virtueDetail && (
                       <View style={s.virtueDetailCard}>
-                        <Text style={s.virtueGreekNote}>{virtueDetail?.latin} ({virtuePronunciations[virtueDetail?.latin?.toLowerCase()]}) is the original Greek name for {selectedVirtueObj?.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
                         <Text style={s.virtueDetailText}>{virtueDetail.definition}</Text>
                         <View style={s.virtueDetailDivider} />
                         <Text style={s.virtueDetailQuestion}>"{virtueDetail.question}"</Text>
@@ -735,7 +734,6 @@ const s = StyleSheet.create({
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
     padding: 18, marginBottom: 8, backgroundColor: colors.bgCard,
   },
-  virtueGreekNote: { fontSize: 13, color: colors.accent, fontStyle: 'italic', marginBottom: 12, lineHeight: 20 },
   virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
   virtueDetailDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
