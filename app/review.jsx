@@ -176,9 +176,10 @@ export default function ReviewScreen() {
                       <Text style={s.insightEmotionLabel}>{item.label}</Text>
                       <View style={s.insightBar}>
                         <View style={[s.insightBarFill, {
-                          width: `${Math.round((item.count / (emotionBreakdown[0]?.count || 1)) * 100)}%`,
+                          flex: item.count / (emotionBreakdown[0]?.count || 1),
                           backgroundColor: item.avgIntensity >= 7 ? colors.virtueBad : item.avgIntensity >= 4 ? colors.accent : colors.borderStrong,
                         }]} />
+                        <View style={{ flex: 1 - (item.count / (emotionBreakdown[0]?.count || 1)) }} />
                       </View>
                     </View>
                     <View style={s.insightRowRight}>
@@ -386,7 +387,7 @@ const s = StyleSheet.create({
   insightRowLeft: { flex: 1, marginRight: 12 },
   insightRowRight: { alignItems: 'flex-end' },
   insightEmotionLabel: { fontSize: 14, color: colors.textSecondary, marginBottom: 6 },
-  insightBar: { height: 3, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' },
+  insightBar: { height: 3, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden', flexDirection: 'row' },
   insightBarFill: { height: 3, borderRadius: 2 },
   insightCount: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, marginBottom: 2 },
   insightIntensity: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5 },
