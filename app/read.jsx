@@ -450,7 +450,7 @@ const s = StyleSheet.create({
   quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontFamily: font.serif },
   quoteRule: { height: 0.5, backgroundColor: colors.border, marginVertical: 16 },
   quoteAuthor: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
-  readingSourceNote: { fontSize: 11, color: colors.textDim, marginTop: 14, lineHeight: 17, fontStyle: 'italic' },
+  readingSourceNote: { fontSize: 13, color: colors.textMuted, marginTop: 14, lineHeight: 20 },
   quoteWork: { fontSize: 12, color: colors.textDim, marginTop: 3 },
   // Reflection — light
   reflectionCard: {
