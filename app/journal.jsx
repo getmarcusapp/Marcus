@@ -231,7 +231,7 @@ export default function JournalScreen() {
     load();
   }, [sessionType]));
 
-  const answeredCount = Object.values(answers).filter(v => v && v.trim().length > 0).length;
+  const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, prompts.length);
   const selectedVirtueObj = virtues.find(v => v.id === selectedVirtue);
   const virtueDetail = virtueDetails[selectedVirtue];
 

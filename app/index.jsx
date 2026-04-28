@@ -9,7 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { virtues } from '../constants/virtues';
-import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone } from '../store/db';
+import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday } from '../notifications';
 
 const virtuePronunciations = {
@@ -70,12 +70,12 @@ export default function PracticeScreen() {
       if (settings) {
         const parsed = JSON.parse(settings);
         if (parsed.reviewDay !== undefined) setReviewDay(parsed.reviewDay);
+      }
       // Check if weekly review was completed this review window
       const reviews = await getReviews();
       const weekAgo = Date.now() - 3 * 24 * 60 * 60 * 1000; // 3-day window
       const reviewedThisWindow = reviews.some(r => new Date(r.date).getTime() > weekAgo);
       setReviewDone(reviewedThisWindow);
-      }
       setMorningDone(!!morning);
       setEveningDone(!!evening);
       setReadingDone(!!reading);
