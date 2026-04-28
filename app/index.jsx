@@ -189,7 +189,8 @@ export default function PracticeScreen() {
             <Text style={s.secLabel}>Today's practice</Text>
           </View>
           <View style={s.progressBar}>
-            <View style={[s.progressFill, { width: `${progress * 100}%` }]} />
+            <View style={[s.progressFill, { flex: progress }]} />
+            <View style={{ flex: Math.max(0, 1 - progress) }} />
           </View>
           <Text style={s.progressText}>{completed} of {totalItems} complete</Text>
 
@@ -398,8 +399,8 @@ const s = StyleSheet.create({
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   practiceHeader: { marginTop: 8, marginBottom: 10 },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase' },
-  progressBar: { height: 1, backgroundColor: colors.border, borderRadius: 1, marginBottom: 8, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: colors.textPrimary, borderRadius: 1 },
+  progressBar: { height: 1, backgroundColor: colors.border, borderRadius: 1, marginBottom: 8, overflow: 'hidden', flexDirection: 'row' },
+  progressFill: { backgroundColor: colors.textPrimary, borderRadius: 1 },
   progressText: { fontSize: 12, color: colors.textDim, marginBottom: 12 },
 
   streakRow: {
