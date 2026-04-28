@@ -133,14 +133,14 @@ export default function PracticeScreen() {
               onPress={() => setVirtueExpanded(!virtueExpanded)}
               activeOpacity={0.8}
             >
-              <Text style={s.virtueEyebrow}>Virtue focus · {todayVirtue.latin}</Text>
+              <Text style={s.virtueEyebrow}>Virtue focus · {todayVirtue.greek}</Text>
               <Text style={s.virtueName}>{todayVirtue.name}</Text>
               <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
               <Text style={s.virtueQuestion}>"{todayVirtue.question}"</Text>
               {virtueExpanded && (
                 <View style={s.virtueDetail}>
                   <View style={s.virtueDivider} />
-                  <Text style={s.virtueGreekNote}>{todayVirtue.latin} ({virtuePronunciations[todayVirtue.latin.toLowerCase()]}) is the original Greek name for {todayVirtue.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
+                  <Text style={s.virtueGreekNote}>{todayVirtue.greek} ({virtuePronunciations[todayVirtue.greek]}) is the original Greek name for {todayVirtue.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
                   <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
                   <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
                 </View>
@@ -306,14 +306,14 @@ export default function PracticeScreen() {
             onPress={() => setVirtueExpanded(!virtueExpanded)}
             activeOpacity={0.8}
           >
-            <Text style={s.virtueEyebrow}>Virtue focus · {todayVirtue.latin}</Text>
+            <Text style={s.virtueEyebrow}>Virtue focus · {todayVirtue.greek}</Text>
             <Text style={s.virtueName}>{todayVirtue.name}</Text>
             <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
             <Text style={s.virtueQuestion}>"{todayVirtue.question}"</Text>
             {virtueExpanded && (
               <View style={s.virtueDetail}>
                 <View style={s.virtueDivider} />
-                <Text style={s.virtueGreekNote}>{todayVirtue.latin} ({virtuePronunciations[todayVirtue.latin.toLowerCase()]}) is the original Greek name for {todayVirtue.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
+                <Text style={s.virtueGreekNote}>{todayVirtue.greek} ({virtuePronunciations[todayVirtue.greek]}) is the original Greek name for {todayVirtue.name} — one of the four cardinal Virtues in Stoic philosophy.</Text>
                 <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
                 <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
               </View>
@@ -462,7 +462,6 @@ const s = StyleSheet.create({
   virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif, marginBottom: 10 },
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif },
   virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 12, letterSpacing: 0.5 },
-  virtueGreekNote: { fontSize: 13, color: colors.accent, fontStyle: 'italic', marginBottom: 12, lineHeight: 20 },
   virtueGreekNote: { fontSize: 13, color: colors.accent, fontStyle: 'italic', marginBottom: 12, lineHeight: 20 },
   morningCompleteCard: {
     backgroundColor: colors.accentBg,
