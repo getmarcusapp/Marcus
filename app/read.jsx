@@ -43,6 +43,7 @@ export default function ReadScreen() {
   const [reading, setReading] = useState(null);
   const [insight, setInsight] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState(0);
   const [log, setLog] = useState([]);
   const [searchQ, setSearchQ] = useState('');
   const [filterAuthor, setFilterAuthor] = useState('all');
@@ -70,6 +71,8 @@ export default function ReadScreen() {
 
   async function generateReading() {
     setLoading(true);
+    setLoadingPhase(0);
+    const phaseTimer = setTimeout(() => setLoadingPhase(1), 4000);
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -114,7 +117,9 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
     } catch (e) {
       Alert.alert('', 'Could not generate reading. Check your connection.');
     } finally {
+      clearTimeout(phaseTimer);
       setLoading(false);
+      setLoadingPhase(0);
     }
   }
 
@@ -234,7 +239,9 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                     color={colors.accent}
                     style={{ marginTop: 20, marginBottom: 8 }}
                   />
-                  <Text style={s.loadingText}>Summoning wisdom from antiquity...</Text>
+                  <Text style={s.loadingText}>
+                    {loadingPhase === 0 ? 'Searching today\'s world...' : 'Composing your reading...'}
+                  </Text>
                 </View>
               ) : reading ? (
                 <>
