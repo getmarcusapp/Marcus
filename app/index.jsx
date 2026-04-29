@@ -98,6 +98,11 @@ export default function PracticeScreen() {
   const morningComplete = !allDone && compassDone && readingDone && morningDone && !eveningDone;
   const progress = Math.min(completed / (isReviewDay ? 5 : 4), 1);
 
+  // Cancel re-engagement notifications when practice is sealed
+  useEffect(() => {
+    if (allDone) onPracticeSealed();
+  }, [allDone]);
+
   if (allDone) {
     return (
       <SafeAreaView style={s.safe}>

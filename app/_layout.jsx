@@ -6,6 +6,7 @@ import { View } from 'react-native';
 import { colors } from '../constants/theme';
 import { hasOnboarded } from '../store/db';
 import { initializePurchases } from '../store/purchases';
+import { scheduleReengagementNotifications } from '../notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function TabIcon({ name, color }) {
@@ -32,6 +33,7 @@ function OnboardingGate() {
 export default function Layout() {
   useEffect(() => {
     initializePurchases();
+    scheduleReengagementNotifications();
     // Bypass paywall in dev and beta builds — never runs in production
     if (__DEV__ || process.env.EXPO_PUBLIC_IS_BETA === 'true') {
       AsyncStorage.setItem('has_premium', 'true');

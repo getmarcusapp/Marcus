@@ -202,6 +202,93 @@ export async function cancelJournalNotification(type) {
   }
 }
 
+
+// ─── RE-ENGAGEMENT NOTIFICATIONS ─────────────────────────────────────────────
+// Called on app load. Checks lastPracticeDate and schedules re-engagement
+// notifications if the user has been inactive. Cancels them if user is active.
+
+const REENGAGEMENT_IDS = {
+  day2: 'reengagement-day2',
+  day7: 'reengagement-day7',
+  streakRisk: 'reengagement-streak-risk',
+};
+
+export async function scheduleReengagementNotifications() {
+  try {
+    // Cancel any existing re-engagement notifications first
+    await cancelReengagementNotifications();
+
+    const raw = await AsyncStorage.getItem('streak');
+    if (!raw) return;
+    const streak = JSON.parse(raw);
+    if (!streak.lastDate) return;
+
+    const lastPractice = new Date(streak.lastDate);
+    const now = new Date();
+    const daysSince = Math.floor((now - lastPractice) / 86400000);
+
+    // Active today or yesterday — no re-engagement needed
+    if (daysSince <= 1) return;
+
+    // Day 2 miss — soft invite, fires tomorrow morning at 8am
+    if (daysSince === 2) {
+      await Notifications.scheduleNotificationAsync({
+        identifier: REENGAGEMENT_IDS.day2,
+        content: {
+          title: 'Marcus',
+          body: 'The practice doesn't judge absence. It just waits.',
+          sound: false,
+        },
+        trigger: { type: 'timeInterval', seconds: 60 * 60 * 8, repeats: false },
+      });
+      return;
+    }
+
+    // Day 7 miss — more direct, fires in 1 hour
+    if (daysSince >= 7) {
+      await Notifications.scheduleNotificationAsync({
+        identifier: REENGAGEMENT_IDS.day7,
+        content: {
+          title: 'Marcus',
+          body: 'It's been a week. One prompt is enough to start again.',
+          sound: false,
+        },
+        trigger: { type: 'timeInterval', seconds: 60 * 60, repeats: false },
+      });
+      return;
+    }
+
+    // Days 3–6 — general nudge, fires next morning at 7am
+    await Notifications.scheduleNotificationAsync({
+      identifier: REENGAGEMENT_IDS.day2,
+      content: {
+        title: 'Marcus',
+        body: 'Marcus Aurelius missed days too. He always returned.',
+        sound: false,
+      },
+      trigger: { type: 'timeInterval', seconds: 60 * 60 * 7, repeats: false },
+    });
+
+  } catch (e) {
+    console.log('scheduleReengagementNotifications error:', e);
+  }
+}
+
+export async function cancelReengagementNotifications() {
+  try {
+    for (const id of Object.values(REENGAGEMENT_IDS)) {
+      await Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
+    }
+  } catch (e) {
+    console.log('cancelReengagementNotifications error:', e);
+  }
+}
+
+// Call this when a practice is sealed — cancels all re-engagement notifications
+export async function onPracticeSealed() {
+  await cancelReengagementNotifications();
+}
+
 export async function cancelAllNotifications() {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
