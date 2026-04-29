@@ -123,7 +123,7 @@ async function run() {
     const bRes = await httpsPost(
       'api.beehiiv.com', '/v2/publications/' + BEEHIIV_PUB_ID + '/posts',
       { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + BEEHIIV_KEY },
-      { subject: edition.theme + ' \u2014 ' + dateStr, content: { free: { web: html, email: html } }, status: 'draft', authors: [{ name: 'Gio' }] }
+      { title: edition.theme + ' \u2014 ' + dateStr, subject: edition.theme + ' \u2014 ' + dateStr, content: { free: { web: html, email: html } }, status: 'draft', authors: [{ name: 'Gio' }] }
     );
     if (bRes.status === 201 || bRes.status === 200) {
       console.log('Draft created in Beehiiv.');
