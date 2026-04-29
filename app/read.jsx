@@ -12,6 +12,8 @@ const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom gener
 
 You have access to a web search tool. Use it to find one significant current event from the past 48 hours. Only use it if a genuine Stoic theme applies naturally. If the connection is weak or news is trivial, fall back to a timeless theme.
 
+Avoid events where the Stoic framing could be read as taking a political side. Do not use: ongoing military conflicts, contested foreign policy, partisan political disputes. Prefer: markets, natural disasters, cultural moments, scientific discoveries, business, sports, or universal human stories. If the only significant news is political or military, write a timeless reading instead.
+
 Generate a daily reading in this EXACT JSON format with no other text:
 {
   "quote": "the exact quote",
@@ -200,7 +202,7 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
               {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
             </Text>
             <Text style={s.sub}>
-              {tab === 'today' ? 'Ancient wisdom for this day' : 'Your reading archive'}
+              {tab === 'today' ? 'Chosen for you. Grounded in today.' : 'Your reading archive'}
             </Text>
           </View>
 
@@ -256,7 +258,7 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
                     <View style={s.quoteRule} />
                     <Text style={s.quoteAuthor}>— {reading.author}</Text>
                     {reading.work && <Text style={s.quoteWork}>{reading.work}</Text>}
-                    <Text style={s.readingSourceNote}>Not every reading comes from a Stoic text. Each is chosen because it carries a lesson the Stoics would recognize.</Text>
+                    <Text style={s.readingSourceNote}>Generated for you based on your Virtue focus and compass. Not every reading comes from a Stoic text — each is chosen because it carries a lesson the Stoics would recognize.</Text>
                   </View>
 
                   <View style={s.reflectionCard}>
