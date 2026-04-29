@@ -236,7 +236,7 @@ export async function scheduleReengagementNotifications() {
         identifier: REENGAGEMENT_IDS.day2,
         content: {
           title: 'Marcus',
-          body: 'The practice doesn't judge absence. It just waits.',
+          body: "The practice doesn't judge absence. It just waits.",
           sound: false,
         },
         trigger: { type: 'timeInterval', seconds: 60 * 60 * 8, repeats: false },
@@ -250,7 +250,7 @@ export async function scheduleReengagementNotifications() {
         identifier: REENGAGEMENT_IDS.day7,
         content: {
           title: 'Marcus',
-          body: 'It's been a week. One prompt is enough to start again.',
+          body: "It's been a week. One prompt is enough to start again.",
           sound: false,
         },
         trigger: { type: 'timeInterval', seconds: 60 * 60, repeats: false },
