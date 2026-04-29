@@ -13,7 +13,7 @@ const menuItems = [
     section: 'Practice',
     items: [
       { label: 'Stoic compass', sub: 'Your north star', icon: 'compass-outline', route: '/compass' },
-      { label: 'Daily reading', sub: 'Wisdom for this day', icon: 'book-outline', route: '/read' },
+      { label: 'Daily reading', sub: 'Personalized to your practice', icon: 'book-outline', route: '/read' },
       { label: 'Morning journal', sub: "Today's reflection and history", icon: 'sunny-outline', route: '/journal?type=morning' },
       { label: 'Evening journal', sub: "Tonight's reflection and history", icon: 'moon-outline', route: '/journal?type=evening' },
       { label: 'Daily readings', sub: 'Your reading archive', icon: 'book-outline', route: '/read' },

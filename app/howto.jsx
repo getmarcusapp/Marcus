@@ -13,7 +13,7 @@ const sections = [
   },
   {
     title: 'The daily practice',
-    content: 'Each day has four core elements:\n\n1. Stoic compass: Read your personal North Star to anchor your intentions.\n\n2. Daily reading: A quote and reflection from Marcus Aurelius, Epictetus, or Seneca. Generated fresh each day.\n\n3. Morning journal: Set your Virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.',
+    content: 'Each day has four core elements:\n\n1. Stoic compass: Read your personal North Star to anchor your intentions.\n\n2. Daily reading: A real quote generated fresh each day, personalized to your Virtue focus and compass. Grounded in what's happening in the world today.\n\n3. Morning journal: Set your Virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.',
   },
   {
     title: 'The Stoic compass',
