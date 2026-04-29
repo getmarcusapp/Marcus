@@ -28,7 +28,7 @@ Sources — never invent or misattribute:
 - Core Stoics: Marcus Aurelius (Meditations), Epictetus (Discourses, Enchiridion), Seneca (Letters, Essays), Zeno, Cato, Cleanthes
 - Aligned thinkers: Socrates, Aristotle, Heraclitus, Cicero, Viktor Frankl, Montaigne, Stockdale
 
-Rules: Vary sources daily. No consecutive same author. Prefer lesser-cited quotes. Match virtue field to user's focus if provided.\`;
+Rules: Vary sources daily. No consecutive same author. Prefer lesser-cited quotes. Match virtue field to user's focus if provided.`;
 
 const virtueColor = {
   Wisdom: '#7a9aaa',
@@ -125,7 +125,7 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
     const updated = await getReadingLog();
     setLog(updated);
 
-    // Check what's still left to do
+    // Check what\'s still left to do
     const morning = await getTodayJournal('morning');
 
     if (!morning) {
