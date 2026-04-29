@@ -8,25 +8,25 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog, getTodayJournal } from '../store/db';
 
-const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom. Generate a daily reading in this EXACT JSON format with no other text:
+const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom generating a personalized daily reading for a user of a Stoic practice app.
+
+You have access to a web search tool. Use it to find one significant current event from the past 48 hours. Only use it if a genuine Stoic theme applies naturally. If the connection is weak or news is trivial, fall back to a timeless theme.
+
+Generate a daily reading in this EXACT JSON format with no other text:
 {
   "quote": "the exact quote",
   "author": "Author Name",
   "work": "Title of Work",
-  "theme": "2-4 word theme",
+  "theme": "2-4 word Stoic theme (not the news event itself)",
   "virtue": "Wisdom|Courage|Moderation|Justice",
-  "reflection": "A 3-4 sentence practical reflection connecting the wisdom to modern daily life. Write in second person."
+  "reflection": "A 3-4 sentence reflection. If a current event applies, briefly name it and apply the Stoic lens. Otherwise write a timeless reflection in second person. Personalize to the user's Virtue focus and compass context if provided."
 }
 
-Draw from this broad range of real, accurately attributed sources — never invent quotes:
-- Core Stoics: Marcus Aurelius (Meditations), Epictetus (Discourses, Enchiridion), Seneca (Letters, On the Shortness of Life, On Benefits), Zeno of Citium, Chrysippus, Cato the Younger, Cleanthes
-- Ancient philosophy aligned with Stoicism: Socrates, Plato, Aristotle, Heraclitus, Pythagoras, Cicero
-- Viktor Frankl (Man's Search for Meaning) — on meaning, suffering, freedom
-- Modern Stoics and adjacent thinkers: Ryan Holiday (The Obstacle Is the Way, Ego Is the Enemy), James Stockdale, Nassim Taleb (on antifragility and resilience)
-- Timeless wisdom from: Rumi (on acceptance and presence), Thoreau (on deliberate living), Emerson (on self-reliance), Montaigne (on self-examination)
-- Historical figures known for Stoic-aligned wisdom: Abraham Lincoln, Theodore Roosevelt, Winston Churchill
+Sources — never invent or misattribute:
+- Core Stoics: Marcus Aurelius (Meditations), Epictetus (Discourses, Enchiridion), Seneca (Letters, Essays), Zeno, Cato, Cleanthes
+- Aligned thinkers: Socrates, Aristotle, Heraclitus, Cicero, Viktor Frankl, Montaigne, Stockdale
 
-Vary the source significantly day to day. Do not repeat the same author on consecutive days. Prefer less commonly cited quotes over famous ones. The date passed in the user message should influence your selection — use seasonal themes, historical events on that date, or the position in the year to add relevance.`;
+Rules: Vary sources daily. No consecutive same author. Prefer lesser-cited quotes. Match virtue field to user's focus if provided.\`;
 
 const virtueColor = {
   Wisdom: '#7a9aaa',
@@ -78,9 +78,10 @@ export default function ReadScreen() {
           'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 1000,
+          model: 'claude-sonnet-4-6',
+          max_tokens: 2048,
           system: SYSTEM_PROMPT,
+          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
           messages: [{
             role: 'user',
             content: (() => {
@@ -88,7 +89,7 @@ export default function ReadScreen() {
               const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
               const recentAuthors = log.slice(0, 14).map(r => r.author).filter(Boolean).join(', ');
               const recentQuotes = log.slice(0, 7).map(r => r.quote ? r.quote.substring(0, 60) : '').filter(Boolean).join(' | ');
-              return `Today is ${dateStr} (day ${dayOfYear} of the year). Generate a Stoic reading. Return only the JSON object.
+              return `Today is ${dateStr} (day ${dayOfYear} of the year). Search for a current event first, then generate a personalized Stoic reading. Return only the JSON object.
 
 Do NOT use these recently used authors: ${recentAuthors || 'none'}.
 Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
@@ -97,7 +98,11 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
         }),
       });
       const data = await response.json();
-      const text = data.content?.[0]?.text || '';
+      // Web search returns multiple content blocks; extract the final text block
+      const textBlock = Array.isArray(data.content)
+        ? data.content.filter(b => b.type === 'text').pop()
+        : null;
+      const text = textBlock?.text || data.content?.[0]?.text || '';
       const clean = text.replace(/```json|```/g, '').trim();
       const result = JSON.parse(clean);
       await saveTodayReading(result);
