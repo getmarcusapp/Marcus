@@ -89,7 +89,9 @@ export async function getStreak() {
     }
     const today = new Date().toDateString();
     const yesterday = new Date(Date.now() - 86400000).toDateString();
-    if (streak.lastDate !== today && streak.lastDate !== yesterday) {
+    const twoDaysAgo = new Date(Date.now() - 172800000).toDateString();
+    // Grace day: one missed day doesn't break the streak
+    if (streak.lastDate !== today && streak.lastDate !== yesterday && streak.lastDate !== twoDaysAgo) {
       return { ...streak, current: 0 };
     }
     return streak;

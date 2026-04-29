@@ -193,24 +193,7 @@ export default function PracticeScreen() {
           </View>
           <Text style={s.progressText}>{completed} of {totalItems} complete</Text>
 
-          {(streak.current > 0 || streak.longest > 0 || streak.totalDays > 0) && (
-            <View style={s.streakRow}>
-              <View style={s.streakStat}>
-                <Text style={s.streakNum}>{streak.current}</Text>
-                <Text style={s.streakLabel}>Current</Text>
-              </View>
-              <View style={s.streakDivider} />
-              <View style={s.streakStat}>
-                <Text style={s.streakNum}>{streak.longest || 0}</Text>
-                <Text style={s.streakLabel}>Longest</Text>
-              </View>
-              <View style={s.streakDivider} />
-              <View style={s.streakStat}>
-                <Text style={s.streakNum}>{streak.totalDays || 0}</Text>
-                <Text style={s.streakLabel}>Total days</Text>
-              </View>
-            </View>
-          )}
+
 
           <View style={s.routineCard}>
 
@@ -401,19 +384,6 @@ const s = StyleSheet.create({
   progressFill: { backgroundColor: colors.textPrimary, borderRadius: 1 },
   progressText: { fontSize: 12, color: colors.textDim, marginBottom: 12 },
 
-  streakRow: {
-    flexDirection: 'row',
-    borderWidth: 0.5,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    backgroundColor: colors.bgElevated,
-    marginBottom: 14,
-    overflow: 'hidden',
-  },
-  streakStat: { flex: 1, alignItems: 'center', paddingVertical: 12 },
-  streakNum: { fontSize: 22, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5 },
-  streakLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 3 },
-  streakDivider: { width: 0.5, backgroundColor: colors.border, marginVertical: 8 },
 
   routineCard: {
     borderWidth: 0.5,
