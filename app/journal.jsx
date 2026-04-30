@@ -421,7 +421,6 @@ export default function JournalScreen() {
                       >
                         <View style={s.virtueInfoLeft}>
                           <Text style={s.virtueInfoName}>{selectedVirtueObj.name}</Text>
-                          <Text style={s.virtueInfoLatin}>{virtueDetail?.latin}</Text>
                           <Text style={s.virtueInfoDesc}>{selectedVirtueObj.desc}</Text>
                         </View>
                         <Text style={s.virtueInfoChev}>{showVirtueDetail ? '∨' : '›'}</Text>
