@@ -460,8 +460,8 @@ export default function JournalScreen() {
                   <Text style={s.anchorLabel}>{isMorning ? 'Morning anchor' : 'Evening anchor'}</Text>
                   <Text style={s.anchorText}>
                     {isMorning
-                      ? '"When you wake, say this to yourself: today I will meet people who are meddlesome, ungrateful, arrogant, deceitful, envious, and unsocial. They are this way because they cannot tell good from evil. But I have seen that the nature of good is beautiful, and the nature of evil ugly, and that the wrongdoer is kin to me — not of the same blood, but sharing in the same reason and the same portion of the divine. I cannot be harmed by any of them. No one can make me ugly. I cannot be angry at a kinsman or hate him. We were made for cooperation — like hands, like feet, like the rows of upper and lower teeth."'
-                      : '"Ask yourself at day\'s end: What was ill done? What done? What left undone? Starting from the first, proceed through all three."'}
+                      ? '"When you wake, expect to meet people who are difficult — meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."'
+                      : '"Ask yourself at day\'s end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn."'}
                   </Text>
                   <Text style={s.anchorAuthor}>
                     {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
