@@ -11,6 +11,7 @@ import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/qu
 import { virtues } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed, cancelJournalNotification } from '../notifications';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
 
 const virtuePronunciations = {
@@ -191,7 +192,13 @@ export default function PracticeScreen() {
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
-        <View style={s.hero}>
+        <LinearGradient
+          colors={['#4a3a26', '#1a1410', '#000000']}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={s.hero}
+        >
           <Image
             source={require('../assets/skull.png')}
             style={s.skullIcon}
@@ -202,7 +209,7 @@ export default function PracticeScreen() {
           <Text style={s.heroSub}>
             {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
           </Text>
-        </View>
+        </LinearGradient>
 
         <View style={s.quoteCard}>
           <Text style={s.quoteText}>“{quote.text}”</Text>
