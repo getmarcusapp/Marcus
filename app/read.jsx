@@ -428,6 +428,12 @@ Return only the JSON object.`;
                     </TouchableOpacity>
                   </View>
 
+                  <Text style={s.modeHint}>
+                    {mode === 'timeless'
+                      ? 'Drawn from the Stoic canon. Untethered to today\'s news.'
+                      : "Tied to a current event. Slower; falls back to timeless if no fresh story fits."}
+                  </Text>
+
                   <TouchableOpacity
                     style={s.regenBtn}
                     onPress={() => generateReading({ topical: mode === 'topical' })}
@@ -619,7 +625,8 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   quoteTextWithIcon: { paddingRight: 40 },
-  modeRow: { flexDirection: 'row', gap: 8, marginTop: 24, marginBottom: 12 },
+  modeRow: { flexDirection: 'row', gap: 8, marginTop: 24, marginBottom: 8 },
+  modeHint: { fontSize: 12, color: colors.textMuted, lineHeight: 18, textAlign: 'center', marginBottom: 14, paddingHorizontal: 8 },
   modePill: {
     flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgCard,
