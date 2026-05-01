@@ -12,7 +12,7 @@
       "distribution": "internal"
     },
     "beta": {
-      "distribution": "internal",
+      "distribution": "store",
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_REVENUECAT_KEY": "appl_PLlIRAynMNSYFQFeZZMoQiSsssK",
@@ -27,6 +27,10 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6762488316"
+      }
+    }
   }
 }
