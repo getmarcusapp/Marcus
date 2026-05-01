@@ -14,6 +14,9 @@ import { refreshNotificationsForToday, onPracticeSealed, cancelJournalNotificati
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
 
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
+
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
   andreia: 'an-DRAY-ah',
@@ -138,7 +141,13 @@ export default function PracticeScreen() {
       <SafeAreaView style={s.safe}>
         <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
-          <Animated.View style={[s.heroSealed, sealedAnimStyle(0)]}>
+          <AnimatedLinearGradient
+            colors={HERO_GRADIENT}
+            locations={[0, 0.6, 1]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={[s.heroSealed, sealedAnimStyle(0)]}
+          >
             <Image
               source={require('../assets/skull.png')}
               style={s.skullIconSealed}
@@ -149,7 +158,7 @@ export default function PracticeScreen() {
             <Text style={s.sealedStreak}>
               {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
             </Text>
-          </Animated.View>
+          </AnimatedLinearGradient>
 
           <Animated.View style={[s.sealedCard, sealedAnimStyle(1)]}>
             <Text style={s.sealedQuoteText}>“{sealQuote.text}”</Text>
@@ -193,7 +202,7 @@ export default function PracticeScreen() {
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
         <LinearGradient
-          colors={['#4a3a26', '#1a1410', '#000000']}
+          colors={HERO_GRADIENT}
           locations={[0, 0.6, 1]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}

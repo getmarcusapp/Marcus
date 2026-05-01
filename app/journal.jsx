@@ -5,7 +5,10 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
+
+const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 import { virtues } from '../constants/virtues';
 import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
@@ -365,7 +368,13 @@ export default function JournalScreen() {
 
           {viewMode === 'write' ? (
             <>
-              <View style={s.mementoStrip}>
+              <LinearGradient
+                colors={HERO_GRADIENT}
+                locations={[0, 0.6, 1]}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+                style={s.mementoStrip}
+              >
                 <Text style={s.mementoText}>
                   {isMorning
                     ? '"When you wake, expect to meet people who are difficult — meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."'
@@ -374,7 +383,7 @@ export default function JournalScreen() {
                 <Text style={s.mementoSub}>
                   {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
                 </Text>
-              </View>
+              </LinearGradient>
 
               <View style={s.body}>
                 {isMorning && (

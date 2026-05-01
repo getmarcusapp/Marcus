@@ -4,9 +4,12 @@ import {
   SafeAreaView, Image, ActivityIndicator, Alert, ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getOfferings, purchasePackage, restorePurchases } from '../store/purchases';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 
 export default function PaywallScreen() {
   const router = useRouter();
@@ -89,7 +92,13 @@ export default function PaywallScreen() {
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* Hero */}
-        <View style={s.hero}>
+        <LinearGradient
+          colors={HERO_GRADIENT}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={s.hero}
+        >
           <Image
             source={require('../assets/skull.png')}
             style={s.skull}
@@ -98,7 +107,7 @@ export default function PaywallScreen() {
           <Text style={s.eyebrow}>Marcus Premium</Text>
           <Text style={s.title}>Become someone{'\n'}you respect.</Text>
           <Text style={s.sub}>A complete daily Stoic practice.{'\n'}7 days free, then 16¢ a day.</Text>
-        </View>
+        </LinearGradient>
 
         {/* Feature list */}
         <View style={s.features}>
