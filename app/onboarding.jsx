@@ -310,7 +310,6 @@ const s = StyleSheet.create({
   welcomeSub: {
     fontSize: 20,
     color: colors.textSecondary,
-    fontStyle: 'italic',
     fontFamily: font.serif,
     marginBottom: 36,
     textAlign: 'center',
@@ -324,7 +323,6 @@ const s = StyleSheet.create({
   welcomeTagline: {
     fontSize: 17,
     color: colors.textMuted,
-    fontStyle: 'italic',
     fontFamily: font.serif,
     textAlign: 'center',
     lineHeight: 28,
@@ -447,7 +445,6 @@ const s = StyleSheet.create({
     fontSize: 19,
     color: colors.textSecondary,
     lineHeight: 32,
-    fontStyle: 'italic',
     fontFamily: font.serif,
     marginBottom: 36,
   },
@@ -503,7 +500,6 @@ const s = StyleSheet.create({
     fontSize: 14,
     color: colors.textDim,
     marginBottom: 16,
-    fontStyle: 'italic',
   },
   compassInput: {
     fontSize: 16,
@@ -512,7 +508,6 @@ const s = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: 'top',
     fontFamily: font.serif,
-    fontStyle: 'italic',
   },
   skipLink: { paddingVertical: 20, alignItems: 'center' },
   skipLinkText: { fontSize: 15, color: colors.textDim },

@@ -491,7 +491,7 @@ const s = StyleSheet.create({
   timeLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 4, textAlign: 'center' },
   timePreview: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 10 },
   sampleMsg: { backgroundColor: colors.bgDeep, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 12 },
-  sampleText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 20, textAlign: 'center' },
+  sampleText: { fontSize: 13, color: colors.textMuted, fontFamily: font.serif, lineHeight: 20, textAlign: 'center' },
   dayRow: { flexDirection: 'row', gap: 6, marginTop: 14 },
   dayBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgDeep },
   dayBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },

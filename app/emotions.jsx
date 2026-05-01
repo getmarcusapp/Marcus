@@ -7,17 +7,18 @@ import {
 import { colors, radius, spacing, font } from '../constants/theme';
 import { emotions, stoicReframes } from '../constants/virtues';
 import { saveTrigger, getTriggers, updateTriggerEntry } from '../store/db';
+import * as haptics from '../lib/haptics';
 
 const EMOTION_COLORS = {
-  anger:       { bg: '#FDF0EF', border: '#E8A09A', text: '#C0504A' },
-  anxiety:     { bg: '#EFF4FD', border: '#9AB4E8', text: '#4A6EC0' },
-  frustration: { bg: '#FDF8EF', border: '#E8C87A', text: '#A07830' },
-  shame:       { bg: '#F5EFFd', border: '#C09AE8', text: '#7050B0' },
-  avoidance:   { bg: '#EFF8F5', border: '#7AC8B4', text: '#307870' },
-  envy:        { bg: '#EFF8EF', border: '#80C880', text: '#307030' },
-  grief:       { bg: '#F0F0F8', border: '#A0A0D0', text: '#505090' },
-  fear:        { bg: '#FDF2EF', border: '#E8B09A', text: '#B06040' },
-  other:       { bg: '#F5F5F5', border: '#C0C0C0', text: '#707070' },
+  anger:       { bg: '#FDF0EF', border: '#E8A09A', text: '#C0504A', tint: 'rgba(232,160,154,0.12)' },
+  anxiety:     { bg: '#EFF4FD', border: '#9AB4E8', text: '#4A6EC0', tint: 'rgba(154,180,232,0.12)' },
+  frustration: { bg: '#FDF8EF', border: '#E8C87A', text: '#A07830', tint: 'rgba(232,200,122,0.12)' },
+  shame:       { bg: '#F5EFFd', border: '#C09AE8', text: '#7050B0', tint: 'rgba(192,154,232,0.12)' },
+  avoidance:   { bg: '#EFF8F5', border: '#7AC8B4', text: '#307870', tint: 'rgba(122,200,180,0.12)' },
+  envy:        { bg: '#EFF8EF', border: '#80C880', text: '#307030', tint: 'rgba(128,200,128,0.12)' },
+  grief:       { bg: '#F0F0F8', border: '#A0A0D0', text: '#505090', tint: 'rgba(160,160,208,0.12)' },
+  fear:        { bg: '#FDF2EF', border: '#E8B09A', text: '#B06040', tint: 'rgba(232,176,154,0.12)' },
+  other:       { bg: '#F5F5F5', border: '#C0C0C0', text: '#707070', tint: 'rgba(192,192,192,0.10)' },
 };
 
 const DISTORTIONS = [
@@ -123,6 +124,7 @@ export default function EmotionsScreen() {
       distortions: selectedDistortions,
     };
     await saveTrigger(entry);
+    haptics.action();
     const updated = await getTriggers();
     setHistory(updated);
     setSelectedEmotion(null);
@@ -216,7 +218,7 @@ export default function EmotionsScreen() {
           {tab === 'log' ? (
             <View style={s.body}>
 
-              {/* Timing toggle */}
+              <Text style={s.stageLabel}>I — Context</Text>
               <Text style={s.secLabel}>When did this happen?</Text>
               <View style={s.timingRow}>
                 <TouchableOpacity
@@ -253,18 +255,20 @@ export default function EmotionsScreen() {
                   return (
                     <TouchableOpacity
                       key={e.id}
-                      style={[s.ePill, isSelected && { backgroundColor: ec.bg, borderColor: ec.border, borderWidth: 1 }]}
+                      style={[s.ePill, isSelected && { backgroundColor: ec.tint, borderColor: ec.border }]}
                       onPress={() => setSelectedEmotion(e.id)}
                       activeOpacity={0.7}
                     >
-                      <View style={[s.eDot, isSelected && { backgroundColor: ec.text }]} />
-                      <Text style={[s.ePillName, isSelected && { color: ec.text, fontWeight: '600' }]}>
+                      <View style={[s.eAccent, { backgroundColor: ec.border, opacity: isSelected ? 1 : 0.55 }]} />
+                      <Text style={[s.ePillName, isSelected && { color: ec.border, fontWeight: '600' }]}>
                         {e.label}
                       </Text>
                     </TouchableOpacity>
                   );
                 })}
               </View>
+
+              <Text style={s.stageLabel}>II — Describe</Text>
 
               <View style={s.fieldCard}>
                 <Text style={s.fieldLabel}>Intensity</Text>
@@ -298,7 +302,9 @@ export default function EmotionsScreen() {
               </View>
 
               {selectedEmotion && (
-                <View style={[s.reframeCard, { borderColor: EMOTION_COLORS[selectedEmotion].border }]}>
+                <>
+                  <Text style={s.stageLabel}>III — Reframe</Text>
+                  <View style={[s.reframeCard, { borderColor: EMOTION_COLORS[selectedEmotion].border, backgroundColor: EMOTION_COLORS[selectedEmotion].tint }]}>
                   <Text style={[s.reframeEyebrow, { color: EMOTION_COLORS[selectedEmotion].text }]}>
                     The Stoic reframe
                   </Text>
@@ -350,6 +356,7 @@ export default function EmotionsScreen() {
                     scrollEnabled={false}
                   />
                 </View>
+                </>
               )}
 
               <TouchableOpacity style={s.saveBtn} onPress={handleLog} activeOpacity={0.8}>
@@ -404,15 +411,15 @@ export default function EmotionsScreen() {
 
               {filteredHistory.length === 0 && history.length > 0 ? (
                 <View style={s.empty}>
-                  <Text style={s.emptyTitle}>No matches</Text>
-                  <Text style={s.emptyText}>Try a different search or filter.</Text>
+                  <Text style={s.emptyTitle}>Nothing matches your filter.</Text>
+                  <Text style={s.emptyText}>Adjust your search or open the field wider.</Text>
                 </View>
               ) : filteredHistory.length === 0 ? (
                 <View style={s.empty}>
                   <Text style={s.emptyIcon}>⚡</Text>
-                  <Text style={s.emptyTitle}>No triggers logged yet</Text>
+                  <Text style={s.emptyTitle}>Nothing logged yet — that is its own kind of clarity.</Text>
                   <Text style={s.emptyText}>
-                    {'When a strong emotion arises — anger, anxiety, frustration, shame — open this logger before you react.\n\nName the emotion, rate the intensity, describe what triggered it, and note your automatic reaction. Then read the Stoic reframe and choose your response.\n\nThe space between stimulus and response is where the practice lives.'}
+                    When a strong emotion arises, open this logger before you react. Name it, rate it, describe what triggered it, and read the Stoic reframe. The space between stimulus and response is where the practice lives.
                   </Text>
                 </View>
               ) : (
@@ -562,12 +569,13 @@ const s = StyleSheet.create({
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
   tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
-  tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
+  tabBtnActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
-  tabBtnTextActive: { color: colors.textSecondary },
+  tabBtnTextActive: { color: colors.accent, fontWeight: '500' },
   // Light body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
+  stageLabel: { fontSize: 11, letterSpacing: 3, color: colors.accentDim, textTransform: 'uppercase', marginTop: 24, marginBottom: 4 },
   timingRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 16, backgroundColor: colors.bgElevated },
   timingBtnActive: { borderColor: colors.textSecondary, backgroundColor: colors.bgElevated },
@@ -576,13 +584,13 @@ const s = StyleSheet.create({
   timingBtnSub: { fontSize: 12, color: colors.textDim, lineHeight: 18 },
   timingBtnSubActive: { color: colors.textSecondary },
   emotionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginBottom: 16 },
-  ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 16, alignItems: 'center', backgroundColor: colors.bgElevated },
-  eDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: colors.textDim, marginBottom: 8 },
-  ePillName: { fontSize: 13, color: colors.textMuted, fontWeight: '400' },
+  ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 18, alignItems: 'center', backgroundColor: colors.bgElevated, overflow: 'hidden' },
+  eAccent: { position: 'absolute', top: 0, left: 0, right: 0, height: 3 },
+  ePillName: { fontSize: 13, color: colors.textSecondary, fontWeight: '400' },
   fieldCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 12, backgroundColor: colors.bgElevated },
   fieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 12 },
   fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 25, minHeight: 64, textAlignVertical: 'top', paddingBottom: 16 },
-  reframeCard: { borderWidth: 0.5, borderRadius: radius.lg, padding: 20, marginBottom: 12, backgroundColor: colors.bgCard },
+  reframeCard: { borderWidth: 1, borderRadius: radius.lg, padding: 26, marginBottom: 12, backgroundColor: colors.bgCard },
   reframeEyebrow: { fontSize: font.microSize, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12, fontWeight: '600' },
   reframeText: { fontSize: 16, color: colors.textSecondary, fontFamily: font.serif, lineHeight: 26, marginBottom: 16 },
   reframeDivider: { height: 0.5, backgroundColor: colors.border, marginBottom: 16 },

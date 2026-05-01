@@ -136,10 +136,10 @@ export default function PaywallScreen() {
                 <Text style={[s.planName, selectedPackage === 'annual' && s.planNameSelected]}>Annual</Text>
               </View>
               <Text style={[s.planPrice, selectedPackage === 'annual' && s.planPriceSelected]}>
-                {annualPrice}<Text style={s.planPeriod}>/year</Text>
+                16¢<Text style={s.planPeriod}>/day</Text>
               </Text>
               <Text style={[s.planNote, selectedPackage === 'annual' && s.planNoteSelected]}>
-                16¢ a day · $1.15/week · Save 37% vs monthly
+                Billed {annualPrice}/year · Save 37% vs monthly
               </Text>
             </TouchableOpacity>
 

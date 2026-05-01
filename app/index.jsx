@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Image,
+  StyleSheet, SafeAreaView, Image, Animated,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,6 +11,7 @@ import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/qu
 import { virtues } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
+import * as haptics from '../lib/haptics';
 
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
@@ -97,18 +98,46 @@ export default function PracticeScreen() {
   const allDone = completed >= 4 && (!isReviewDay || completed >= 5);
   const morningComplete = !allDone && compassDone && readingDone && morningDone && !eveningDone;
   const progress = Math.min(completed / (isReviewDay ? 5 : 4), 1);
+  const nextItem = !compassDone ? 'compass'
+    : !readingDone ? 'reading'
+    : !morningDone ? 'morning'
+    : !eveningDone ? 'evening'
+    : null;
 
-  // Cancel re-engagement notifications when practice is sealed
+  // Cancel re-engagement notifications when practice is sealed; fire success haptic once per day
   useEffect(() => {
-    if (allDone) onPracticeSealed();
+    if (!allDone) return;
+    onPracticeSealed();
+    (async () => {
+      const today = new Date().toDateString();
+      const last = await AsyncStorage.getItem('last_sealed_date');
+      if (last !== today) {
+        haptics.success();
+        await AsyncStorage.setItem('last_sealed_date', today);
+      }
+    })();
   }, [allDone]);
+
+  // Sealed-state reveal animation
+  const sealedFades = useRef([0, 0, 0, 0].map(() => new Animated.Value(0))).current;
+  const sealedSlides = useRef([0, 0, 0, 0].map(() => new Animated.Value(20))).current;
+  useFocusEffect(useCallback(() => {
+    if (!allDone) return;
+    sealedFades.forEach(a => a.setValue(0));
+    sealedSlides.forEach(a => a.setValue(20));
+    Animated.stagger(140, sealedFades.map((fade, i) => Animated.parallel([
+      Animated.timing(fade, { toValue: 1, duration: 650, useNativeDriver: true }),
+      Animated.timing(sealedSlides[i], { toValue: 0, duration: 650, useNativeDriver: true }),
+    ]))).start();
+  }, [allDone]));
+  const sealedAnimStyle = (i) => ({ opacity: sealedFades[i], transform: [{ translateY: sealedSlides[i] }] });
 
   if (allDone) {
     return (
       <SafeAreaView style={s.safe}>
         <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
-          <View style={s.heroSealed}>
+          <Animated.View style={[s.heroSealed, sealedAnimStyle(0)]}>
             <Image
               source={require('../assets/skull.png')}
               style={s.skullIconSealed}
@@ -119,20 +148,20 @@ export default function PracticeScreen() {
             <Text style={s.sealedStreak}>
               {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
             </Text>
-          </View>
+          </Animated.View>
 
-          <View style={s.sealedCard}>
+          <Animated.View style={[s.sealedCard, sealedAnimStyle(1)]}>
             <Text style={s.sealedQuoteText}>“{sealQuote.text}”</Text>
             <View style={s.sealedQuoteRule} />
             <Text style={s.sealedQuoteAttr}>— {sealQuote.author.toUpperCase()}, {sealQuote.source.toUpperCase()}</Text>
-          </View>
+          </Animated.View>
 
-          <View style={s.sealedRestCard}>
+          <Animated.View style={[s.sealedRestCard, sealedAnimStyle(2)]}>
             <Text style={s.sealedRestTitle}>The rest of the day is yours.</Text>
             <Text style={s.sealedRestSub}>You have done what was required. Now live what you practiced.</Text>
-          </View>
+          </Animated.View>
 
-          <View style={s.body}>
+          <Animated.View style={[s.body, sealedAnimStyle(3)]}>
             <TouchableOpacity
               style={s.virtueCard}
               onPress={() => setVirtueExpanded(!virtueExpanded)}
@@ -151,7 +180,7 @@ export default function PracticeScreen() {
               )}
               <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
 
         </ScrollView>
       </SafeAreaView>
@@ -191,19 +220,19 @@ export default function PracticeScreen() {
 
           <View style={s.practiceHeader}>
             <Text style={s.secLabel}>Today's practice</Text>
+            <Text style={s.practiceCount}>{completed} of {totalItems}</Text>
           </View>
           <View style={s.progressBar}>
             <View style={[s.progressFill, { flex: progress }]} />
             <View style={{ flex: Math.max(0, 1 - progress) }} />
           </View>
-          <Text style={s.progressText}>{completed} of {totalItems} complete</Text>
 
 
 
           <View style={s.routineCard}>
 
             <TouchableOpacity
-              style={[s.routineRow, s.routineRowBorder]}
+              style={[s.routineRow, s.routineRowBorder, nextItem === 'compass' && s.routineRowNext]}
               onPress={async () => { router.push('/compass'); setCompassDone(true); await persistCompassDone(); }}
               activeOpacity={0.7}
             >
@@ -225,7 +254,7 @@ export default function PracticeScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[s.routineRow, s.routineRowBorder]}
+              style={[s.routineRow, s.routineRowBorder, nextItem === 'reading' && s.routineRowNext]}
               onPress={() => router.push('/read')}
               activeOpacity={0.7}
             >
@@ -240,7 +269,7 @@ export default function PracticeScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[s.routineRow, s.routineRowBorder]}
+              style={[s.routineRow, s.routineRowBorder, nextItem === 'morning' && s.routineRowNext]}
               onPress={() => router.push({ pathname: '/journal', params: { type: 'morning' } })}
               activeOpacity={0.7}
             >
@@ -255,7 +284,7 @@ export default function PracticeScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[s.routineRow, isReviewDay && s.routineRowBorder]}
+              style={[s.routineRow, isReviewDay && s.routineRowBorder, nextItem === 'evening' && s.routineRowNext]}
               onPress={() => router.push({ pathname: '/journal', params: { type: 'evening' } })}
               activeOpacity={0.7}
             >
@@ -383,11 +412,11 @@ const s = StyleSheet.create({
 
   // Light body zone
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
-  practiceHeader: { marginTop: 8, marginBottom: 10 },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase' },
+  practiceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 8, marginBottom: 10 },
+  practiceCount: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accentDim, textTransform: 'uppercase' },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
   progressBar: { height: 1, backgroundColor: colors.border, borderRadius: 1, marginBottom: 8, overflow: 'hidden', flexDirection: 'row' },
   progressFill: { backgroundColor: colors.textPrimary, borderRadius: 1 },
-  progressText: { fontSize: 12, color: colors.textDim, marginBottom: 12 },
 
 
   routineCard: {
@@ -398,24 +427,25 @@ const s = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 16,
   },
-  routineRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 18 },
+  routineRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 18, borderLeftWidth: 2, borderLeftColor: 'transparent' },
   routineRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  dot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.borderMid },
+  routineRowNext: { borderLeftColor: colors.accent },
+  dot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.textMuted },
   dotDone: { backgroundColor: colors.accent, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
   routineContent: { flex: 1 },
   routineTitle: { fontSize: 15, fontWeight: '400', color: colors.textPrimary, marginBottom: 3 },
   titleDone: { color: colors.textDim, textDecorationLine: 'line-through' },
-  routineSub: { fontSize: 12, color: colors.textDim },
+  routineSub: { fontSize: 12, color: colors.textMuted },
   tagRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   undoBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
   undoBtnText: { fontSize: 11, color: colors.textMuted },
   tag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
   tagDone: { borderColor: colors.border },
-  tagNow: { borderColor: colors.textPrimary, backgroundColor: 'transparent' },
-  tagLater: { borderColor: colors.border },
+  tagNow: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
+  tagLater: { borderWidth: 0, paddingHorizontal: 0, paddingVertical: 0 },
   tagAccent: { borderColor: colors.borderMid },
   tagText: { fontSize: 10, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' },
-  tagTextNow: { color: colors.textPrimary, fontWeight: '500' },
+  tagTextNow: { color: colors.accent, fontWeight: '500' },
   tagTextAccent: { color: colors.textMuted },
 
   virtueCard: {

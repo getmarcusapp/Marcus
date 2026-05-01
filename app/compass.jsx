@@ -8,6 +8,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { getCompass, saveCompass } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
+import * as haptics from '../lib/haptics';
 
 const COMPASS_HINTS = {
   why: {
@@ -45,6 +46,7 @@ export default function CompassScreen() {
     const key = tabKeys[activeTab];
     const updated = { ...compass, [key]: draft };
     await saveCompass(updated);
+    haptics.action();
     setCompass(updated);
     setEditing(false);
   }
@@ -242,7 +244,7 @@ const s = StyleSheet.create({
   },
   editBtnSave: { borderColor: colors.borderMid, backgroundColor: colors.bgElevated },
   editBtnText: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 14 },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 14 },
   virtueCard: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
     padding: 22, marginBottom: 12, backgroundColor: colors.bgElevated,

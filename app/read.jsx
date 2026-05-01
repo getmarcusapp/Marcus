@@ -5,33 +5,65 @@ import {
   KeyboardAvoidingView, Platform, Image, Share,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import SkullLoader from '../components/SkullLoader';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog, getReadingHistory, getLastVirtueFocus } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
+import * as haptics from '../lib/haptics';
 
 const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom generating a personalized daily reading for a user of a Stoic practice app.
-
-You have access to a web search tool. Optionally use it to find a current event ONLY from within the past 48 hours. Before invoking the Stoic lens on any event, verify the article's publication date is within 48 hours of today. If you cannot find a date or the event is older, DO NOT use it — write a timeless reflection instead. A timeless reflection is preferred over a recycled or stale event.
-
-Topical diversity is critical. Do not repeatedly anchor on the same domain (e.g. marathons, elections, market moves). Rotate categories across days. If your search returns the same dominant story you've covered before, ignore it and write timeless.
-
-Avoid events where the Stoic framing could be read as taking a political side. Do not use: ongoing military conflicts, contested foreign policy, partisan political disputes. Prefer when freshness is verified: markets, natural disasters, cultural moments, scientific discoveries, business, sports, or universal human stories. If the only significant news is political, military, or stale, write a timeless reading instead.
 
 Generate a daily reading in this EXACT JSON format with no other text:
 {
   "quote": "the exact quote",
   "author": "Author Name",
   "work": "Title of Work",
-  "theme": "2-4 word Stoic theme (not the news event itself)",
+  "theme": "2-4 word Stoic theme",
   "virtue": "Wisdom|Courage|Moderation|Justice",
-  "reflection": "A 3-4 sentence reflection. If a current event applies, briefly name it and apply the Stoic lens. Otherwise write a timeless reflection in second person. Personalize to the user's Virtue focus and compass context if provided."
+  "event_date": null,
+  "event_url": null,
+  "reflection": "A 3-4 sentence reflection in second person. Personalize to the user's Virtue focus if provided."
 }
+
+Default mode is TIMELESS. Set event_date and event_url to null. Do not use temporal markers (today, yesterday, this week, recently, just announced, etc.).
+
+If the user message includes "TOPICAL MODE", and only then, you may use the web_search tool to find a current event from the past 48 hours, fill event_date with the article's actual publication date (YYYY-MM-DD), and fill event_url with the article URL — both must come from a real search result, never fabricated. If you cannot find a fresh event with a verified URL, fall back to timeless mode for that response.
 
 Sources — never invent or misattribute:
 - Core Stoics: Marcus Aurelius (Meditations), Epictetus (Discourses, Enchiridion), Seneca (Letters, Essays), Zeno, Cato, Cleanthes
-- Aligned thinkers: Socrates, Aristotle, Heraclitus, Cicero, Viktor Frankl, Montaigne, Stockdale
+- Aligned thinkers: Socrates, Aristotle, Heraclitus, Cicero, Viktor Frankl, Montaigne, Stockdale, Boethius, Hadot, Pierre Hadot, Lao Tzu, Confucius
 
-Rules: Vary sources daily. No consecutive same author. Prefer lesser-cited quotes. Match virtue field to user's focus if provided.`;
+Rules: Vary sources across days. No consecutive same author. Prefer lesser-cited quotes. Match virtue field to user's focus if provided.`;
+
+const TEMPORAL_MARKERS = /\b(today|yesterday|this week|last week|recently|just announced|the latest|earlier this|this morning|tonight|just now|this past|this month|breaking)\b/i;
+
+function isReadingFresh(result) {
+  const reflection = result?.reflection || '';
+  const hasTemporal = TEMPORAL_MARKERS.test(reflection);
+  const eventDate = result?.event_date;
+  const eventUrl = result?.event_url;
+  if (!hasTemporal && !eventDate) return true;
+  if (eventDate) {
+    const parsed = new Date(eventDate);
+    if (isNaN(parsed.getTime())) return false;
+    const ageMs = Date.now() - parsed.getTime();
+    if (ageMs > 48 * 60 * 60 * 1000 || ageMs < -24 * 60 * 60 * 1000) return false;
+    if (!eventUrl) return false;
+    return true;
+  }
+  return false;
+}
+
+function normalizeQuote(q) {
+  return (q || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
+}
+
+function findDuplicateQuote(quote, history) {
+  const target = normalizeQuote(quote);
+  if (!target) return null;
+  return history.find(h => normalizeQuote(h.quote) === target) || null;
+}
 
 const virtueColor = {
   Wisdom: '#7a9aaa',
@@ -52,6 +84,7 @@ export default function ReadScreen() {
   const [filterAuthor, setFilterAuthor] = useState('all');
   const [filterMonth, setFilterMonth] = useState('all');
   const [insightSaved, setInsightSaved] = useState(false);
+  const [mode, setMode] = useState('timeless');
 
   useFocusEffect(useCallback(() => {
   async function load() {
@@ -72,7 +105,8 @@ export default function ReadScreen() {
   load();
 }, []));
 
-  async function generateReading() {
+  async function generateReading(opts = {}) {
+    const topical = !!opts.topical;
     setLoading(true);
     setLoadingPhase(0);
     const phaseTimer = setTimeout(() => setLoadingPhase(1), 4000);
@@ -80,61 +114,104 @@ export default function ReadScreen() {
       const history = await getReadingHistory();
       const virtueFocus = await getLastVirtueFocus();
       const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-      const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-      const recentAuthors = history.slice(0, 14).map(r => r.author).filter(Boolean).join(', ');
-      const recentQuotes = history.slice(0, 7).map(r => r.quote ? r.quote.substring(0, 60) : '').filter(Boolean).join(' | ');
-      const recentReflections = history.slice(0, 7).map((r, i) => r.reflection ? `(${i + 1}) ${r.reflection.substring(0, 200)}` : '').filter(Boolean).join('\n');
-      const recentThemes = history.slice(0, 7).map(r => r.theme).filter(Boolean).join(', ');
-      const userMessage = `Today is ${dateStr} (day ${dayOfYear} of the year). Search for a current event first, then generate a personalized Stoic reading. Return only the JSON object.
+      const recentAuthors = history.slice(0, 60).map(r => r.author).filter(Boolean).join(', ');
+      const recentQuotes = history.slice(0, 30).map(r => r.quote ? r.quote.substring(0, 80) : '').filter(Boolean).join(' | ');
+      const recentReflections = history.slice(0, 14).map((r, i) => r.reflection ? `(${i + 1}) ${r.reflection.substring(0, 160)}` : '').filter(Boolean).join('\n');
+      const recentThemes = history.slice(0, 30).map(r => r.theme).filter(Boolean).join(', ');
+
+      async function callOnce({ topicalCall, dedupNote }) {
+        const modeLine = topicalCall
+          ? 'TOPICAL MODE: Use web_search to find a current event from the past 48 hours, fill event_date and event_url from the actual search result. If no fresh event is found with a verified URL, fall back to timeless for this response.'
+          : 'TIMELESS MODE. Set event_date and event_url to null. No temporal markers.';
+        const dedupLine = dedupNote ? `\n\n${dedupNote}\n` : '';
+        const userMessage = `Today is ${dateStr}. ${modeLine}
 
 ${virtueFocus ? `User's current Virtue focus: ${virtueFocus}. Tailor the reading and reflection to that focus.` : ''}
 
-Do NOT use these recently used authors: ${recentAuthors || 'none'}.
-Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.
-Do NOT repeat these recent themes: ${recentThemes || 'none'}.
-Do NOT write a reflection that overlaps in topic, framing, or news event with these recent reflections:
-${recentReflections || 'none'}`;
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.EXPO_PUBLIC_ANTHROPIC_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 2048,
-          system: SYSTEM_PROMPT,
-          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-          messages: [{ role: 'user', content: userMessage }],
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        console.log('Reading API non-OK:', response.status, JSON.stringify(data));
-        throw new Error(`API ${response.status}: ${data?.error?.message || 'unknown'}`);
+Uniqueness across the user's full reading history is critical. Do NOT reuse:
+- Authors recently used: ${recentAuthors || 'none'}
+- Quotes recently used (first 80 chars each): ${recentQuotes || 'none'}
+- Themes recently used: ${recentThemes || 'none'}
+- Reflections recently written:
+${recentReflections || 'none'}${dedupLine}
+Return only the JSON object.`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        try {
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': process.env.EXPO_PUBLIC_ANTHROPIC_KEY,
+              'anthropic-version': '2023-06-01',
+              'anthropic-dangerous-direct-browser-access': 'true',
+            },
+            body: JSON.stringify({
+              model: 'claude-sonnet-4-6',
+              max_tokens: 2048,
+              system: SYSTEM_PROMPT,
+              tools: topicalCall ? [{ type: 'web_search_20250305', name: 'web_search' }] : undefined,
+              messages: [{ role: 'user', content: userMessage }],
+            }),
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            console.log('Reading API non-OK:', response.status, JSON.stringify(data));
+            throw new Error(`API ${response.status}: ${data?.error?.message || 'unknown'}`);
+          }
+          const textBlock = Array.isArray(data.content)
+            ? data.content.filter(b => b.type === 'text').pop()
+            : null;
+          const text = textBlock?.text || data.content?.[0]?.text || '';
+          const stripped = text.replace(/```json|```/g, '').trim();
+          const start = stripped.indexOf('{');
+          const end = stripped.lastIndexOf('}');
+          if (start === -1 || end === -1 || end <= start) {
+            console.log('Reading: no JSON object in response. Raw text:', stripped.slice(0, 500));
+            throw new Error('Model did not return JSON');
+          }
+          return JSON.parse(stripped.slice(start, end + 1));
+        } finally {
+          clearTimeout(timeoutId);
+        }
       }
-      // Web search returns multiple content blocks; extract the final text block
-      const textBlock = Array.isArray(data.content)
-        ? data.content.filter(b => b.type === 'text').pop()
-        : null;
-      const text = textBlock?.text || data.content?.[0]?.text || '';
-      const stripped = text.replace(/```json|```/g, '').trim();
-      const start = stripped.indexOf('{');
-      const end = stripped.lastIndexOf('}');
-      if (start === -1 || end === -1 || end <= start) {
-        console.log('Reading: no JSON object in response. Raw text:', stripped.slice(0, 500));
-        throw new Error('Model did not return JSON');
+
+      let result = await callOnce({ topicalCall: topical });
+
+      if (topical && !isReadingFresh(result)) {
+        console.log('Reading: topical freshness check failed, falling back to timeless. event_date =', result?.event_date);
+        result = await callOnce({ topicalCall: false });
       }
-      const result = JSON.parse(stripped.slice(start, end + 1));
+
+      const dup = findDuplicateQuote(result?.quote, history);
+      if (dup) {
+        const dupDate = dup.date ? new Date(dup.date).toDateString() : 'a previous day';
+        console.log('Reading: duplicate quote detected, retrying. Quote:', result.quote?.slice(0, 60), 'first used:', dupDate);
+        result = await callOnce({
+          topicalCall: false,
+          dedupNote: `IMPORTANT: You returned a quote we already used on ${dupDate}: "${(dup.quote || '').slice(0, 120)}". Pick a fundamentally different quote and a different author than that one.`,
+        });
+      }
+
       await saveTodayReading(result);
       setReading(result);
       setInsight('');
       setInsightSaved(false);
     } catch (e) {
-      console.log('Reading generation failed:', e?.message, e);
-      Alert.alert('', 'Could not generate reading. Check your connection.');
+      const isTimeout = e?.name === 'AbortError';
+      console.log('Reading generation failed:', isTimeout ? 'timeout' : e?.message, e);
+      Alert.alert(
+        '',
+        isTimeout
+          ? 'The reading is taking longer than expected. Try again?'
+          : 'Could not generate reading right now.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Try again', onPress: () => generateReading(opts) },
+        ]
+      );
     } finally {
       clearTimeout(phaseTimer);
       setLoading(false);
@@ -145,6 +222,7 @@ ${recentReflections || 'none'}`;
   async function handleSaveInsight() {
     if (!insight.trim()) return;
     await saveReadingInsight(insight);
+    haptics.action();
     setInsightSaved(true);
     const updated = await getReadingLog();
     setLog(updated);
@@ -164,6 +242,7 @@ ${recentReflections || 'none'}`;
 
   async function handleShare() {
     if (!reading) return;
+    haptics.tap();
     const lines = [
       `"${reading.quote}"`,
       `— ${reading.author}${reading.work ? `, ${reading.work}` : ''}`,
@@ -262,21 +341,7 @@ ${recentReflections || 'none'}`;
           {tab === 'today' ? (
             <View style={s.body}>
               {loading ? (
-                <View style={s.loadingCard}>
-                  <Image
-                    source={require('../assets/skull.png')}
-                    style={s.loadingSkull}
-                    resizeMode="contain"
-                  />
-                  <ActivityIndicator
-                    size="small"
-                    color={colors.accent}
-                    style={{ marginTop: 20, marginBottom: 8 }}
-                  />
-                  <Text style={s.loadingText}>
-                    {loadingPhase === 0 ? 'Searching today\'s world...' : 'Composing your reading...'}
-                  </Text>
-                </View>
+                <SkullLoader text={loadingPhase === 0 ? "Searching today's world..." : 'Composing your reading...'} />
               ) : reading ? (
                 <>
                   <View style={s.badgeRow}>
@@ -295,7 +360,10 @@ ${recentReflections || 'none'}`;
                   </View>
 
                   <View style={s.quoteCard}>
-                    <Text style={s.quoteText}>“{reading.quote}”</Text>
+                    <TouchableOpacity style={s.quoteShareIcon} onPress={handleShare} activeOpacity={0.6} hitSlop={10}>
+                      <Ionicons name="share-outline" size={20} color={colors.accent} />
+                    </TouchableOpacity>
+                    <Text style={[s.quoteText, s.quoteTextWithIcon]}>“{reading.quote}”</Text>
                     <View style={s.quoteRule} />
                     <Text style={s.quoteAuthor}>— {reading.author}</Text>
                     {reading.work && <Text style={s.quoteWork}>{reading.work}</Text>}
@@ -341,16 +409,33 @@ ${recentReflections || 'none'}`;
                     </TouchableOpacity>
                   )}
 
-                  <TouchableOpacity style={s.refreshBtn} onPress={generateReading} activeOpacity={0.8}>
-                    <Text style={s.refreshBtnText}>Generate new reading</Text>
-                  </TouchableOpacity>
+                  <View style={s.modeRow}>
+                    <TouchableOpacity
+                      style={[s.modePill, mode === 'timeless' && s.modePillActive]}
+                      onPress={() => { haptics.tap(); setMode('timeless'); }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.modePillText, mode === 'timeless' && s.modePillTextActive]}>Timeless</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[s.modePill, mode === 'topical' && s.modePillActive]}
+                      onPress={() => { haptics.tap(); setMode('topical'); }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.modePillText, mode === 'topical' && s.modePillTextActive]}>Topical</Text>
+                    </TouchableOpacity>
+                  </View>
 
-                  <TouchableOpacity style={s.shareBtn} onPress={handleShare} activeOpacity={0.8}>
-                    <Text style={s.shareBtnText}>Share this reading</Text>
+                  <TouchableOpacity
+                    style={s.regenBtn}
+                    onPress={() => generateReading({ topical: mode === 'topical' })}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={s.regenBtnText}>Generate new reading</Text>
                   </TouchableOpacity>
                 </>
               ) : (
-                <TouchableOpacity style={s.generateBtn} onPress={generateReading} activeOpacity={0.8}>
+                <TouchableOpacity style={s.generateBtn} onPress={() => generateReading()} activeOpacity={0.8}>
                   <Text style={s.generateBtnText}>Generate today's reading</Text>
                 </TouchableOpacity>
               )}
@@ -407,11 +492,11 @@ ${recentReflections || 'none'}`;
 
               {filteredLog.length === 0 && log.length > 0 ? (
                 <View style={s.empty}>
-                  <Text style={s.emptyText}>No readings match your search.</Text>
+                  <Text style={s.emptyText}>Nothing matches your filter. Adjust your search or open the field wider.</Text>
                 </View>
               ) : filteredLog.length === 0 ? (
                 <View style={s.empty}>
-                  <Text style={s.emptyText}>No readings saved yet.{'\n'}Save your first insight to begin the archive.</Text>
+                  <Text style={s.emptyText}>Your archive is empty. Save your first insight today, and the days will accumulate here.</Text>
                 </View>
               ) : (
                 groupLogByMonth(filteredLog).map(group => (
@@ -482,13 +567,6 @@ const s = StyleSheet.create({
   tabBtnTextActive: { color: colors.textSecondary },
   // Light reading body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
-  loadingCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 48, alignItems: 'center', marginTop: 8,
-    backgroundColor: colors.bgElevated,
-  },
-  loadingSkull: { width: 160, height: 160, opacity: 0.9, marginBottom: 16 },
-  loadingText: { fontSize: 14, color: colors.textMuted, marginTop: 4, fontFamily: font.serif, fontStyle: 'italic' },
   badgeRow: { flexDirection: 'row', gap: 8, marginBottom: 14, marginTop: 8 },
   virtueBadge: { borderWidth: 0.5, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 5 },
   virtueBadgeText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
@@ -531,10 +609,26 @@ const s = StyleSheet.create({
   },
   saveBtnDone: { borderColor: colors.borderMid, backgroundColor: colors.bgElevated },
   saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
-  refreshBtn: { padding: 14, alignItems: 'center' },
-  refreshBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
-  shareBtn: { padding: 14, alignItems: 'center', marginBottom: 60 },
-  shareBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
+  quoteShareIcon: {
+    position: 'absolute', top: 12, right: 12, zIndex: 1,
+    width: 36, height: 36, borderRadius: 18,
+    borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  quoteTextWithIcon: { paddingRight: 40 },
+  modeRow: { flexDirection: 'row', gap: 8, marginTop: 24, marginBottom: 12 },
+  modePill: {
+    flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
+    paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgCard,
+  },
+  modePillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
+  modePillText: { fontSize: 12, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
+  modePillTextActive: { color: colors.accent },
+  regenBtn: {
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    padding: 18, alignItems: 'center', backgroundColor: colors.accentBg, marginBottom: 60,
+  },
+  regenBtnText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   generateBtn: {
     borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
     padding: 20, alignItems: 'center', backgroundColor: colors.bgElevated, marginTop: 8,

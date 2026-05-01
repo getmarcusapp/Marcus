@@ -152,7 +152,7 @@ export async function addToReadingHistory(reading) {
       theme: reading.theme,
       reflection: reading.reflection,
     };
-    const updated = [entry, ...history].slice(0, 14);
+    const updated = [entry, ...history];
     await AsyncStorage.setItem('reading_history', JSON.stringify(updated));
     return true;
   } catch (e) { return false; }

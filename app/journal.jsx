@@ -9,6 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
+import * as haptics from '../lib/haptics';
 
 const morningPrompts = [
   {
@@ -246,6 +247,7 @@ export default function JournalScreen() {
     };
     const ok = await saveJournal(entry);
     if (ok) {
+      haptics.action();
       await incrementStreak();
       setAlreadySaved(true);
       const all = await getJournals();
@@ -271,6 +273,7 @@ export default function JournalScreen() {
  async function handleEditSave(updated) {
   const ok = await updateJournalEntry(updated);
   if (ok) {
+    haptics.action();
     const all = await getJournals();
     setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
     setEditingEntry(null);
@@ -540,15 +543,17 @@ export default function JournalScreen() {
 
               {filteredHistory.length === 0 && history.length > 0 ? (
                 <View style={s.empty}>
-                  <Text style={s.emptyTitle}>No matches</Text>
-                  <Text style={s.emptyText}>Try a different search or filter.</Text>
+                  <Text style={s.emptyTitle}>Nothing matches your filter.</Text>
+                  <Text style={s.emptyText}>Adjust your search or open the field wider.</Text>
                 </View>
               ) : filteredHistory.length === 0 ? (
                 <View style={s.empty}>
                   <Text style={s.emptyIcon}>☽</Text>
-                  <Text style={s.emptyTitle}>No entries yet</Text>
+                  <Text style={s.emptyTitle}>Your {isMorning ? 'mornings' : 'evenings'} are not yet written.</Text>
                   <Text style={s.emptyText}>
-                    {`Your ${isMorning ? 'morning' : 'evening'} journal entries will appear here after you complete today's practice.\n\n${isMorning ? 'The morning journal has four prompts: what is in your control, where courage is required, what you are postponing, and what difficulty might arise.' : 'The evening journal has four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}`}
+                    {isMorning
+                      ? 'Each morning, four prompts: what is in your control, where courage is required, what you are postponing, and what difficulty might arise. Begin one when you are ready.'
+                      : 'Each evening, four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}
                   </Text>
                 </View>
               ) : (
@@ -688,7 +693,7 @@ const s = StyleSheet.create({
 
   // Light writing surface
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
   virtueSection: { marginBottom: 8 },
   virtuePills: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   vpill: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center', backgroundColor: colors.bgElevated },

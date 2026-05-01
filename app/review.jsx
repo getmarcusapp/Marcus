@@ -316,11 +316,11 @@ export default function ReviewScreen() {
 
             {filteredHistory.length === 0 && history.length > 0 ? (
               <View style={s.empty}>
-                <Text style={s.emptyText}>No reviews in this range.</Text>
+                <Text style={s.emptyText}>Nothing in this range. Open the field wider.</Text>
               </View>
             ) : filteredHistory.length === 0 ? (
               <View style={s.empty}>
-                <Text style={s.emptyText}>No reviews yet.{'\n'}Complete your first week.</Text>
+                <Text style={s.emptyText}>No weeks sealed yet. Complete your first, and a record will gather here.</Text>
               </View>
             ) : (
               filteredHistory.map(entry => (
