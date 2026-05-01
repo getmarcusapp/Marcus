@@ -105,7 +105,7 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
-  title: { fontSize: font.heroSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -1.5, marginBottom: 8 },
+  title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -1.5, marginBottom: 8 },
   sub: { fontSize: 18, color: colors.textSecondary, fontFamily: font.serif, marginBottom: 20 },
   statsCard: {
     flexDirection: 'row',

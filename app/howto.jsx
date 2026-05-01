@@ -108,7 +108,7 @@ const s = StyleSheet.create({
   backArrow: { fontSize: 24, color: colors.accent },
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.heroSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 8 },
+  title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 8 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
   body: { padding: spacing.md, paddingTop: spacing.lg },
   sectionBlock: {

@@ -46,26 +46,33 @@ const stoicReframesUpdated = {
 
 function IntensitySlider({ value, onChange }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 }}>
-      <TouchableOpacity
-        onPress={() => onChange(Math.max(1, value - 1))}
-        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgElevated }}
-      >
-        <Text style={{ fontSize: 24, color: colors.textSecondary }}>−</Text>
+    <View style={iss.row}>
+      <TouchableOpacity onPress={() => onChange(Math.max(1, value - 1))} style={iss.btn}>
+        <Text style={iss.btnText}>−</Text>
       </TouchableOpacity>
-      <View style={{ flex: 1, height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' }}>
-        <View style={{ width: `${(value / 10) * 100}%`, height: '100%', backgroundColor: colors.textSecondary, borderRadius: 2 }} />
+      <View style={iss.track}>
+        <View style={[iss.fill, { width: `${(value / 10) * 100}%` }]} />
       </View>
-      <TouchableOpacity
-        onPress={() => onChange(Math.min(10, value + 1))}
-        style={{ width: 44, height: 44, borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgElevated }}
-      >
-        <Text style={{ fontSize: 24, color: colors.textSecondary }}>+</Text>
+      <TouchableOpacity onPress={() => onChange(Math.min(10, value + 1))} style={iss.btn}>
+        <Text style={iss.btnText}>+</Text>
       </TouchableOpacity>
-      <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, minWidth: 48, textAlign: 'right' }}>{value}/10</Text>
+      <Text style={iss.value}>{value}/10</Text>
     </View>
   );
 }
+
+const iss = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
+  btn: {
+    width: 44, height: 44, borderWidth: 0.5, borderColor: colors.borderMid,
+    borderRadius: 10, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: colors.bgElevated,
+  },
+  btnText: { fontSize: 24, color: colors.textSecondary },
+  track: { flex: 1, height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' },
+  fill: { height: '100%', backgroundColor: colors.textSecondary, borderRadius: 2 },
+  value: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, minWidth: 48, textAlign: 'right' },
+});
 
 
 function groupByMonth(entries) {
