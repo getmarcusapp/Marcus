@@ -676,7 +676,7 @@ const s = StyleSheet.create({
     padding: spacing.xl,
     paddingVertical: 20,
   },
-  mementoText: { fontSize: 15, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif, fontStyle: 'italic' },
+  mementoText: { fontSize: 17, color: colors.textPrimary, lineHeight: 28, fontFamily: font.serif },
   mementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, textTransform: 'uppercase' },
 
   // Light writing surface
