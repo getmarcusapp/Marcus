@@ -136,8 +136,45 @@ export async function saveTodayReading(reading) {
       ...reading,
       date: new Date().toDateString(),
     }));
+    await addToReadingHistory(reading);
     return true;
   } catch (e) { return false; }
+}
+
+export async function addToReadingHistory(reading) {
+  try {
+    const raw = await AsyncStorage.getItem('reading_history');
+    const history = raw ? JSON.parse(raw) : [];
+    const entry = {
+      date: new Date().toISOString(),
+      author: reading.author,
+      quote: reading.quote,
+      theme: reading.theme,
+      reflection: reading.reflection,
+    };
+    const updated = [entry, ...history].slice(0, 14);
+    await AsyncStorage.setItem('reading_history', JSON.stringify(updated));
+    return true;
+  } catch (e) { return false; }
+}
+
+export async function getReadingHistory() {
+  try {
+    const raw = await AsyncStorage.getItem('reading_history');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+
+export async function getLastVirtueFocus() {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.JOURNALS);
+    if (!raw) return null;
+    const journals = JSON.parse(raw);
+    const morning = journals
+      .filter(j => j.type === 'morning' && j.virtue)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    return morning[0]?.virtue || null;
+  } catch (e) { return null; }
 }
 
 export async function saveReadingInsight(insight) {
@@ -182,6 +219,19 @@ export async function persistCompassDone() {
 export async function clearCompassDone() {
   try {
     await AsyncStorage.removeItem('compass_done');
+    return true;
+  } catch (e) { return false; }
+}
+
+export async function clearTodayPractice() {
+  try {
+    await AsyncStorage.removeItem('compass_done');
+    await AsyncStorage.removeItem('reading_today');
+    const raw = await AsyncStorage.getItem(KEYS.JOURNALS);
+    const journals = raw ? JSON.parse(raw) : [];
+    const today = new Date().toDateString();
+    const remaining = journals.filter(j => new Date(j.date).toDateString() !== today);
+    await AsyncStorage.setItem(KEYS.JOURNALS, JSON.stringify(remaining));
     return true;
   } catch (e) { return false; }
 }

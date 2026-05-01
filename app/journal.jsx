@@ -7,7 +7,8 @@ import {
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
-import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry, getTodayReading, getCompassDone } from '../store/db';
+import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry } from '../store/db';
+import { getNextPracticeAfter } from '../store/practice-flow';
 
 const morningPrompts = [
   {
@@ -251,43 +252,18 @@ export default function JournalScreen() {
       setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
 
       if (isMorning) {
-        // Morning: offer to go to reading (likely not done yet) or back to practice
-        Alert.alert(
-          '',
-          'Morning reflection saved.',
-          [
+        const next = await getNextPracticeAfter('morning');
+        if (next) {
+          Alert.alert('', 'Morning reflection saved.', [
             { text: 'Go to Practice', onPress: () => router.replace('/') },
-            { text: 'Read today\'s wisdom', onPress: () => router.replace('/read') },
-          ]
-        );
-      } else {
-        // Evening: check if all practice items are complete
-        const readingDone = await getTodayReading();
-        const compassDone = await getCompassDone();
-        const morningDone = await getTodayJournal('morning');
-        const allDone = !!compassDone && !!readingDone && !!morningDone;
-
-        if (allDone) {
-          // Everything complete — go straight to the sealed state
-          router.replace('/');
-        } else if (readingDone) {
-          // Reading done, just go to practice
-          Alert.alert(
-            '',
-            'Evening reflection saved.',
-            [{ text: 'Go to Practice', onPress: () => router.replace('/') }]
-          );
+            { text: `${next.label} →`, onPress: () => router.replace(next.href) },
+          ]);
         } else {
-          // Reading not done yet — offer it
-          Alert.alert(
-            '',
-            'Evening reflection saved.',
-            [
-              { text: 'Go to Practice', onPress: () => router.replace('/') },
-              { text: 'Read today\'s wisdom', onPress: () => router.replace('/read') },
-            ]
-          );
+          router.replace('/');
         }
+      } else {
+        // Evening — never redirect to other practice items; just go home.
+        router.replace('/');
       }
     }
   }

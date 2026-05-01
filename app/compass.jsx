@@ -6,7 +6,8 @@ import {
 import { useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
-import { getCompass, saveCompass, getTodayReading, getTodayJournal } from '../store/db';
+import { getCompass, saveCompass } from '../store/db';
+import { getNextPracticeAfter } from '../store/practice-flow';
 
 const COMPASS_HINTS = {
   why: {
@@ -33,13 +34,11 @@ export default function CompassScreen() {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
-  const [readingDone, setReadingDone] = useState(false);
-  const [morningDone, setMorningDone] = useState(false);
+  const [nextStep, setNextStep] = useState(null);
 
   useEffect(() => {
     getCompass().then(setCompass);
-    getTodayReading().then(r => setReadingDone(!!r));
-    getTodayJournal('morning').then(m => setMorningDone(!!m));
+    getNextPracticeAfter('compass').then(setNextStep);
   }, []);
 
   async function handleSave() {
@@ -56,18 +55,12 @@ export default function CompassScreen() {
   }
 
   function handleNext() {
-    if (!readingDone) {
-      router.push('/read');
-    } else if (!morningDone) {
-      router.push({ pathname: '/journal', params: { type: 'morning' } });
-    } else {
-      router.replace('/');
-    }
+    if (nextStep) router.push(nextStep.href);
+    else router.replace('/');
   }
 
   function nextLabel() {
-    if (!readingDone) return 'Continue to daily reading';
-    if (!morningDone) return 'Continue to morning journal';
+    if (nextStep) return `Continue to ${nextStep.label.toLowerCase()}`;
     return 'Back to practice';
   }
 

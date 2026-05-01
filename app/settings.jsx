@@ -4,7 +4,7 @@ import {
   StyleSheet, SafeAreaView, Switch, Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getJournals, getTriggers, getStreak } from '../store/db';
+import { getJournals, getTriggers, getStreak, clearTodayPractice } from '../store/db';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { requestNotificationPermissions, scheduleAllNotifications, cancelAllNotifications } from '../notifications';
 
@@ -186,6 +186,24 @@ export default function SettingsScreen() {
   async function handleResetOnboarding() {
     await AsyncStorage.removeItem('has_onboarded');
     Alert.alert('', 'Onboarding reset. Close and reopen the app to see it.');
+  }
+
+  async function handleResetTodayPractice() {
+    Alert.alert(
+      'Reset today\'s practice?',
+      'Clears compass, reading, and any morning/evening journal entries saved today. History from previous days is kept.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: async () => {
+            await clearTodayPractice();
+            Alert.alert('', 'Today\'s practice cleared.');
+          },
+        },
+      ]
+    );
   }
 
   async function handleDisableAll() {
@@ -422,6 +440,9 @@ export default function SettingsScreen() {
           </TouchableOpacity>
           <TouchableOpacity style={s.resetBtn} onPress={handleResetOnboarding} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Reset onboarding</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.resetBtn} onPress={handleResetTodayPractice} activeOpacity={0.8}>
+            <Text style={s.resetBtnText}>Reset today's practice</Text>
           </TouchableOpacity>
 
         </View>

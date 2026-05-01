@@ -6,13 +6,16 @@ import {
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog, getTodayJournal } from '../store/db';
+import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog, getReadingHistory, getLastVirtueFocus } from '../store/db';
+import { getNextPracticeAfter } from '../store/practice-flow';
 
 const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom generating a personalized daily reading for a user of a Stoic practice app.
 
-You have access to a web search tool. Use it to find one significant current event from the past 48 hours. Only use it if a genuine Stoic theme applies naturally. If the connection is weak or news is trivial, fall back to a timeless theme.
+You have access to a web search tool. Optionally use it to find a current event ONLY from within the past 48 hours. Before invoking the Stoic lens on any event, verify the article's publication date is within 48 hours of today. If you cannot find a date or the event is older, DO NOT use it — write a timeless reflection instead. A timeless reflection is preferred over a recycled or stale event.
 
-Avoid events where the Stoic framing could be read as taking a political side. Do not use: ongoing military conflicts, contested foreign policy, partisan political disputes. Prefer: markets, natural disasters, cultural moments, scientific discoveries, business, sports, or universal human stories. If the only significant news is political or military, write a timeless reading instead.
+Topical diversity is critical. Do not repeatedly anchor on the same domain (e.g. marathons, elections, market moves). Rotate categories across days. If your search returns the same dominant story you've covered before, ignore it and write timeless.
+
+Avoid events where the Stoic framing could be read as taking a political side. Do not use: ongoing military conflicts, contested foreign policy, partisan political disputes. Prefer when freshness is verified: markets, natural disasters, cultural moments, scientific discoveries, business, sports, or universal human stories. If the only significant news is political, military, or stale, write a timeless reading instead.
 
 Generate a daily reading in this EXACT JSON format with no other text:
 {
@@ -74,6 +77,23 @@ export default function ReadScreen() {
     setLoadingPhase(0);
     const phaseTimer = setTimeout(() => setLoadingPhase(1), 4000);
     try {
+      const history = await getReadingHistory();
+      const virtueFocus = await getLastVirtueFocus();
+      const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+      const recentAuthors = history.slice(0, 14).map(r => r.author).filter(Boolean).join(', ');
+      const recentQuotes = history.slice(0, 7).map(r => r.quote ? r.quote.substring(0, 60) : '').filter(Boolean).join(' | ');
+      const recentReflections = history.slice(0, 7).map((r, i) => r.reflection ? `(${i + 1}) ${r.reflection.substring(0, 200)}` : '').filter(Boolean).join('\n');
+      const recentThemes = history.slice(0, 7).map(r => r.theme).filter(Boolean).join(', ');
+      const userMessage = `Today is ${dateStr} (day ${dayOfYear} of the year). Search for a current event first, then generate a personalized Stoic reading. Return only the JSON object.
+
+${virtueFocus ? `User's current Virtue focus: ${virtueFocus}. Tailor the reading and reflection to that focus.` : ''}
+
+Do NOT use these recently used authors: ${recentAuthors || 'none'}.
+Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.
+Do NOT repeat these recent themes: ${recentThemes || 'none'}.
+Do NOT write a reflection that overlaps in topic, framing, or news event with these recent reflections:
+${recentReflections || 'none'}`;
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -87,34 +107,33 @@ export default function ReadScreen() {
           max_tokens: 2048,
           system: SYSTEM_PROMPT,
           tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-          messages: [{
-            role: 'user',
-            content: (() => {
-              const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-              const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-              const recentAuthors = log.slice(0, 14).map(r => r.author).filter(Boolean).join(', ');
-              const recentQuotes = log.slice(0, 7).map(r => r.quote ? r.quote.substring(0, 60) : '').filter(Boolean).join(' | ');
-              return `Today is ${dateStr} (day ${dayOfYear} of the year). Search for a current event first, then generate a personalized Stoic reading. Return only the JSON object.
-
-Do NOT use these recently used authors: ${recentAuthors || 'none'}.
-Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
-            })(),
-          }],
+          messages: [{ role: 'user', content: userMessage }],
         }),
       });
       const data = await response.json();
+      if (!response.ok) {
+        console.log('Reading API non-OK:', response.status, JSON.stringify(data));
+        throw new Error(`API ${response.status}: ${data?.error?.message || 'unknown'}`);
+      }
       // Web search returns multiple content blocks; extract the final text block
       const textBlock = Array.isArray(data.content)
         ? data.content.filter(b => b.type === 'text').pop()
         : null;
       const text = textBlock?.text || data.content?.[0]?.text || '';
-      const clean = text.replace(/```json|```/g, '').trim();
-      const result = JSON.parse(clean);
+      const stripped = text.replace(/```json|```/g, '').trim();
+      const start = stripped.indexOf('{');
+      const end = stripped.lastIndexOf('}');
+      if (start === -1 || end === -1 || end <= start) {
+        console.log('Reading: no JSON object in response. Raw text:', stripped.slice(0, 500));
+        throw new Error('Model did not return JSON');
+      }
+      const result = JSON.parse(stripped.slice(start, end + 1));
       await saveTodayReading(result);
       setReading(result);
       setInsight('');
       setInsightSaved(false);
     } catch (e) {
+      console.log('Reading generation failed:', e?.message, e);
       Alert.alert('', 'Could not generate reading. Check your connection.');
     } finally {
       clearTimeout(phaseTimer);
@@ -130,12 +149,10 @@ Do NOT use quotes similar to these recent ones: ${recentQuotes || 'none'}.`;
     const updated = await getReadingLog();
     setLog(updated);
 
-    // Check what\'s still left to do
-    const morning = await getTodayJournal('morning');
-
-    if (!morning) {
+    const next = await getNextPracticeAfter('reading');
+    if (next) {
       Alert.alert('', 'Insight saved.', [
-        { text: 'Morning journal →', onPress: () => router.replace({ pathname: '/journal', params: { type: 'morning' } }) },
+        { text: `${next.label} →`, onPress: () => router.replace(next.href) },
         { text: 'Back to Practice', style: 'cancel', onPress: () => router.replace('/') },
       ]);
     } else {
