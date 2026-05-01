@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Tabs, useRouter, useSegments } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { View } from 'react-native';
+import { View, AppState } from 'react-native';
 import { colors } from '../constants/theme';
 import { hasOnboarded } from '../store/db';
 import { initializePurchases } from '../store/purchases';
-import { scheduleReengagementNotifications } from '../notifications';
+import { scheduleReengagementNotifications, scheduleAllNotifications } from '../notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function TabIcon({ name, color }) {
@@ -34,10 +34,18 @@ export default function Layout() {
   useEffect(() => {
     initializePurchases();
     scheduleReengagementNotifications();
+    scheduleAllNotifications();
     // Bypass paywall in dev and beta builds — never runs in production
     if (__DEV__ || process.env.EXPO_PUBLIC_IS_BETA === 'true') {
       AsyncStorage.setItem('has_premium', 'true');
     }
+
+    // Re-schedule notifications when the app foregrounds, so today's
+    // canceled notifications get re-created for tomorrow.
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') scheduleAllNotifications();
+    });
+    return () => sub.remove();
   }, []);
 
   return (

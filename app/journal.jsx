@@ -9,6 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
+import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 
 const morningPrompts = [
@@ -248,6 +249,7 @@ export default function JournalScreen() {
     const ok = await saveJournal(entry);
     if (ok) {
       haptics.action();
+      cancelJournalNotification(isMorning ? 'morning' : 'evening');
       await incrementStreak();
       setAlreadySaved(true);
       const all = await getJournals();

@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { virtues } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews } from '../store/db';
-import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
+import { refreshNotificationsForToday, onPracticeSealed, cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 
 const virtuePronunciations = {
@@ -233,7 +233,7 @@ export default function PracticeScreen() {
 
             <TouchableOpacity
               style={[s.routineRow, s.routineRowBorder, nextItem === 'compass' && s.routineRowNext]}
-              onPress={async () => { router.push('/compass'); setCompassDone(true); await persistCompassDone(); }}
+              onPress={async () => { router.push('/compass'); setCompassDone(true); await persistCompassDone(); cancelJournalNotification('compass'); }}
               activeOpacity={0.7}
             >
               <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>

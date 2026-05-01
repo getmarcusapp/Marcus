@@ -10,6 +10,7 @@ import SkullLoader from '../components/SkullLoader';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog, getReadingHistory, getLastVirtueFocus } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
+import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 
 const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom generating a personalized daily reading for a user of a Stoic practice app.
@@ -196,6 +197,7 @@ Return only the JSON object.`;
       }
 
       await saveTodayReading(result);
+      cancelJournalNotification('reading');
       setReading(result);
       setInsight('');
       setInsightSaved(false);
