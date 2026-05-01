@@ -9,7 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { saveCompass, setHasOnboarded } from '../store/db';
 
 const DEFAULT_COMPASS = {
-  why: 'I am drawn to Stoicism because it offers something rare — a practical philosophy for living well, tested across centuries. Not theory. Not productivity hacks. A system for becoming someone you respect.',
+  why: 'To cultivate the kind of person I want to be — disciplined in attention, deliberate in action, calm in the face of what I cannot control. Built from character, not from outcomes.',
   overcome: 'I want to worry less about what I cannot control. To respond instead of react. To free myself from the anxiety of other people\'s opinions and the tyranny of my own undisciplined mind.',
   aspire: 'I want to meet adversity with calm, and fortune with humility. To live each day with intention — not perfectly, but deliberately. To be someone who acts in accordance with their values, even when it\'s hard.',
 };
@@ -240,8 +240,8 @@ function PracticePreviewStep({ onNext }) {
                   <Text style={s.previewItemTitle}>{item.title}</Text>
                   <Text style={s.previewItemSub}>{item.sub}</Text>
                 </View>
-                <View style={s.previewTag}>
-                  <Text style={s.previewTagText}>{item.tag}</Text>
+                <View style={[s.previewTag, item.tag === 'LATER' && s.previewTagLater, item.tag !== 'LATER' && s.previewTagNow]}>
+                  <Text style={[s.previewTagText, item.tag !== 'LATER' && s.previewTagTextNow]}>{item.tag}</Text>
                 </View>
               </View>
             ))}
@@ -353,11 +353,14 @@ const s = StyleSheet.create({
   previewCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, overflow: 'hidden', marginBottom: 16 },
   previewRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
   previewRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  previewDot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.borderMid },
+  previewDot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.textMuted },
   previewContent: { flex: 1 },
   previewItemTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
-  previewItemSub: { fontSize: 13, color: colors.textDim },
-  previewTag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
+  previewItemSub: { fontSize: 13, color: colors.textMuted },
+  previewTag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
+  previewTagNow: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
+  previewTagLater: { borderWidth: 0, paddingHorizontal: 0, paddingVertical: 0 },
+  previewTagTextNow: { color: colors.accent, fontWeight: '500' },
   previewTagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
   previewNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, backgroundColor: colors.bgDeep },
   previewNoteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
@@ -451,7 +454,7 @@ const s = StyleSheet.create({
   practiceHeading: {
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
-    color: colors.textDim,
+    color: colors.accent,
     textTransform: 'uppercase',
     marginBottom: 20,
   },
