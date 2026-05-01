@@ -515,7 +515,8 @@ export default function JournalScreen() {
                       <Text style={[s.filterPillText, filterMonth === 'all' && s.filterPillTextActive]}>All time</Text>
                     </TouchableOpacity>
                     {availableMonths.map(mk => {
-                      const d = new Date(mk + '-01');
+                      const [yr, mo] = mk.split('-');
+                      const d = new Date(parseInt(yr, 10), parseInt(mo, 10) - 1, 1);
                       const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
                       return (
                         <TouchableOpacity

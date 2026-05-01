@@ -477,7 +477,8 @@ Return only the JSON object.`;
                       <Text style={[s.filterPillText, filterMonth === 'all' && s.filterPillTextActive]}>All time</Text>
                     </TouchableOpacity>
                     {availableMonths.map(mk => {
-                      const d = new Date(mk + '-01');
+                      const [yr, mo] = mk.split('-');
+                      const d = new Date(parseInt(yr, 10), parseInt(mo, 10) - 1, 1);
                       const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
                       return (
                         <TouchableOpacity key={mk} style={[s.filterPill, filterMonth === mk && s.filterPillActive]} onPress={() => setFilterMonth(mk)} activeOpacity={0.7}>
