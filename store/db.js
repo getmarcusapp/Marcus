@@ -236,6 +236,36 @@ export async function clearTodayPractice() {
   } catch (e) { return false; }
 }
 
+export async function sealTodayPractice() {
+  try {
+    const todayStr = new Date().toDateString();
+    const todayIso = new Date().toISOString();
+    await persistCompassDone();
+    await saveTodayReading({
+      quote: 'You have power over your mind — not outside events. Realize this, and you will find strength.',
+      author: 'Marcus Aurelius',
+      work: 'Meditations',
+      theme: 'Inner Citadel',
+      virtue: 'Wisdom',
+      event_date: null,
+      event_url: null,
+      reflection: '[Test seed reading — created via Developer → Seal today\'s practice.]',
+    });
+    const raw = await AsyncStorage.getItem(KEYS.JOURNALS);
+    const journals = raw ? JSON.parse(raw) : [];
+    const filtered = journals.filter(j => new Date(j.date).toDateString() !== todayStr);
+    const synthetic = ['morning', 'evening'].map(type => ({
+      id: `seed-${type}-${Date.now()}`,
+      type,
+      date: todayIso,
+      virtue: 'wisdom',
+      answers: { 0: '[Seeded for testing.]' },
+    }));
+    await AsyncStorage.setItem(KEYS.JOURNALS, JSON.stringify([...synthetic, ...filtered]));
+    return true;
+  } catch (e) { return false; }
+}
+
 export async function hasOnboarded() {
   try {
     const raw = await AsyncStorage.getItem('has_onboarded');

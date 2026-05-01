@@ -4,7 +4,7 @@ import {
   StyleSheet, SafeAreaView, Switch, Alert, Share,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getJournals, getTriggers, getStreak, clearTodayPractice } from '../store/db';
+import { getJournals, getTriggers, getStreak, clearTodayPractice, sealTodayPractice } from '../store/db';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { requestNotificationPermissions, scheduleAllNotifications, cancelAllNotifications } from '../notifications';
 
@@ -200,6 +200,23 @@ export default function SettingsScreen() {
           onPress: async () => {
             await clearTodayPractice();
             Alert.alert('', 'Today\'s practice cleared.');
+          },
+        },
+      ]
+    );
+  }
+
+  async function handleSealTodayPractice() {
+    Alert.alert(
+      'Seal today\'s practice?',
+      'Marks compass, reading, morning journal, and evening journal as complete with seeded test data. Useful for previewing the sealed state.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Seal',
+          onPress: async () => {
+            await sealTodayPractice();
+            Alert.alert('', 'Today\'s practice sealed.');
           },
         },
       ]
@@ -443,6 +460,9 @@ export default function SettingsScreen() {
           </TouchableOpacity>
           <TouchableOpacity style={s.resetBtn} onPress={handleResetTodayPractice} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Reset today's practice</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.resetBtn} onPress={handleSealTodayPractice} activeOpacity={0.8}>
+            <Text style={s.resetBtnText}>Seal today's practice</Text>
           </TouchableOpacity>
 
         </View>
