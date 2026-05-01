@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { virtues } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews } from '../store/db';
-import { refreshNotificationsForToday } from '../notifications';
+import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
 
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
