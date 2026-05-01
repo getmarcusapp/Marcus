@@ -5,8 +5,11 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { saveCompass, setHasOnboarded } from '../store/db';
+
+const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 
 const DEFAULT_COMPASS = {
   why: 'To cultivate the kind of person I want to be — disciplined in attention, deliberate in action, calm in the face of what I cannot control. Built from character, not from outcomes.',
@@ -57,23 +60,31 @@ export default function OnboardingScreen() {
 
 function WelcomeStep({ onNext }) {
   return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.welcomeBody}>
-        <Image source={require('../assets/skull.png')} style={s.welcomeSkull} resizeMode="contain" />
-        <Text style={s.welcomeTitle}>Marcus</Text>
-        <Text style={s.welcomeSub}>A Stoic practice app</Text>
-        <View style={s.welcomeDivider} />
-        <Text style={s.welcomeTagline}>
-          “The impediment to action advances action. What stands in the way becomes the way.”
-        </Text>
-        <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations V.20</Text>
-      </View>
-      <View style={s.footer}>
-        <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText}>Begin your practice</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    <LinearGradient
+      colors={HERO_GRADIENT}
+      locations={[0, 0.6, 1]}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView style={s.safeTransparent}>
+        <View style={s.welcomeBody}>
+          <Image source={require('../assets/skull.png')} style={s.welcomeSkull} resizeMode="contain" />
+          <Text style={s.welcomeTitle}>Marcus</Text>
+          <Text style={s.welcomeSub}>A Stoic practice app</Text>
+          <View style={s.welcomeDivider} />
+          <Text style={s.welcomeTagline}>
+            “The impediment to action advances action. What stands in the way becomes the way.”
+          </Text>
+          <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations V.20</Text>
+        </View>
+        <View style={s.footer}>
+          <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
+            <Text style={s.primaryBtnText}>Begin your practice</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
@@ -269,25 +280,34 @@ function ReadyStep({ onFinish }) {
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.welcomeBody}>
-        <Image source={require('../assets/skull.png')} style={s.readySkull} resizeMode="contain" />
-        <Text style={s.readyEyebrow}>Memento mori</Text>
-        <Text style={s.readyTitle}>Your practice{'\n'}begins now.</Text>
-        <Text style={s.readyDate}>{dateStr}</Text>
-        <Text style={s.readyStreak}>Day 1</Text>
-      </View>
-      <View style={s.footer}>
-        <TouchableOpacity style={s.primaryBtn} onPress={onFinish} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText}>Go to Practice →</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    <LinearGradient
+      colors={HERO_GRADIENT}
+      locations={[0, 0.6, 1]}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView style={s.safeTransparent}>
+        <View style={s.welcomeBody}>
+          <Image source={require('../assets/skull.png')} style={s.readySkull} resizeMode="contain" />
+          <Text style={s.readyEyebrow}>Memento mori</Text>
+          <Text style={s.readyTitle}>Your practice{'\n'}begins now.</Text>
+          <Text style={s.readyDate}>{dateStr}</Text>
+          <Text style={s.readyStreak}>Day 1</Text>
+        </View>
+        <View style={s.footer}>
+          <TouchableOpacity style={s.primaryBtn} onPress={onFinish} activeOpacity={0.8}>
+            <Text style={s.primaryBtnText}>Go to Practice →</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
+  safeTransparent: { flex: 1, backgroundColor: 'transparent' },
   scroll: { flex: 1 },
 
   // Welcome
@@ -298,7 +318,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 36,
     paddingBottom: 40,
   },
-  welcomeSkull: { width: 120, height: 120, marginBottom: 32, opacity: 0.95 },
+  welcomeSkull: { width: 180, height: 180, marginBottom: 32, opacity: 0.95 },
   welcomeTitle: {
     fontSize: 64,
     fontWeight: '700',
@@ -365,7 +385,7 @@ const s = StyleSheet.create({
   previewNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, backgroundColor: colors.bgDeep },
   previewNoteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
 
-  readySkull: { width: 110, height: 110, marginBottom: 28, opacity: 1 },
+  readySkull: { width: 180, height: 180, marginBottom: 28, opacity: 1 },
   readyEyebrow: {
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
