@@ -13,22 +13,22 @@ import * as haptics from '../lib/haptics';
 
 const morningPrompts = [
   {
-    num: 'I',
+    num: 'I · Discern',
     q: 'What is in my control today — and what must I release?',
     hint: "The Stoics divide all things into two categories: what is 'up to us' and what is not. Up to us: our judgments, intentions, how we respond. Not up to us: other people's behavior, outcomes, reputation, the weather, the economy.\n\nImportantly, your thoughts themselves are not fully in your control — they arise unbidden. What is in your control is whether you assent to a thought, dwell on it, act on it. The Stoic practice is not suppression but discernment: this impression is mine to engage with; that one I can let pass.\n\nReleasing what is not yours doesn't mean you don't care. It means you stop exhausting yourself on things you cannot move.",
   },
   {
-    num: 'II',
+    num: 'II · Brace',
     q: 'Where will courage be required of me today?',
     hint: "Courage (andreia) is one of the four cardinal virtues — but the Stoics meant something precise by it. Not recklessness, not aggression. The willingness to act rightly even when it is uncomfortable, costly, or unpopular.\n\nCourage is required whenever you know what the right thing is but feel resistance to doing it: the difficult conversation you've been avoiding, the boundary you need to hold, the work that demands your honest effort when distraction is easier.\n\nAsking this in the morning puts you on alert. You've named the moment before it arrives. When it comes, you've already decided.",
   },
   {
-    num: 'III',
+    num: 'III · Name',
     q: 'What are you postponing that matters? Name one thing.',
     hint: "Seneca wrote that we suffer more in imagination than in reality — but he also observed that we are experts at deferring what matters in favor of what is urgent, easy, or comfortable.\n\nThe Stoics were deeply aware of mortality as a clarifying force. If you knew today was your last, what would you regret not having done? That regret is information. It points at what actually matters to you beneath the noise of daily preference.\n\nNaming one thing — just one — makes it real. The act of naming is the act of committing. Not to completing it today necessarily, but to acknowledging that it exists and that you are responsible for it.",
   },
   {
-    num: 'IV',
+    num: 'IV · Foresee',
     q: 'What difficulty might arise today, and how would a person of Virtue meet it?',
     hint: "This is premeditatio malorum — the premeditation of adversity. The Stoics practiced it daily. Marcus Aurelius began most mornings by mentally rehearsing the difficult people and situations he would face.\n\nModern research confirms what the Stoics intuited: negative visualization — mentally simulating obstacles before they occur — reduces anxiety and improves performance. It works because the obstacle loses its power to surprise you. You've already met it, already chosen your response.\n\nAsk: not 'what bad thing might happen' in a fearful way, but 'how would a person who embodies wisdom, courage, and justice meet this?' You're not predicting disaster. You're rehearsing Virtue.",
   },
