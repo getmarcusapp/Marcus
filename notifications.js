@@ -59,8 +59,8 @@ export async function scheduleAllNotifications() {
     if (!compassAlreadyDone) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Marcus',
-          body: 'Begin with your compass. Let it orient the day.',
+          title: 'Begin with your compass',
+          body: 'Let it orient the day.',
           sound: false,
         },
         trigger: { type: 'daily', hour: settings.compassHour, minute: settings.compassMinute },
@@ -74,8 +74,8 @@ export async function scheduleAllNotifications() {
     if (!readingDone) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Marcus',
-          body: 'Your daily wisdom awaits. Take a moment to read.',
+          title: "Today's reading is ready",
+          body: 'A moment of wisdom for the day.',
           sound: false,
         },
         trigger: { type: 'daily', hour: settings.readingHour, minute: settings.readingMinute },
@@ -91,8 +91,8 @@ export async function scheduleAllNotifications() {
     if (!morningDone || !morningPassedToday) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Marcus',
-          body: 'The hourglass turns. Your morning practice awaits.',
+          title: 'Morning practice',
+          body: 'The hourglass turns. Reflect and intend.',
           sound: false,
         },
         trigger: {
@@ -110,8 +110,8 @@ export async function scheduleAllNotifications() {
     if (!eveningDone) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Marcus',
-          body: 'The day closes. Time to examine it.',
+          title: 'The day closes',
+          body: 'Time to examine it before you sleep.',
           sound: false,
         },
         trigger: {
@@ -127,8 +127,8 @@ export async function scheduleAllNotifications() {
   if (settings.middayEnabled) {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Marcus',
-        body: 'Pause. How are you meeting the day?',
+        title: 'Pause',
+        body: 'How are you meeting the day?',
         sound: false,
       },
       trigger: { type: 'daily', hour: settings.middayHour, minute: settings.middayMinute },
@@ -139,8 +139,8 @@ export async function scheduleAllNotifications() {
   if (settings.reviewEnabled) {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Marcus',
-        body: 'A week has passed. Seal it with intention.',
+        title: 'A week to seal',
+        body: 'Look back. Examine. Begin again.',
         sound: false,
       },
       trigger: {
@@ -166,11 +166,11 @@ export async function refreshNotificationsForToday() {
     const eveningDone = await isTodayJournalDone('evening');
 
     for (const notif of scheduled) {
-      const body = notif.content?.body || '';
-      if (morningDone && body.includes('morning practice')) {
+      const haystack = ((notif.content?.title || '') + ' ' + (notif.content?.body || '')).toLowerCase();
+      if (morningDone && haystack.includes('morning practice')) {
         await Notifications.cancelScheduledNotificationAsync(notif.identifier);
       }
-      if (eveningDone && body.includes('day closes')) {
+      if (eveningDone && haystack.includes('the day closes')) {
         await Notifications.cancelScheduledNotificationAsync(notif.identifier);
       }
     }
@@ -186,14 +186,15 @@ export async function cancelJournalNotification(type) {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
     const keywords = {
       morning: 'morning practice',
-      evening: 'day closes',
-      compass: 'Begin with your compass',
-      reading: 'daily wisdom awaits',
+      evening: 'the day closes',
+      compass: 'begin with your compass',
+      reading: "today's reading",
     };
     const keyword = keywords[type] || '';
     if (!keyword) return;
     for (const notif of scheduled) {
-      if ((notif.content?.body || '').includes(keyword)) {
+      const haystack = ((notif.content?.title || '') + ' ' + (notif.content?.body || '')).toLowerCase();
+      if (haystack.includes(keyword)) {
         await Notifications.cancelScheduledNotificationAsync(notif.identifier);
       }
     }
@@ -235,7 +236,7 @@ export async function scheduleReengagementNotifications() {
       await Notifications.scheduleNotificationAsync({
         identifier: REENGAGEMENT_IDS.day2,
         content: {
-          title: 'Marcus',
+          title: "It's been a day",
           body: "The practice doesn't judge absence. It just waits.",
           sound: false,
         },
@@ -249,8 +250,8 @@ export async function scheduleReengagementNotifications() {
       await Notifications.scheduleNotificationAsync({
         identifier: REENGAGEMENT_IDS.day7,
         content: {
-          title: 'Marcus',
-          body: "It's been a week. One prompt is enough to start again.",
+          title: "It's been a week",
+          body: 'One prompt is enough to start again.',
           sound: false,
         },
         trigger: { type: 'timeInterval', seconds: 60 * 60, repeats: false },
@@ -262,8 +263,8 @@ export async function scheduleReengagementNotifications() {
     await Notifications.scheduleNotificationAsync({
       identifier: REENGAGEMENT_IDS.day2,
       content: {
-        title: 'Marcus',
-        body: 'Marcus Aurelius missed days too. He always returned.',
+        title: 'Even Marcus missed days',
+        body: 'He always returned. So can you.',
         sound: false,
       },
       trigger: { type: 'timeInterval', seconds: 60 * 60 * 7, repeats: false },
