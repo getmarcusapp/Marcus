@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator,
-  KeyboardAvoidingView, Platform, Image,
+  KeyboardAvoidingView, Platform, Image, Share,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -159,6 +159,23 @@ ${recentReflections || 'none'}`;
       Alert.alert('', 'Insight saved.', [
         { text: 'Back to Practice', onPress: () => router.replace('/') },
       ]);
+    }
+  }
+
+  async function handleShare() {
+    if (!reading) return;
+    const lines = [
+      `"${reading.quote}"`,
+      `— ${reading.author}${reading.work ? `, ${reading.work}` : ''}`,
+      '',
+      reading.reflection,
+      '',
+      'From Marcus — daily Stoic practice.',
+    ];
+    try {
+      await Share.share({ message: lines.join('\n') });
+    } catch (e) {
+      console.log('Share failed:', e?.message);
     }
   }
 
@@ -326,6 +343,10 @@ ${recentReflections || 'none'}`;
 
                   <TouchableOpacity style={s.refreshBtn} onPress={generateReading} activeOpacity={0.8}>
                     <Text style={s.refreshBtnText}>Generate new reading</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={s.shareBtn} onPress={handleShare} activeOpacity={0.8}>
+                    <Text style={s.shareBtnText}>Share this reading</Text>
                   </TouchableOpacity>
                 </>
               ) : (
@@ -510,8 +531,10 @@ const s = StyleSheet.create({
   },
   saveBtnDone: { borderColor: colors.borderMid, backgroundColor: colors.bgElevated },
   saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
-  refreshBtn: { padding: 14, alignItems: 'center', marginBottom: 60 },
+  refreshBtn: { padding: 14, alignItems: 'center' },
   refreshBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
+  shareBtn: { padding: 14, alignItems: 'center', marginBottom: 60 },
+  shareBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
   generateBtn: {
     borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
     padding: 20, alignItems: 'center', backgroundColor: colors.bgElevated, marginTop: 8,
