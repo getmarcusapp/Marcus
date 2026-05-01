@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Switch, Alert, Share,
+  StyleSheet, SafeAreaView, Switch, Alert, Share, Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getJournals, getTriggers, getStreak, clearTodayPractice, sealTodayPractice } from '../store/db';
@@ -204,6 +204,23 @@ export default function SettingsScreen() {
         },
       ]
     );
+  }
+
+  async function handleShareApp() {
+    try {
+      await Share.share({
+        message: 'Marcus — a daily Stoic practice app. Become someone you respect.\n\nhttps://getmarcus.app',
+      });
+    } catch (e) {
+      console.log('Share app failed:', e?.message);
+    }
+  }
+
+  async function handleContactSupport() {
+    const url = 'mailto:support@getmarcus.app?subject=Marcus%20app%20support';
+    const supported = await Linking.canOpenURL(url);
+    if (supported) await Linking.openURL(url);
+    else Alert.alert('', 'No email app set up. Email support@getmarcus.app');
   }
 
   async function handleSealTodayPractice() {
@@ -451,6 +468,36 @@ export default function SettingsScreen() {
             <Text style={s.exportBtnSub}>Share journal entries and emotion logs as text</Text>
           </TouchableOpacity>
 
+          <Text style={s.secLabel}>Spread the practice</Text>
+          <TouchableOpacity style={s.exportBtn} onPress={handleShareApp} activeOpacity={0.8}>
+            <Text style={s.exportBtnTitle}>Share Marcus</Text>
+            <Text style={s.exportBtnSub}>Send the app to someone who could use it</Text>
+          </TouchableOpacity>
+
+          <Text style={s.secLabel}>Help</Text>
+          <TouchableOpacity style={s.exportBtn} onPress={handleContactSupport} activeOpacity={0.8}>
+            <Text style={s.exportBtnTitle}>Contact support</Text>
+            <Text style={s.exportBtnSub}>Email the team — questions, feedback, bug reports</Text>
+          </TouchableOpacity>
+
+          <Text style={s.secLabel}>About</Text>
+          <View style={s.aboutCard}>
+            <View style={s.aboutRow}>
+              <Text style={s.aboutLabel}>Version</Text>
+              <Text style={s.aboutValue}>1.0.0</Text>
+            </View>
+            <View style={s.aboutDivider} />
+            <TouchableOpacity style={s.aboutRow} onPress={() => Linking.openURL('https://getmarcus.app/privacy.html')}>
+              <Text style={s.aboutLabel}>Privacy policy</Text>
+              <Text style={s.aboutChev}>›</Text>
+            </TouchableOpacity>
+            <View style={s.aboutDivider} />
+            <TouchableOpacity style={s.aboutRow} onPress={() => Linking.openURL('https://getmarcus.app')}>
+              <Text style={s.aboutLabel}>getmarcus.app</Text>
+              <Text style={s.aboutChev}>›</Text>
+            </TouchableOpacity>
+          </View>
+
           <Text style={s.secLabel}>Developer</Text>
           <TouchableOpacity style={s.dangerBtn} onPress={handleDisableAll} activeOpacity={0.8}>
             <Text style={s.dangerBtnText}>Cancel all notifications</Text>
@@ -527,6 +574,12 @@ const s = StyleSheet.create({
   exportBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
   exportBtnTitle: { fontSize: 15, fontWeight: '500', color: colors.textSecondary, marginBottom: 4 },
   exportBtnSub: { fontSize: 13, color: colors.textDim },
+  aboutCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, marginBottom: 4, overflow: 'hidden' },
+  aboutRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 18 },
+  aboutLabel: { fontSize: 15, color: colors.textSecondary },
+  aboutValue: { fontSize: 14, color: colors.textMuted },
+  aboutChev: { fontSize: 20, color: colors.textMuted },
+  aboutDivider: { height: 0.5, backgroundColor: colors.border },
   dangerBtn: { borderWidth: 0.5, borderColor: '#2a1a1a', borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: '#0d0808', marginBottom: 10 },
   dangerBtnText: { fontSize: 12, color: '#884444', letterSpacing: 1, textTransform: 'uppercase' },
   resetBtn: { borderWidth: 0.5, borderColor: '#3a2020', borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: '#1a0a0a', marginBottom: 32 },
