@@ -102,7 +102,6 @@ export default function EmotionsScreen() {
   const [filterDistortion, setFilterDistortion] = useState('all');
   const [filterIntensity, setFilterIntensity] = useState(0); // 0 = all, 7 = high only
   const [sortMode, setSortMode] = useState('date'); // 'date' | 'intensity'
-  const [filterMonth, setFilterMonth] = useState('all');
   const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => { getTriggers().then(setHistory); }, []);
@@ -155,19 +154,9 @@ export default function EmotionsScreen() {
   }
 }
 
-  const availableMonths = [...new Set(history.map(e => {
-    const d = new Date(e.date);
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-  }))].sort().reverse();
-
   const filteredHistory = history
     .filter(e => {
       if (filterEmotion !== 'all' && e.emotion !== filterEmotion) return false;
-      if (filterMonth !== 'all') {
-        const d = new Date(e.date);
-        const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-        if (key !== filterMonth) return false;
-      }
       if (filterDistortion !== 'all' && !(e.distortions || []).includes(filterDistortion)) return false;
       if (filterIntensity > 0 && (e.intensity || 0) < filterIntensity) return false;
       if (searchQ.trim()) {
