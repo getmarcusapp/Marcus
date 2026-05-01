@@ -375,6 +375,18 @@ export default function JournalScreen() {
               </View>
 
               <View style={s.body}>
+                <View style={s.anchorCard}>
+                  <Text style={s.anchorLabel}>{isMorning ? 'Morning anchor' : 'Evening anchor'}</Text>
+                  <Text style={s.anchorText}>
+                    {isMorning
+                      ? '"When you wake, expect to meet people who are difficult — meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."'
+                      : '"Ask yourself at day\'s end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn."'}
+                  </Text>
+                  <Text style={s.anchorAuthor}>
+                    {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
+                  </Text>
+                </View>
+
                 {isMorning && (
                   <View style={s.virtueSection}>
                     <Text style={s.secLabel}>Today's Virtue Focus</Text>
@@ -455,18 +467,6 @@ export default function JournalScreen() {
                     )}
                   </TouchableOpacity>
                 ))}
-
-                <View style={s.anchorCard}>
-                  <Text style={s.anchorLabel}>{isMorning ? 'Morning anchor' : 'Evening anchor'}</Text>
-                  <Text style={s.anchorText}>
-                    {isMorning
-                      ? '"When you wake, expect to meet people who are difficult — meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."'
-                      : '"Ask yourself at day\'s end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn."'}
-                  </Text>
-                  <Text style={s.anchorAuthor}>
-                    {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
-                  </Text>
-                </View>
 
                 <TouchableOpacity style={s.saveBtn} onPress={handleSave} activeOpacity={0.8}>
                   <Text style={s.saveBtnText}>
