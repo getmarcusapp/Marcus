@@ -678,9 +678,9 @@ const s = StyleSheet.create({
   monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
-  tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
+  tabBtnActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
-  tabBtnTextActive: { color: colors.textSecondary },
+  tabBtnTextActive: { color: colors.accent, fontWeight: '500' },
   mementoStrip: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,

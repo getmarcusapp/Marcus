@@ -361,9 +361,9 @@ const s = StyleSheet.create({
   sub: { fontSize: font.subSize, color: colors.textMuted },
   tabRow: { flexDirection: 'row', gap: 10, padding: spacing.md, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
-  tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
+  tabBtnActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
-  tabBtnTextActive: { color: colors.textSecondary },
+  tabBtnTextActive: { color: colors.accent, fontWeight: '500' },
   body: { padding: spacing.md },
   // Stats
   statRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },

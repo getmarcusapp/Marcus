@@ -562,9 +562,9 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep,
   },
   tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
-  tabBtnActive: { backgroundColor: colors.bgElevated, borderColor: colors.borderStrong },
+  tabBtnActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
   tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
-  tabBtnTextActive: { color: colors.textSecondary },
+  tabBtnTextActive: { color: colors.accent, fontWeight: '500' },
   // Light reading body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   badgeRow: { flexDirection: 'row', gap: 8, marginBottom: 14, marginTop: 8 },
