@@ -366,27 +366,15 @@ export default function JournalScreen() {
               <View style={s.mementoStrip}>
                 <Text style={s.mementoText}>
                   {isMorning
-                    ? 'This day will not come again. What will you make of the hours you are given?'
-                    : 'Did you live well today? Not perfectly — but with intention?'}
+                    ? '"When you wake, expect to meet people who are difficult — meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."'
+                    : '"Ask yourself at day\'s end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn."'}
                 </Text>
                 <Text style={s.mementoSub}>
-                  {isMorning ? 'Memento mori · Carpe diem' : 'The day closes · Examine thyself'}
+                  {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
                 </Text>
               </View>
 
               <View style={s.body}>
-                <View style={s.anchorCard}>
-                  <Text style={s.anchorLabel}>{isMorning ? 'Morning anchor' : 'Evening anchor'}</Text>
-                  <Text style={s.anchorText}>
-                    {isMorning
-                      ? '"When you wake, expect to meet people who are difficult — meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."'
-                      : '"Ask yourself at day\'s end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn."'}
-                  </Text>
-                  <Text style={s.anchorAuthor}>
-                    {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
-                  </Text>
-                </View>
-
                 {isMorning && (
                   <View style={s.virtueSection}>
                     <Text style={s.secLabel}>Today's Virtue Focus</Text>
@@ -729,13 +717,6 @@ const s = StyleSheet.create({
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
   hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
-  anchorCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 20, marginBottom: 12, backgroundColor: colors.bgCard,
-  },
-  anchorLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 10 },
-  anchorText: { fontSize: 17, color: colors.textPrimary, fontFamily: font.serif, lineHeight: 28 },
-  anchorAuthor: { fontSize: 11, color: colors.textDim, marginTop: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
   saveBtn: {
     borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
     padding: 18, alignItems: 'center', backgroundColor: colors.bgElevated, marginBottom: 36,
