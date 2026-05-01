@@ -212,7 +212,7 @@ const s = StyleSheet.create({
   },
   skull: { width: 80, height: 80, marginBottom: 20, opacity: 0.9 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12 },
-  title: { fontSize: font.heroSize, fontWeight: '700', color: colors.textPrimary, letterSpacing: -1, textAlign: 'center', marginBottom: 14, lineHeight: 42 },
+  title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -1, textAlign: 'center', marginBottom: 14, lineHeight: 42 },
   sub: { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
 
   features: {

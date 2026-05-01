@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Switch, Alert,
+  StyleSheet, SafeAreaView, Switch, Alert, Share,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getJournals, getTriggers, getStreak, clearTodayPractice } from '../store/db';

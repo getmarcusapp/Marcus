@@ -695,7 +695,6 @@ const s = StyleSheet.create({
   },
   virtueInfoLeft: { flex: 1 },
   virtueInfoName: { fontSize: 20, fontWeight: '400', color: colors.textPrimary, marginBottom: 2 },
-  virtueInfoLatin: { fontSize: 12, color: colors.textMuted, marginBottom: 6 },
   virtueInfoDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 21 },
   virtueInfoChev: { fontSize: 20, color: colors.textDim },
   virtueDetailCard: {
