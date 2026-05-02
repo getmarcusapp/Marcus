@@ -8,6 +8,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { emotions, stoicReframes } from '../constants/virtues';
 import { saveTrigger, getTriggers, updateTriggerEntry } from '../store/db';
 import * as haptics from '../lib/haptics';
+import { useMindfulSession } from '../lib/useMindfulSession';
 
 const EMOTION_COLORS = {
   anger:       { bg: '#FDF0EF', border: '#E8A09A', text: '#C0504A', tint: 'rgba(232,160,154,0.12)' },
@@ -101,6 +102,7 @@ export default function EmotionsScreen() {
   const [filterEmotion, setFilterEmotion] = useState('all');
   const [filterDistortion, setFilterDistortion] = useState('all');
   const [filterIntensity, setFilterIntensity] = useState(0); // 0 = all, 7 = high only
+  const commitMindfulSession = useMindfulSession();
   const [sortMode, setSortMode] = useState('date'); // 'date' | 'intensity'
   const [editingEntry, setEditingEntry] = useState(null);
 
@@ -131,6 +133,7 @@ export default function EmotionsScreen() {
     };
     await saveTrigger(entry);
     haptics.action();
+    commitMindfulSession();
     const updated = await getTriggers();
     setHistory(updated);
     setSelectedEmotion(null);

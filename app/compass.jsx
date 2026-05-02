@@ -9,6 +9,7 @@ import { virtues } from '../constants/virtues';
 import { getCompass, saveCompass } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
 import * as haptics from '../lib/haptics';
+import { useMindfulSession } from '../lib/useMindfulSession';
 
 const COMPASS_HINTS = {
   why: {
@@ -36,6 +37,7 @@ export default function CompassScreen() {
   const [draft, setDraft] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
   const [nextStep, setNextStep] = useState(null);
+  const commitMindfulSession = useMindfulSession();
 
   useEffect(() => {
     getCompass().then(setCompass);
@@ -47,6 +49,7 @@ export default function CompassScreen() {
     const updated = { ...compass, [key]: draft };
     await saveCompass(updated);
     haptics.action();
+    commitMindfulSession();
     setCompass(updated);
     setEditing(false);
   }

@@ -14,6 +14,34 @@ import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJourn
 import { getNextPracticeAfter } from '../store/practice-flow';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
+import * as health from '../lib/health';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMindfulSession } from '../lib/useMindfulSession';
+
+async function maybeAskHealthPermission() {
+  const asked = await AsyncStorage.getItem('health_permission_asked');
+  if (asked === 'true') return;
+  const available = await health.isAvailable();
+  if (!available) return;
+  Alert.alert(
+    'Sync to Apple Health?',
+    'Marcus can record each practice you complete as Mindful Minutes, so your reflection time joins the rest of your wellness data. You can change this anytime in Settings.',
+    [
+      {
+        text: 'Maybe later',
+        style: 'cancel',
+        onPress: async () => { await AsyncStorage.setItem('health_permission_asked', 'true'); },
+      },
+      {
+        text: 'Connect',
+        onPress: async () => {
+          await health.requestPermission();
+          await AsyncStorage.setItem('health_permission_asked', 'true');
+        },
+      },
+    ],
+  );
+}
 
 const morningPrompts = [
   {
@@ -185,6 +213,7 @@ export default function JournalScreen() {
   const defaultType = params?.type || (new Date().getHours() < 13 ? 'morning' : 'evening');
   const [sessionType, setSessionType] = useState(defaultType);
   const isMorning = sessionType !== 'evening';
+  const commitMindfulSession = useMindfulSession();
 
   // Sync sessionType when navigating here explicitly from practice with a type param
   useEffect(() => {
@@ -252,7 +281,9 @@ export default function JournalScreen() {
     const ok = await saveJournal(entry);
     if (ok) {
       haptics.action();
+      commitMindfulSession();
       cancelJournalNotification(isMorning ? 'morning' : 'evening');
+      maybeAskHealthPermission();
       await incrementStreak();
       setAlreadySaved(true);
       const all = await getJournals();

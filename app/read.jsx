@@ -12,6 +12,7 @@ import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingLog, g
 import { getNextPracticeAfter } from '../store/practice-flow';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
+import { useMindfulSession } from '../lib/useMindfulSession';
 
 const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom generating a personalized daily reading for a user of a Stoic practice app.
 
@@ -86,6 +87,7 @@ export default function ReadScreen() {
   const [filterMonth, setFilterMonth] = useState('all');
   const [insightSaved, setInsightSaved] = useState(false);
   const [mode, setMode] = useState('timeless');
+  const commitMindfulSession = useMindfulSession();
 
   useFocusEffect(useCallback(() => {
   async function load() {
@@ -225,6 +227,7 @@ Return only the JSON object.`;
     if (!insight.trim()) return;
     await saveReadingInsight(insight);
     haptics.action();
+    commitMindfulSession();
     setInsightSaved(true);
     const updated = await getReadingLog();
     setLog(updated);

@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getJournals, getTriggers, getStreak, clearTodayPractice, sealTodayPractice } from '../store/db';
+import * as health from '../lib/health';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { requestNotificationPermissions, scheduleAllNotifications, cancelAllNotifications } from '../notifications';
 
@@ -73,6 +74,33 @@ function TimeAdjuster({ hour, minute, onHourChange, onMinuteChange }) {
 }
 
 export default function SettingsScreen() {
+  const [healthAsked, setHealthAsked] = useState(false);
+  const [healthAvailable, setHealthAvailable] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const asked = await AsyncStorage.getItem('health_permission_asked');
+      setHealthAsked(asked === 'true');
+      setHealthAvailable(await health.isAvailable());
+    })();
+  }, []);
+
+  async function handleConnectHealth() {
+    const ok = await health.requestPermission();
+    await AsyncStorage.setItem('health_permission_asked', 'true');
+    setHealthAsked(true);
+    if (!ok) {
+      Alert.alert(
+        'Permission denied',
+        'Open iOS Settings to allow Marcus to write Mindful Minutes to Apple Health.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+        ],
+      );
+    }
+  }
+
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -479,6 +507,16 @@ export default function SettingsScreen() {
             <Text style={s.exportBtnTitle}>Contact support</Text>
             <Text style={s.exportBtnSub}>Email the team — questions, feedback, bug reports</Text>
           </TouchableOpacity>
+
+          {healthAvailable && (
+            <>
+              <Text style={s.secLabel}>Apple Health</Text>
+              <TouchableOpacity style={s.exportBtn} onPress={handleConnectHealth} activeOpacity={0.8}>
+                <Text style={s.exportBtnTitle}>{healthAsked ? 'Manage Apple Health' : 'Connect to Apple Health'}</Text>
+                <Text style={s.exportBtnSub}>Marcus writes Mindful Minutes for each practice you complete.</Text>
+              </TouchableOpacity>
+            </>
+          )}
 
           <Text style={s.secLabel}>About</Text>
           <View style={s.aboutCard}>

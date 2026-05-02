@@ -17,10 +17,13 @@
       "bundleIdentifier": "com.gioblanco.marcus",
       "newArchEnabled": false,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSHealthUpdateUsageDescription": "Marcus syncs your daily Stoic practice as Mindful Minutes so your reflection time is counted alongside meditation and breathwork."
       },
       "entitlements": {
-        "com.apple.developer.in-app-payments": []
+        "com.apple.developer.in-app-payments": [],
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": []
       }
     },
     "scheme": "marcus",
@@ -33,7 +36,8 @@
           "color": "#0a0a0a",
           "defaultChannel": "default"
         }
-      ]
+      ],
+      "react-native-health"
     ],
     "extra": {
       "router": {},

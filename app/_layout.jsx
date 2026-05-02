@@ -7,6 +7,7 @@ import { colors } from '../constants/theme';
 import { hasOnboarded } from '../store/db';
 import { initializePurchases } from '../store/purchases';
 import { scheduleReengagementNotifications, scheduleAllNotifications } from '../notifications';
+import * as health from '../lib/health';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function TabIcon({ name, color }) {
@@ -35,6 +36,12 @@ export default function Layout() {
     initializePurchases();
     scheduleReengagementNotifications();
     scheduleAllNotifications();
+    // Re-init HealthKit if user previously granted, so writes work this session.
+    // No iOS prompt is shown — initHealthKit is a no-op once iOS has the answer cached.
+    (async () => {
+      const asked = await AsyncStorage.getItem('health_permission_asked');
+      if (asked === 'true') await health.requestPermission();
+    })();
     // Bypass paywall in dev and beta builds — never runs in production
     if (__DEV__ || process.env.EXPO_PUBLIC_IS_BETA === 'true') {
       AsyncStorage.setItem('has_premium', 'true');
