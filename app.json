@@ -22,8 +22,7 @@
       },
       "entitlements": {
         "com.apple.developer.in-app-payments": [],
-        "com.apple.developer.healthkit": true,
-        "com.apple.developer.healthkit.access": []
+        "com.apple.developer.healthkit": true
       }
     },
     "scheme": "marcus",
@@ -37,7 +36,14 @@
           "defaultChannel": "default"
         }
       ],
-      "react-native-health"
+      [
+        "react-native-health",
+        {
+          "isClinicalDataEnabled": false,
+          "healthSharePermission": "Marcus does not read your health data.",
+          "healthUpdatePermission": "Marcus syncs your daily Stoic practice as Mindful Minutes so your reflection time is counted alongside meditation and breathwork."
+        }
+      ]
     ],
     "extra": {
       "router": {},
