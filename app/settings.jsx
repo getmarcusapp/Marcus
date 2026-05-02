@@ -51,6 +51,19 @@ export default function SettingsScreen() {
   }, []);
 
   async function handleConnectHealth() {
+    if (healthAsked) {
+      // iOS won't re-prompt once asked. Send the user to system Settings
+      // where they can toggle Mindful Sessions write access.
+      Alert.alert(
+        'Manage Apple Health',
+        'Once Marcus has asked for permission, iOS only allows changes from system Settings → Privacy & Security → Health → Marcus.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+        ],
+      );
+      return;
+    }
     const ok = await health.requestPermission();
     await AsyncStorage.setItem('health_permission_asked', 'true');
     setHealthAsked(true);

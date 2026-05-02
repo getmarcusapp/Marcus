@@ -67,7 +67,7 @@ export default function DeveloperSettingsScreen() {
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
         <View style={s.hero}>
-          <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
+          <TouchableOpacity onPress={() => router.replace('/settings')} style={s.backRow}>
             <Text style={s.backArrow}>‹</Text>
             <Text style={s.backLabel}>Settings</Text>
           </TouchableOpacity>
