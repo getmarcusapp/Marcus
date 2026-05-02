@@ -18,6 +18,7 @@
       "newArchEnabled": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "NSHealthShareUsageDescription": "Marcus does not read your health data.",
         "NSHealthUpdateUsageDescription": "Marcus syncs your daily Stoic practice as Mindful Minutes so your reflection time is counted alongside meditation and breathwork."
       },
       "entitlements": {
@@ -34,14 +35,6 @@
           "icon": "./assets/icon.png",
           "color": "#0a0a0a",
           "defaultChannel": "default"
-        }
-      ],
-      [
-        "react-native-health",
-        {
-          "isClinicalDataEnabled": false,
-          "healthSharePermission": "Marcus does not read your health data.",
-          "healthUpdatePermission": "Marcus syncs your daily Stoic practice as Mindful Minutes so your reflection time is counted alongside meditation and breathwork."
         }
       ]
     ],
