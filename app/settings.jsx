@@ -1,87 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Switch, Alert, Share, Linking,
+  StyleSheet, SafeAreaView, Alert, Share, Linking,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getJournals, getTriggers, getStreak, clearTodayPractice, sealTodayPractice } from '../store/db';
-import * as health from '../lib/health';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { requestNotificationPermissions, scheduleAllNotifications, cancelAllNotifications } from '../notifications';
+import { getJournals, getTriggers, getStreak } from '../store/db';
+import * as health from '../lib/health';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
-const DEFAULT_SETTINGS = {
-  morningEnabled: true,
-  morningHour: 7,
-  morningMinute: 0,
-  compassEnabled: true,
-  compassHour: 7,
-  compassMinute: 30,
-  middayEnabled: false,
-  middayHour: 12,
-  middayMinute: 0,
-  eveningEnabled: true,
-  eveningHour: 20,
-  eveningMinute: 0,
-  reviewEnabled: true,
-  reviewHour: 9,
-  reviewMinute: 0,
-  reviewDay: 0,
-};
-
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-function formatTime(hour, minute) {
-  const h = hour % 12 || 12;
-  const m = minute.toString().padStart(2, '0');
-  return `${h}:${m} ${hour < 12 ? 'AM' : 'PM'}`;
-}
-
-function TimeAdjuster({ hour, minute, onHourChange, onMinuteChange }) {
+function NavRow({ label, sub, onPress, last }) {
   return (
-    <View style={t.wrap}>
-      <View style={t.col}>
-        <TouchableOpacity style={t.btn} onPress={() => onHourChange((hour + 1) % 24)}>
-          <Text style={t.arrow}>▲</Text>
-        </TouchableOpacity>
-        <Text style={t.val}>{(hour % 12 || 12).toString().padStart(2, '0')}</Text>
-        <TouchableOpacity style={t.btn} onPress={() => onHourChange((hour + 23) % 24)}>
-          <Text style={t.arrow}>▼</Text>
-        </TouchableOpacity>
+    <TouchableOpacity
+      style={[s.row, !last && s.rowBorder]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={{ flex: 1 }}>
+        <Text style={s.rowLabel}>{label}</Text>
+        {sub ? <Text style={s.rowSub}>{sub}</Text> : null}
       </View>
-      <Text style={t.colon}>:</Text>
-      <View style={t.col}>
-        <TouchableOpacity style={t.btn} onPress={() => onMinuteChange((minute + 5) % 60)}>
-          <Text style={t.arrow}>▲</Text>
-        </TouchableOpacity>
-        <Text style={t.val}>{minute.toString().padStart(2, '0')}</Text>
-        <TouchableOpacity style={t.btn} onPress={() => onMinuteChange((minute + 55) % 60)}>
-          <Text style={t.arrow}>▼</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={t.col}>
-        <TouchableOpacity style={t.btn} onPress={() => onHourChange((hour + 12) % 24)}>
-          <Text style={t.arrow}>▲</Text>
-        </TouchableOpacity>
-        <Text style={t.val}>{hour < 12 ? 'AM' : 'PM'}</Text>
-        <TouchableOpacity style={t.btn} onPress={() => onHourChange((hour + 12) % 24)}>
-          <Text style={t.arrow}>▼</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      <Text style={s.chev}>›</Text>
+    </TouchableOpacity>
   );
 }
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const [healthAsked, setHealthAsked] = useState(false);
   const [healthAvailable, setHealthAvailable] = useState(false);
+  const [reminderSummary, setReminderSummary] = useState('');
 
   useEffect(() => {
     (async () => {
       const asked = await AsyncStorage.getItem('health_permission_asked');
       setHealthAsked(asked === 'true');
       setHealthAvailable(await health.isAvailable());
+      const raw = await AsyncStorage.getItem(NOTIF_SETTINGS_KEY);
+      if (raw) {
+        const cfg = JSON.parse(raw);
+        const enabled = ['morningEnabled', 'compassEnabled', 'middayEnabled', 'eveningEnabled', 'reviewEnabled']
+          .filter(k => cfg[k]).length;
+        setReminderSummary(enabled === 0 ? 'Off' : `${enabled} of 5 active`);
+      } else {
+        setReminderSummary('Configure your reminders');
+      }
     })();
   }, []);
 
@@ -101,137 +66,34 @@ export default function SettingsScreen() {
     }
   }
 
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
-  const [saved, setSaved] = useState(false);
-  const [permissionGranted, setPermissionGranted] = useState(false);
-
-  useEffect(() => {
-    AsyncStorage.getItem(NOTIF_SETTINGS_KEY).then(raw => {
-      if (raw) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(raw) });
-    });
-    // Check existing permission status
-    import('expo-notifications').then(Notifications => {
-      Notifications.getPermissionsAsync().then(({ status }) => {
-        setPermissionGranted(status === 'granted');
-      });
-    });
-  }, []);
-
-  function update(key, value) {
-    setSettings(prev => ({ ...prev, [key]: value }));
-    setSaved(false);
-  }
-
-  async function handleSave() {
-    await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, JSON.stringify(settings));
-
-    // Request permissions if not already granted
-    if (!permissionGranted) {
-      const granted = await requestNotificationPermissions();
-      setPermissionGranted(granted);
-      if (!granted) {
-        Alert.alert(
-          'Notifications disabled',
-          'Please enable notifications for Marcus in your iPhone Settings → Marcus → Notifications.',
-          [{ text: 'OK' }]
-        );
-        setSaved(true);
-        return;
-      }
-    }
-
-    // Schedule notifications — wrap in try/catch so a scheduling error
-    // doesn't silently swallow the confirmation
-    try {
-      await scheduleAllNotifications();
-    } catch (e) {
-      console.log('Notification scheduling error:', e);
-    }
-
-    setSaved(true);
-    Alert.alert('', 'Settings saved. Notifications scheduled.', [{ text: 'Done' }]);
-  }
-
   async function handleExport() {
     try {
       const journals = await getJournals();
       const triggers = await getTriggers();
       const streak = await getStreak();
-      const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-      const divider = '─'.repeat(40);
-      let text = 'MARCUS — PRACTICE EXPORT\n';
-      text += 'Exported ' + dateStr + '\n';
-      text += 'Current streak: ' + (streak.current || 0) + ' days';
-      text += ' | Longest: ' + (streak.longest || 0) + ' days';
-      text += ' | Total days: ' + (streak.totalDays || 0) + '\n';
-      text += '\n' + divider + '\n\n';
-
-      // Journal entries
-      text += 'JOURNAL ENTRIES (' + journals.length + ' total)\n\n';
-      const byDate = {};
-      journals.forEach(j => {
-        const d = j.date || 'Unknown date';
-        if (!byDate[d]) byDate[d] = [];
-        byDate[d].push(j);
-      });
-      const sortedDates = Object.keys(byDate).slice(0, 90);
-      sortedDates.forEach(date => {
-        byDate[date].forEach(j => {
-          text += date + ' — ' + (j.type === 'morning' ? 'Morning' : 'Evening') + '\n';
-          if (j.virtue) text += 'Virtue: ' + j.virtue + '\n';
-          if (j.answers) {
-            const prompts = Object.entries(j.answers);
-            prompts.forEach(([k, v]) => {
-              if (v && v.trim()) text += '  Q' + (parseInt(k) + 1) + ': ' + v.trim() + '\n';
-            });
-          }
-          text += '\n';
-        });
-      });
-
-      // Emotion triggers
-      if (triggers.length > 0) {
-        text += divider + '\n\n';
-        text += 'EMOTION TRIGGERS (' + triggers.length + ' total)\n\n';
-        triggers.slice(0, 50).forEach(t => {
-          text += (t.date || 'Unknown') + ' — ' + (t.emotion || 'Unknown emotion');
-          text += ' (intensity: ' + (t.intensity || '?') + '/10)\n';
-          if (t.trigger) text += '  Trigger: ' + t.trigger + '\n';
-          if (t.reaction) text += '  Reaction: ' + t.reaction + '\n';
-          if (t.response) text += '  Response: ' + t.response + '\n';
-          text += '\n';
+      const lines = [];
+      lines.push(`Marcus practice export — ${new Date().toDateString()}`);
+      lines.push(`Streak: ${streak.current ?? 0} day(s) current, ${streak.longest ?? 0} longest, ${streak.totalDays ?? 0} total\n`);
+      if (journals.length) {
+        lines.push('--- Journal entries ---');
+        journals.forEach(j => {
+          lines.push(`\n${new Date(j.date).toDateString()} — ${j.type}${j.virtue ? ` (Virtue: ${j.virtue})` : ''}`);
+          Object.values(j.answers || {}).forEach(a => a && lines.push(`  ${a}`));
         });
       }
-
-      await Share.share({ message: text, title: 'Marcus Practice Export' });
+      if (triggers.length) {
+        lines.push('\n\n--- Emotion logs ---');
+        triggers.forEach(t => {
+          lines.push(`\n${new Date(t.date).toDateString()} — ${t.emotion} (intensity ${t.intensity}/10)`);
+          if (t.trigger) lines.push(`  Trigger: ${t.trigger}`);
+          if (t.reaction) lines.push(`  Automatic reaction: ${t.reaction}`);
+          if (t.chosenResponse) lines.push(`  Chosen response: ${t.chosenResponse}`);
+        });
+      }
+      await Share.share({ message: lines.join('\n'), title: 'Marcus Practice Export' });
     } catch (e) {
-      console.log('Export error:', e);
-      Alert.alert('Export failed', 'Could not export your data. Please try again.');
+      Alert.alert('', 'Could not export. Try again later.');
     }
-  }
-
-  async function handleResetOnboarding() {
-    await AsyncStorage.removeItem('has_onboarded');
-    Alert.alert('', 'Onboarding reset. Close and reopen the app to see it.');
-  }
-
-  async function handleResetTodayPractice() {
-    Alert.alert(
-      'Reset today\'s practice?',
-      'Clears compass, reading, and any morning/evening journal entries saved today. History from previous days is kept.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: async () => {
-            await clearTodayPractice();
-            Alert.alert('', 'Today\'s practice cleared.');
-          },
-        },
-      ]
-    );
   }
 
   async function handleShareApp() {
@@ -239,9 +101,7 @@ export default function SettingsScreen() {
       await Share.share({
         message: 'Marcus — a daily Stoic practice app. Become someone you respect.\n\nhttps://getmarcus.app',
       });
-    } catch (e) {
-      console.log('Share app failed:', e?.message);
-    }
+    } catch (e) { /* swallowed */ }
   }
 
   async function handleContactSupport() {
@@ -251,319 +111,89 @@ export default function SettingsScreen() {
     else Alert.alert('', 'No email app set up. Email support@getmarcus.app');
   }
 
-  async function handleSealTodayPractice() {
-    Alert.alert(
-      'Seal today\'s practice?',
-      'Marks compass, reading, morning journal, and evening journal as complete with seeded test data. Useful for previewing the sealed state.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Seal',
-          onPress: async () => {
-            await sealTodayPractice();
-            Alert.alert('', 'Today\'s practice sealed.');
-          },
-        },
-      ]
-    );
-  }
-
-  async function handleDisableAll() {
-    await cancelAllNotifications();
-    const updated = {
-      ...settings,
-      morningEnabled: false,
-      eveningEnabled: false,
-      reviewEnabled: false,
-    };
-    setSettings(updated);
-    await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, JSON.stringify(updated));
-    Alert.alert('', 'All notifications cancelled.');
-  }
-
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
-
         <View style={s.hero}>
           <Text style={s.eyebrow}>Marcus</Text>
           <Text style={s.title}>Settings</Text>
           <Text style={s.sub}>Configure your daily practice</Text>
         </View>
 
-        {!permissionGranted && (
-          <View style={s.permissionBanner}>
-            <Text style={s.permissionTitle}>Notifications not enabled</Text>
-            <Text style={s.permissionText}>
-              Save your settings below to request notification permissions. Or enable them manually in iPhone Settings → Marcus.
-            </Text>
-          </View>
-        )}
-
         <View style={s.body}>
-
-          <Text style={s.secLabel}>Morning reflection</Text>
+          <Text style={s.secLabel}>Practice</Text>
           <View style={s.card}>
-            <View style={s.rowBetween}>
-              <View>
-                <Text style={s.rowTitle}>Morning reminder</Text>
-                <Text style={s.rowSub}>Daily · before the world begins</Text>
-              </View>
-              <Switch
-                value={settings.morningEnabled}
-                onValueChange={v => update('morningEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.morningEnabled ? colors.textPrimary : colors.textDim}
+            <NavRow
+              label="Notifications & Reminders"
+              sub={reminderSummary}
+              onPress={() => router.push('/settings-notifications')}
+            />
+            {healthAvailable && (
+              <NavRow
+                label="Apple Health"
+                sub={healthAsked ? 'Mindful Minutes connected' : 'Sync your practice as Mindful Minutes'}
+                onPress={handleConnectHealth}
+                last
               />
-            </View>
-            {settings.morningEnabled && (
-              <View style={s.timeSection}>
-                <Text style={s.timeLabel}>Remind me at</Text>
-                <TimeAdjuster
-                  hour={settings.morningHour}
-                  minute={settings.morningMinute}
-                  onHourChange={v => update('morningHour', v)}
-                  onMinuteChange={v => update('morningMinute', v)}
-                />
-                <Text style={s.timePreview}>{formatTime(settings.morningHour, settings.morningMinute)}</Text>
-                <View style={s.sampleMsg}>
-                  <Text style={s.sampleText}>"The hourglass turns. Your morning practice awaits."</Text>
-                </View>
-              </View>
             )}
-          </View>
-
-          <Text style={s.secLabel}>Compass</Text>
-          <View style={s.card}>
-            <View style={s.rowBetween}>
-              <View>
-                <Text style={s.rowTitle}>Compass reminder</Text>
-                <Text style={s.rowSub}>Daily · read before the day begins</Text>
-              </View>
-              <Switch
-                value={settings.compassEnabled}
-                onValueChange={v => update('compassEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.compassEnabled ? colors.textPrimary : colors.textDim}
-              />
-            </View>
-            {settings.compassEnabled && (
-              <View style={s.timeSection}>
-                <Text style={s.timeLabel}>Remind me at</Text>
-                <TimeAdjuster
-                  hour={settings.compassHour}
-                  minute={settings.compassMinute}
-                  onHourChange={v => update('compassHour', v)}
-                  onMinuteChange={v => update('compassMinute', v)}
-                />
-                <Text style={s.timePreview}>{formatTime(settings.compassHour, settings.compassMinute)}</Text>
-                <View style={s.sampleMsg}>
-                  <Text style={s.sampleText}>"Before you begin — read your compass. Remember who you are trying to be."</Text>
-                </View>
-              </View>
-            )}
-          </View>
-
-          <Text style={s.secLabel}>Mid-day check-in</Text>
-          <View style={s.card}>
-            <View style={s.rowBetween}>
-              <View>
-                <Text style={s.rowTitle}>Mid-day pause</Text>
-                <Text style={s.rowSub}>Daily · examine before the afternoon</Text>
-              </View>
-              <Switch
-                value={settings.middayEnabled}
-                onValueChange={v => update('middayEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.middayEnabled ? colors.textPrimary : colors.textDim}
-              />
-            </View>
-            {settings.middayEnabled && (
-              <View style={s.timeSection}>
-                <Text style={s.timeLabel}>Remind me at</Text>
-                <TimeAdjuster
-                  hour={settings.middayHour}
-                  minute={settings.middayMinute}
-                  onHourChange={v => update('middayHour', v)}
-                  onMinuteChange={v => update('middayMinute', v)}
-                />
-                <Text style={s.timePreview}>{formatTime(settings.middayHour, settings.middayMinute)}</Text>
-                <View style={s.sampleMsg}>
-                  <Text style={s.sampleText}>"Pause. How has the morning gone? Have you acted in accordance with your values?"</Text>
-                </View>
-              </View>
-            )}
-          </View>
-
-          <Text style={s.secLabel}>Evening reflection</Text>
-          <View style={s.card}>
-            <View style={s.rowBetween}>
-              <View>
-                <Text style={s.rowTitle}>Evening reminder</Text>
-                <Text style={s.rowSub}>Daily · before the day closes</Text>
-              </View>
-              <Switch
-                value={settings.eveningEnabled}
-                onValueChange={v => update('eveningEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.eveningEnabled ? colors.textPrimary : colors.textDim}
-              />
-            </View>
-            {settings.eveningEnabled && (
-              <View style={s.timeSection}>
-                <Text style={s.timeLabel}>Remind me at</Text>
-                <TimeAdjuster
-                  hour={settings.eveningHour}
-                  minute={settings.eveningMinute}
-                  onHourChange={v => update('eveningHour', v)}
-                  onMinuteChange={v => update('eveningMinute', v)}
-                />
-                <Text style={s.timePreview}>{formatTime(settings.eveningHour, settings.eveningMinute)}</Text>
-                <View style={s.sampleMsg}>
-                  <Text style={s.sampleText}>"The day closes. Time to examine it."</Text>
-                </View>
-              </View>
-            )}
-          </View>
-
-          <Text style={s.secLabel}>Weekly review</Text>
-          <View style={s.card}>
-            <View style={s.rowBetween}>
-              <View>
-                <Text style={s.rowTitle}>Review reminder</Text>
-                <Text style={s.rowSub}>Weekly · seal the week</Text>
-              </View>
-              <Switch
-                value={settings.reviewEnabled}
-                onValueChange={v => update('reviewEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.reviewEnabled ? colors.textPrimary : colors.textDim}
-              />
-            </View>
-            {settings.reviewEnabled && (
-              <View style={s.timeSection}>
-                <Text style={s.timeLabel}>Remind me at</Text>
-                <TimeAdjuster
-                  hour={settings.reviewHour}
-                  minute={settings.reviewMinute}
-                  onHourChange={v => update('reviewHour', v)}
-                  onMinuteChange={v => update('reviewMinute', v)}
-                />
-                <Text style={s.timePreview}>{formatTime(settings.reviewHour, settings.reviewMinute)}</Text>
-                <View style={s.sampleMsg}>
-                  <Text style={s.sampleText}>"A week has passed. Seal it with intention."</Text>
-                </View>
-              </View>
-            )}
-          </View>
-
-          <Text style={s.secLabel}>Review day</Text>
-          <View style={s.card}>
-            <Text style={s.rowSub}>Your weekly review appears in Practice on this day</Text>
-            <View style={s.dayRow}>
-              {DAYS.map((day, idx) => (
-                <TouchableOpacity
-                  key={day}
-                  style={[s.dayBtn, settings.reviewDay === idx && s.dayBtnActive]}
-                  onPress={() => update('reviewDay', idx)}
-                >
-                  <Text style={[s.dayBtnText, settings.reviewDay === idx && s.dayBtnTextActive]}>
-                    {day}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={[s.saveBtn, saved && s.saveBtnDone]}
-            onPress={handleSave}
-            activeOpacity={0.8}
-          >
-            <Text style={[s.saveBtnText, saved && s.saveBtnTextDone]}>{saved ? 'Notifications scheduled ✓' : 'Save & schedule notifications'}</Text>
-          </TouchableOpacity>
-
-          <View style={s.notifNote}>
-            <Text style={s.notifNoteTitle}>About notifications</Text>
-            <Text style={s.notifNoteText}>
-              Saving your settings will request permission to send notifications and schedule your daily reminders. You can update your times at any time and save again to reschedule.
-            </Text>
           </View>
 
           <Text style={s.secLabel}>Data</Text>
-          <TouchableOpacity style={s.exportBtn} onPress={handleExport} activeOpacity={0.8}>
-            <Text style={s.exportBtnTitle}>Export your practice data</Text>
-            <Text style={s.exportBtnSub}>Share journal entries and emotion logs as text</Text>
-          </TouchableOpacity>
+          <View style={s.card}>
+            <NavRow
+              label="Export your practice data"
+              sub="Share journal entries and emotion logs as text"
+              onPress={handleExport}
+              last
+            />
+          </View>
 
-          <Text style={s.secLabel}>Spread the practice</Text>
-          <TouchableOpacity style={s.exportBtn} onPress={handleShareApp} activeOpacity={0.8}>
-            <Text style={s.exportBtnTitle}>Share Marcus</Text>
-            <Text style={s.exportBtnSub}>Send the app to someone who could use it</Text>
-          </TouchableOpacity>
-
-          <Text style={s.secLabel}>Help</Text>
-          <TouchableOpacity style={s.exportBtn} onPress={handleContactSupport} activeOpacity={0.8}>
-            <Text style={s.exportBtnTitle}>Contact support</Text>
-            <Text style={s.exportBtnSub}>Email the team — questions, feedback, bug reports</Text>
-          </TouchableOpacity>
-
-          {healthAvailable && (
-            <>
-              <Text style={s.secLabel}>Apple Health</Text>
-              <TouchableOpacity style={s.exportBtn} onPress={handleConnectHealth} activeOpacity={0.8}>
-                <Text style={s.exportBtnTitle}>{healthAsked ? 'Manage Apple Health' : 'Connect to Apple Health'}</Text>
-                <Text style={s.exportBtnSub}>Marcus writes Mindful Minutes for each practice you complete.</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <Text style={s.secLabel}>Marcus</Text>
+          <View style={s.card}>
+            <NavRow
+              label="Share Marcus"
+              sub="Send the app to someone who could use it"
+              onPress={handleShareApp}
+            />
+            <NavRow
+              label="Contact support"
+              sub="Email the team — questions, feedback, bug reports"
+              onPress={handleContactSupport}
+              last
+            />
+          </View>
 
           <Text style={s.secLabel}>About</Text>
-          <View style={s.aboutCard}>
-            <View style={s.aboutRow}>
-              <Text style={s.aboutLabel}>Version</Text>
-              <Text style={s.aboutValue}>1.0.0</Text>
+          <View style={s.card}>
+            <View style={[s.row, s.rowBorder]}>
+              <Text style={s.rowLabel}>Version</Text>
+              <Text style={s.rowValue}>1.0.0</Text>
             </View>
-            <View style={s.aboutDivider} />
-            <TouchableOpacity style={s.aboutRow} onPress={() => Linking.openURL('https://getmarcus.app/privacy.html')}>
-              <Text style={s.aboutLabel}>Privacy policy</Text>
-              <Text style={s.aboutChev}>›</Text>
-            </TouchableOpacity>
-            <View style={s.aboutDivider} />
-            <TouchableOpacity style={s.aboutRow} onPress={() => Linking.openURL('https://getmarcus.app')}>
-              <Text style={s.aboutLabel}>getmarcus.app</Text>
-              <Text style={s.aboutChev}>›</Text>
-            </TouchableOpacity>
+            <NavRow
+              label="Privacy policy"
+              onPress={() => Linking.openURL('https://getmarcus.app/privacy.html')}
+            />
+            <NavRow
+              label="getmarcus.app"
+              onPress={() => Linking.openURL('https://getmarcus.app')}
+              last
+            />
           </View>
 
           <Text style={s.secLabel}>Developer</Text>
-          <TouchableOpacity style={s.dangerBtn} onPress={handleDisableAll} activeOpacity={0.8}>
-            <Text style={s.dangerBtnText}>Cancel all notifications</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.resetBtn} onPress={handleResetOnboarding} activeOpacity={0.8}>
-            <Text style={s.resetBtnText}>Reset onboarding</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.resetBtn} onPress={handleResetTodayPractice} activeOpacity={0.8}>
-            <Text style={s.resetBtnText}>Reset today's practice</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.resetBtn} onPress={handleSealTodayPractice} activeOpacity={0.8}>
-            <Text style={s.resetBtnText}>Seal today's practice</Text>
-          </TouchableOpacity>
-
+          <View style={s.card}>
+            <NavRow
+              label="Developer Tools"
+              sub="Diagnostics and test seeds"
+              onPress={() => router.push('/settings-developer')}
+              last
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const t = StyleSheet.create({
-  wrap: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginVertical: 12 },
-  col: { alignItems: 'center', gap: 8 },
-  btn: { width: 36, height: 36, borderWidth: 0.5, borderColor: colors.border, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  arrow: { fontSize: 12, color: colors.textMuted },
-  val: { fontSize: 22, fontWeight: '600', color: colors.textPrimary, minWidth: 36, textAlign: 'center' },
-  colon: { fontSize: 22, color: colors.textMuted, marginBottom: 4 },
-});
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
@@ -578,48 +208,13 @@ const s = StyleSheet.create({
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
-  permissionBanner: {
-    backgroundColor: '#0a0f1a',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#1e2a3a',
-    padding: spacing.lg,
-  },
-  permissionTitle: { fontSize: 13, fontWeight: '600', color: '#7aaddd', marginBottom: 6 },
-  permissionText: { fontSize: 13, color: '#3a5a7a', lineHeight: 20 },
-  body: { padding: spacing.md },
+  body: { padding: spacing.md, paddingBottom: 60 },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 20, marginBottom: 10 },
-  card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  rowTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 3 },
-  rowSub: { fontSize: 13, color: colors.textDim, marginBottom: 0 },
-  timeSection: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
-  timeLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, textTransform: 'uppercase', marginBottom: 4, textAlign: 'center' },
-  timePreview: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 10 },
-  sampleMsg: { backgroundColor: colors.bgDeep, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 12 },
-  sampleText: { fontSize: 13, color: colors.textMuted, fontFamily: font.serif, lineHeight: 20, textAlign: 'center' },
-  dayRow: { flexDirection: 'row', gap: 6, marginTop: 14 },
-  dayBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgDeep },
-  dayBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  dayBtnText: { fontSize: 11, color: colors.textDim },
-  dayBtnTextActive: { color: colors.accent, fontWeight: '600' },
-  saveBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginTop: 24, marginBottom: 14 },
-  saveBtnDone: { borderColor: '#3a6a3a', backgroundColor: '#0a1a0a' },
-  saveBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
-  saveBtnTextDone: { color: '#6aaa6a' },
-  notifNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgDeep },
-  notifNoteTitle: { fontSize: 13, fontWeight: '600', color: colors.textMuted, marginBottom: 8 },
-  notifNoteText: { fontSize: 13, color: colors.textDim, lineHeight: 20 },
-  exportBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
-  exportBtnTitle: { fontSize: 15, fontWeight: '500', color: colors.textSecondary, marginBottom: 4 },
-  exportBtnSub: { fontSize: 13, color: colors.textDim },
-  aboutCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, marginBottom: 4, overflow: 'hidden' },
-  aboutRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 18 },
-  aboutLabel: { fontSize: 15, color: colors.textSecondary },
-  aboutValue: { fontSize: 14, color: colors.textMuted },
-  aboutChev: { fontSize: 20, color: colors.textMuted },
-  aboutDivider: { height: 0.5, backgroundColor: colors.border },
-  dangerBtn: { borderWidth: 0.5, borderColor: '#2a1a1a', borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: '#0d0808', marginBottom: 10 },
-  dangerBtnText: { fontSize: 12, color: '#884444', letterSpacing: 1, textTransform: 'uppercase' },
-  resetBtn: { borderWidth: 0.5, borderColor: '#3a2020', borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: '#1a0a0a', marginBottom: 32 },
-  resetBtnText: { fontSize: 12, color: '#cc6060', letterSpacing: 1, textTransform: 'uppercase' },
+  card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, overflow: 'hidden' },
+  row: { flexDirection: 'row', alignItems: 'center', padding: 18 },
+  rowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  rowLabel: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 3 },
+  rowSub: { fontSize: 13, color: colors.textDim },
+  rowValue: { fontSize: 14, color: colors.textMuted, marginLeft: 12 },
+  chev: { fontSize: 22, color: colors.textMuted, marginLeft: 12 },
 });

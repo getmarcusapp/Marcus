@@ -87,6 +87,8 @@ export default function Layout() {
         <Tabs.Screen name="compass" options={{ href: null }} />
         <Tabs.Screen name="review" options={{ href: null }} />
         <Tabs.Screen name="settings" options={{ href: null }} />
+        <Tabs.Screen name="settings-notifications" options={{ href: null }} />
+        <Tabs.Screen name="settings-developer" options={{ href: null }} />
         <Tabs.Screen name="onboarding" options={{ href: null }} />
         <Tabs.Screen name="howto" options={{ href: null }} />
         <Tabs.Screen name="paywall" options={{ href: null }} />
