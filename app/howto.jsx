@@ -13,7 +13,7 @@ const sections = [
   },
   {
     title: 'The daily practice',
-    content: 'Each day has four core elements:\n\n1. Stoic compass: Read your personal North Star to anchor your intentions.\n\n2. Daily reading: A real quote generated fresh each day, personalized to your Virtue focus and compass. Grounded in what\'s happening in the world today.\n\n3. Morning journal: Set your Virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.',
+    content: 'Each day has four core elements:\n\n1. Stoic compass: Read your personal North Star to anchor your intentions.\n\n2. Daily reading: A quote generated fresh each day, personalized to your Virtue focus and compass. Switch between Timeless mode (drawn from the Stoic canon, untethered to news) and Topical mode (tied to a verified current event from the past 48 hours). Default is timeless. The mode toggle lives below the reading.\n\n3. Morning journal: Set your Virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.',
   },
   {
     title: 'The Stoic compass',
@@ -21,7 +21,7 @@ const sections = [
   },
   {
     title: 'The four Virtues',
-    content: 'Stoicism centers on four cardinal virtues. Each morning you choose one as your focus. \n\nWisdom: Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage: Doing the right thing even when it is hard or costly.\n\nModeration: Neither too much nor too little. Temperance in all things.\n\nJustice: Acting rightly toward others. Community, fairness, duty.\n\nOver time, tracking which virtues you embody and which you struggle with reveals patterns worth examining.',
+    content: 'Stoicism centers on four cardinal Virtues. Each morning you choose one as your focus.\n\nWisdom: Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage: Doing the right thing even when it is hard or costly.\n\nModeration: Neither too much nor too little. Temperance in all things.\n\nJustice: Acting rightly toward others. Community, fairness, duty.\n\nOver time, tracking which Virtues you embody and which you struggle with reveals patterns worth examining.',
   },
   {
     title: 'The emotion logger',
@@ -37,7 +37,11 @@ const sections = [
   },
   {
     title: 'About streaks',
-    content: 'Marcus tracks three streak metrics:\n\nCurrent streak: Your active run of consecutive days completing the core practice (compass + reading + morning journal). This resets if you miss a day.\n\nLongest streak: Your best ever run. This never resets.\n\nTotal days practiced: Your cumulative count of practice days, ever.\n\nIf you break your current streak, the app won\'t berate you. The Stoic response to a missed day is simple: begin again.',
+    content: 'Marcus tracks three streak metrics:\n\nCurrent streak: Your active run of consecutive days completing the full daily practice — compass, daily reading, morning journal, and evening journal. A day must be fully sealed (all four) to count.\n\nLongest streak: Your best ever run. This never resets.\n\nTotal days practiced: Your cumulative count of fully sealed days, ever.\n\nGrace day: Missing a single day does not break your streak. Marcus carries you forward. If you miss two days in a row, the current streak resets — but your longest and total are preserved.\n\nIf you break your current streak, the app won\'t berate you. The Stoic response to a missed day is simple: begin again.',
+  },
+  {
+    title: 'Apple Health',
+    content: 'Marcus can sync to Apple Health as Mindful Minutes — your Stoic practice counted alongside meditation, breathwork, and other mindfulness time.\n\nWhen connected, each practice you complete (compass, daily reading, morning journal, evening journal, or emotion log) is recorded as a Mindful Session. The session contains only the start and end timestamps — never the content of your journal entries.\n\nMarcus does not read any health data from your device. The integration is opt-in and one-way: Marcus writes, never reads.\n\nConnect from Settings → Apple Health. Once granted, iOS only allows changes from system Settings → Privacy & Security → Health → Marcus.',
   },
   {
     title: 'Memento mori',
