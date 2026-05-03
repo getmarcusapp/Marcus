@@ -570,13 +570,13 @@ const s = StyleSheet.create({
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
   tabRow: {
-    flexDirection: 'row', gap: 10, padding: spacing.md,
+    flexDirection: 'row',
     borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep,
   },
-  tabBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
-  tabBtnActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
-  tabBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
-  tabBtnTextActive: { color: colors.accent, fontWeight: '500' },
+  tabBtn: { flex: 1, paddingVertical: 16, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
+  tabBtnActive: { borderBottomColor: colors.accent },
+  tabBtnText: { fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', color: colors.textDim },
+  tabBtnTextActive: { color: colors.accent },
   // Light reading body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   badgeRow: { flexDirection: 'row', gap: 8, marginBottom: 14, marginTop: 8 },
