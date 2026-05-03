@@ -119,7 +119,7 @@ export default function NotificationsSettingsScreen() {
         )}
 
         <View style={s.body}>
-          <Text style={s.secLabel}>Morning reflection</Text>
+          <Text style={s.secLabel}>Morning Journal</Text>
           <View style={s.card}>
             <View style={s.rowBetween}>
               <View>
@@ -212,7 +212,7 @@ export default function NotificationsSettingsScreen() {
             )}
           </View>
 
-          <Text style={s.secLabel}>Evening reflection</Text>
+          <Text style={s.secLabel}>Evening Journal</Text>
           <View style={s.card}>
             <View style={s.rowBetween}>
               <View>

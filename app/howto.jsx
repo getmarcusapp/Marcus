@@ -13,10 +13,10 @@ const sections = [
   },
   {
     title: 'The daily practice',
-    content: 'Each day has four core elements:\n\n1. Stoic compass: Read your personal North Star to anchor your intentions.\n\n2. Daily reading: A quote generated fresh each day, personalized to your Virtue focus and compass. Switch between Timeless mode (drawn from the Stoic canon, untethered to news) and Topical mode (tied to a verified current event from the past 48 hours). Default is timeless. The mode toggle lives below the reading.\n\n3. Morning journal: Set your Virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.',
+    content: 'Each day has four core elements:\n\n1. Stoic Compass: Read your personal North Star to anchor your intentions.\n\n2. Daily Reading: A quote generated fresh each day, personalized to your Virtue focus and compass. Switch between Timeless mode (drawn from the Stoic canon, untethered to news) and Topical mode (tied to a verified current event from the past 48 hours). Default is timeless. The mode toggle lives below the reading.\n\n3. Morning Journal: Set your Virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening Journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.',
   },
   {
-    title: 'The Stoic compass',
+    title: 'The Stoic Compass',
     content: 'The compass is the foundation of your practice. It has three sections:\n\nWhy I practice: What draws you to Stoicism? What brought you here?\n\nWhat I want to overcome: The patterns, fears, and struggles you want to work through.\n\nWho I aspire to be: The person you are building toward.\n\nRead your compass every morning before journaling. It takes 60 seconds and reorients everything that follows. Edit it anytime from the More tab as your answers evolve.',
   },
   {

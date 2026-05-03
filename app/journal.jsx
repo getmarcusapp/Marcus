@@ -373,7 +373,7 @@ export default function JournalScreen() {
                   </TouchableOpacity>
                 ))}
             </View>
-            <Text style={s.eyebrow}>{isMorning ? 'Morning reflection' : 'Evening reflection'}</Text>
+            <Text style={s.eyebrow}>{isMorning ? 'Morning Journal' : 'Evening Journal'}</Text>
             <Text style={s.title}>
               {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
               {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}

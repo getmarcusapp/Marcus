@@ -80,7 +80,7 @@ export default function CompassScreen() {
             <Text style={s.backArrow}>‹</Text>
             <Text style={s.backLabel}>Practice</Text>
           </TouchableOpacity>
-          <Text style={s.eyebrow}>My stoic compass</Text>
+          <Text style={s.eyebrow}>Stoic Compass</Text>
           <Text style={s.title}>Your North Star</Text>
           <Text style={s.heroQuote}>“Know, first, who you are, and then adorn yourself accordingly.”</Text>
           <Text style={s.heroAttr}>— Epictetus, Discourses</Text>

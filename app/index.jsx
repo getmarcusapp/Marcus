@@ -254,7 +254,7 @@ export default function PracticeScreen() {
             >
               <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
-                <Text style={[s.routineTitle, compassDone && s.titleDone]}>Stoic compass</Text>
+                <Text style={[s.routineTitle, compassDone && s.titleDone]}>Stoic Compass</Text>
                 <Text style={s.routineSub}>Your North Star — read daily</Text>
               </View>
               <View style={s.tagRow}>
@@ -276,7 +276,7 @@ export default function PracticeScreen() {
             >
               <View style={[s.dot, readingDone && s.dotDone]}>{readingDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
-                <Text style={[s.routineTitle, readingDone && s.titleDone]}>Daily reading</Text>
+                <Text style={[s.routineTitle, readingDone && s.titleDone]}>Daily Reading</Text>
                 <Text style={s.routineSub}>Ancient wisdom for this day</Text>
               </View>
               <View style={[s.tag, readingDone ? s.tagDone : s.tagNow]}>
@@ -291,7 +291,7 @@ export default function PracticeScreen() {
             >
               <View style={[s.dot, morningDone && s.dotDone]}>{morningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
-                <Text style={[s.routineTitle, morningDone && s.titleDone]}>Morning journal</Text>
+                <Text style={[s.routineTitle, morningDone && s.titleDone]}>Morning Journal</Text>
                 <Text style={s.routineSub}>Reflect and intend</Text>
               </View>
               <View style={[s.tag, morningDone ? s.tagDone : s.tagNow]}>
@@ -306,7 +306,7 @@ export default function PracticeScreen() {
             >
               <View style={[s.dot, eveningDone && s.dotDone]}>{eveningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
-                <Text style={[s.routineTitle, eveningDone && s.titleDone]}>Evening journal</Text>
+                <Text style={[s.routineTitle, eveningDone && s.titleDone]}>Evening Journal</Text>
                 <Text style={s.routineSub}>Examine and release</Text>
               </View>
               <View style={[s.tag, eveningDone ? s.tagDone : s.tagLater]}>

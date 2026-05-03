@@ -109,10 +109,10 @@ function PhilosophyStep({ onNext }) {
           <Text style={s.practiceHeading}>Your daily practice</Text>
 
           {[
-            { title: 'Stoic compass', desc: 'Your personal North Star — why you practice, what you want to overcome, who you aspire to be.' },
-            { title: 'Daily reading', desc: 'A real quote, generated fresh each day and personalized to your Virtue focus. Grounded in today\'s world.' },
-            { title: 'Morning journal', desc: 'Set your intention, choose your Virtue focus, and prepare for what the day requires.' },
-            { title: 'Evening journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
+            { title: 'Stoic Compass', desc: 'Your personal North Star — why you practice, what you want to overcome, who you aspire to be.' },
+            { title: 'Daily Reading', desc: 'A real quote, generated fresh each day and personalized to your Virtue focus. Grounded in today\'s world.' },
+            { title: 'Morning Journal', desc: 'Set your intention, choose your Virtue focus, and prepare for what the day requires.' },
+            { title: 'Evening Journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
             { title: 'Emotion logger', desc: 'When strong emotions arise, log the trigger, examine your thinking, and choose your response.' },
             { title: 'Weekly review', desc: 'Once a week, examine your patterns, assess your virtues, and set your intention forward.' },
           ].map((item, idx) => (
@@ -227,10 +227,10 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
 
 function PracticePreviewStep({ onNext }) {
   const items = [
-    { title: 'Stoic compass', sub: 'Your North Star — read daily', tag: 'NOW' },
-    { title: 'Daily reading', sub: 'Personalized to your practice, fresh each day', tag: 'READ' },
-    { title: 'Morning journal', sub: 'Reflect and intend', tag: 'NOW' },
-    { title: 'Evening journal', sub: 'Examine and release', tag: 'LATER' },
+    { title: 'Stoic Compass', sub: 'Your North Star — read daily', tag: 'NOW' },
+    { title: 'Daily Reading', sub: 'Personalized to your practice, fresh each day', tag: 'READ' },
+    { title: 'Morning Journal', sub: 'Reflect and intend', tag: 'NOW' },
+    { title: 'Evening Journal', sub: 'Examine and release', tag: 'LATER' },
   ];
 
   return (

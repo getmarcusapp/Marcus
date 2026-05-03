@@ -320,7 +320,7 @@ Return only the JSON object.`;
               <Text style={s.backArrow}>‹</Text>
               <Text style={s.backLabel}>Practice</Text>
             </TouchableOpacity>
-            <Text style={s.eyebrow}>Daily reading</Text>
+            <Text style={s.eyebrow}>Daily Reading</Text>
             <Text style={s.title}>
               {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
             </Text>
