@@ -112,7 +112,7 @@ export default function SettingsScreen() {
   async function handleShareApp() {
     try {
       await Share.share({
-        message: 'Marcus — a daily Stoic practice app. Become someone you respect.\n\nhttps://getmarcus.app',
+        message: 'Marcus. A daily Stoic practice app. Become someone you respect.\n\nhttps://getmarcus.app',
       });
     } catch (e) { /* swallowed */ }
   }
@@ -170,7 +170,7 @@ export default function SettingsScreen() {
             />
             <NavRow
               label="Contact support"
-              sub="Email the team — questions, feedback, bug reports"
+              sub="Email the team. Questions, feedback, bug reports."
               onPress={handleContactSupport}
               last
             />

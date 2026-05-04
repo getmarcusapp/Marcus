@@ -24,24 +24,24 @@ const reviewPrompts = [
   {
     num: 'I · Account',
     q: 'What went well? Where did you act with Virtue this week?',
-    hint: 'This is not a victory lap. Notice the moments — even small ones — where you showed up as the person you want to be. Honest accounting cuts both ways: catalogue what worked so you can repeat it.',
+    hint: 'This is not a victory lap. Notice the moments — even small ones — where you showed up as the person you want to be. Honest accounting cuts both ways: catalog what worked so you can repeat it.',
     key: 'wentWell',
   },
   {
     num: 'II · Reckon',
     q: 'Where did you stray? Where did you fall short of your own standard?',
-    hint: 'Without shame, without flinching. The Stoic practice is not about being perfect — it is about being awake to where you fell short. Naming it is the beginning of correcting it.',
+    hint: 'Without shame, without flinching. The Stoic practice is not about being perfect. It is about being awake to where you fell short. Naming it is the beginning of correcting it.',
     key: 'strayed',
   },
   {
     num: 'III · Pattern',
     q: 'What patterns keep showing up? What is unresolved?',
-    hint: 'A single bad day is a moment. The same bad day, three weeks running, is a pattern. Patterns are where the practice does its real work — they reveal what is actually shaping your life.',
+    hint: 'A single bad day is a moment. The same bad day, three weeks running, is a pattern. Patterns are where the practice does its real work. They reveal what is actually shaping your life.',
     key: 'challenges',
   },
   {
     num: 'IV · Body',
-    q: 'How did you treat your physical self — sleep, movement, food, restraint?',
+    q: 'How did you treat your physical self: sleep, movement, food, restraint?',
     hint: 'The Stoics did not separate the body from the practice. Marcus Aurelius wrote about food, sleep, and exercise as moral matters. The body is the instrument of Virtue. How well did you maintain it?',
     key: 'body',
   },
@@ -259,7 +259,7 @@ export default function ReviewScreen() {
                     <TextInput
                       style={s.promptInput}
                       multiline
-                      placeholder="Write here — no judgment, only honesty..."
+                      placeholder="Write here. No judgment, only honesty..."
                       placeholderTextColor={colors.textDim}
                       value={answers[p.key] || ''}
                       onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}

@@ -25,9 +25,9 @@ const virtuePronunciations = {
 };
 
 const virtueDetails = {
-  wisdom: { definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly — not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
+  wisdom: { definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly, not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
   courage: { definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
-  moderation: { definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation — the disciplined middle path.', question: 'Where am I in excess today?' },
+  moderation: { definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation: the disciplined middle path.', question: 'Where am I in excess today?' },
   justice: { definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
 };
 
@@ -255,7 +255,7 @@ export default function PracticeScreen() {
               <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
               <View style={s.routineContent}>
                 <Text style={[s.routineTitle, compassDone && s.titleDone]}>Stoic Compass</Text>
-                <Text style={s.routineSub}>Your North Star — read daily</Text>
+                <Text style={s.routineSub}>Your North Star · read daily</Text>
               </View>
               <View style={s.tagRow}>
                 {compassDone && (

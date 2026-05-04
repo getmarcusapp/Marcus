@@ -254,7 +254,7 @@ Return only the JSON object.`;
       '',
       reading.reflection,
       '',
-      'From Marcus — daily Stoic practice.',
+      'From Marcus. Daily Stoic practice.',
     ];
     try {
       await Share.share({ message: lines.join('\n') });
@@ -372,7 +372,7 @@ Return only the JSON object.`;
                     <View style={s.quoteRule} />
                     <Text style={s.quoteAuthor}>— {reading.author}</Text>
                     {reading.work && <Text style={s.quoteWork}>{reading.work}</Text>}
-                    <Text style={s.readingSourceNote}>Generated for you based on your Virtue focus and compass. Not every reading comes from a Stoic text — each is chosen because it carries a lesson the Stoics would recognize.</Text>
+                    <Text style={s.readingSourceNote}>Generated for you based on your Virtue focus and compass. Not every reading comes from a Stoic text. Each is chosen because it carries a lesson the Stoics would recognize.</Text>
                   </View>
 
                   <View style={s.reflectionCard}>

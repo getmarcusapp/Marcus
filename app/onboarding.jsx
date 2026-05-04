@@ -12,9 +12,9 @@ import { saveCompass, setHasOnboarded } from '../store/db';
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 
 const DEFAULT_COMPASS = {
-  why: 'To cultivate the kind of person I want to be — disciplined in attention, deliberate in action, calm in the face of what I cannot control. Built from character, not from outcomes.',
+  why: 'To cultivate the kind of person I want to be: disciplined in attention, deliberate in action, calm in the face of what I cannot control. Built from character, not from outcomes.',
   overcome: 'I want to worry less about what I cannot control. To respond instead of react. To free myself from the anxiety of other people\'s opinions and the tyranny of my own undisciplined mind.',
-  aspire: 'I want to meet adversity with calm, and fortune with humility. To live each day with intention — not perfectly, but deliberately. To be someone who acts in accordance with their values, even when it\'s hard.',
+  aspire: 'I want to meet adversity with calm, and fortune with humility. To live each day with intention, not perfectly, but deliberately. To be someone who acts in accordance with their values, even when it\'s hard.',
 };
 
 export default function OnboardingScreen() {
@@ -103,13 +103,13 @@ function PhilosophyStep({ onNext }) {
 
         <View style={s.stepBody}>
           <Text style={s.philosophyText}>
-            Marcus is a daily system rooted in Stoic philosophy — one of history's most practical frameworks for living well. Not theory. Not productivity hacks. A system for becoming someone you respect.
+            Marcus is a daily system rooted in Stoic philosophy: one of history's most practical frameworks for living well. Not theory. Not productivity hacks. A system for becoming someone you respect.
           </Text>
 
           <Text style={s.practiceHeading}>Your daily practice</Text>
 
           {[
-            { title: 'Stoic Compass', desc: 'Your personal North Star — why you practice, what you want to overcome, who you aspire to be.' },
+            { title: 'Stoic Compass', desc: 'Your personal North Star: why you practice, what you want to overcome, who you aspire to be.' },
             { title: 'Daily Reading', desc: 'A real quote, generated fresh each day and personalized to your Virtue focus. Grounded in today\'s world.' },
             { title: 'Morning Journal', desc: 'Set your intention, choose your Virtue focus, and prepare for what the day requires.' },
             { title: 'Evening Journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
@@ -139,8 +139,8 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
   const [openHint, setOpenHint] = React.useState(null);
 
   const HINTS = {
-    why: "The Stoics held that Virtue — not outcome — is the only true good. Your Why should reflect what is in your control: your character, your intentions, how you show up.\n\nA Stoic Why doesn't depend on external circumstances. 'I want to be respected' is external. 'I want to act with integrity regardless of outcome' is internal — yours to achieve regardless of what happens around you.",
-    overcome: "Name a pattern you can observe in yourself — not a circumstance or another person. Those are outside your control. What you can overcome is your habitual response to them.\n\n'I want to overcome anxiety' is external. 'I want to stop treating anxiety as a verdict rather than an impression' is internal — that is where the Stoic practice lives.",
+    why: "The Stoics held that Virtue — not outcome — is the only true good. Your Why should reflect what is in your control: your character, your intentions, how you show up.\n\nA Stoic Why doesn't depend on external circumstances. 'I want to be respected' is external. 'I want to act with integrity regardless of outcome' is internal: yours to achieve regardless of what happens around you.",
+    overcome: "Name a pattern you can observe in yourself, not a circumstance or another person. Those are outside your control. What you can overcome is your habitual response to them.\n\n'I want to overcome anxiety' is external. 'I want to stop treating anxiety as a verdict rather than an impression' is internal. That is where the Stoic practice lives.",
     aspire: "Aspiration in Stoic terms is the cultivation of Virtue: wisdom, courage, temperance, justice. The test is whether your aspiration describes who you are becoming, not what you are getting.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.'",
   };
 
@@ -162,7 +162,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
             <Text style={s.stepEyebrow}>Your compass</Text>
             <Text style={s.stepTitle}>Set your{'\n'}North Star</Text>
             <Text style={s.stepSub}>
-              These three questions anchor your daily practice. They come pre-filled — edit each one to make it yours, or leave the defaults and customize later.
+              These three questions anchor your daily practice. They come pre-filled. Edit each one to make it yours, or leave the defaults and customize later.
             </Text>
           </View>
 
@@ -211,7 +211,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
             ))}
 
             <TouchableOpacity onPress={onSkip} style={s.skipLink}>
-              <Text style={s.skipLinkText}>Skip for now — use the defaults</Text>
+              <Text style={s.skipLinkText}>Skip for now, use the defaults</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -227,7 +227,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
 
 function PracticePreviewStep({ onNext }) {
   const items = [
-    { title: 'Stoic Compass', sub: 'Your North Star — read daily', tag: 'NOW' },
+    { title: 'Stoic Compass', sub: 'Your North Star · read daily', tag: 'NOW' },
     { title: 'Daily Reading', sub: 'Personalized to your practice, fresh each day', tag: 'READ' },
     { title: 'Morning Journal', sub: 'Reflect and intend', tag: 'NOW' },
     { title: 'Evening Journal', sub: 'Examine and release', tag: 'LATER' },

@@ -36,11 +36,11 @@ const DISTORTIONS = [
 const stoicReframesUpdated = {
   anger: "Is this worth your peace? What happened is not in your control. Your response is. What does the situation actually require of you?",
   anxiety: "Separate what is in your control from what is not. Attend only to the former. The rest is not yours to carry.",
-  frustration: "You were not wronged — you were inconvenienced. The Stoic does not react to inconvenience. What is the wise response here?",
-  shame: "Examine whether the shame is warranted. If you acted wrongly, own it and correct course. If not, release it — the judgment of others is not yours to control.",
+  frustration: "You were not wronged. You were inconvenienced. The Stoic does not react to inconvenience. What is the wise response here?",
+  shame: "Examine whether the shame is warranted. If you acted wrongly, own it and correct course. If not, release it. The judgment of others is not yours to control.",
   avoidance: "You are delaying because you fear an outcome. Name the fear. Then ask: is it as bad as the cost of continued avoidance?",
   envy: "You are measuring your inner life against another's outer life. You do not know their interior. Tend your own.",
-  grief: "Grief is love with nowhere to go. Honor it. The Stoic does not suppress feeling — only the slavery to feeling.",
+  grief: "Grief is love with nowhere to go. Honor it. The Stoic does not suppress feeling, only the slavery to feeling.",
   fear: "Fear imagines futures that have not arrived. Return to what is actually in front of you, in this moment. What does now require?",
   other: "Pause. Name what you are actually feeling beneath the surface. Then ask: what would a person of Virtue do here?",
 };
@@ -217,7 +217,7 @@ export default function EmotionsScreen() {
           {tab === 'log' ? (
             <View style={s.body}>
 
-              <Text style={s.stageLabel}>I — Context</Text>
+              <Text style={s.stageLabel}>I · Context</Text>
               <Text style={s.secLabel}>When did this happen?</Text>
               <View style={s.timingRow}>
                 <TouchableOpacity
@@ -267,7 +267,7 @@ export default function EmotionsScreen() {
                 })}
               </View>
 
-              <Text style={s.stageLabel}>II — Describe</Text>
+              <Text style={s.stageLabel}>II · Describe</Text>
 
               <View style={s.fieldCard}>
                 <Text style={s.fieldLabel}>Intensity</Text>
@@ -302,7 +302,7 @@ export default function EmotionsScreen() {
 
               {selectedEmotion && (
                 <>
-                  <Text style={s.stageLabel}>III — Reframe</Text>
+                  <Text style={s.stageLabel}>III · Reframe</Text>
                   <View style={[s.reframeCard, { borderColor: EMOTION_COLORS[selectedEmotion].border, backgroundColor: EMOTION_COLORS[selectedEmotion].tint }]}>
                   <Text style={[s.reframeEyebrow, { color: EMOTION_COLORS[selectedEmotion].text }]}>
                     The Stoic reframe
@@ -348,7 +348,7 @@ export default function EmotionsScreen() {
                     multiline
                     placeholder={timing === 'now'
                       ? "What is your chosen response going forward?"
-                      : "Looking back — what would the Stoic have done?"}
+                      : "Looking back, what would the Stoic have done?"}
                     placeholderTextColor={colors.textDim}
                     value={chosenResponse}
                     onChangeText={setChosenResponse}
@@ -416,7 +416,7 @@ export default function EmotionsScreen() {
               ) : filteredHistory.length === 0 ? (
                 <View style={s.empty}>
                   <Text style={s.emptyIcon}>⚡</Text>
-                  <Text style={s.emptyTitle}>Nothing logged yet — that is its own kind of clarity.</Text>
+                  <Text style={s.emptyTitle}>Nothing logged yet. That is its own kind of clarity.</Text>
                   <Text style={s.emptyText}>
                     When a strong emotion arises, open this logger before you react. Name it, rate it, describe what triggered it, and read the Stoic reframe. The space between stimulus and response is where the practice lives.
                   </Text>

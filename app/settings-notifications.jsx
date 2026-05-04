@@ -175,7 +175,7 @@ export default function NotificationsSettingsScreen() {
                 />
                 <Text style={s.timePreview}>{formatTime(settings.compassHour, settings.compassMinute)}</Text>
                 <View style={s.sampleMsg}>
-                  <Text style={s.sampleText}>"Before you begin — read your compass. Remember who you are trying to be."</Text>
+                  <Text style={s.sampleText}>"Before you begin, read your compass. Remember who you are trying to be."</Text>
                 </View>
               </View>
             )}
