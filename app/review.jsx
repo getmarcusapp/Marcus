@@ -42,7 +42,7 @@ const reviewPrompts = [
   {
     num: 'IV · Body',
     q: 'How did you treat your physical self: sleep, movement, food, restraint?',
-    hint: 'The Stoics did not separate the body from the practice. Marcus Aurelius wrote about food, sleep, and exercise as moral matters. The body is the instrument of Virtue. How well did you maintain it?',
+    hint: 'The Stoics did not separate the body from the practice. Marcus Aurelius wrote about food, sleep, and exercise as moral matters. The body is the instrument of Virtue. How well did you maintain it?\n\nBefore answering, consider opening Apple Health and glancing at your Mindfulness, Sleep, and Activity tabs for the week. Real data beats memory. Honest reflection deserves honest evidence.',
     key: 'body',
   },
 ];
