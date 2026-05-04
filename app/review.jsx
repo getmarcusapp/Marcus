@@ -50,7 +50,8 @@ export default function ReviewScreen() {
       const weekJournals = journals.filter(j => new Date(j.date).getTime() > weekAgo);
       const weekTriggers = triggers.filter(t => new Date(t.date).getTime() > weekAgo);
       const reframed = weekTriggers.filter(t => t.chosenResponse && t.chosenResponse.trim().length > 0);
-      setStats({ journaled: weekJournals.length, triggers: weekTriggers.length, reframed: reframed.length });
+      const uniqueDaysJournaled = new Set(weekJournals.map(j => new Date(j.date).toDateString())).size;
+      setStats({ journaled: uniqueDaysJournaled, triggers: weekTriggers.length, reframed: reframed.length });
 
       const emotionMap = {};
       weekTriggers.forEach(t => {
