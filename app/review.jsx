@@ -21,10 +21,30 @@ const DISTORTION_LABELS = {
 };
 
 const reviewPrompts = [
-  { label: 'What went well?', sub: 'Where did you act with Virtue this week?', key: 'wentWell' },
-  { label: 'Where did I stray?', sub: 'Where did you fall short of your own standard?', key: 'strayed' },
-  { label: 'Recurring challenges', sub: 'What patterns keep showing up? What is unresolved?', key: 'challenges' },
-  { label: 'Body and discipline', sub: 'How did you treat your physical self — sleep, movement, food, restraint?', key: 'body' },
+  {
+    num: 'I · Account',
+    q: 'What went well? Where did you act with Virtue this week?',
+    hint: 'This is not a victory lap. Notice the moments — even small ones — where you showed up as the person you want to be. Honest accounting cuts both ways: catalogue what worked so you can repeat it.',
+    key: 'wentWell',
+  },
+  {
+    num: 'II · Reckon',
+    q: 'Where did you stray? Where did you fall short of your own standard?',
+    hint: 'Without shame, without flinching. The Stoic practice is not about being perfect — it is about being awake to where you fell short. Naming it is the beginning of correcting it.',
+    key: 'strayed',
+  },
+  {
+    num: 'III · Pattern',
+    q: 'What patterns keep showing up? What is unresolved?',
+    hint: 'A single bad day is a moment. The same bad day, three weeks running, is a pattern. Patterns are where the practice does its real work — they reveal what is actually shaping your life.',
+    key: 'challenges',
+  },
+  {
+    num: 'IV · Body',
+    q: 'How did you treat your physical self — sleep, movement, food, restraint?',
+    hint: 'The Stoics did not separate the body from the practice. Marcus Aurelius wrote about food, sleep, and exercise as moral matters. The body is the instrument of Virtue. How well did you maintain it?',
+    key: 'body',
+  },
 ];
 
 export default function ReviewScreen() {
@@ -34,6 +54,7 @@ export default function ReviewScreen() {
   const [worstVirtue, setWorstVirtue] = useState(virtues[3].id);
   const [intention, setIntention] = useState('');
   const [openPrompt, setOpenPrompt] = useState(0);
+  const [openHint, setOpenHint] = useState(null);
   const [history, setHistory] = useState([]);
   const [filterRange, setFilterRange] = useState('all');
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
@@ -212,27 +233,38 @@ export default function ReviewScreen() {
             {reviewPrompts.map((p, idx) => (
               <TouchableOpacity
                 key={p.key}
-                style={[s.promptBlock, openPrompt === idx && s.promptBlockOpen]}
+                style={[s.promptCard, openPrompt === idx && s.promptCardOpen]}
                 onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)}
                 activeOpacity={0.8}
               >
-                <View style={s.pbHeader}>
-                  <View style={s.pbLabelWrap}>
-                    <Text style={s.pbLabel}>{p.label}</Text>
-                    <Text style={s.pbSub}>{p.sub}</Text>
-                  </View>
-                  <Text style={s.pbChev}>{openPrompt === idx ? '∨' : '›'}</Text>
+                <View style={s.promptTopRow}>
+                  <Text style={s.promptNum}>{p.num}</Text>
+                  {p.hint && (
+                    <TouchableOpacity
+                      style={s.hintBtn}
+                      onPress={() => setOpenHint(openHint === idx ? null : idx)}
+                    >
+                      <Text style={s.hintBtnText}>ⓘ</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
+                <Text style={s.promptQ}>{p.q}</Text>
+                {openHint === idx && p.hint && (
+                  <View style={s.hintBox}>
+                    <Text style={s.hintText}>{p.hint}</Text>
+                  </View>
+                )}
                 {openPrompt === idx && (
-                  <View style={s.pbBody}>
+                  <View style={s.promptAnswer}>
                     <TextInput
-                      style={s.pbInput}
+                      style={s.promptInput}
                       multiline
-                      placeholder="Write honestly..."
+                      placeholder="Write here — no judgment, only honesty..."
                       placeholderTextColor={colors.textDim}
                       value={answers[p.key] || ''}
                       onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
                       scrollEnabled={false}
+                      keyboardAppearance="dark"
                     />
                   </View>
                 )}
@@ -372,15 +404,17 @@ const s = StyleSheet.create({
   statNum: { fontSize: 30, fontWeight: '600', color: colors.textSecondary, marginBottom: 6 },
   statLbl: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase', textAlign: 'center', lineHeight: 16 },
   // Prompts
-  promptBlock: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden' },
-  promptBlockOpen: { backgroundColor: colors.bgCard, borderColor: colors.borderMid },
-  pbHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 18, backgroundColor: colors.bgDeep },
-  pbLabelWrap: { flex: 1 },
-  pbLabel: { fontSize: 14, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8 },
-  pbSub: { fontSize: 13, color: colors.textDim, marginTop: 3 },
-  pbChev: { fontSize: 20, color: colors.textDim },
-  pbBody: { padding: 18, borderTopWidth: 0.5, borderTopColor: colors.border },
-  pbInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 80, textAlignVertical: 'top' },
+  promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
+  promptCardOpen: { borderColor: colors.borderMid },
+  promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
+  promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
+  promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
+  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
+  hintBtn: { padding: 4 },
+  hintBtnText: { fontSize: 18, color: colors.accent },
+  hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
+  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
   // Insight cards (shared by emotions, distortions, virtue ledger)
   insightCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
   insightCardTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12 },
