@@ -81,6 +81,14 @@ export default function OnboardingScreen() {
 }
 
 function WelcomeStep({ onNext }) {
+  const [name, setName] = useState('');
+
+  async function handleNext() {
+    const trimmed = name.trim();
+    if (trimmed) await AsyncStorage.setItem('user_name', trimmed);
+    onNext();
+  }
+
   return (
     <LinearGradient
       colors={HERO_GRADIENT}
@@ -90,21 +98,40 @@ function WelcomeStep({ onNext }) {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={s.safeTransparent}>
-        <View style={s.welcomeBody}>
-          <Image source={require('../assets/skull.png')} style={s.welcomeSkull} resizeMode="contain" />
-          <Text style={s.welcomeTitle}>Marcus</Text>
-          <Text style={s.welcomeSub}>A Stoic practice app</Text>
-          <View style={s.welcomeDivider} />
-          <Text style={s.welcomeTagline}>
-            “The impediment to action advances action. What stands in the way becomes the way.”
-          </Text>
-          <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations V.20</Text>
-        </View>
-        <View style={s.footer}>
-          <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-            <Text style={s.primaryBtnText}>Begin your practice</Text>
-          </TouchableOpacity>
-        </View>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={0}
+        >
+          <View style={s.welcomeBody}>
+            <Image source={require('../assets/skull.png')} style={s.welcomeSkull} resizeMode="contain" />
+            <Text style={s.welcomeTitle}>Marcus</Text>
+            <Text style={s.welcomeSub}>A Stoic practice app</Text>
+            <View style={s.welcomeDivider} />
+            <Text style={s.welcomeTagline}>
+              “The impediment to action advances action. What stands in the way becomes the way.”
+            </Text>
+            <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations V.20</Text>
+
+            <TextInput
+              style={s.welcomeNameInput}
+              placeholder="What should we call you? (optional)"
+              placeholderTextColor={colors.textDim}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+              autoCorrect={false}
+              maxLength={40}
+              returnKeyType="done"
+              onSubmitEditing={handleNext}
+            />
+          </View>
+          <View style={s.footer}>
+            <TouchableOpacity style={s.primaryBtn} onPress={handleNext} activeOpacity={0.8}>
+              <Text style={s.primaryBtnText}>Begin your practice</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -430,6 +457,16 @@ const s = StyleSheet.create({
     fontSize: 13,
     color: colors.textDim,
     letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  welcomeNameInput: {
+    marginTop: 36,
+    width: '100%',
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.accentDim,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: colors.textPrimary,
     textAlign: 'center',
   },
 

@@ -17,6 +17,17 @@ import * as haptics from '../lib/haptics';
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 
+// Module-level flag — resets on cold start, so the greeting plays once
+// per app launch rather than every navigation back to home.
+let hasShownGreetingThisSession = false;
+
+function getTimeOfDayLabel() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return 'Morning';
+  if (hour >= 12 && hour < 17) return 'Afternoon';
+  return 'Evening';
+}
+
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
   andreia: 'an-DRAY-ah',
@@ -43,6 +54,28 @@ export default function PracticeScreen() {
   const [reviewDone, setReviewDone] = useState(false);
   const [totalDays, setTotalDays] = useState(0);
   const [virtueExpanded, setVirtueExpanded] = useState(false);
+  const [userName, setUserName] = useState(null);
+  const [eyebrowPhase, setEyebrowPhase] = useState(hasShownGreetingThisSession ? 'memento' : 'greeting');
+  const eyebrowOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    AsyncStorage.getItem('user_name').then(name => setUserName(name?.trim() || null));
+  }, []);
+
+  useEffect(() => {
+    if (hasShownGreetingThisSession || eyebrowPhase !== 'greeting') return;
+    const t = setTimeout(() => {
+      Animated.timing(eyebrowOpacity, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => {
+        hasShownGreetingThisSession = true;
+        setEyebrowPhase('memento');
+        Animated.timing(eyebrowOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+      });
+    }, 1800);
+    return () => clearTimeout(t);
+  }, [eyebrowPhase]);
+
+  const greetingText = userName ? `${getTimeOfDayLabel()}, ${userName}.` : `${getTimeOfDayLabel()}.`;
+  const eyebrowText = eyebrowPhase === 'greeting' ? greetingText : 'Memento mori';
 
   const today = todayDate;
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -213,7 +246,7 @@ export default function PracticeScreen() {
             style={s.skullIcon}
             resizeMode="contain"
           />
-          <Text style={s.eyebrow}>Memento mori</Text>
+          <Animated.Text style={[s.eyebrow, { opacity: eyebrowOpacity }]}>{eyebrowText}</Animated.Text>
           <Text style={s.heroDate}>{dateStr}</Text>
           <Text style={s.heroSub}>
             {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
