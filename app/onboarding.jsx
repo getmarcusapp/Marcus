@@ -6,8 +6,29 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { saveCompass, setHasOnboarded } from '../store/db';
+import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
+
+const DEFAULT_NOTIF_SETTINGS = {
+  morningEnabled: true,
+  morningHour: 7,
+  morningMinute: 0,
+  compassEnabled: true,
+  compassHour: 7,
+  compassMinute: 30,
+  middayEnabled: false,
+  middayHour: 12,
+  middayMinute: 0,
+  eveningEnabled: true,
+  eveningHour: 20,
+  eveningMinute: 0,
+  reviewEnabled: true,
+  reviewHour: 9,
+  reviewMinute: 0,
+  reviewDay: 0,
+};
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 
@@ -39,12 +60,13 @@ export default function OnboardingScreen() {
     <PhilosophyStep onNext={() => setStep(2)} />,
     <CompassStep compass={compass} setCompass={setCompass} onNext={() => setStep(3)} onSkip={() => setStep(3)} />,
     <PracticePreviewStep onNext={() => setStep(4)} />,
+    <RemindersStep onNext={() => setStep(5)} />,
     <ReadyStep onFinish={handleFinish} />,
   ];
 
   return (
     <View style={{ flex: 1 }}>
-      {step > 0 && step < 4 && (
+      {step > 0 && step < 5 && (
         <TouchableOpacity
           onPress={() => setStep(step - 1)}
           style={s.onboardingBack}
@@ -275,6 +297,62 @@ function PracticePreviewStep({ onNext }) {
   );
 }
 
+function RemindersStep({ onNext }) {
+  async function handleEnable() {
+    const granted = await requestNotificationPermissions();
+    if (granted) {
+      await AsyncStorage.setItem('notification_settings', JSON.stringify(DEFAULT_NOTIF_SETTINGS));
+      await scheduleAllNotifications();
+    }
+    onNext();
+  }
+
+  return (
+    <SafeAreaView style={s.safe}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+        <View style={s.stepHero}>
+          <Text style={s.stepEyebrow}>Stay anchored</Text>
+          <Text style={s.stepTitle}>A few gentle{'\n'}reminders.</Text>
+        </View>
+
+        <View style={s.stepBody}>
+          <Text style={s.philosophyText}>
+            Marcus uses notifications to anchor your practice across the day. Just enough to keep the rhythm, never enough to feel like a leash.
+          </Text>
+
+          <Text style={s.practiceHeading}>Out of the box</Text>
+          <View style={s.reminderList}>
+            {[
+              { time: '7:00 AM', name: 'Morning Journal' },
+              { time: '7:30 AM', name: 'Stoic Compass' },
+              { time: '8:00 PM', name: 'Evening Journal' },
+              { time: 'Sun 9:00 AM', name: 'Weekly Review' },
+            ].map((r, i, arr) => (
+              <View key={r.name} style={[s.reminderRow, i < arr.length - 1 && s.reminderRowBorder]}>
+                <Text style={s.reminderTime}>{r.time}</Text>
+                <Text style={s.reminderName}>{r.name}</Text>
+              </View>
+            ))}
+          </View>
+
+          <Text style={s.reminderNote}>
+            Adjust times or add a midday check-in anytime in Settings.
+          </Text>
+        </View>
+
+        <View style={s.footer}>
+          <TouchableOpacity style={s.primaryBtn} onPress={handleEnable} activeOpacity={0.8}>
+            <Text style={s.primaryBtnText}>Enable reminders</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.skipLink} onPress={onNext} activeOpacity={0.7}>
+            <Text style={s.skipLinkText}>Maybe later</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
 function ReadyStep({ onFinish }) {
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -477,6 +555,43 @@ const s = StyleSheet.create({
     color: colors.accent,
     textTransform: 'uppercase',
     marginBottom: 20,
+  },
+  reminderList: {
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    backgroundColor: colors.bgCard,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  reminderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    gap: 16,
+  },
+  reminderRowBorder: {
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+  },
+  reminderTime: {
+    fontSize: 13,
+    color: colors.accent,
+    letterSpacing: 0.5,
+    minWidth: 84,
+  },
+  reminderName: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    fontWeight: '500',
+    flex: 1,
+  },
+  reminderNote: {
+    fontSize: 13,
+    color: colors.textMuted,
+    lineHeight: 20,
+    marginTop: 4,
   },
   practiceItem: {
     flexDirection: 'row',
