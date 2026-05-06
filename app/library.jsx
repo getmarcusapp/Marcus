@@ -27,7 +27,7 @@ function BookCard({ book }) {
       <View style={s.linksRow}>
         <TouchableOpacity
           style={s.primaryLink}
-          onPress={() => Linking.openURL(bookshopUrl(book.slug)).catch(() => {})}
+          onPress={() => Linking.openURL(bookshopUrl(book.isbn)).catch(() => {})}
           activeOpacity={0.7}
         >
           <Text style={s.primaryLinkText}>View on Bookshop.org →</Text>
