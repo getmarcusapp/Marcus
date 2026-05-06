@@ -194,8 +194,14 @@ export default function PracticeScreen() {
   // hero stagger so the day count earns a moment.
   const streakScale = useRef(new Animated.Value(0.7)).current;
   const streakOpacity = useRef(new Animated.Value(0)).current;
+  // ScrollView ref so we can snap to top when the sealed state appears —
+  // the practice screen stays mounted across navigation so without this,
+  // any scroll offset from the in-progress state is retained, hiding the
+  // skull / day count / sealed quote.
+  const sealedScrollRef = useRef(null);
   useFocusEffect(useCallback(() => {
     if (!allDone) return;
+    sealedScrollRef.current?.scrollTo({ y: 0, animated: false });
     sealedFades.forEach(a => a.setValue(0));
     sealedSlides.forEach(a => a.setValue(20));
     streakScale.setValue(0.7);
@@ -218,7 +224,7 @@ export default function PracticeScreen() {
   if (allDone) {
     return (
       <SafeAreaView style={s.safe}>
-        <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView ref={sealedScrollRef} style={s.scroll} showsVerticalScrollIndicator={false}>
 
           <AnimatedLinearGradient
             colors={HERO_GRADIENT}
