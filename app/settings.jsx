@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Alert, Share, Linking,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getJournals, getTriggers, getStreak } from '../store/db';
@@ -29,6 +29,9 @@ function NavRow({ label, sub, onPress, last }) {
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const fromPath = params?.from || '/more';
+  const fromLabel = params?.fromLabel || 'More';
   const [healthAsked, setHealthAsked] = useState(false);
   const [healthAvailable, setHealthAvailable] = useState(false);
   const [reminderSummary, setReminderSummary] = useState('');
@@ -128,6 +131,10 @@ export default function SettingsScreen() {
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
         <View style={s.hero}>
+          <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
+            <Text style={s.backArrow}>‹</Text>
+            <Text style={s.backLabel}>{fromLabel}</Text>
+          </TouchableOpacity>
           <Text style={s.eyebrow}>Marcus</Text>
           <Text style={s.title}>Settings</Text>
           <Text style={s.sub}>Configure your daily practice</Text>
@@ -218,6 +225,9 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
+  backArrow: { fontSize: 24, color: colors.accent },
+  backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },

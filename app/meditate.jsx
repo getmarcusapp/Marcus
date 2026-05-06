@@ -61,8 +61,8 @@ export default function MeditateScreen() {
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
         <View style={s.header}>
-          <TouchableOpacity style={s.backBtn} onPress={() => router.replace(fromPath)}>
-            <Ionicons name="chevron-back" size={20} color={colors.textMuted} />
+          <TouchableOpacity style={s.backRow} onPress={() => router.replace(fromPath)}>
+            <Text style={s.backArrow}>‹</Text>
             <Text style={s.backLabel}>{fromLabel}</Text>
           </TouchableOpacity>
           <Text style={s.eyebrow}>Meditations</Text>
@@ -171,8 +171,9 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
 
   header: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xl },
-  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: spacing.lg },
-  backLabel: { fontSize: font.labelSize, color: colors.textMuted, letterSpacing: 0.5 },
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
+  backArrow: { fontSize: 24, color: colors.accent },
+  backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
