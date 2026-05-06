@@ -164,6 +164,7 @@ function PhilosophyStep({ onNext }) {
           {[
             { title: 'Stoic Compass', desc: 'Your personal North Star: why you practice, what you want to overcome, who you aspire to be.' },
             { title: 'Daily Reading', desc: 'A real quote, generated fresh each day and personalized to your Virtue focus. Grounded in today\'s world.' },
+            { title: 'Guided Meditations', desc: 'Five Stoic meditations, five minutes each. Voiced. Surfaced contextually for the time of day.' },
             { title: 'Morning Journal', desc: 'Set your intention, choose your Virtue focus, and prepare for what the day requires.' },
             { title: 'Evening Journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
             { title: 'Emotion logger', desc: 'When strong emotions arise, log the trigger, examine your thinking, and choose your response.' },
@@ -321,7 +322,7 @@ function PracticePreviewStep({ onNext }) {
 
       <View style={s.footer}>
         <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText}>Begin your practice →</Text>
+          <Text style={s.primaryBtnText}>Continue →</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
