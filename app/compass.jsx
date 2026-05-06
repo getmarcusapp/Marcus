@@ -224,8 +224,17 @@ const s = StyleSheet.create({
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 36 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
-  backArrow: { fontSize: 24, color: colors.accent },
-  backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
+  // textShadow on the back row specifically because it sits at the top of
+  // the hero where the gradient is fully transparent, so the gold can be
+  // washed out by bright spots in the painting (e.g. the globe).
+  backArrow: {
+    fontSize: 24, color: colors.accent,
+    textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 6,
+  },
+  backLabel: {
+    fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase',
+    textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 6,
+  },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10 },
   heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24, marginBottom: 6 },
