@@ -86,8 +86,8 @@ export default function CompassScreen() {
             resizeMode="cover"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.92)', 'rgba(0,0,0,0.95)']}
-            locations={[0, 0.45, 0.85, 1]}
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.3, 0.65, 1]}
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
