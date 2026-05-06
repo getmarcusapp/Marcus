@@ -583,9 +583,19 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 36 },
-  backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
-  backArrow: { fontSize: 24, color: colors.accent },
-  backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
+  // Dark pill behind the back link so the gold reads cleanly over any
+  // bright spot in the hero painting. Self-contained — doesn't affect
+  // the surrounding image.
+  backRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 18,
+  },
+  backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
+  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
