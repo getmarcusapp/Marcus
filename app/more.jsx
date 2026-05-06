@@ -24,6 +24,7 @@ const menuItems = [
     section: 'App',
     items: [
       { label: 'How Marcus works', sub: 'The practice explained', icon: 'help-circle-outline', route: '/howto' },
+      { label: 'Further reading', sub: 'A short shelf of curated Stoic works', icon: 'library-outline', route: '/library' },
       { label: 'The artwork', sub: 'Classical paintings used throughout the app', icon: 'images-outline', route: '/imagery' },
       { label: 'Settings', sub: 'Notifications and preferences', icon: 'settings-outline', route: '/settings' },
     ],
