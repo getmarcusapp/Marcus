@@ -93,6 +93,7 @@ export default function Layout() {
         <Tabs.Screen name="onboarding" options={{ href: null }} />
         <Tabs.Screen name="howto" options={{ href: null }} />
         <Tabs.Screen name="meditate" options={{ href: null }} />
+        <Tabs.Screen name="imagery" options={{ href: null }} />
         <Tabs.Screen name="paywall" options={{ href: null }} />
       </Tabs>
       <MiniMeditationPlayer />

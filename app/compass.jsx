@@ -86,8 +86,8 @@ export default function CompassScreen() {
             resizeMode="cover"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.35)', 'rgba(0,0,0,0.88)']}
-            locations={[0, 0.5, 1]}
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.15)', 'rgba(0,0,0,0.85)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.4, 0.78, 1]}
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
@@ -183,12 +183,20 @@ export default function CompassScreen() {
               <Text style={s.secLabel}>The four cardinal virtues</Text>
               {virtues.map(v => (
                 <View key={v.id} style={s.virtueCard}>
-                  <View style={s.virtueTop}>
-                    <Text style={s.virtueName}>{v.name}</Text>
+                  <View style={s.virtueImageWrap}>
+                    <Image source={v.image} style={s.virtueImage} resizeMode="cover" />
+                    <LinearGradient
+                      colors={['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.55)']}
+                      locations={[0.5, 1]}
+                      style={StyleSheet.absoluteFillObject}
+                    />
                   </View>
-                  <Text style={s.virtueDesc}>{v.desc}</Text>
-                  <View style={s.virtueDivider} />
-                  <Text style={s.virtueQuestion}>"{v.question}"</Text>
+                  <View style={s.virtueBody}>
+                    <Text style={s.virtueName}>{v.name}</Text>
+                    <Text style={s.virtueDesc}>{v.desc}</Text>
+                    <View style={s.virtueDivider} />
+                    <Text style={s.virtueQuestion}>"{v.question}"</Text>
+                  </View>
                 </View>
               ))}
             </View>
@@ -218,10 +226,24 @@ const s = StyleSheet.create({
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
   backArrow: { fontSize: 24, color: colors.accent },
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10 },
-  heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24, marginBottom: 6 },
-  heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
+  eyebrow: {
+    fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent,
+    textTransform: 'uppercase', marginBottom: 8,
+    textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 8,
+  },
+  title: {
+    fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary,
+    letterSpacing: -0.8, marginBottom: 10,
+    textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 8,
+  },
+  heroQuote: {
+    fontSize: 15, color: colors.textPrimary, fontFamily: font.serif, lineHeight: 24, marginBottom: 6,
+    textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 8,
+  },
+  heroAttr: {
+    fontSize: 11, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase',
+    textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 6,
+  },
   nextRow: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
@@ -270,10 +292,16 @@ const s = StyleSheet.create({
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 14 },
   virtueCard: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 22, marginBottom: 12, backgroundColor: colors.bgElevated,
+    marginBottom: 12, backgroundColor: colors.bgElevated,
+    overflow: 'hidden',
   },
-  virtueTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 },
-  virtueName: { fontSize: 22, fontWeight: '400', color: colors.textPrimary },
+  virtueImageWrap: {
+    width: '100%', height: 120, backgroundColor: '#000',
+    position: 'relative', overflow: 'hidden',
+  },
+  virtueImage: { width: '100%', height: '100%' },
+  virtueBody: { padding: 22 },
+  virtueName: { fontSize: 22, fontWeight: '400', color: colors.textPrimary, marginBottom: 8 },
   virtueDesc: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
   virtueDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   virtueQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
