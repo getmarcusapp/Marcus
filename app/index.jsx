@@ -169,7 +169,9 @@ export default function PracticeScreen() {
     : !eveningDone ? 'evening'
     : null;
 
-  // Cancel re-engagement notifications when practice is sealed; fire success haptic once per day
+  // Cancel re-engagement notifications when practice is sealed; fire a
+  // three-beat haptic rhythm (light → medium → success) once per day on
+  // the first seal. Like a small drumroll into the success notification.
   useEffect(() => {
     if (!allDone) return;
     onPracticeSealed();
@@ -177,7 +179,9 @@ export default function PracticeScreen() {
       const today = new Date().toDateString();
       const last = await AsyncStorage.getItem('last_sealed_date');
       if (last !== today) {
-        haptics.success();
+        haptics.tap();
+        setTimeout(() => haptics.action(), 160);
+        setTimeout(() => haptics.success(), 400);
         await AsyncStorage.setItem('last_sealed_date', today);
       }
     })();
@@ -186,14 +190,28 @@ export default function PracticeScreen() {
   // Sealed-state reveal animation
   const sealedFades = useRef([0, 0, 0, 0].map(() => new Animated.Value(0))).current;
   const sealedSlides = useRef([0, 0, 0, 0].map(() => new Animated.Value(20))).current;
+  // Streak number gets its own spring entrance — pops into view after the
+  // hero stagger so the day count earns a moment.
+  const streakScale = useRef(new Animated.Value(0.7)).current;
+  const streakOpacity = useRef(new Animated.Value(0)).current;
   useFocusEffect(useCallback(() => {
     if (!allDone) return;
     sealedFades.forEach(a => a.setValue(0));
     sealedSlides.forEach(a => a.setValue(20));
+    streakScale.setValue(0.7);
+    streakOpacity.setValue(0);
     Animated.stagger(140, sealedFades.map((fade, i) => Animated.parallel([
       Animated.timing(fade, { toValue: 1, duration: 650, useNativeDriver: true }),
       Animated.timing(sealedSlides[i], { toValue: 0, duration: 650, useNativeDriver: true }),
     ]))).start();
+    // Streak springs in slightly after the hero block fades — feels like
+    // the number is the answer the page is building toward.
+    setTimeout(() => {
+      Animated.parallel([
+        Animated.spring(streakScale, { toValue: 1, tension: 55, friction: 6, useNativeDriver: true }),
+        Animated.timing(streakOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+      ]).start();
+    }, 380);
   }, [allDone]));
   const sealedAnimStyle = (i) => ({ opacity: sealedFades[i], transform: [{ translateY: sealedSlides[i] }] });
 
@@ -216,9 +234,14 @@ export default function PracticeScreen() {
             />
             <Text style={s.sealedEyebrow}>{reviewDone && isReviewDay ? 'Week sealed' : 'Practice complete'}</Text>
             <Text style={s.sealedDate}>{dateStr}</Text>
-            <Text style={s.sealedStreak}>
+            <Animated.Text
+              style={[
+                s.sealedStreak,
+                { opacity: streakOpacity, transform: [{ scale: streakScale }] },
+              ]}
+            >
               {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
-            </Text>
+            </Animated.Text>
           </AnimatedLinearGradient>
 
           <Animated.View style={[s.sealedCard, sealedAnimStyle(1)]}>
