@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator,
@@ -14,6 +14,8 @@ import { getNextPracticeAfter } from '../store/practice-flow';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
+import { captureRef } from 'react-native-view-shot';
+import { ReadingShareCard, SHARE_CARD_WIDTH, SHARE_CARD_HEIGHT } from '../components/ReadingShareCard';
 
 const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom generating a personalized daily reading for a user of a Stoic practice app.
 
@@ -91,6 +93,7 @@ export default function ReadScreen() {
   const [filterMonth, setFilterMonth] = useState('all');
   const [insightSaved, setInsightSaved] = useState(false);
   const [mode, setMode] = useState('timeless');
+  const shareCardRef = useRef(null);
   const commitMindfulSession = useMindfulSession();
 
   useFocusEffect(useCallback(() => {
@@ -252,18 +255,31 @@ Return only the JSON object.`;
   async function handleShare() {
     if (!reading) return;
     haptics.tap();
-    const lines = [
-      `"${reading.quote}"`,
-      `— ${reading.author}${reading.work ? `, ${reading.work}` : ''}`,
-      '',
-      reading.reflection,
-      '',
-      'From Marcus. Daily Stoic practice.',
-    ];
     try {
-      await Share.share({ message: lines.join('\n') });
+      // Capture the off-screen ShareCard as a JPEG and share that file.
+      // Falls back to text-only if capture fails for any reason.
+      const uri = await captureRef(shareCardRef, {
+        format: 'jpg',
+        quality: 0.92,
+        result: 'tmpfile',
+      });
+      await Share.share({
+        url: uri,
+        message: 'From Marcus. A daily Stoic practice.',
+      });
     } catch (e) {
-      console.log('Share failed:', e?.message);
+      console.log('Share image failed, falling back to text:', e?.message);
+      const lines = [
+        `"${reading.quote}"`,
+        `— ${reading.author}${reading.work ? `, ${reading.work}` : ''}`,
+        '',
+        'From Marcus. A daily Stoic practice.',
+      ];
+      try {
+        await Share.share({ message: lines.join('\n') });
+      } catch (e2) {
+        console.log('Share text fallback failed:', e2?.message);
+      }
     }
   }
 
@@ -305,6 +321,24 @@ Return only the JSON object.`;
 
   return (
     <SafeAreaView style={s.safe}>
+      {/* Off-screen share card. Rendered into the layout tree so captureRef
+          can reach it but positioned far off-screen so the user never sees
+          it directly. Only mounted once a reading exists to avoid empty
+          captures during loading. */}
+      {reading && (
+        <View
+          ref={shareCardRef}
+          collapsable={false}
+          style={s.shareCardOffscreen}
+        >
+          <ReadingShareCard
+            quote={reading.quote}
+            author={reading.author}
+            work={reading.work}
+          />
+        </View>
+      )}
+
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: colors.bg }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -581,6 +615,10 @@ Return only the JSON object.`;
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
+  // Position the share card far off-screen so it's laid out (so captureRef
+  // can find it) but never visible to the user. left:-99999 keeps it out
+  // of the visible viewport on every device.
+  shareCardOffscreen: { position: 'absolute', left: -99999, top: 0 },
   scroll: { flex: 1 },
   // Dark header with hero image
   hero: {
