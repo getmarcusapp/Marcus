@@ -46,23 +46,23 @@ export function MiniMeditationPlayer() {
           </Text>
         </TouchableOpacity>
         <View style={s.controls}>
-          <TouchableOpacity onPress={() => seek(-15)} style={s.skipBtn} hitSlop={6}>
-            <Ionicons name="play-back" size={18} color={colors.textSecondary} />
+          <TouchableOpacity onPress={() => seek(-15)} style={s.skipBtn}>
+            <Ionicons name="play-back" size={24} color={colors.textSecondary} />
             <Text style={s.skipLabel}>15</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => toggle(med)} style={s.playBtn} hitSlop={6}>
+          <TouchableOpacity onPress={() => toggle(med)} style={s.playBtn}>
             {player.isLoading ? (
               <ActivityIndicator color={colors.accent} size="small" />
             ) : (
-              <Ionicons name={player.isPlaying ? 'pause' : 'play'} size={22} color={colors.accent} />
+              <Ionicons name={player.isPlaying ? 'pause' : 'play'} size={28} color={colors.accent} />
             )}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => seek(15)} style={s.skipBtn} hitSlop={6}>
-            <Ionicons name="play-forward" size={18} color={colors.textSecondary} />
+          <TouchableOpacity onPress={() => seek(15)} style={s.skipBtn}>
+            <Ionicons name="play-forward" size={24} color={colors.textSecondary} />
             <Text style={s.skipLabel}>15</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => unload()} style={s.closeBtn} hitSlop={8}>
-            <Ionicons name="close" size={18} color={colors.textDim} />
+          <TouchableOpacity onPress={() => unload()} style={s.closeBtn}>
+            <Ionicons name="close" size={22} color={colors.textDim} />
           </TouchableOpacity>
         </View>
       </View>
@@ -89,20 +89,28 @@ const s = StyleSheet.create({
   body: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 12,
+    paddingLeft: 16,
+    paddingRight: 8,
+    paddingVertical: 8,
+    gap: 8,
   },
   titleArea: { flex: 1 },
   title: { fontSize: 13, color: colors.textPrimary, fontWeight: '500' },
   time: { fontSize: 11, color: colors.textDim, marginTop: 2, letterSpacing: 0.3 },
-  controls: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  skipBtn: { alignItems: 'center', justifyContent: 'center', width: 32, paddingVertical: 4 },
-  skipLabel: { fontSize: 8, color: colors.textDim, marginTop: -2, letterSpacing: 0.3 },
-  playBtn: {
-    width: 36, height: 36, borderRadius: 18,
+  controls: { flexDirection: 'row', alignItems: 'center' },
+  // 44pt tap targets per Apple HIG; consistent square buttons so spacing
+  // is visually even and fat-fingering doesn't hit the wrong control.
+  skipBtn: {
+    width: 44, height: 44,
     alignItems: 'center', justifyContent: 'center',
-    marginHorizontal: 2,
   },
-  closeBtn: { padding: 4, marginLeft: 2 },
+  skipLabel: { fontSize: 10, color: colors.textDim, marginTop: -2, letterSpacing: 0.3, fontWeight: '500' },
+  playBtn: {
+    width: 44, height: 44, borderRadius: 22,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  closeBtn: {
+    width: 44, height: 44,
+    alignItems: 'center', justifyContent: 'center',
+  },
 });
