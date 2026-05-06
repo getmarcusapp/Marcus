@@ -56,18 +56,35 @@ export default function MeditateScreen() {
   const fromPath = params?.from || '/more';
   const fromLabel = params?.fromLabel || 'More';
 
+  // Contextual meditation for the page hero (matches the practice card pick):
+  // morning -> Premeditatio, midday -> View From Above, evening -> Evening Examination.
+  const hour = new Date().getHours();
+  const contextualMed =
+    hour >= 5 && hour < 12 ? MEDITATIONS['premeditatio']
+    : hour >= 18 || hour < 5 ? MEDITATIONS['evening-examination']
+    : MEDITATIONS['view-from-above'];
+  const headerMed = selected || contextualMed;
+
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
         <View style={s.header}>
-          <TouchableOpacity style={s.backRow} onPress={() => router.replace(fromPath)}>
-            <Text style={s.backArrow}>‹</Text>
-            <Text style={s.backLabel}>{fromLabel}</Text>
-          </TouchableOpacity>
-          <Text style={s.eyebrow}>Meditations</Text>
-          <Text style={s.title}>Stoic practice.</Text>
-          <Text style={s.sub}>Ancient attention training for the modern day.</Text>
+          <Image source={headerMed.image} style={s.headerImage} resizeMode="cover" />
+          <LinearGradient
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.78)']}
+            locations={[0, 0.55, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={s.headerContent}>
+            <TouchableOpacity style={s.backRow} onPress={() => router.replace(fromPath)}>
+              <Text style={s.backArrow}>‹</Text>
+              <Text style={s.backLabel}>{fromLabel}</Text>
+            </TouchableOpacity>
+            <Text style={s.eyebrow}>Meditations</Text>
+            <Text style={s.title}>Stoic practice.</Text>
+            <Text style={s.sub}>Ancient attention training for the modern day.</Text>
+          </View>
         </View>
 
         {/* Player */}
@@ -170,7 +187,15 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
 
-  header: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xl },
+  header: {
+    minHeight: 240,
+    backgroundColor: '#000',
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+  },
+  headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  headerContent: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xl },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
   backArrow: { fontSize: 24, color: colors.accent },
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
