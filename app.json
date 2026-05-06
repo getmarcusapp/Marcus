@@ -19,7 +19,8 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSHealthShareUsageDescription": "Marcus does not read your health data.",
-        "NSHealthUpdateUsageDescription": "Marcus syncs your daily Stoic practice as Mindful Minutes so your reflection time is counted alongside meditation and breathwork."
+        "NSHealthUpdateUsageDescription": "Marcus syncs your daily Stoic practice as Mindful Minutes so your reflection time is counted alongside meditation and breathwork.",
+        "UIBackgroundModes": ["audio"]
       },
       "entitlements": {
         "com.apple.developer.in-app-payments": [],
