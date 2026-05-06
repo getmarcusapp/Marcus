@@ -1,16 +1,10 @@
 // Imagery: public-domain classical art, one per virtue.
-//   Wisdom     -> Marble head of Athena (Met Museum, Roman copy of Greek original)
+// Pre-cropped to 1080x608 (16:9 banner) so cover-crop in the 160px hero
+// band fills cleanly with no per-virtue positioning needed.
+//   Wisdom     -> Marble head of Athena (Met Museum)
 //   Courage    -> Caravaggio, "David with the Head of Goliath" (1610, Borghese)
 //   Temperance -> Piero del Pollaiolo, "Temperance" (1469-72, Uffizi)
 //   Justice    -> Maerten van Heemskerck, "Iustitia"
-//
-// imageAspect = source W/H, used to set the image's intrinsic size at
-// width:100%. imageShift is a percentage translateY (negative = up) that
-// pulls the focal point of each painting into the visible 160px band.
-// Computed from the formula:
-//   shift% = (80 / renderedH) - focalY
-// where focalY is the 0-1 position of the subject in the source and
-// renderedH is the image's height at ~390px wide phone width.
 export const virtues = [
   {
     id: 'wisdom',
@@ -18,9 +12,6 @@ export const virtues = [
     desc: 'Discernment, insight, and right judgment. See clearly — not through bias or fear.',
     question: 'Am I perceiving this clearly, or through ego?',
     image: require('../assets/virtues/wisdom.jpg'),
-    imageAspect: 1280 / 1707,
-    // Athena's face is centered vertically in the photo (~50%)
-    imageShift: '-35%',
   },
   {
     id: 'courage',
@@ -28,9 +19,6 @@ export const virtues = [
     desc: 'Do the right thing even when it is hard or costly.',
     question: 'What am I avoiding out of fear?',
     image: require('../assets/virtues/courage.jpg'),
-    imageAspect: 1280 / 1584,
-    // Goliath's head is held in David's hand at ~65-70% down.
-    imageShift: '-50%',
   },
   {
     id: 'moderation',
@@ -38,9 +26,6 @@ export const virtues = [
     desc: 'Neither too much nor too little of anything. The disciplined middle path.',
     question: 'Where am I in excess today?',
     image: require('../assets/virtues/moderation.jpg'),
-    imageAspect: 1280 / 2461,
-    // Tall portrait: figure's face + hands holding vessels at ~25% down.
-    imageShift: '-16%',
   },
   {
     id: 'justice',
@@ -48,9 +33,6 @@ export const virtues = [
     desc: 'Act rightly toward others. Community, fairness, duty.',
     question: 'Did I treat others well today?',
     image: require('../assets/virtues/justice.jpg'),
-    imageAspect: 743 / 1023,
-    // Justitia's face + scales at ~30% down.
-    imageShift: '-15%',
   },
 ];
 
