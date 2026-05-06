@@ -241,7 +241,13 @@ export default function PracticeScreen() {
               <View style={s.virtueImageWrap}>
                 <Image
                   source={todayVirtue.image}
-                  style={[s.virtueImage, { aspectRatio: todayVirtue.imageAspect }]}
+                  style={[
+                    s.virtueImage,
+                    {
+                      aspectRatio: todayVirtue.imageAspect,
+                      transform: [{ translateY: todayVirtue.imageShift }],
+                    },
+                  ]}
                 />
                 <LinearGradient
                   colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
@@ -463,7 +469,13 @@ export default function PracticeScreen() {
             <View style={s.virtueImageWrap}>
               <Image
                 source={todayVirtue.image}
-                style={[s.virtueImage, { aspectRatio: todayVirtue.imageAspect }]}
+                style={[
+                  s.virtueImage,
+                  {
+                    aspectRatio: todayVirtue.imageAspect,
+                    transform: [{ translateY: todayVirtue.imageShift }],
+                  },
+                ]}
               />
               <LinearGradient
                 colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
