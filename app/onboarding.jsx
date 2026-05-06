@@ -182,7 +182,7 @@ function PhilosophyStep({ onNext }) {
       </ScrollView>
       <View style={s.footer}>
         <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText}>Continue</Text>
+          <Text style={s.primaryBtnText}>Continue →</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
