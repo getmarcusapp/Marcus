@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  KeyboardAvoidingView, Platform,
+  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -287,7 +287,7 @@ export default function JournalScreen() {
     };
     const ok = await saveJournal(entry);
     if (ok) {
-      haptics.action();
+      haptics.success();
       commitMindfulSession();
       cancelJournalNotification(isMorning ? 'morning' : 'evening');
       maybeAskHealthPermission();
@@ -500,16 +500,8 @@ export default function JournalScreen() {
                           onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
                           scrollEnabled={false}
                           keyboardAppearance="dark"
+                          inputAccessoryViewID={Platform.OS === 'ios' ? 'journalAccessory' : undefined}
                         />
-                        {idx < prompts.length - 1 && (
-                          <TouchableOpacity
-                            style={s.nextPromptBtn}
-                            onPress={() => setOpenPrompt(idx + 1)}
-                            activeOpacity={0.7}
-                          >
-                            <Text style={s.nextPromptText}>Next prompt →</Text>
-                          </TouchableOpacity>
-                        )}
                       </View>
                     )}
                   </TouchableOpacity>
@@ -656,6 +648,38 @@ export default function JournalScreen() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID="journalAccessory">
+          <View style={s.accessoryBar}>
+            <TouchableOpacity
+              onPress={() => Keyboard.dismiss()}
+              style={s.accessoryDone}
+              activeOpacity={0.7}
+            >
+              <Text style={s.accessoryDoneText}>Done</Text>
+            </TouchableOpacity>
+            {openPrompt < prompts.length - 1 ? (
+              <TouchableOpacity
+                onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>Next prompt →</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={() => { Keyboard.dismiss(); handleSave(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>
+                  {alreadySaved ? 'Update journal →' : 'Complete journal →'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </InputAccessoryView>
+      )}
     </SafeAreaView>
   );
 }
@@ -773,6 +797,20 @@ const s = StyleSheet.create({
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  accessoryBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.bgElevated,
+    borderTopWidth: 0.5,
+    borderTopColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
+  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   promptHeader: { marginBottom: 0 },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },

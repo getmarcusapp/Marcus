@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  KeyboardAvoidingView, Platform,
+  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { emotions, stoicReframes } from '../constants/virtues';
@@ -46,15 +46,20 @@ const stoicReframesUpdated = {
 };
 
 function IntensitySlider({ value, onChange }) {
+  function step(next) {
+    if (next === value) return;
+    haptics.tap();
+    onChange(next);
+  }
   return (
     <View style={iss.row}>
-      <TouchableOpacity onPress={() => onChange(Math.max(1, value - 1))} style={iss.btn}>
+      <TouchableOpacity onPress={() => step(Math.max(1, value - 1))} style={iss.btn}>
         <Text style={iss.btnText}>−</Text>
       </TouchableOpacity>
       <View style={iss.track}>
         <View style={[iss.fill, { width: `${(value / 10) * 100}%` }]} />
       </View>
-      <TouchableOpacity onPress={() => onChange(Math.min(10, value + 1))} style={iss.btn}>
+      <TouchableOpacity onPress={() => step(Math.min(10, value + 1))} style={iss.btn}>
         <Text style={iss.btnText}>+</Text>
       </TouchableOpacity>
       <Text style={iss.value}>{value}/10</Text>
@@ -103,12 +108,25 @@ export default function EmotionsScreen() {
   const [filterDistortion, setFilterDistortion] = useState('all');
   const [filterIntensity, setFilterIntensity] = useState(0); // 0 = all, 7 = high only
   const commitMindfulSession = useMindfulSession();
+  const triggerInputRef = useRef(null);
+  const reactionInputRef = useRef(null);
+  const responseInputRef = useRef(null);
+
+  // Auto-focus the trigger textarea when an emotion is selected — bypasses
+  // the post-pick scroll-and-tap friction. iOS keyboard avoidance handles
+  // bringing the input into view.
+  useEffect(() => {
+    if (!selectedEmotion) return;
+    const t = setTimeout(() => triggerInputRef.current?.focus(), 250);
+    return () => clearTimeout(t);
+  }, [selectedEmotion]);
   const [sortMode, setSortMode] = useState('date'); // 'date' | 'intensity'
   const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => { getTriggers().then(setHistory); }, []);
 
   function toggleDistortion(id) {
+    haptics.tap();
     setSelectedDistortions(prev =>
       prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
     );
@@ -132,7 +150,7 @@ export default function EmotionsScreen() {
       distortions: selectedDistortions,
     };
     await saveTrigger(entry);
-    haptics.action();
+    haptics.success();
     commitMindfulSession();
     const updated = await getTriggers();
     setHistory(updated);
@@ -255,7 +273,7 @@ export default function EmotionsScreen() {
                     <TouchableOpacity
                       key={e.id}
                       style={[s.ePill, isSelected && { backgroundColor: ec.tint, borderColor: ec.border }]}
-                      onPress={() => setSelectedEmotion(e.id)}
+                      onPress={() => { haptics.tap(); setSelectedEmotion(e.id); }}
                       activeOpacity={0.7}
                     >
                       <View style={[s.eAccent, { backgroundColor: ec.border, opacity: isSelected ? 1 : 0.55 }]} />
@@ -277,6 +295,7 @@ export default function EmotionsScreen() {
               <View style={s.fieldCard}>
                 <Text style={s.fieldLabel}>What triggered it?</Text>
                 <TextInput
+                  ref={triggerInputRef}
                   style={s.fieldInput}
                   multiline
                   placeholder="Describe the situation..."
@@ -284,12 +303,14 @@ export default function EmotionsScreen() {
                   value={trigger}
                   onChangeText={setTrigger}
                   scrollEnabled={false}
+                  inputAccessoryViewID={Platform.OS === 'ios' ? 'emoTriggerAccessory' : undefined}
                 />
               </View>
 
               <View style={s.fieldCard}>
                 <Text style={s.fieldLabel}>My automatic reaction</Text>
                 <TextInput
+                  ref={reactionInputRef}
                   style={s.fieldInput}
                   multiline
                   placeholder="What did you want to do or say?"
@@ -297,6 +318,7 @@ export default function EmotionsScreen() {
                   value={reaction}
                   onChangeText={setReaction}
                   scrollEnabled={false}
+                  inputAccessoryViewID={Platform.OS === 'ios' ? 'emoReactionAccessory' : undefined}
                 />
               </View>
 
@@ -344,6 +366,7 @@ export default function EmotionsScreen() {
                     {timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
                   </Text>
                   <TextInput
+                    ref={responseInputRef}
                     style={s.fieldInput}
                     multiline
                     placeholder={timing === 'now'
@@ -353,6 +376,7 @@ export default function EmotionsScreen() {
                     value={chosenResponse}
                     onChangeText={setChosenResponse}
                     scrollEnabled={false}
+                    inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}
                   />
                 </View>
                 </>
@@ -478,6 +502,7 @@ export default function EmotionsScreen() {
                   key={d.id}
                   style={[s.distortionPill, isSelected && { backgroundColor: ec.bg, borderColor: ec.border }]}
                   onPress={() => {
+                    haptics.tap();
                     const current = editingEntry.distortions || [];
                     const updated = isSelected
                       ? current.filter(x => x !== d.id)
@@ -548,6 +573,58 @@ export default function EmotionsScreen() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+      {Platform.OS === 'ios' && (
+        <>
+          <InputAccessoryView nativeID="emoTriggerAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { haptics.tap(); reactionInputRef.current?.focus(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>Next →</Text>
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+          <InputAccessoryView nativeID="emoReactionAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              {selectedEmotion ? (
+                <TouchableOpacity
+                  onPress={() => { haptics.tap(); responseInputRef.current?.focus(); }}
+                  style={s.accessoryAction}
+                  activeOpacity={0.7}
+                >
+                  <Text style={s.accessoryActionText}>Next →</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryAction} activeOpacity={0.7}>
+                  <Text style={s.accessoryActionText}>Continue ↓</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </InputAccessoryView>
+          <InputAccessoryView nativeID="emoResponseAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { Keyboard.dismiss(); handleLog(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>Log this trigger →</Text>
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -647,4 +724,18 @@ const s = StyleSheet.create({
   editSaveBtnText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
   histEditBtn: { marginTop: 10, borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start' },
   histEditBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
+  accessoryBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.bgElevated,
+    borderTopWidth: 0.5,
+    borderTopColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
+  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

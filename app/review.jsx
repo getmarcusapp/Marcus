@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  KeyboardAvoidingView, Platform,
+  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveReview, getReviews, getJournals, getTriggers } from '../store/db';
+import * as haptics from '../lib/haptics';
 
 const EMOTION_LABELS = {
   anger: 'Anger', anxiety: 'Anxiety', frustration: 'Frustration',
@@ -67,6 +68,7 @@ export default function ReviewScreen() {
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
   const [distortionBreakdown, setDistortionBreakdown] = useState([]);
+  const [virtueFocusCounts, setVirtueFocusCounts] = useState({});
 
   useEffect(() => {
     async function load() {
@@ -109,6 +111,25 @@ export default function ReviewScreen() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
       setDistortionBreakdown(distList);
+
+      // Pre-fill the Virtue Ledger from the week's morning focuses.
+      // Most embodied = most-picked focus. Least embodied = a virtue never picked
+      // (strongest signal of avoidance), falling back to the least-picked.
+      const focusCounts = {};
+      weekJournals.forEach(j => {
+        if (j.type === 'morning' && j.virtue) {
+          focusCounts[j.virtue] = (focusCounts[j.virtue] || 0) + 1;
+        }
+      });
+      setVirtueFocusCounts(focusCounts);
+      const sortedDesc = Object.entries(focusCounts).sort((a, b) => b[1] - a[1]);
+      if (sortedDesc.length > 0) {
+        setBestVirtue(sortedDesc[0][0]);
+        const allIds = virtues.map(v => v.id);
+        const unpicked = allIds.filter(id => !focusCounts[id]);
+        if (unpicked.length > 0) setWorstVirtue(unpicked[0]);
+        else setWorstVirtue(sortedDesc[sortedDesc.length - 1][0]);
+      }
     }
     load();
   }, []);
@@ -121,6 +142,7 @@ export default function ReviewScreen() {
       answers, bestVirtue, worstVirtue, intention, stats,
     };
     await saveReview(entry);
+    haptics.success();
     const updated = await getReviews();
     setHistory(updated);
     Alert.alert('', 'Week sealed.', [{ text: 'Done', onPress: () => setTab('history') }]);
@@ -273,25 +295,22 @@ export default function ReviewScreen() {
                       onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
                       scrollEnabled={false}
                       keyboardAppearance="dark"
+                      inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewPromptAccessory' : undefined}
                     />
-                    {idx < reviewPrompts.length - 1 && (
-                      <TouchableOpacity
-                        style={s.nextPromptBtn}
-                        onPress={() => setOpenPrompt(idx + 1)}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={s.nextPromptText}>Next prompt →</Text>
-                      </TouchableOpacity>
-                    )}
                   </View>
                 )}
               </TouchableOpacity>
             ))}
 
-            {/* Virtue Ledger — styled as insight card for consistency */}
-            <View style={s.insightCard}>
-              <Text style={s.insightCardTitle}>Virtue Ledger</Text>
-              <Text style={s.insightFootnote}>Which Virtue did you most and least embody this week?</Text>
+            {/* V · Ledger — pre-filled from the week's morning focuses */}
+            <View style={s.promptCard}>
+              <View style={s.promptTopRow}>
+                <Text style={s.promptNum}>V · Ledger</Text>
+              </View>
+              <Text style={s.promptQ}>Which Virtue did you most embody this week — and which did you fall short on?</Text>
+              {Object.keys(virtueFocusCounts).length > 0 && (
+                <Text style={s.ledgerHint}>Pre-filled from your morning focuses. Adjust if it doesn't match how the week actually went.</Text>
+              )}
               <View style={s.virtueRow}>
                 <View style={s.virtuePicker}>
                   <Text style={s.vpLabel}>Most embodied</Text>
@@ -299,10 +318,11 @@ export default function ReviewScreen() {
                     <TouchableOpacity
                       key={v.id}
                       style={[s.vpBtn, bestVirtue === v.id && s.vpBtnActive]}
-                      onPress={() => setBestVirtue(v.id)}
+                      onPress={() => { haptics.tap(); setBestVirtue(v.id); }}
                     >
                       <Text style={[s.vpBtnText, bestVirtue === v.id && { color: colors.virtueGood, fontWeight: '600' }]}>
                         {v.name}
+                        {virtueFocusCounts[v.id] ? ` · ${virtueFocusCounts[v.id]}d` : ''}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -313,10 +333,11 @@ export default function ReviewScreen() {
                     <TouchableOpacity
                       key={v.id}
                       style={[s.vpBtn, worstVirtue === v.id && s.vpBtnActive]}
-                      onPress={() => setWorstVirtue(v.id)}
+                      onPress={() => { haptics.tap(); setWorstVirtue(v.id); }}
                     >
                       <Text style={[s.vpBtnText, worstVirtue === v.id && { color: colors.virtueBad, fontWeight: '600' }]}>
                         {v.name}
+                        {virtueFocusCounts[v.id] ? ` · ${virtueFocusCounts[v.id]}d` : ''}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -324,17 +345,21 @@ export default function ReviewScreen() {
               </View>
             </View>
 
-            {/* Intention — last, as the output of all reflection above */}
-            <View style={s.intentionCard}>
-              <Text style={s.insightCardTitle}>Intention for next week</Text>
+            {/* VI · Commit — the output of all reflection above */}
+            <View style={s.promptCard}>
+              <View style={s.promptTopRow}>
+                <Text style={s.promptNum}>VI · Commit</Text>
+              </View>
+              <Text style={s.promptQ}>What one thing will you do differently next week?</Text>
               <TextInput
                 style={s.intentionInput}
                 multiline
-                placeholder="What one thing will you do differently? Write it as a commitment, not a wish..."
+                placeholder="Write it as a commitment, not a wish..."
                 placeholderTextColor={colors.textDim}
                 value={intention}
                 onChangeText={setIntention}
                 scrollEnabled={false}
+                inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewIntentionAccessory' : undefined}
               />
             </View>
 
@@ -392,6 +417,44 @@ export default function ReviewScreen() {
 
         </ScrollView>
       </KeyboardAvoidingView>
+      {Platform.OS === 'ios' && (
+        <>
+          <InputAccessoryView nativeID="reviewPromptAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              {openPrompt < reviewPrompts.length - 1 ? (
+                <TouchableOpacity
+                  onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
+                  style={s.accessoryAction}
+                  activeOpacity={0.7}
+                >
+                  <Text style={s.accessoryActionText}>Next prompt →</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryAction} activeOpacity={0.7}>
+                  <Text style={s.accessoryActionText}>Continue ↓</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </InputAccessoryView>
+          <InputAccessoryView nativeID="reviewIntentionAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { Keyboard.dismiss(); handleSave(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>Seal this week →</Text>
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -430,6 +493,20 @@ const s = StyleSheet.create({
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  accessoryBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.bgElevated,
+    borderTopWidth: 0.5,
+    borderTopColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
+  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
@@ -448,8 +525,9 @@ const s = StyleSheet.create({
   insightPill: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
   insightPillText: { fontSize: 12, color: colors.textMuted },
   insightFootnote: { fontSize: 11, color: colors.textDim, marginTop: 4, marginBottom: 8 },
-  // Virtue ledger (inside insightCard)
-  virtueRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  // Virtue ledger (inside promptCard)
+  ledgerHint: { fontSize: 12, color: colors.textDim, lineHeight: 18, marginTop: 8 },
+  virtueRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
   virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' },
   vpLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', padding: 12, paddingHorizontal: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   vpBtn: { padding: 13, paddingHorizontal: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border },
