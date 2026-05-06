@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView, Platform, Image, Share,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import SkullLoader from '../components/SkullLoader';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -316,17 +317,29 @@ Return only the JSON object.`;
         >
 
           <View style={s.hero}>
-            <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
-              <Text style={s.backArrow}>‹</Text>
-              <Text style={s.backLabel}>Practice</Text>
-            </TouchableOpacity>
-            <Text style={s.eyebrow}>Daily Reading</Text>
-            <Text style={s.title}>
-              {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-            </Text>
-            <Text style={s.sub}>
-              {tab === 'today' ? 'Chosen for you. Grounded in today.' : 'Your reading archive'}
-            </Text>
+            <Image
+              source={require('../assets/heroes/read.jpg')}
+              style={s.heroImage}
+              resizeMode="cover"
+            />
+            <LinearGradient
+              colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
+              locations={[0, 0.5, 1]}
+              style={StyleSheet.absoluteFillObject}
+            />
+            <View style={s.heroContent}>
+              <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
+                <Text style={s.backArrow}>‹</Text>
+                <Text style={s.backLabel}>Practice</Text>
+              </TouchableOpacity>
+              <Text style={s.eyebrow}>Daily Reading</Text>
+              <Text style={s.title}>
+                {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+              </Text>
+              <Text style={s.sub}>
+                {tab === 'today' ? 'Chosen for you. Grounded in today.' : 'Your reading archive'}
+              </Text>
+            </View>
           </View>
 
           <View style={s.tabRow}>
@@ -555,14 +568,18 @@ Return only the JSON object.`;
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  // Dark header
+  // Dark header with hero image
   hero: {
     backgroundColor: colors.bgDeep,
-    padding: spacing.xl,
-    paddingTop: 36,
+    minHeight: 260,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
+  heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  heroContent: { padding: spacing.xl, paddingTop: 36 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
   backArrow: { fontSize: 24, color: colors.accent },
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },

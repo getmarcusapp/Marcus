@@ -371,27 +371,41 @@ export default function JournalScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={s.header}>
-            {fromPractice && (
-              <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
-                <Text style={s.backArrow}>‹</Text>
-                <Text style={s.backLabel}>Practice</Text>
-              </TouchableOpacity>
-            )}
-            <View style={s.typeToggle}>
-                {['morning', 'evening'].map(t => (
-                  <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setViewMode('write'); setOpenPrompt(0); setOpenHint(null); }} activeOpacity={0.7}>
-                    <Text style={[s.typeBtnText, sessionType === t && s.typeBtnTextActive]}>{t === 'morning' ? '☽  Morning' : '◑  Evening'}</Text>
-                  </TouchableOpacity>
-                ))}
+            <Image
+              source={isMorning
+                ? require('../assets/heroes/journal-morning.jpg')
+                : require('../assets/heroes/journal-evening.jpg')}
+              style={s.headerImage}
+              resizeMode="cover"
+            />
+            <LinearGradient
+              colors={['rgba(0,0,0,0.55)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
+              locations={[0, 0.5, 1]}
+              style={StyleSheet.absoluteFillObject}
+            />
+            <View style={s.headerContent}>
+              {fromPractice && (
+                <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
+                  <Text style={s.backArrow}>‹</Text>
+                  <Text style={s.backLabel}>Practice</Text>
+                </TouchableOpacity>
+              )}
+              <View style={s.typeToggle}>
+                  {['morning', 'evening'].map(t => (
+                    <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setViewMode('write'); setOpenPrompt(0); setOpenHint(null); }} activeOpacity={0.7}>
+                      <Text style={[s.typeBtnText, sessionType === t && s.typeBtnTextActive]}>{t === 'morning' ? '☽  Morning' : '◑  Evening'}</Text>
+                    </TouchableOpacity>
+                  ))}
+              </View>
+              <Text style={s.eyebrow}>{isMorning ? 'Morning Journal' : 'Evening Journal'}</Text>
+              <Text style={s.title}>
+                {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
+                {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+              </Text>
+              <Text style={s.sub}>
+                {isMorning ? 'Before the world begins' : 'Before the day closes'}
+              </Text>
             </View>
-            <Text style={s.eyebrow}>{isMorning ? 'Morning Journal' : 'Evening Journal'}</Text>
-            <Text style={s.title}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
-              {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-            </Text>
-            <Text style={s.sub}>
-              {isMorning ? 'Before the world begins' : 'Before the day closes'}
-            </Text>
           </View>
 
           <View style={s.tabRow}>
@@ -779,11 +793,15 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   header: {
     backgroundColor: colors.bgDeep,
-    padding: spacing.xl,
-    paddingTop: spacing.lg,
+    minHeight: 280,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
+  headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  headerContent: { padding: spacing.xl, paddingTop: spacing.lg },
   typeToggle: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   typeBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgCard },
   typeBtnActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },

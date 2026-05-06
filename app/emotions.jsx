@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard,
+  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { emotions, stoicReframes } from '../constants/virtues';
 import { saveTrigger, getTriggers, updateTriggerEntry } from '../store/db';
@@ -209,13 +210,25 @@ export default function EmotionsScreen() {
         >
 
           <View style={s.hero}>
-            <Text style={s.eyebrow}>Emotional mastery</Text>
-            <Text style={s.title}>{tab === 'log' ? 'Log a trigger' : 'Your history'}</Text>
-            <Text style={s.sub}>
-              {tab === 'log'
-                ? 'Between stimulus and response\nthere is a space. This is that space.'
-                : 'Patterns reveal what single moments cannot'}
-            </Text>
+            <Image
+              source={require('../assets/heroes/emotions.jpg')}
+              style={s.heroImage}
+              resizeMode="cover"
+            />
+            <LinearGradient
+              colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
+              locations={[0, 0.5, 1]}
+              style={StyleSheet.absoluteFillObject}
+            />
+            <View style={s.heroContent}>
+              <Text style={s.eyebrow}>Emotional mastery</Text>
+              <Text style={s.title}>{tab === 'log' ? 'Log a trigger' : 'Your history'}</Text>
+              <Text style={s.sub}>
+                {tab === 'log'
+                  ? 'Between stimulus and response\nthere is a space. This is that space.'
+                  : 'Patterns reveal what single moments cannot'}
+              </Text>
+            </View>
           </View>
 
           <View style={s.tabRow}>
@@ -632,14 +645,18 @@ export default function EmotionsScreen() {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  // Dark header
+  // Dark header with hero image
   hero: {
     backgroundColor: colors.bgDeep,
-    padding: spacing.xl,
-    paddingTop: 36,
+    minHeight: 240,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
+  heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  heroContent: { padding: spacing.xl, paddingTop: 36 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
