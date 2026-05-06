@@ -401,7 +401,11 @@ function RemindersStep({ onNext }) {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={s.scroll}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 180 }}
+      >
         <View style={s.stepHero}>
           <Text style={s.stepEyebrow}>Stay anchored</Text>
           <Text style={s.stepTitle}>A few gentle{'\n'}reminders.</Text>
@@ -431,16 +435,16 @@ function RemindersStep({ onNext }) {
             Adjust times or add a midday check-in anytime in Settings.
           </Text>
         </View>
-
-        <View style={s.footer}>
-          <TouchableOpacity style={s.primaryBtn} onPress={handleEnable} activeOpacity={0.8}>
-            <Text style={s.primaryBtnText}>Enable reminders</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.skipLink} onPress={onNext} activeOpacity={0.7}>
-            <Text style={s.skipLinkText}>Maybe later</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
+
+      <View style={s.footer}>
+        <TouchableOpacity style={s.primaryBtn} onPress={handleEnable} activeOpacity={0.8}>
+          <Text style={s.primaryBtnText}>Enable reminders</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={s.skipLink} onPress={onNext} activeOpacity={0.7}>
+          <Text style={s.skipLinkText}>Maybe later</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
