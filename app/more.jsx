@@ -73,7 +73,13 @@ export default function MoreScreen() {
                 <TouchableOpacity
                   key={item.label}
                   style={[s.row, idx < section.items.length - 1 && s.rowBorder]}
-                  onPress={() => router.push(item.route)}
+                  onPress={() => {
+                    // Pass from/fromLabel so destination screens with
+                    // back buttons land us back on More instead of the
+                    // active tab.
+                    const sep = item.route.includes('?') ? '&' : '?';
+                    router.push(`${item.route}${sep}from=/more&fromLabel=More`);
+                  }}
                   activeOpacity={0.7}
                 >
                   <View style={s.iconWrap}>

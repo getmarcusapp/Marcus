@@ -306,7 +306,7 @@ export default function PracticeScreen() {
                 )}
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
+            <TouchableOpacity onPress={() => router.push('/meditate?from=/&fromLabel=Practice')} style={s.medAllBtn} activeOpacity={0.7}>
               <Text style={s.medAllText}>All meditations →</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -525,7 +525,7 @@ export default function PracticeScreen() {
               )}
             </View>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => router.push('/meditate?from=/&fromLabel=Practice')} style={s.medAllBtn} activeOpacity={0.7}>
             <Text style={s.medAllText}>All meditations →</Text>
           </TouchableOpacity>
 

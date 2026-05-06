@@ -16,6 +16,18 @@ const TAB_BAR_HEIGHT = 84;
 // already has its own player, and onboarding/paywall hide the tab bar.
 const HIDDEN_ROUTES = new Set(['/meditate', '/onboarding', '/paywall']);
 
+// Map current pathname -> label shown on the meditate back button when the
+// user expands the mini-player from elsewhere in the app.
+const PATH_LABELS = {
+  '/': 'Practice',
+  '/journal': 'Journal',
+  '/emotions': 'Emotions',
+  '/more': 'More',
+  '/compass': 'Compass',
+  '/read': 'Reading',
+  '/review': 'Review',
+};
+
 export function MiniMeditationPlayer() {
   const router = useRouter();
   const pathname = usePathname();
@@ -37,7 +49,14 @@ export function MiniMeditationPlayer() {
       <View style={s.body}>
         <TouchableOpacity
           style={s.titleArea}
-          onPress={() => router.push({ pathname: '/meditate', params: { id: med.id } })}
+          onPress={() => router.push({
+            pathname: '/meditate',
+            params: {
+              id: med.id,
+              from: pathname,
+              fromLabel: PATH_LABELS[pathname] || 'Back',
+            },
+          })}
           activeOpacity={0.7}
         >
           <Text style={s.title} numberOfLines={1}>{med.title}</Text>

@@ -50,14 +50,20 @@ export default function MeditateScreen() {
   const progress = duration > 0 ? position / duration : 0;
   const formatTime = formatMedTime;
 
+  // Back-navigation source. Hidden routes are siblings of the tabs so
+  // router.back() falls through to the active tab; we accept an explicit
+  // ?from=&fromLabel= from the caller and replace to that route.
+  const fromPath = params?.from || '/more';
+  const fromLabel = params?.fromLabel || 'More';
+
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
         <View style={s.header}>
-          <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={s.backBtn} onPress={() => router.replace(fromPath)}>
             <Ionicons name="chevron-back" size={20} color={colors.textMuted} />
-            <Text style={s.backLabel}>More</Text>
+            <Text style={s.backLabel}>{fromLabel}</Text>
           </TouchableOpacity>
           <Text style={s.eyebrow}>Meditations</Text>
           <Text style={s.title}>Stoic practice.</Text>

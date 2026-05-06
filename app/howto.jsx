@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 
 const sections = [
@@ -51,6 +51,9 @@ const sections = [
 
 export default function HowToScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const fromPath = params?.from || '/more';
+  const fromLabel = params?.fromLabel || 'More';
   const [openSection, setOpenSection] = useState(null);
 
   return (
@@ -58,9 +61,9 @@ export default function HowToScreen() {
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
         <View style={s.hero}>
-          <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
+          <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
             <Text style={s.backArrow}>‹</Text>
-            <Text style={s.backLabel}>More</Text>
+            <Text style={s.backLabel}>{fromLabel}</Text>
           </TouchableOpacity>
           <Text style={s.eyebrow}>Marcus</Text>
           <Text style={s.title}>How it works</Text>
