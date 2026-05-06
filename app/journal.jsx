@@ -664,13 +664,22 @@ export default function JournalScreen() {
                 </View>
               ) : filteredHistory.length === 0 ? (
                 <View style={s.empty}>
-                  <Text style={s.emptyIcon}>☽</Text>
+                  <Text style={s.emptyIcon}>{isMorning ? '☼' : '☽'}</Text>
                   <Text style={s.emptyTitle}>Your {isMorning ? 'mornings' : 'evenings'} are not yet written.</Text>
                   <Text style={s.emptyText}>
                     {isMorning
-                      ? 'Each morning, four prompts: what is in your control, where courage is required, what you are postponing, and what difficulty might arise. Begin one when you are ready.'
-                      : 'Each evening, four movements: examine where you acted with virtue, confess where you fell short, release what you are carrying, and find one thing that deserves your thanks.'}
+                      ? 'Four prompts each morning — what is in your control, where courage is required, what you are postponing, what difficulty might arise. Begin one when you are ready.'
+                      : 'Four movements each evening — where you acted with virtue, where you fell short, what you are carrying, and one thing that deserves your thanks.'}
                   </Text>
+                  <TouchableOpacity
+                    style={s.emptyCta}
+                    onPress={() => setViewMode('write')}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={s.emptyCtaText}>
+                      {isMorning ? 'Begin morning practice →' : 'Begin evening practice →'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
                 groupByMonth(filteredHistory).map(group => (
@@ -936,10 +945,17 @@ const s = StyleSheet.create({
   },
   saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
   saveBtnSub: { fontSize: 12, color: colors.textMuted, marginTop: 5 },
-  empty: { padding: 40, alignItems: 'center', backgroundColor: colors.bgCard },
-  emptyIcon: { fontSize: 32, marginBottom: 16, opacity: 0.4 },
-  emptyTitle: { fontSize: 17, fontWeight: '500', color: colors.textSecondary, marginBottom: 12, textAlign: 'center' },
-  emptyText: { fontSize: 14, color: colors.textDim, textAlign: 'center', lineHeight: 22 },
+  empty: { padding: 40, paddingTop: 56, alignItems: 'center', backgroundColor: colors.bgCard },
+  emptyIcon: { fontSize: 32, marginBottom: 16, color: colors.accentDim },
+  emptyTitle: { fontSize: 18, fontWeight: '400', color: colors.textPrimary, marginBottom: 12, textAlign: 'center', fontFamily: font.serif },
+  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
+  emptyCta: {
+    marginTop: 28,
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    paddingVertical: 14, paddingHorizontal: 22,
+    backgroundColor: colors.accentBg,
+  },
+  emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   histEntry: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden', backgroundColor: colors.bgElevated },
   histEntryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: colors.bgCard, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   histEntryDate: { fontSize: 15, fontWeight: '500', color: colors.textPrimary, marginBottom: 3 },

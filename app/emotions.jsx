@@ -452,11 +452,18 @@ export default function EmotionsScreen() {
                 </View>
               ) : filteredHistory.length === 0 ? (
                 <View style={s.empty}>
-                  <Text style={s.emptyIcon}>⚡</Text>
-                  <Text style={s.emptyTitle}>Nothing logged yet. That is its own kind of clarity.</Text>
+                  <Text style={s.emptyEyebrow}>The space between stimulus and response</Text>
+                  <Text style={s.emptyTitle}>Nothing logged yet.{'\n'}That is its own kind of clarity.</Text>
                   <Text style={s.emptyText}>
-                    When a strong emotion arises, open this logger before you react. Name it, rate it, describe what triggered it, and read the Stoic reframe. The space between stimulus and response is where the practice lives.
+                    When a strong emotion arises, open this logger before you react. Name it, rate it, describe what triggered it. Then read the Stoic reframe. The practice lives in that pause.
                   </Text>
+                  <TouchableOpacity
+                    style={s.emptyCta}
+                    onPress={() => setTab('log')}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={s.emptyCtaText}>Log a trigger →</Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
                 groupByMonth(filteredHistory).map(group => (
@@ -709,7 +716,15 @@ const s = StyleSheet.create({
   histDistortionText: { fontSize: 11, textTransform: 'capitalize', letterSpacing: 0.3, fontWeight: '500' },
   histTrigger: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
   histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, lineHeight: 22 },
-  empty: { padding: 40, alignItems: 'center', backgroundColor: colors.bgCard },
+  empty: { padding: 40, paddingTop: 56, alignItems: 'center', backgroundColor: colors.bgCard },
+  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
+  emptyCta: {
+    marginTop: 28,
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    paddingVertical: 14, paddingHorizontal: 22,
+    backgroundColor: colors.accentBg,
+  },
+  emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8, backgroundColor: colors.bgCard },
   searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
   filterRow: { paddingVertical: 6, backgroundColor: colors.bgCard },
@@ -723,9 +738,9 @@ const s = StyleSheet.create({
   filterCount: { fontSize: 12, color: colors.textMuted },
   monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
-  emptyIcon: { fontSize: 32, marginBottom: 16, opacity: 0.4 },
-  emptyTitle: { fontSize: 17, fontWeight: '500', color: colors.textSecondary, marginBottom: 12, textAlign: 'center' },
-  emptyText: { fontSize: 14, color: colors.textDim, textAlign: 'center', lineHeight: 22 },
+  emptyIcon: { fontSize: 32, marginBottom: 16, color: colors.accentDim },
+  emptyTitle: { fontSize: 18, fontWeight: '400', color: colors.textPrimary, marginBottom: 12, textAlign: 'center', fontFamily: font.serif, lineHeight: 26 },
+  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
   editCard: { borderWidth: 1, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden' },
   editCardHeader: { padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   editCardTitle: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },

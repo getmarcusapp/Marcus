@@ -417,7 +417,18 @@ export default function ReviewScreen() {
               </View>
             ) : filteredHistory.length === 0 ? (
               <View style={s.empty}>
-                <Text style={s.emptyText}>No weeks sealed yet. Complete your first, and a record will gather here.</Text>
+                <Text style={s.emptyEyebrow}>Sunday reckoning</Text>
+                <Text style={s.emptyTitle}>No weeks sealed yet.</Text>
+                <Text style={s.emptyText}>
+                  At week's end, the practice asks five questions. Account for the wins. Reckon with the shortfalls. Notice the patterns. Examine the body. Commit to the next.{'\n\n'}Seal one — and a record gathers here.
+                </Text>
+                <TouchableOpacity
+                  style={s.emptyCta}
+                  onPress={() => setTab('current')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={s.emptyCtaText}>Open this week's review →</Text>
+                </TouchableOpacity>
               </View>
             ) : (
               filteredHistory.map(entry => (
@@ -585,8 +596,17 @@ const s = StyleSheet.create({
   histWorst: { fontSize: 14, color: colors.virtueBad, marginBottom: 4 },
   histPreview: { fontSize: 14, color: colors.textDim, lineHeight: 22, marginTop: 6 },
   // Archive filters
-  empty: { padding: 60, alignItems: 'center' },
-  emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
+  empty: { padding: 40, paddingTop: 56, alignItems: 'center', backgroundColor: colors.bgCard },
+  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
+  emptyTitle: { fontSize: 18, fontWeight: '400', color: colors.textPrimary, marginBottom: 12, textAlign: 'center', fontFamily: font.serif },
+  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
+  emptyCta: {
+    marginTop: 28,
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    paddingVertical: 14, paddingHorizontal: 22,
+    backgroundColor: colors.accentBg,
+  },
+  emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   filterRow: { paddingVertical: 8 },
   filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
   filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },

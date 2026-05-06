@@ -524,7 +524,18 @@ Return only the JSON object.`;
                 </View>
               ) : filteredLog.length === 0 ? (
                 <View style={s.empty}>
-                  <Text style={s.emptyText}>Your archive is empty. Save your first insight today, and the days will accumulate here.</Text>
+                  <Text style={s.emptyEyebrow}>Ancient wisdom for this day</Text>
+                  <Text style={s.emptyTitle}>Your archive is empty.</Text>
+                  <Text style={s.emptyText}>
+                    Each day, a fresh reading: a real Stoic passage chosen for what's happening today, with space to write your own insight before the day begins. Save the first, and the days accumulate here.
+                  </Text>
+                  <TouchableOpacity
+                    style={s.emptyCta}
+                    onPress={() => setTab('today')}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={s.emptyCtaText}>Read today's →</Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
                 groupLogByMonth(filteredLog).map(group => (
@@ -677,7 +688,16 @@ const s = StyleSheet.create({
     padding: 20, alignItems: 'center', backgroundColor: colors.bgElevated, marginTop: 8,
   },
   generateBtnText: { fontSize: 14, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
-  empty: { padding: 60, alignItems: 'center', backgroundColor: colors.bgCard },
+  empty: { padding: 40, paddingTop: 56, alignItems: 'center', backgroundColor: colors.bgCard },
+  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
+  emptyTitle: { fontSize: 18, fontWeight: '400', color: colors.textPrimary, marginBottom: 12, textAlign: 'center', fontFamily: font.serif },
+  emptyCta: {
+    marginTop: 28,
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    paddingVertical: 14, paddingHorizontal: 22,
+    backgroundColor: colors.accentBg,
+  },
+  emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
   searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
   filterRow: { paddingVertical: 6 },
@@ -688,7 +708,7 @@ const s = StyleSheet.create({
   filterCount: { fontSize: 12, color: colors.textMuted },
   monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
-  emptyText: { fontSize: 16, color: colors.textDim, textAlign: 'center', lineHeight: 26 },
+  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
   archiveRow: { padding: 20, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
   archiveTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   archiveDate: { fontSize: 14, color: colors.textPrimary, fontWeight: '500' },
