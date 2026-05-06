@@ -16,8 +16,8 @@
 // identifiers from Amazon Associates and Bookshop.org. Until then, links
 // will function (no commission earned) but Marcus does not actually
 // monetize the click.
-export const BOOKSHOP_AFFILIATE_ID = 'marcus-stoic'; // your bookshop.org ?aid=
-export const AMAZON_AFFILIATE_TAG = 'marcusapp-20';  // your Amazon ?tag=
+export const BOOKSHOP_AFFILIATE_ID = '123947';      // bookshop.org ?aid=
+export const AMAZON_AFFILIATE_TAG = 'marcusapp-20'; // your Amazon ?tag= (placeholder)
 
 // Helpers ───────────────────────────────────────────────────────────────
 // Bookshop.org product slugs are unstable — the safer guaranteed-working
