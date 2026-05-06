@@ -326,8 +326,8 @@ Return only the JSON object.`;
               resizeMode="cover"
             />
             <LinearGradient
-              colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
-              locations={[0, 0.5, 1]}
+              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.7)']}
+              locations={[0, 0.55, 1]}
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.heroContent}>
