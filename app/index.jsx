@@ -236,20 +236,32 @@ export default function PracticeScreen() {
             <TouchableOpacity
               style={s.virtueCard}
               onPress={() => setVirtueExpanded(!virtueExpanded)}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
             >
-              <Text style={s.virtueEyebrow}>Virtue focus</Text>
-              <Text style={s.virtueName}>{todayVirtue.name}</Text>
-              <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
-              <Text style={s.virtueQuestion}>"{todayVirtue.question}"</Text>
-              {virtueExpanded && (
-                <View style={s.virtueDetail}>
-                  <View style={s.virtueDivider} />
-                  <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
-                  <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
+              <View style={s.virtueImageWrap}>
+                <Image source={todayVirtue.image} style={s.virtueImage} resizeMode="cover" />
+                <LinearGradient
+                  colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
+                  locations={[0, 0.55, 1]}
+                  style={StyleSheet.absoluteFillObject}
+                />
+                <View style={s.virtueImageBottom}>
+                  <Text style={s.virtueEyebrow}>Virtue focus</Text>
                 </View>
-              )}
-              <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
+              </View>
+              <View style={s.virtueBody}>
+                <Text style={s.virtueName}>{todayVirtue.name}</Text>
+                <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
+                <Text style={s.virtueQuestion}>"{todayVirtue.question}"</Text>
+                {virtueExpanded && (
+                  <View style={s.virtueDetail}>
+                    <View style={s.virtueDivider} />
+                    <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
+                    <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
+                  </View>
+                )}
+                <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -443,20 +455,32 @@ export default function PracticeScreen() {
           <TouchableOpacity
             style={s.virtueCard}
             onPress={() => setVirtueExpanded(!virtueExpanded)}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
-            <Text style={s.virtueEyebrow}>Virtue focus</Text>
-            <Text style={s.virtueName}>{todayVirtue.name}</Text>
-            <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
-            <Text style={s.virtueQuestion}>"{todayVirtue.question}"</Text>
-            {virtueExpanded && (
-              <View style={s.virtueDetail}>
-                <View style={s.virtueDivider} />
-                <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
-                <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
+            <View style={s.virtueImageWrap}>
+              <Image source={todayVirtue.image} style={s.virtueImage} resizeMode="cover" />
+              <LinearGradient
+                colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
+                locations={[0, 0.55, 1]}
+                style={StyleSheet.absoluteFillObject}
+              />
+              <View style={s.virtueImageBottom}>
+                <Text style={s.virtueEyebrow}>Virtue focus</Text>
               </View>
-            )}
-            <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
+            </View>
+            <View style={s.virtueBody}>
+              <Text style={s.virtueName}>{todayVirtue.name}</Text>
+              <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
+              <Text style={s.virtueQuestion}>"{todayVirtue.question}"</Text>
+              {virtueExpanded && (
+                <View style={s.virtueDetail}>
+                  <View style={s.virtueDivider} />
+                  <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
+                  <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
+                </View>
+              )}
+              <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -621,10 +645,14 @@ const s = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: colors.border,
     borderRadius: radius.lg,
-    padding: 22,
     marginBottom: 32,
     backgroundColor: colors.bgCard,
+    overflow: 'hidden',
   },
+  virtueImageWrap: { width: '100%', height: 160, backgroundColor: '#000' },
+  virtueImage: { width: '100%', height: '100%' },
+  virtueImageBottom: { position: 'absolute', left: 22, right: 22, bottom: 14 },
+  virtueBody: { padding: 22, paddingTop: 18 },
   virtueEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
   virtueName: { fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
   virtueDesc: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, marginBottom: 12 },

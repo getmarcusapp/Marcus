@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput,
-  TouchableOpacity, StyleSheet, SafeAreaView,
+  TouchableOpacity, StyleSheet, SafeAreaView, Image,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
@@ -76,14 +77,26 @@ export default function CompassScreen() {
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
         <View style={s.hero}>
-          <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
-            <Text style={s.backArrow}>‹</Text>
-            <Text style={s.backLabel}>Practice</Text>
-          </TouchableOpacity>
-          <Text style={s.eyebrow}>Stoic Compass</Text>
-          <Text style={s.title}>Your North Star</Text>
-          <Text style={s.heroQuote}>“Know, first, who you are, and then adorn yourself accordingly.”</Text>
-          <Text style={s.heroAttr}>— Epictetus, Discourses</Text>
+          <Image
+            source={require('../assets/heroes/compass.jpg')}
+            style={s.heroImage}
+            resizeMode="cover"
+          />
+          <LinearGradient
+            colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.55, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={s.heroContent}>
+            <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
+              <Text style={s.backArrow}>‹</Text>
+              <Text style={s.backLabel}>Practice</Text>
+            </TouchableOpacity>
+            <Text style={s.eyebrow}>Stoic Compass</Text>
+            <Text style={s.title}>Your North Star</Text>
+            <Text style={s.heroQuote}>“Know, first, who you are, and then adorn yourself accordingly.”</Text>
+            <Text style={s.heroAttr}>— Epictetus, Discourses</Text>
+          </View>
         </View>
 
         <View style={s.nextRow}>
@@ -187,14 +200,18 @@ export default function CompassScreen() {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  // Dark header
+  // Dark header with hero image
   hero: {
     backgroundColor: colors.bgDeep,
-    padding: spacing.xl,
-    paddingTop: 36,
+    minHeight: 280,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
+  heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  heroContent: { padding: spacing.xl, paddingTop: 36 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
   backArrow: { fontSize: 24, color: colors.accent },
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },

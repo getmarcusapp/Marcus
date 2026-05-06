@@ -1,27 +1,36 @@
+// Imagery: public-domain classical art, one per virtue.
+//   Wisdom     -> Marble head of Athena (Met Museum, Roman copy of Greek original)
+//   Courage    -> Caravaggio, "David with the Head of Goliath" (1610, Borghese)
+//   Temperance -> Piero del Pollaiolo, "Temperance" (1469-72, Uffizi)
+//   Justice    -> Maerten van Heemskerck, "Iustitia"
 export const virtues = [
   {
     id: 'wisdom',
     name: 'Wisdom',
     desc: 'Discernment, insight, and right judgment. See clearly — not through bias or fear.',
     question: 'Am I perceiving this clearly, or through ego?',
+    image: require('../assets/virtues/wisdom.jpg'),
   },
   {
     id: 'courage',
     name: 'Courage',
     desc: 'Do the right thing even when it is hard or costly.',
     question: 'What am I avoiding out of fear?',
+    image: require('../assets/virtues/courage.jpg'),
   },
   {
     id: 'moderation',
     name: 'Temperance',
     desc: 'Neither too much nor too little of anything. The disciplined middle path.',
     question: 'Where am I in excess today?',
+    image: require('../assets/virtues/moderation.jpg'),
   },
   {
     id: 'justice',
     name: 'Justice',
     desc: 'Act rightly toward others. Community, fairness, duty.',
     question: 'Did I treat others well today?',
+    image: require('../assets/virtues/justice.jpg'),
   },
 ];
 
