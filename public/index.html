@@ -934,6 +934,90 @@
     line-height: 1.6;
   }
 
+  /* Guided Meditations spotlight */
+  .meditations-spotlight {
+    position: relative;
+    width: 100%;
+    padding: 120px 24px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .meditations-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg/1280px-Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg');
+    background-size: cover;
+    background-position: center 30%;
+  }
+  .meditations-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.72) 55%, rgba(0,0,0,0.92) 100%);
+  }
+  .meditations-inner {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    text-align: center;
+  }
+  .meditations-eyebrow {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin: 0 0 18px;
+  }
+  .meditations-title {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 300;
+    color: var(--text-primary);
+    letter-spacing: -1.5px;
+    line-height: 1.05;
+    margin: 0 0 22px;
+  }
+  .meditations-sub {
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    max-width: 540px;
+    margin: 0 auto 36px;
+  }
+  .meditations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 32px;
+    max-width: 560px;
+    margin: 0 auto;
+    text-align: left;
+  }
+  .meditation-item--full {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+  .meditation-tag {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent-dim);
+    text-transform: uppercase;
+    margin: 0 0 4px;
+  }
+  .meditation-title {
+    font-size: 16px;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  @media (max-width: 480px) {
+    .meditations-spotlight { padding: 96px 20px; }
+    .meditations-title { font-size: 32px; }
+    .meditations-sub { font-size: 15px; }
+    .meditations-grid { grid-template-columns: 1fr; gap: 18px; max-width: 320px; text-align: center; }
+    .meditation-item--full { grid-column: auto; }
+  }
+
 </style>
 </head>
 <body>
@@ -1215,33 +1299,33 @@
 
 
 <!-- GUIDED MEDITATIONS -->
-<section style="position: relative; min-height: 540px; padding: 120px 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden; display: flex; align-items: center; justify-content: center;">
-  <div style="position: absolute; inset: 0; background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg/1280px-Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg'); background-size: cover; background-position: center 30%;"></div>
-  <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 55%, rgba(0,0,0,0.92) 100%);"></div>
-  <div style="position: relative; max-width: 720px; text-align: center;">
-    <p style="font-size: 12px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin: 0 0 18px;">Five guided meditations</p>
-    <h2 style="font-size: clamp(40px, 6vw, 64px); font-weight: 300; color: var(--text-primary); letter-spacing: -1.5px; line-height: 1.05; margin: 0 0 22px;">Ancient attention training,<br>voiced.</h2>
-    <p style="font-size: 17px; color: var(--text-secondary); line-height: 1.55; max-width: 540px; margin: 0 auto 36px;">Five Stoic meditations, five minutes each. The right one surfaces at the right moment of your day &mdash; preparation in the morning, perspective at midday, accounting in the evening. Listen on the way to work, before journaling, or anytime you need to return to yourself.</p>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px 32px; max-width: 600px; margin: 0 auto; text-align: left;">
-      <div>
-        <p style="font-size: 11px; letter-spacing: 2px; color: var(--accent-dim); text-transform: uppercase; margin: 0 0 4px;">Perspective</p>
-        <p style="font-size: 16px; color: var(--text-primary); margin: 0;">The View From Above</p>
+<section class="meditations-spotlight">
+  <div class="meditations-bg"></div>
+  <div class="meditations-overlay"></div>
+  <div class="meditations-inner">
+    <p class="meditations-eyebrow">Five guided meditations</p>
+    <h2 class="meditations-title">Ancient attention training,<br>voiced.</h2>
+    <p class="meditations-sub">Five Stoic meditations, five minutes each. The right one surfaces at the right moment of your day &mdash; preparation in the morning, perspective at midday, accounting in the evening. Listen on the way to work, before journaling, or anytime you need to return to yourself.</p>
+    <div class="meditations-grid">
+      <div class="meditation-item">
+        <p class="meditation-tag">Perspective</p>
+        <p class="meditation-title">The View From Above</p>
       </div>
-      <div>
-        <p style="font-size: 11px; letter-spacing: 2px; color: var(--accent-dim); text-transform: uppercase; margin: 0 0 4px;">Preparation</p>
-        <p style="font-size: 16px; color: var(--text-primary); margin: 0;">Premeditatio Malorum</p>
+      <div class="meditation-item">
+        <p class="meditation-tag">Preparation</p>
+        <p class="meditation-title">Premeditatio Malorum</p>
       </div>
-      <div>
-        <p style="font-size: 11px; letter-spacing: 2px; color: var(--accent-dim); text-transform: uppercase; margin: 0 0 4px;">Accounting</p>
-        <p style="font-size: 16px; color: var(--text-primary); margin: 0;">The Evening Examination</p>
+      <div class="meditation-item">
+        <p class="meditation-tag">Accounting</p>
+        <p class="meditation-title">The Evening Examination</p>
       </div>
-      <div>
-        <p style="font-size: 11px; letter-spacing: 2px; color: var(--accent-dim); text-transform: uppercase; margin: 0 0 4px;">Gratitude</p>
-        <p style="font-size: 16px; color: var(--text-primary); margin: 0;">Negative Visualization</p>
+      <div class="meditation-item">
+        <p class="meditation-tag">Gratitude</p>
+        <p class="meditation-title">Negative Visualization</p>
       </div>
-      <div style="grid-column: 1 / -1; text-align: center;">
-        <p style="font-size: 11px; letter-spacing: 2px; color: var(--accent-dim); text-transform: uppercase; margin: 0 0 4px;">Attention</p>
-        <p style="font-size: 16px; color: var(--text-primary); margin: 0;">The Present Moment</p>
+      <div class="meditation-item meditation-item--full">
+        <p class="meditation-tag">Attention</p>
+        <p class="meditation-title">The Present Moment</p>
       </div>
     </div>
   </div>
