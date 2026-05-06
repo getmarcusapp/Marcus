@@ -3,6 +3,12 @@
 //   Courage    -> Caravaggio, "David with the Head of Goliath" (1610, Borghese)
 //   Temperance -> Piero del Pollaiolo, "Temperance" (1469-72, Uffizi)
 //   Justice    -> Maerten van Heemskerck, "Iustitia"
+//
+// imageAspect = source W/H. With the virtue card's hero band (160 px)
+// using cover-crop, centering chops off the figure's head on tall
+// portraits. We render the image absolutely positioned at top:0 with
+// width:100% + this aspect ratio so the head/face sits at the top of
+// the band; the lower portion of the painting clips below.
 export const virtues = [
   {
     id: 'wisdom',
@@ -10,6 +16,7 @@ export const virtues = [
     desc: 'Discernment, insight, and right judgment. See clearly — not through bias or fear.',
     question: 'Am I perceiving this clearly, or through ego?',
     image: require('../assets/virtues/wisdom.jpg'),
+    imageAspect: 1280 / 1707,
   },
   {
     id: 'courage',
@@ -17,6 +24,7 @@ export const virtues = [
     desc: 'Do the right thing even when it is hard or costly.',
     question: 'What am I avoiding out of fear?',
     image: require('../assets/virtues/courage.jpg'),
+    imageAspect: 1280 / 1584,
   },
   {
     id: 'moderation',
@@ -24,6 +32,7 @@ export const virtues = [
     desc: 'Neither too much nor too little of anything. The disciplined middle path.',
     question: 'Where am I in excess today?',
     image: require('../assets/virtues/moderation.jpg'),
+    imageAspect: 1280 / 2461,
   },
   {
     id: 'justice',
@@ -31,6 +40,7 @@ export const virtues = [
     desc: 'Act rightly toward others. Community, fairness, duty.',
     question: 'Did I treat others well today?',
     image: require('../assets/virtues/justice.jpg'),
+    imageAspect: 743 / 1023,
   },
 ];
 

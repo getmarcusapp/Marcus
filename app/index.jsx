@@ -239,7 +239,10 @@ export default function PracticeScreen() {
               activeOpacity={0.85}
             >
               <View style={s.virtueImageWrap}>
-                <Image source={todayVirtue.image} style={s.virtueImage} resizeMode="cover" />
+                <Image
+                  source={todayVirtue.image}
+                  style={[s.virtueImage, { aspectRatio: todayVirtue.imageAspect }]}
+                />
                 <LinearGradient
                   colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
                   locations={[0, 0.55, 1]}
@@ -458,7 +461,10 @@ export default function PracticeScreen() {
             activeOpacity={0.85}
           >
             <View style={s.virtueImageWrap}>
-              <Image source={todayVirtue.image} style={s.virtueImage} resizeMode="cover" />
+              <Image
+                source={todayVirtue.image}
+                style={[s.virtueImage, { aspectRatio: todayVirtue.imageAspect }]}
+              />
               <LinearGradient
                 colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
                 locations={[0, 0.55, 1]}
@@ -649,8 +655,23 @@ const s = StyleSheet.create({
     backgroundColor: colors.bgCard,
     overflow: 'hidden',
   },
-  virtueImageWrap: { width: '100%', height: 160, backgroundColor: '#000' },
-  virtueImage: { width: '100%', height: '100%' },
+  virtueImageWrap: {
+    width: '100%',
+    height: 160,
+    backgroundColor: '#000',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  // Image is absolutely positioned at top:0 with width:100% + per-virtue
+  // aspectRatio so its full height extends below the wrap; the wrap clips.
+  // This shows the top portion of each painting (heads/faces) regardless of
+  // source aspect ratio.
+  virtueImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+  },
   virtueImageBottom: { position: 'absolute', left: 22, right: 22, bottom: 14 },
   virtueBody: { padding: 22, paddingTop: 18 },
   virtueEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
