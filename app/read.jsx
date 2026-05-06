@@ -255,28 +255,33 @@ Return only the JSON object.`;
   async function handleShare() {
     if (!reading) return;
     haptics.tap();
+    // Image card carries the quote + attribution; text body carries the
+    // reflection (the personalized 'why this passage today' beat) so the
+    // share is both visually iconic and substantively differentiated.
+    const message = [
+      reading.reflection,
+      '',
+      'From Marcus. A daily Stoic practice.',
+    ].filter(Boolean).join('\n');
     try {
-      // Capture the off-screen ShareCard as a JPEG and share that file.
-      // Falls back to text-only if capture fails for any reason.
       const uri = await captureRef(shareCardRef, {
         format: 'jpg',
         quality: 0.92,
         result: 'tmpfile',
       });
-      await Share.share({
-        url: uri,
-        message: 'From Marcus. A daily Stoic practice.',
-      });
+      await Share.share({ url: uri, message });
     } catch (e) {
       console.log('Share image failed, falling back to text:', e?.message);
       const lines = [
         `"${reading.quote}"`,
         `— ${reading.author}${reading.work ? `, ${reading.work}` : ''}`,
         '',
+        reading.reflection,
+        '',
         'From Marcus. A daily Stoic practice.',
       ];
       try {
-        await Share.share({ message: lines.join('\n') });
+        await Share.share({ message: lines.filter(Boolean).join('\n') });
       } catch (e2) {
         console.log('Share text fallback failed:', e2?.message);
       }
