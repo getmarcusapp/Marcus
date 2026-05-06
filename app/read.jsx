@@ -16,14 +16,22 @@ import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { captureRef } from 'react-native-view-shot';
 import { ReadingShareCard, SHARE_CARD_WIDTH, SHARE_CARD_HEIGHT } from '../components/ReadingShareCard';
+import { STOIC_QUOTES, selectCandidates } from '../constants/stoicQuotes';
 
 const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom generating a personalized daily reading for a user of a Stoic practice app.
 
-Generate a daily reading in this EXACT JSON format with no other text:
+CRITICAL: You will be given a list of CANDIDATE QUOTES with their authors, works, and source citations. You MUST select your quote from this candidate list — do not generate, paraphrase, or substitute any quote. Use the exact quote text and exact attribution as provided. This is non-negotiable: misattribution destroys user trust.
+
+Your job is to:
+1. Select the candidate that best fits today's context (user's Virtue focus, the day, and the mode below).
+2. Write a 3–4 sentence reflection in the second person that connects the quote to the user's practice.
+
+Output this EXACT JSON format with no other text:
 {
-  "quote": "the exact quote",
-  "author": "Author Name",
-  "work": "Title of Work",
+  "quote_id": "the id of the candidate you selected",
+  "quote": "the exact quote text from the candidate (verbatim)",
+  "author": "the exact author from the candidate (verbatim)",
+  "work": "the exact work from the candidate (verbatim)",
   "theme": "2-4 word Stoic theme",
   "virtue": "Wisdom|Courage|Moderation|Justice",
   "event_date": null,
@@ -31,15 +39,14 @@ Generate a daily reading in this EXACT JSON format with no other text:
   "reflection": "A 3-4 sentence reflection in second person. Personalize to the user's Virtue focus if provided."
 }
 
-Default mode is TIMELESS. Set event_date and event_url to null. Do not use temporal markers (today, yesterday, this week, recently, just announced, etc.).
+Default mode is TIMELESS. Set event_date and event_url to null. Do not use temporal markers (today, yesterday, this week, recently, just announced, etc.) in the reflection.
 
-If the user message includes "TOPICAL MODE", and only then, you may use the web_search tool to find a current event from the past 48 hours, fill event_date with the article's actual publication date (YYYY-MM-DD), and fill event_url with the article URL — both must come from a real search result, never fabricated. If you cannot find a fresh event with a verified URL, fall back to timeless mode for that response.
+If the user message includes "TOPICAL MODE", and only then, you may use the web_search tool to find a current event from the past 48 hours, fill event_date with the article's actual publication date (YYYY-MM-DD), and fill event_url with the article URL — both must come from a real search result, never fabricated. The reflection should briefly tie the chosen candidate quote to the event. If no fresh event with a verified URL is found, fall back to timeless mode for that response.
 
-Sources — never invent or misattribute:
-- Core Stoics: Marcus Aurelius (Meditations), Epictetus (Discourses, Enchiridion), Seneca (Letters, Essays), Zeno, Cato, Cleanthes
-- Aligned thinkers: Socrates, Aristotle, Heraclitus, Cicero, Viktor Frankl, Montaigne, Stockdale, Boethius, Hadot, Pierre Hadot, Lao Tzu, Confucius
-
-Rules: Vary sources across days. No consecutive same author. Prefer lesser-cited quotes. Match virtue field to user's focus if provided.`;
+Rules:
+- Pick the quote that best resonates with the user's Virtue focus (if provided) and the spirit of the day.
+- Reflection must be original and specific to the chosen quote — no generic Stoic platitudes.
+- Match the virtue field to either the user's focus or the dominant virtue of the chosen candidate.`;
 
 const TEMPORAL_MARKERS = /\b(today|yesterday|this week|last week|recently|just announced|the latest|earlier this|this morning|tonight|just now|this past|this month|breaking)\b/i;
 
@@ -124,25 +131,34 @@ export default function ReadScreen() {
       const history = await getReadingHistory();
       const virtueFocus = await getLastVirtueFocus();
       const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-      const recentAuthors = history.slice(0, 60).map(r => r.author).filter(Boolean).join(', ');
-      const recentQuotes = history.slice(0, 30).map(r => r.quote ? r.quote.substring(0, 80) : '').filter(Boolean).join(' | ');
       const recentReflections = history.slice(0, 14).map((r, i) => r.reflection ? `(${i + 1}) ${r.reflection.substring(0, 160)}` : '').filter(Boolean).join('\n');
       const recentThemes = history.slice(0, 30).map(r => r.theme).filter(Boolean).join(', ');
+      // Build the candidate pool: exclude any quote ids the user has seen
+      // recently, prefer ones matching their virtue focus.
+      const recentIds = history.slice(0, 60).map(r => r.quote_id).filter(Boolean);
+      const candidates = selectCandidates({
+        virtueFocus: virtueFocus ? virtueFocus.toLowerCase() : null,
+        excludeIds: recentIds,
+        limit: 24,
+      });
+      const candidateBlock = candidates
+        .map(c => `- id: ${c.id}\n  quote: "${c.quote}"\n  author: ${c.author}\n  work: ${c.work}\n  source: ${c.source}\n  virtues: ${c.virtues.join(', ')}\n  themes: ${c.themes.join(', ')}`)
+        .join('\n');
 
       async function callOnce({ topicalCall, dedupNote }) {
         const modeLine = topicalCall
-          ? 'TOPICAL MODE: Use web_search to find a current event from the past 48 hours, fill event_date and event_url from the actual search result. If no fresh event is found with a verified URL, fall back to timeless for this response.'
-          : 'TIMELESS MODE. Set event_date and event_url to null. No temporal markers.';
+          ? 'TOPICAL MODE: Use web_search to find a current event from the past 48 hours, fill event_date and event_url from the actual search result. The reflection should briefly tie the chosen candidate quote to the event. If no fresh event is found with a verified URL, fall back to timeless for this response.'
+          : 'TIMELESS MODE. Set event_date and event_url to null. No temporal markers in the reflection.';
         const dedupLine = dedupNote ? `\n\n${dedupNote}\n` : '';
         const userMessage = `Today is ${dateStr}. ${modeLine}
 
-${virtueFocus ? `User's current Virtue focus: ${virtueFocus}. Tailor the reading and reflection to that focus.` : ''}
+${virtueFocus ? `User's current Virtue focus: ${virtueFocus}. Prefer a candidate whose virtues include this focus.` : ''}
 
-Uniqueness across the user's full reading history is critical. Do NOT reuse:
-- Authors recently used: ${recentAuthors || 'none'}
-- Quotes recently used (first 80 chars each): ${recentQuotes || 'none'}
-- Themes recently used: ${recentThemes || 'none'}
-- Reflections recently written:
+CANDIDATE QUOTES — choose exactly one and copy its quote/author/work verbatim into your output:
+${candidateBlock}
+
+Recent themes to vary from: ${recentThemes || 'none'}
+Recent reflections to vary from in style and angle:
 ${recentReflections || 'none'}${dedupLine}
 Return only the JSON object.`;
 
@@ -195,14 +211,36 @@ Return only the JSON object.`;
         result = await callOnce({ topicalCall: false });
       }
 
+      // Canonical-source guard: even if the AI tried to alter the quote
+      // text, look up by quote_id and substitute the verified text/author/
+      // work from the corpus. Eliminates any residual misattribution risk.
+      const canonical = result?.quote_id
+        ? STOIC_QUOTES.find(q => q.id === result.quote_id)
+        : null;
+      if (canonical) {
+        result.quote = canonical.quote;
+        result.author = canonical.author;
+        result.work = canonical.work;
+      } else {
+        console.log('Reading: AI returned an unknown quote_id, attempting fallback. id =', result?.quote_id);
+      }
+
       const dup = findDuplicateQuote(result?.quote, history);
       if (dup) {
         const dupDate = dup.date ? new Date(dup.date).toDateString() : 'a previous day';
         console.log('Reading: duplicate quote detected, retrying. Quote:', result.quote?.slice(0, 60), 'first used:', dupDate);
         result = await callOnce({
           topicalCall: false,
-          dedupNote: `IMPORTANT: You returned a quote we already used on ${dupDate}: "${(dup.quote || '').slice(0, 120)}". Pick a fundamentally different quote and a different author than that one.`,
+          dedupNote: `IMPORTANT: You returned a quote we already used on ${dupDate}: "${(dup.quote || '').slice(0, 120)}". Pick a fundamentally different quote (different id, different author).`,
         });
+        const canonical2 = result?.quote_id
+          ? STOIC_QUOTES.find(q => q.id === result.quote_id)
+          : null;
+        if (canonical2) {
+          result.quote = canonical2.quote;
+          result.author = canonical2.author;
+          result.work = canonical2.work;
+        }
       }
 
       await saveTodayReading(result);
