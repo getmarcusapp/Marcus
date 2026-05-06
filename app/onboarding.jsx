@@ -113,18 +113,21 @@ function WelcomeStep({ onNext }) {
             </Text>
             <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations V.20</Text>
 
-            <TextInput
-              style={s.welcomeNameInput}
-              placeholder="What should we call you? (optional)"
-              placeholderTextColor={colors.textDim}
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-              autoCorrect={false}
-              maxLength={40}
-              returnKeyType="done"
-              onSubmitEditing={handleNext}
-            />
+            <View style={s.welcomeNameWrap}>
+              <Text style={s.welcomeNameLabel}>Your name · optional</Text>
+              <TextInput
+                style={s.welcomeNameInput}
+                placeholder="What should we call you?"
+                placeholderTextColor={colors.textMuted}
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                autoCorrect={false}
+                maxLength={40}
+                returnKeyType="done"
+                onSubmitEditing={handleNext}
+              />
+            </View>
           </View>
           <View style={s.footer}>
             <TouchableOpacity style={s.primaryBtn} onPress={handleNext} activeOpacity={0.8}>
@@ -459,12 +462,26 @@ const s = StyleSheet.create({
     letterSpacing: 0.5,
     textAlign: 'center',
   },
-  welcomeNameInput: {
+  welcomeNameWrap: {
     marginTop: 36,
     width: '100%',
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.accentDim,
-    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  welcomeNameLabel: {
+    fontSize: font.labelSize,
+    letterSpacing: font.sectionTracking,
+    color: colors.accent,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  welcomeNameInput: {
+    width: '100%',
+    borderWidth: 0.5,
+    borderColor: colors.accentDim,
+    borderRadius: radius.md,
+    backgroundColor: colors.accentBg,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     fontSize: 16,
     color: colors.textPrimary,
     textAlign: 'center',
