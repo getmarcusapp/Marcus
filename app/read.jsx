@@ -4,7 +4,7 @@ import {
   TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator,
   KeyboardAvoidingView, Platform, Image, Share,
 } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import SkullLoader from '../components/SkullLoader';
@@ -77,6 +77,9 @@ const virtueColor = {
 
 export default function ReadScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const fromPath = params?.from || '/';
+  const fromLabel = params?.fromLabel || 'Practice';
   const [tab, setTab] = useState('today');
   const [reading, setReading] = useState(null);
   const [insight, setInsight] = useState('');
@@ -328,9 +331,9 @@ Return only the JSON object.`;
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.heroContent}>
-              <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
+              <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
                 <Text style={s.backArrow}>‹</Text>
-                <Text style={s.backLabel}>Practice</Text>
+                <Text style={s.backLabel}>{fromLabel}</Text>
               </TouchableOpacity>
               <Text style={s.eyebrow}>Daily Reading</Text>
               <Text style={s.title}>

@@ -368,7 +368,7 @@ export default function PracticeScreen() {
 
             <TouchableOpacity
               style={[s.routineRow, s.routineRowBorder, nextItem === 'compass' && s.routineRowNext]}
-              onPress={async () => { router.push('/compass'); setCompassDone(true); await persistCompassDone(); cancelJournalNotification('compass'); }}
+              onPress={async () => { router.push('/compass?from=/&fromLabel=Practice'); setCompassDone(true); await persistCompassDone(); cancelJournalNotification('compass'); }}
               activeOpacity={0.7}
             >
               <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
@@ -390,7 +390,7 @@ export default function PracticeScreen() {
 
             <TouchableOpacity
               style={[s.routineRow, s.routineRowBorder, nextItem === 'reading' && s.routineRowNext]}
-              onPress={() => router.push('/read')}
+              onPress={() => router.push('/read?from=/&fromLabel=Practice')}
               activeOpacity={0.7}
             >
               <View style={[s.dot, readingDone && s.dotDone]}>{readingDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
@@ -436,7 +436,7 @@ export default function PracticeScreen() {
             {isReviewDay && (
               <TouchableOpacity
                 style={s.routineRow}
-                onPress={() => router.push('/review')}
+                onPress={() => router.push('/review?from=/&fromLabel=Practice')}
                 activeOpacity={0.7}
               >
                 <View style={s.dot} />

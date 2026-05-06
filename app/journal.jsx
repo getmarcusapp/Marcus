@@ -213,6 +213,8 @@ export default function JournalScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const fromPractice = !!params?.type;
+  const fromPath = params?.from || '/';
+  const fromLabel = params?.fromLabel || 'Practice';
   const defaultType = params?.type || (new Date().getHours() < 13 ? 'morning' : 'evening');
   const [sessionType, setSessionType] = useState(defaultType);
   const isMorning = sessionType !== 'evening';
@@ -385,9 +387,9 @@ export default function JournalScreen() {
             />
             <View style={s.headerContent}>
               {fromPractice && (
-                <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
+                <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
                   <Text style={s.backArrow}>‹</Text>
-                  <Text style={s.backLabel}>Practice</Text>
+                  <Text style={s.backLabel}>{fromLabel}</Text>
                 </TouchableOpacity>
               )}
               <View style={s.typeToggle}>

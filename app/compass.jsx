@@ -4,7 +4,7 @@ import {
   TouchableOpacity, StyleSheet, SafeAreaView, Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { getCompass, saveCompass } from '../store/db';
@@ -32,6 +32,9 @@ const tabKeys = ['why', 'overcome', 'aspire'];
 
 export default function CompassScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const fromPath = params?.from || '/';
+  const fromLabel = params?.fromLabel || 'Practice';
   const [activeTab, setActiveTab] = useState(0);
   const [compass, setCompass] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -88,9 +91,9 @@ export default function CompassScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
-            <TouchableOpacity onPress={() => router.back()} style={s.backRow}>
+            <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
               <Text style={s.backArrow}>‹</Text>
-              <Text style={s.backLabel}>Practice</Text>
+              <Text style={s.backLabel}>{fromLabel}</Text>
             </TouchableOpacity>
             <Text style={s.eyebrow}>Stoic Compass</Text>
             <Text style={s.title}>Your North Star</Text>

@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveReview, getReviews, getJournals, getTriggers } from '../store/db';
@@ -50,6 +51,10 @@ const reviewPrompts = [
 ];
 
 export default function ReviewScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const fromPath = params?.from || '/';
+  const fromLabel = params?.fromLabel || 'Practice';
   const [tab, setTab] = useState('current');
   const [answers, setAnswers] = useState({});
   const [bestVirtue, setBestVirtue] = useState(virtues[0].id);
@@ -185,6 +190,10 @@ export default function ReviewScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
+            <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
+              <Text style={s.backArrow}>‹</Text>
+              <Text style={s.backLabel}>{fromLabel}</Text>
+            </TouchableOpacity>
             <Text style={s.eyebrow}>Weekly review</Text>
             <Text style={s.title}>
               {tab === 'current'
@@ -486,6 +495,9 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 36 },
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
+  backArrow: { fontSize: 24, color: colors.accent },
+  backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
