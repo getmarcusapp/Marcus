@@ -9,6 +9,7 @@ import { initializePurchases } from '../store/purchases';
 import { scheduleReengagementNotifications, scheduleAllNotifications } from '../notifications';
 import * as health from '../lib/health';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MiniMeditationPlayer } from '../components/MiniMeditationPlayer';
 
 function TabIcon({ name, color }) {
   return <Ionicons name={name} size={22} color={color} />;
@@ -94,6 +95,7 @@ export default function Layout() {
         <Tabs.Screen name="meditate" options={{ href: null }} />
         <Tabs.Screen name="paywall" options={{ href: null }} />
       </Tabs>
+      <MiniMeditationPlayer />
     </SafeAreaProvider>
   );
 }
