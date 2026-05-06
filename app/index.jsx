@@ -252,6 +252,31 @@ export default function PracticeScreen() {
               )}
               <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
             </TouchableOpacity>
+
+            {(() => {
+              const med = pickContextualMeditation();
+              return (
+                <>
+                  <TouchableOpacity
+                    style={s.medCard}
+                    onPress={() => router.push({ pathname: '/meditate', params: { id: med.id } })}
+                    activeOpacity={0.8}
+                  >
+                    <View style={s.medTopRow}>
+                      <Text style={s.medEyebrow}>Today's meditation</Text>
+                      <Ionicons name="play-circle" size={32} color={colors.accent} />
+                    </View>
+                    <Text style={s.medSubtitle}>{med.subtitle}</Text>
+                    <Text style={s.medTitle}>{med.title}</Text>
+                    <Text style={s.medDesc}>{med.desc}</Text>
+                    <Text style={s.medMeta}>5 min · guided</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
+                    <Text style={s.medAllText}>All meditations →</Text>
+                  </TouchableOpacity>
+                </>
+              );
+            })()}
           </Animated.View>
 
         </ScrollView>
