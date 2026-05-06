@@ -227,6 +227,13 @@ export default function JournalScreen() {
   const [selectedVirtue, setSelectedVirtue] = useState(virtues[0].id);
   const [openPrompt, setOpenPrompt] = useState(0);
   const [openHint, setOpenHint] = useState(null);
+  const promptInputRefs = useRef({});
+
+  useEffect(() => {
+    if (openPrompt < 0) return;
+    const t = setTimeout(() => promptInputRefs.current[openPrompt]?.focus(), 200);
+    return () => clearTimeout(t);
+  }, [openPrompt]);
   const [alreadySaved, setAlreadySaved] = useState(false);
   const [showVirtueDetail, setShowVirtueDetail] = useState(false);
   const [viewMode, setViewMode] = useState('write'); // 'write' | 'history'
@@ -484,6 +491,7 @@ export default function JournalScreen() {
                     {openPrompt === idx && (
                       <View style={s.promptAnswer}>
                         <TextInput
+                          ref={el => { promptInputRefs.current[idx] = el; }}
                           style={s.promptInput}
                           multiline
                           placeholder="Write here. No judgment, only honesty..."
@@ -493,6 +501,15 @@ export default function JournalScreen() {
                           scrollEnabled={false}
                           keyboardAppearance="dark"
                         />
+                        {idx < prompts.length - 1 && (
+                          <TouchableOpacity
+                            style={s.nextPromptBtn}
+                            onPress={() => setOpenPrompt(idx + 1)}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={s.nextPromptText}>Next prompt →</Text>
+                          </TouchableOpacity>
+                        )}
                       </View>
                     )}
                   </TouchableOpacity>
@@ -754,6 +771,8 @@ const s = StyleSheet.create({
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
+  nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
+  nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   promptHeader: { marginBottom: 0 },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },

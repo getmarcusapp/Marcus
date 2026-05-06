@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
@@ -55,6 +55,13 @@ export default function ReviewScreen() {
   const [intention, setIntention] = useState('');
   const [openPrompt, setOpenPrompt] = useState(0);
   const [openHint, setOpenHint] = useState(null);
+  const promptInputRefs = useRef({});
+
+  useEffect(() => {
+    if (openPrompt < 0) return;
+    const t = setTimeout(() => promptInputRefs.current[openPrompt]?.focus(), 200);
+    return () => clearTimeout(t);
+  }, [openPrompt]);
   const [history, setHistory] = useState([]);
   const [filterRange, setFilterRange] = useState('all');
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
@@ -257,6 +264,7 @@ export default function ReviewScreen() {
                 {openPrompt === idx && (
                   <View style={s.promptAnswer}>
                     <TextInput
+                      ref={el => { promptInputRefs.current[idx] = el; }}
                       style={s.promptInput}
                       multiline
                       placeholder="Write here. No judgment, only honesty..."
@@ -266,6 +274,15 @@ export default function ReviewScreen() {
                       scrollEnabled={false}
                       keyboardAppearance="dark"
                     />
+                    {idx < reviewPrompts.length - 1 && (
+                      <TouchableOpacity
+                        style={s.nextPromptBtn}
+                        onPress={() => setOpenPrompt(idx + 1)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={s.nextPromptText}>Next prompt →</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 )}
               </TouchableOpacity>
@@ -411,6 +428,8 @@ const s = StyleSheet.create({
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
+  nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
+  nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
