@@ -344,6 +344,16 @@ export default function PracticeScreen() {
           <Text style={s.quoteAttr}>— {quote.author.toUpperCase()}, {quote.source.toUpperCase()}</Text>
         </View>
 
+        {streak.totalDays === 0 && completed === 0 && !morningComplete && (
+          <View style={s.welcomeCard}>
+            <Text style={s.welcomeEyebrow}>Welcome</Text>
+            <Text style={s.welcomeTitle}>Your practice begins today.</Text>
+            <Text style={s.welcomeText}>
+              Four steps below. Take them as the day allows. There is no streak to defend yet — only the practice.
+            </Text>
+          </View>
+        )}
+
         {morningComplete && (
           <View style={s.morningCompleteCard}>
             <Text style={s.morningCompleteEyebrow}>Morning practice complete</Text>
@@ -676,6 +686,20 @@ const s = StyleSheet.create({
   },
   morningCompleteEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 6 },
   morningCompleteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
+
+  // Day-1 welcome — shows on the very first practice screen view, before
+  // any item is completed and before any full day has been sealed. Hides
+  // the moment any practice element is tapped.
+  welcomeCard: {
+    backgroundColor: colors.accentBg,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.accentDim,
+    padding: spacing.xl,
+    paddingVertical: 22,
+  },
+  welcomeEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
+  welcomeTitle: { fontSize: 20, color: colors.textPrimary, fontFamily: font.serif, marginBottom: 10 },
+  welcomeText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
 
   medCard: {
     borderWidth: 0.5,
