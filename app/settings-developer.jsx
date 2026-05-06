@@ -19,6 +19,28 @@ export default function DeveloperSettingsScreen() {
     Alert.alert('', 'Onboarding reset. Close and reopen the app to see it.');
   }
 
+  function handleWipeAllData() {
+    Alert.alert(
+      'Wipe ALL data?',
+      'Erases every journal entry, emotion log, weekly review, daily reading, compass, streak, and saved preference. Onboarding will run again. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Wipe everything',
+          style: 'destructive',
+          onPress: async () => {
+            await cancelAllNotifications().catch(() => {});
+            await AsyncStorage.clear();
+            Alert.alert(
+              '',
+              'All data wiped. Force-close the app (swipe up in app switcher) and reopen to start as a Day 1 user.'
+            );
+          },
+        },
+      ]
+    );
+  }
+
   async function handleDisableAll() {
     await cancelAllNotifications();
     const raw = await AsyncStorage.getItem(NOTIF_SETTINGS_KEY);
@@ -94,6 +116,14 @@ export default function DeveloperSettingsScreen() {
           <TouchableOpacity style={s.resetBtn} onPress={handleResetOnboarding} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Reset onboarding</Text>
           </TouchableOpacity>
+
+          <Text style={s.secLabel}>Day 1 reset</Text>
+          <TouchableOpacity style={s.dangerBtn} onPress={handleWipeAllData} activeOpacity={0.8}>
+            <Text style={s.dangerBtnText}>Wipe all data</Text>
+          </TouchableOpacity>
+          <Text style={s.helperText}>
+            Clears every journal, emotion log, review, reading, compass, and streak. Onboarding runs again. Use to test the first-run experience.
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -122,4 +152,5 @@ const s = StyleSheet.create({
   dangerBtnText: { fontSize: 14, color: '#cc6666', letterSpacing: 0.5 },
   resetBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 8 },
   resetBtnText: { fontSize: 14, color: colors.textMuted, letterSpacing: 0.5 },
+  helperText: { fontSize: 12, color: colors.textDim, lineHeight: 18, marginTop: 6, marginHorizontal: 4 },
 });
