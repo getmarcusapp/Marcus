@@ -75,7 +75,7 @@ export async function scheduleAllNotifications() {
       await Notifications.scheduleNotificationAsync({
         content: {
           title: "Today's reading is ready",
-          body: 'A moment of wisdom for the day.',
+          body: 'A passage chosen for this day. Read it before the noise begins.',
           sound: false,
         },
         trigger: { type: 'daily', hour: settings.readingHour, minute: settings.readingMinute },
@@ -139,8 +139,8 @@ export async function scheduleAllNotifications() {
   if (settings.reviewEnabled) {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'A week to seal',
-        body: 'Look back. Examine. Begin again.',
+        title: 'Sunday reckoning',
+        body: 'Five questions. The week is yours to close.',
         sound: false,
       },
       trigger: {
@@ -251,7 +251,7 @@ export async function scheduleReengagementNotifications() {
         identifier: REENGAGEMENT_IDS.day7,
         content: {
           title: "It's been a week",
-          body: 'One prompt is enough to start again.',
+          body: 'Begin with one prompt. The rest follows.',
           sound: false,
         },
         trigger: { type: 'timeInterval', seconds: 60 * 60, repeats: false },
