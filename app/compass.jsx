@@ -86,8 +86,8 @@ export default function CompassScreen() {
             resizeMode="cover"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.15)', 'rgba(0,0,0,0.85)', 'rgba(0,0,0,0.95)']}
-            locations={[0, 0.4, 0.78, 1]}
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.7)']}
+            locations={[0, 0.55, 1]}
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
@@ -226,24 +226,10 @@ const s = StyleSheet.create({
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
   backArrow: { fontSize: 24, color: colors.accent },
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
-  eyebrow: {
-    fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent,
-    textTransform: 'uppercase', marginBottom: 8,
-    textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 8,
-  },
-  title: {
-    fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary,
-    letterSpacing: -0.8, marginBottom: 10,
-    textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 8,
-  },
-  heroQuote: {
-    fontSize: 15, color: colors.textPrimary, fontFamily: font.serif, lineHeight: 24, marginBottom: 6,
-    textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 8,
-  },
-  heroAttr: {
-    fontSize: 11, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase',
-    textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 6,
-  },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
+  title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10 },
+  heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24, marginBottom: 6 },
+  heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
   nextRow: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
