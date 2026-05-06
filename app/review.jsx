@@ -214,6 +214,7 @@ export default function ReviewScreen() {
             weekOf={shareEntry.weekOf}
             bestVirtue={shareEntry.bestVirtue}
             intention={shareEntry.intention}
+            stats={shareEntry.stats}
           />
         </View>
       )}

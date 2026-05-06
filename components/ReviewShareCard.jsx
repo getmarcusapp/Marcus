@@ -20,26 +20,34 @@ function virtueLabel(id) {
   return names[id] || id;
 }
 
-export function ReviewShareCard({ weekOf, bestVirtue, intention }) {
+export function ReviewShareCard({ weekOf, bestVirtue, intention, stats }) {
   const best = virtueLabel(bestVirtue);
-  // Truncate intention generously so it always fits the layout.
   const intentionText = (intention || '').trim();
-  const truncated = intentionText.length > 280
-    ? intentionText.slice(0, 277).trimEnd() + '…'
+  const truncated = intentionText.length > 240
+    ? intentionText.slice(0, 237).trimEnd() + '…'
     : intentionText;
+
+  const journaled = stats?.journaled ?? 0;
+  const reframed = stats?.reframed ?? 0;
+  const statBits = [];
+  if (journaled > 0) statBits.push(`${journaled}/7 days journaled`);
+  if (reframed > 0) statBits.push(`${reframed} reframed`);
+  const statsLine = statBits.length ? statBits.join(' · ') : null;
 
   return (
     <View style={s.card}>
       <Image source={SHARE_BG} style={s.bg} resizeMode="cover" />
       <LinearGradient
-        colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0.8)', 'rgba(0,0,0,0.95)']}
+        colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.92)']}
         locations={[0, 0.55, 1]}
         style={StyleSheet.absoluteFillObject}
       />
 
       <View style={s.content}>
         <Text style={s.eyebrow}>Sunday reckoning</Text>
-        <Text style={s.weekTitle}>Week of {weekOf}</Text>
+        <Text style={s.weekTitle}>Week of{'\n'}{weekOf}</Text>
+
+        {statsLine ? <Text style={s.statsLine}>{statsLine}</Text> : null}
 
         {best ? (
           <>
@@ -53,7 +61,7 @@ export function ReviewShareCard({ weekOf, bestVirtue, intention }) {
           <>
             <View style={s.divider} />
             <Text style={s.intentionLabel}>Intention for the week ahead</Text>
-            <Text style={s.intentionText}>{truncated}</Text>
+            <Text style={s.intentionText}>"{truncated}"</Text>
           </>
         ) : null}
       </View>
@@ -80,31 +88,39 @@ const s = StyleSheet.create({
     position: 'absolute',
     left: 80,
     right: 80,
-    top: 220,
-    bottom: 280,
+    top: 200,
+    bottom: 260,
     justifyContent: 'center',
   },
   eyebrow: {
-    fontSize: 28,
+    fontSize: 30,
     letterSpacing: 6,
     color: colors.accent,
     textTransform: 'uppercase',
-    marginBottom: 28,
+    marginBottom: 36,
     fontWeight: '500',
   },
   weekTitle: {
-    fontSize: 64,
+    fontSize: 96,
     color: colors.textPrimary,
     fontFamily: font.serif,
     fontWeight: '300',
-    letterSpacing: -1.5,
-    lineHeight: 76,
+    letterSpacing: -2,
+    lineHeight: 104,
+  },
+  statsLine: {
+    fontSize: 24,
+    color: colors.textMuted,
+    letterSpacing: 1,
+    marginTop: 28,
+    fontFamily: font.serif,
+    fontStyle: 'italic',
   },
   divider: {
-    width: 80,
+    width: 100,
     height: 1.5,
     backgroundColor: colors.accentDim,
-    marginVertical: 40,
+    marginVertical: 44,
   },
   virtueLabel: {
     fontSize: 22,
@@ -115,7 +131,7 @@ const s = StyleSheet.create({
     fontWeight: '500',
   },
   virtueName: {
-    fontSize: 56,
+    fontSize: 64,
     color: colors.textPrimary,
     fontFamily: font.serif,
     fontWeight: '300',
@@ -130,10 +146,10 @@ const s = StyleSheet.create({
     fontWeight: '500',
   },
   intentionText: {
-    fontSize: 38,
+    fontSize: 36,
     color: colors.textSecondary,
     fontFamily: font.serif,
-    lineHeight: 56,
+    lineHeight: 52,
     fontStyle: 'italic',
   },
 
