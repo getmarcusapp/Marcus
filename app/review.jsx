@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image,
+  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image, Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -10,6 +10,8 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveReview, getReviews, getJournals, getTriggers } from '../store/db';
 import * as haptics from '../lib/haptics';
+import { captureRef } from 'react-native-view-shot';
+import { ReviewShareCard } from '../components/ReviewShareCard';
 
 const EMOTION_LABELS = {
   anger: 'Anger', anxiety: 'Anxiety', frustration: 'Frustration',
@@ -72,6 +74,8 @@ export default function ReviewScreen() {
   const [history, setHistory] = useState([]);
   const [filterRange, setFilterRange] = useState('all');
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
+  const shareCardRef = useRef(null);
+  const [shareEntry, setShareEntry] = useState(null);
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
   const [distortionBreakdown, setDistortionBreakdown] = useState([]);
   const [virtueFocusCounts, setVirtueFocusCounts] = useState({});
@@ -151,7 +155,41 @@ export default function ReviewScreen() {
     haptics.success();
     const updated = await getReviews();
     setHistory(updated);
-    Alert.alert('', 'Week sealed.', [{ text: 'Done', onPress: () => setTab('history') }]);
+    Alert.alert('Week sealed.', 'Saved to your review archive.', [
+      { text: 'Share', onPress: () => shareReviewEntry(entry) },
+      { text: 'Done', onPress: () => setTab('history') },
+    ]);
+  }
+
+  async function shareReviewEntry(entry) {
+    haptics.tap();
+    setShareEntry(entry);
+    // Let the off-screen card render with the new entry data before capture.
+    await new Promise(r => setTimeout(r, 80));
+    const intentionText = (entry?.intention || '').trim();
+    const message = [
+      intentionText ? `Intention for the week ahead:\n\n${intentionText}` : null,
+      intentionText ? '' : null,
+      '— Marcus · a daily Stoic practice',
+    ].filter(v => v !== null).join('\n');
+    try {
+      const uri = await captureRef(shareCardRef, {
+        format: 'jpg',
+        quality: 0.92,
+        result: 'tmpfile',
+      });
+      await Share.share({ url: uri, message });
+    } catch (e) {
+      console.log('Review share image failed, falling back:', e?.message);
+      const fallback = [
+        `Week of ${entry?.weekOf || ''}`,
+        '',
+        intentionText ? `Intention for the week ahead:\n${intentionText}` : null,
+        intentionText ? '' : null,
+        '— Marcus · a daily Stoic practice',
+      ].filter(Boolean).join('\n');
+      try { await Share.share({ message: fallback }); } catch {}
+    }
   }
 
   const filteredHistory = history.filter(e => {
@@ -165,6 +203,20 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      {/* Off-screen share card. Re-renders when shareEntry changes. */}
+      {shareEntry && (
+        <View
+          ref={shareCardRef}
+          collapsable={false}
+          style={s.shareCardOffscreen}
+        >
+          <ReviewShareCard
+            weekOf={shareEntry.weekOf}
+            bestVirtue={shareEntry.bestVirtue}
+            intention={shareEntry.intention}
+          />
+        </View>
+      )}
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: colors.bg }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -442,6 +494,13 @@ export default function ReviewScreen() {
                   {entry.answers?.wentWell && (
                     <Text style={s.histPreview}>"{entry.answers.wentWell.slice(0, 140)}..."</Text>
                   )}
+                  <TouchableOpacity
+                    style={s.histShareBtn}
+                    onPress={() => shareReviewEntry(entry)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={s.histShareText}>Share →</Text>
+                  </TouchableOpacity>
                 </View>
               ))
             )}
@@ -494,6 +553,7 @@ export default function ReviewScreen() {
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
+  shareCardOffscreen: { position: 'absolute', left: -99999, top: 0 },
   scroll: { flex: 1 },
   hero: {
     backgroundColor: colors.bgDeep,
@@ -595,6 +655,13 @@ const s = StyleSheet.create({
   histBest: { fontSize: 14, color: colors.virtueGood, marginBottom: 4 },
   histWorst: { fontSize: 14, color: colors.virtueBad, marginBottom: 4 },
   histPreview: { fontSize: 14, color: colors.textDim, lineHeight: 22, marginTop: 6 },
+  histShareBtn: {
+    alignSelf: 'flex-start',
+    marginTop: 14,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: 6,
+    paddingHorizontal: 12, paddingVertical: 6,
+  },
+  histShareText: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   // Archive filters
   empty: { padding: 40, paddingTop: 56, alignItems: 'center', backgroundColor: colors.bgCard },
   emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
