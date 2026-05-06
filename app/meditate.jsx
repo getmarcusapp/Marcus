@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, ScrollView,
   StyleSheet, SafeAreaView, ActivityIndicator,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -66,6 +66,7 @@ function formatTime(ms) {
 
 export default function MeditateScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const soundRef = useRef(null);
   const [selected, setSelected] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -83,6 +84,14 @@ export default function MeditateScreen() {
       if (soundRef.current) soundRef.current.unloadAsync();
     };
   }, []);
+
+  // Auto-select a meditation when arriving with ?id=... (deep-linked from
+  // practice card or journal screens).
+  useEffect(() => {
+    if (!params?.id) return;
+    const med = MEDITATIONS.find(m => m.id === params.id);
+    if (med) selectMeditation(med);
+  }, [params?.id]);
 
   async function selectMeditation(med) {
     if (soundRef.current) {

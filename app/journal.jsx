@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
@@ -464,6 +465,28 @@ export default function JournalScreen() {
                   </View>
                 )}
 
+                {!alreadySaved && (
+                  <TouchableOpacity
+                    style={s.listenCard}
+                    onPress={() => router.push({ pathname: '/meditate', params: { id: isMorning ? 'premeditatio' : 'evening-examination' } })}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="play-circle" size={32} color={colors.accent} />
+                    <View style={s.listenContent}>
+                      <Text style={s.listenEyebrow}>Listen first · 5 min</Text>
+                      <Text style={s.listenTitle}>
+                        {isMorning ? 'Premeditatio Malorum' : 'The Evening Examination'}
+                      </Text>
+                      <Text style={s.listenDesc}>
+                        {isMorning
+                          ? 'A meditation that primes the practice below.'
+                          : 'A meditation that primes the reflection below.'}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.textDim} />
+                  </TouchableOpacity>
+                )}
+
                 {prompts.map((prompt, idx) => (
                   <TouchableOpacity
                     key={idx}
@@ -788,6 +811,15 @@ const s = StyleSheet.create({
   virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
   virtueDetailDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
+  listenCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg,
+    padding: 16, marginBottom: 14, backgroundColor: colors.accentBg,
+  },
+  listenContent: { flex: 1 },
+  listenEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+  listenTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, marginBottom: 2 },
+  listenDesc: { fontSize: 12, color: colors.textMuted, lineHeight: 18 },
   promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
   promptCardOpen: { borderColor: colors.borderMid },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },

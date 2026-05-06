@@ -42,6 +42,35 @@ const virtueDetails = {
   justice: { definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
 };
 
+// Pick a meditation contextual to the time of day:
+// morning -> Premeditatio Malorum (look ahead), midday -> View From Above
+// (perspective), evening -> Evening Examination (account for the day).
+function pickContextualMeditation() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) {
+    return {
+      id: 'premeditatio',
+      subtitle: 'Preparation',
+      title: 'Premeditatio Malorum',
+      desc: 'Look at what might go wrong before the day begins so it cannot surprise you.',
+    };
+  }
+  if (hour >= 18 || hour < 5) {
+    return {
+      id: 'evening-examination',
+      subtitle: 'Accounting',
+      title: 'The Evening Examination',
+      desc: 'Ask three honest questions and put the day down.',
+    };
+  }
+  return {
+    id: 'view-from-above',
+    subtitle: 'Perspective',
+    title: 'The View From Above',
+    desc: 'Rise above your circumstances to see them at their actual scale.',
+  };
+}
+
 export default function PracticeScreen() {
   const router = useRouter();
   const [morningDone, setMorningDone] = useState(false);
@@ -385,6 +414,31 @@ export default function PracticeScreen() {
             <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
           </TouchableOpacity>
 
+          {(() => {
+            const med = pickContextualMeditation();
+            return (
+              <>
+                <TouchableOpacity
+                  style={s.medCard}
+                  onPress={() => router.push({ pathname: '/meditate', params: { id: med.id } })}
+                  activeOpacity={0.8}
+                >
+                  <View style={s.medTopRow}>
+                    <Text style={s.medEyebrow}>Today's meditation</Text>
+                    <Ionicons name="play-circle" size={32} color={colors.accent} />
+                  </View>
+                  <Text style={s.medSubtitle}>{med.subtitle}</Text>
+                  <Text style={s.medTitle}>{med.title}</Text>
+                  <Text style={s.medDesc}>{med.desc}</Text>
+                  <Text style={s.medMeta}>5 min · guided</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
+                  <Text style={s.medAllText}>All meditations →</Text>
+                </TouchableOpacity>
+              </>
+            );
+          })()}
+
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -523,4 +577,22 @@ const s = StyleSheet.create({
   },
   morningCompleteEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 6 },
   morningCompleteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
+
+  medCard: {
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: 22,
+    marginTop: -16,
+    marginBottom: 12,
+    backgroundColor: colors.bgCard,
+  },
+  medTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
+  medEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
+  medSubtitle: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 6 },
+  medTitle: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
+  medDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 14 },
+  medMeta: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
+  medAllBtn: { alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 12, marginBottom: 20 },
+  medAllText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });
