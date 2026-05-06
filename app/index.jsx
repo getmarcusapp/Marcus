@@ -255,34 +255,44 @@ export default function PracticeScreen() {
             <TouchableOpacity
               style={s.medCard}
               onPress={toggleMedPlay}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
               disabled={medIsLoading}
             >
-              <View style={s.medTopRow}>
-                <Text style={s.medEyebrow}>Today's meditation</Text>
-                {medIsLoading ? (
-                  <ActivityIndicator color={colors.accent} />
+              <View style={s.medImageWrap}>
+                <Image source={todayMed.image} style={s.medImage} resizeMode="cover" />
+                <LinearGradient
+                  colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
+                  locations={[0, 0.55, 1]}
+                  style={s.medImageOverlay}
+                />
+                <View style={s.medImageBottom}>
+                  <Text style={s.medEyebrow}>Today's meditation</Text>
+                  {medIsLoading ? (
+                    <ActivityIndicator color={colors.accent} />
+                  ) : (
+                    <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={44} color={colors.accent} />
+                  )}
+                </View>
+              </View>
+              <View style={s.medBody}>
+                <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
+                <Text style={s.medTitle}>{todayMed.title}</Text>
+                <Text style={s.medDesc}>{todayMed.description}</Text>
+                {medHasLoaded ? (
+                  <>
+                    <View style={s.medProgressBar}>
+                      <View style={[s.medProgressFill, { flex: medProgress }]} />
+                      <View style={{ flex: Math.max(0, 1 - medProgress) }} />
+                    </View>
+                    <View style={s.medTimeRow}>
+                      <Text style={s.medTimeText}>{formatMedTime(medPosition)}</Text>
+                      <Text style={s.medTimeText}>{formatMedTime(medDuration)}</Text>
+                    </View>
+                  </>
                 ) : (
-                  <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={36} color={colors.accent} />
+                  <Text style={s.medMeta}>5 min · guided</Text>
                 )}
               </View>
-              <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
-              <Text style={s.medTitle}>{todayMed.title}</Text>
-              <Text style={s.medDesc}>{todayMed.desc}</Text>
-              {medHasLoaded ? (
-                <>
-                  <View style={s.medProgressBar}>
-                    <View style={[s.medProgressFill, { flex: medProgress }]} />
-                    <View style={{ flex: Math.max(0, 1 - medProgress) }} />
-                  </View>
-                  <View style={s.medTimeRow}>
-                    <Text style={s.medTimeText}>{formatMedTime(medPosition)}</Text>
-                    <Text style={s.medTimeText}>{formatMedTime(medDuration)}</Text>
-                  </View>
-                </>
-              ) : (
-                <Text style={s.medMeta}>5 min · guided</Text>
-              )}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
               <Text style={s.medAllText}>All meditations →</Text>
@@ -452,34 +462,44 @@ export default function PracticeScreen() {
           <TouchableOpacity
             style={s.medCard}
             onPress={toggleMedPlay}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
             disabled={medIsLoading}
           >
-            <View style={s.medTopRow}>
-              <Text style={s.medEyebrow}>Today's meditation</Text>
-              {medIsLoading ? (
-                <ActivityIndicator color={colors.accent} />
+            <View style={s.medImageWrap}>
+              <Image source={todayMed.image} style={s.medImage} resizeMode="cover" />
+              <LinearGradient
+                colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
+                locations={[0, 0.55, 1]}
+                style={s.medImageOverlay}
+              />
+              <View style={s.medImageBottom}>
+                <Text style={s.medEyebrow}>Today's meditation</Text>
+                {medIsLoading ? (
+                  <ActivityIndicator color={colors.accent} />
+                ) : (
+                  <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={44} color={colors.accent} />
+                )}
+              </View>
+            </View>
+            <View style={s.medBody}>
+              <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
+              <Text style={s.medTitle}>{todayMed.title}</Text>
+              <Text style={s.medDesc}>{todayMed.description}</Text>
+              {medHasLoaded ? (
+                <>
+                  <View style={s.medProgressBar}>
+                    <View style={[s.medProgressFill, { flex: medProgress }]} />
+                    <View style={{ flex: Math.max(0, 1 - medProgress) }} />
+                  </View>
+                  <View style={s.medTimeRow}>
+                    <Text style={s.medTimeText}>{formatMedTime(medPosition)}</Text>
+                    <Text style={s.medTimeText}>{formatMedTime(medDuration)}</Text>
+                  </View>
+                </>
               ) : (
-                <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={36} color={colors.accent} />
+                <Text style={s.medMeta}>5 min · guided</Text>
               )}
             </View>
-            <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
-            <Text style={s.medTitle}>{todayMed.title}</Text>
-            <Text style={s.medDesc}>{todayMed.desc}</Text>
-            {medHasLoaded ? (
-              <>
-                <View style={s.medProgressBar}>
-                  <View style={[s.medProgressFill, { flex: medProgress }]} />
-                  <View style={{ flex: Math.max(0, 1 - medProgress) }} />
-                </View>
-                <View style={s.medTimeRow}>
-                  <Text style={s.medTimeText}>{formatMedTime(medPosition)}</Text>
-                  <Text style={s.medTimeText}>{formatMedTime(medDuration)}</Text>
-                </View>
-              </>
-            ) : (
-              <Text style={s.medMeta}>5 min · guided</Text>
-            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
             <Text style={s.medAllText}>All meditations →</Text>
@@ -628,11 +648,29 @@ const s = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: colors.border,
     borderRadius: radius.lg,
-    padding: 22,
     marginTop: -16,
     marginBottom: 12,
     backgroundColor: colors.bgCard,
+    overflow: 'hidden',
   },
+  medImageWrap: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#000',
+    position: 'relative',
+  },
+  medImage: { width: '100%', height: '100%' },
+  medImageOverlay: { ...StyleSheet.absoluteFillObject },
+  medImageBottom: {
+    position: 'absolute',
+    left: 18,
+    right: 14,
+    bottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  medBody: { padding: 22, paddingTop: 18 },
   medTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
   medEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
   medSubtitle: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 6 },

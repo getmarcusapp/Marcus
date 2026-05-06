@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
   KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard,
-  ActivityIndicator,
+  ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -481,18 +481,23 @@ export default function JournalScreen() {
                     <TouchableOpacity
                       style={s.listenCard}
                       onPress={() => { haptics.tap(); toggleMeditation(journalMed); }}
-                      activeOpacity={0.8}
+                      activeOpacity={0.85}
                       disabled={jIsLoading}
                     >
-                      {jIsLoading ? (
-                        <ActivityIndicator color={colors.accent} />
-                      ) : (
-                        <Ionicons
-                          name={jIsPlaying ? 'pause-circle' : 'play-circle'}
-                          size={36}
-                          color={colors.accent}
-                        />
-                      )}
+                      <View style={s.listenThumb}>
+                        <Image source={journalMed.image} style={s.listenThumbImg} resizeMode="cover" />
+                        <View style={s.listenThumbOverlay}>
+                          {jIsLoading ? (
+                            <ActivityIndicator color={colors.accent} size="small" />
+                          ) : (
+                            <Ionicons
+                              name={jIsPlaying ? 'pause-circle' : 'play-circle'}
+                              size={32}
+                              color={colors.accent}
+                            />
+                          )}
+                        </View>
+                      </View>
                       <View style={s.listenContent}>
                         <Text style={s.listenEyebrow}>Listen first · 5 min</Text>
                         <Text style={s.listenTitle}>{journalMed.title}</Text>
@@ -846,7 +851,18 @@ const s = StyleSheet.create({
   listenCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg,
-    padding: 16, marginBottom: 14, backgroundColor: colors.accentBg,
+    padding: 12, paddingRight: 16, marginBottom: 14, backgroundColor: colors.accentBg,
+  },
+  listenThumb: {
+    width: 64, height: 64, borderRadius: radius.md,
+    overflow: 'hidden', backgroundColor: '#000',
+    position: 'relative',
+  },
+  listenThumbImg: { width: '100%', height: '100%' },
+  listenThumbOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
   },
   listenContent: { flex: 1 },
   listenEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },

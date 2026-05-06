@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
-  StyleSheet, SafeAreaView, ActivityIndicator,
+  StyleSheet, SafeAreaView, ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import {
@@ -66,43 +67,54 @@ export default function MeditateScreen() {
         {/* Player */}
         {selected && (
           <View style={s.player}>
-            <Text style={s.playerSubtitle}>{selected.subtitle}</Text>
-            <Text style={s.playerTitle}>{selected.title}</Text>
-            <Text style={s.playerDesc}>{selected.description}</Text>
-
-            {/* Progress bar */}
-            <View style={s.progressBar}>
-              <View style={[s.progressFill, { flex: progress }]} />
-              <View style={{ flex: 1 - progress }} />
+            <View style={s.playerHero}>
+              <Image source={selected.image} style={s.playerHeroImg} resizeMode="cover" />
+              <LinearGradient
+                colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
+                locations={[0, 0.55, 1]}
+                style={StyleSheet.absoluteFillObject}
+              />
+              <View style={s.playerHeroText}>
+                <Text style={s.playerSubtitle}>{selected.subtitle}</Text>
+                <Text style={s.playerTitle}>{selected.title}</Text>
+              </View>
             </View>
-            <View style={s.timeRow}>
-              <Text style={s.timeText}>{formatTime(position)}</Text>
-              <Text style={s.timeText}>{formatTime(duration)}</Text>
-            </View>
 
-            {/* Controls */}
-            <View style={s.controls}>
-              <TouchableOpacity style={s.skipBtn} onPress={() => seek(-1)}>
-                <Ionicons name="play-back" size={22} color={colors.textMuted} />
-                <Text style={s.skipLabel}>15s</Text>
-              </TouchableOpacity>
+            <View style={s.playerBody}>
+              <Text style={s.playerDesc}>{selected.description}</Text>
 
-              <TouchableOpacity style={s.playBtn} onPress={togglePlay}>
-                {isLoading ? (
-                  <ActivityIndicator color={colors.bg} />
-                ) : (
-                  <Ionicons
-                    name={isPlaying ? 'pause' : 'play'}
-                    size={28}
-                    color={colors.bg}
-                  />
-                )}
-              </TouchableOpacity>
+              <View style={s.progressBar}>
+                <View style={[s.progressFill, { flex: progress }]} />
+                <View style={{ flex: 1 - progress }} />
+              </View>
+              <View style={s.timeRow}>
+                <Text style={s.timeText}>{formatTime(position)}</Text>
+                <Text style={s.timeText}>{formatTime(duration)}</Text>
+              </View>
 
-              <TouchableOpacity style={s.skipBtn} onPress={() => seek(1)}>
-                <Ionicons name="play-forward" size={22} color={colors.textMuted} />
-                <Text style={s.skipLabel}>15s</Text>
-              </TouchableOpacity>
+              <View style={s.controls}>
+                <TouchableOpacity style={s.skipBtn} onPress={() => seek(-1)}>
+                  <Ionicons name="play-back" size={22} color={colors.textMuted} />
+                  <Text style={s.skipLabel}>15s</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={s.playBtn} onPress={togglePlay}>
+                  {isLoading ? (
+                    <ActivityIndicator color={colors.bg} />
+                  ) : (
+                    <Ionicons
+                      name={isPlaying ? 'pause' : 'play'}
+                      size={28}
+                      color={colors.bg}
+                    />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity style={s.skipBtn} onPress={() => seek(1)}>
+                  <Ionicons name="play-forward" size={22} color={colors.textMuted} />
+                  <Text style={s.skipLabel}>15s</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         )}
@@ -110,30 +122,36 @@ export default function MeditateScreen() {
         {/* Meditation list */}
         <View style={s.list}>
           <Text style={s.sectionLabel}>All meditations</Text>
-          {MEDITATIONS_LIST.map(med => (
-            <TouchableOpacity
-              key={med.id}
-              style={[s.medCard, selected?.id === med.id && s.medCardActive]}
-              onPress={() => selectMeditation(med)}
-              activeOpacity={0.7}
-            >
-              <View style={s.medLeft}>
-                <View style={s.medIconWrap}>
-                  <Ionicons
-                    name={selected?.id === med.id && isPlaying ? 'pause-circle' : 'play-circle'}
-                    size={36}
-                    color={selected?.id === med.id ? colors.accent : colors.textDim}
-                  />
+          {MEDITATIONS_LIST.map(med => {
+            const isActive = selected?.id === med.id;
+            return (
+              <TouchableOpacity
+                key={med.id}
+                style={[s.medCard, isActive && s.medCardActive]}
+                onPress={() => selectMeditation(med)}
+                activeOpacity={0.7}
+              >
+                <View style={s.medLeft}>
+                  <View style={s.medThumb}>
+                    <Image source={med.image} style={s.medThumbImg} resizeMode="cover" />
+                    <View style={s.medThumbOverlay}>
+                      <Ionicons
+                        name={isActive && isPlaying ? 'pause-circle' : 'play-circle'}
+                        size={30}
+                        color={isActive ? colors.accent : '#fff'}
+                      />
+                    </View>
+                  </View>
+                  <View style={s.medText}>
+                    <Text style={[s.medTitle, isActive && s.medTitleActive]}>
+                      {med.title}
+                    </Text>
+                    <Text style={s.medMeta}>{med.subtitle} · {med.time} · {med.duration}</Text>
+                  </View>
                 </View>
-                <View style={s.medText}>
-                  <Text style={[s.medTitle, selected?.id === med.id && s.medTitleActive]}>
-                    {med.title}
-                  </Text>
-                  <Text style={s.medMeta}>{med.subtitle} · {med.time} · {med.duration}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <View style={{ height: 40 }} />
@@ -159,11 +177,15 @@ const s = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 0.5,
     borderColor: colors.border,
-    padding: spacing.lg,
     marginBottom: spacing.lg,
+    overflow: 'hidden',
   },
+  playerHero: { width: '100%', height: 220, backgroundColor: '#000' },
+  playerHeroImg: { width: '100%', height: '100%' },
+  playerHeroText: { position: 'absolute', left: spacing.lg, right: spacing.lg, bottom: 14 },
+  playerBody: { padding: spacing.lg },
   playerSubtitle: { fontSize: font.labelSize, color: colors.accent, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 },
-  playerTitle: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
+  playerTitle: { fontSize: 22, fontWeight: '600', color: colors.textPrimary },
   playerDesc: { fontSize: 14, color: colors.textMuted, lineHeight: 20, marginBottom: spacing.lg },
 
   progressBar: {
@@ -197,13 +219,23 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
   medCardActive: {},
   medLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, flex: 1 },
-  medIconWrap: {},
+  medThumb: {
+    width: 64, height: 64, borderRadius: radius.md,
+    overflow: 'hidden', backgroundColor: '#000',
+    position: 'relative',
+  },
+  medThumbImg: { width: '100%', height: '100%' },
+  medThumbOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
   medText: { flex: 1 },
   medTitle: { fontSize: 15, fontWeight: '500', color: colors.textSecondary, marginBottom: 3 },
   medTitleActive: { color: colors.textPrimary },
