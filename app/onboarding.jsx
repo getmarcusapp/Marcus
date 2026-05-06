@@ -12,12 +12,14 @@ import { saveCompass, setHasOnboarded } from '../store/db';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
 
 const DEFAULT_NOTIF_SETTINGS = {
-  morningEnabled: true,
-  morningHour: 7,
-  morningMinute: 0,
+  // Compass orients the day, so it fires before the Morning Journal acts
+  // on that orientation.
   compassEnabled: true,
   compassHour: 7,
-  compassMinute: 30,
+  compassMinute: 0,
+  morningEnabled: true,
+  morningHour: 7,
+  morningMinute: 30,
   middayEnabled: false,
   middayHour: 12,
   middayMinute: 0,
@@ -419,8 +421,8 @@ function RemindersStep({ onNext }) {
           <Text style={s.practiceHeading}>Out of the box</Text>
           <View style={s.reminderList}>
             {[
-              { time: '7:00 AM', name: 'Morning Journal' },
-              { time: '7:30 AM', name: 'Stoic Compass' },
+              { time: '7:00 AM', name: 'Stoic Compass' },
+              { time: '7:30 AM', name: 'Morning Journal' },
               { time: '8:00 PM', name: 'Evening Journal' },
               { time: 'Sun 9:00 AM', name: 'Weekly Review' },
             ].map((r, i, arr) => (

@@ -11,12 +11,13 @@ import { requestNotificationPermissions, scheduleAllNotifications } from '../not
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
 const DEFAULT_SETTINGS = {
-  morningEnabled: true,
-  morningHour: 7,
-  morningMinute: 0,
+  // Compass orients the day; Morning Journal acts on that orientation.
   compassEnabled: true,
   compassHour: 7,
-  compassMinute: 30,
+  compassMinute: 0,
+  morningEnabled: true,
+  morningHour: 7,
+  morningMinute: 30,
   middayEnabled: false,
   middayHour: 12,
   middayMinute: 0,
@@ -119,37 +120,6 @@ export default function NotificationsSettingsScreen() {
         )}
 
         <View style={s.body}>
-          <Text style={s.secLabel}>Morning Journal</Text>
-          <View style={s.card}>
-            <View style={s.rowBetween}>
-              <View>
-                <Text style={s.rowTitle}>Morning reminder</Text>
-                <Text style={s.rowSub}>Daily · before the world begins</Text>
-              </View>
-              <Switch
-                value={settings.morningEnabled}
-                onValueChange={v => update('morningEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.morningEnabled ? colors.textPrimary : colors.textDim}
-              />
-            </View>
-            {settings.morningEnabled && (
-              <View style={s.timeSection}>
-                <Text style={s.timeLabel}>Remind me at</Text>
-                <TimeAdjuster
-                  hour={settings.morningHour}
-                  minute={settings.morningMinute}
-                  onHourChange={v => update('morningHour', v)}
-                  onMinuteChange={v => update('morningMinute', v)}
-                />
-                <Text style={s.timePreview}>{formatTime(settings.morningHour, settings.morningMinute)}</Text>
-                <View style={s.sampleMsg}>
-                  <Text style={s.sampleText}>"The hourglass turns. Your morning practice awaits."</Text>
-                </View>
-              </View>
-            )}
-          </View>
-
           <Text style={s.secLabel}>Compass</Text>
           <View style={s.card}>
             <View style={s.rowBetween}>
@@ -176,6 +146,37 @@ export default function NotificationsSettingsScreen() {
                 <Text style={s.timePreview}>{formatTime(settings.compassHour, settings.compassMinute)}</Text>
                 <View style={s.sampleMsg}>
                   <Text style={s.sampleText}>"Before you begin, read your compass. Remember who you are trying to be."</Text>
+                </View>
+              </View>
+            )}
+          </View>
+
+          <Text style={s.secLabel}>Morning Journal</Text>
+          <View style={s.card}>
+            <View style={s.rowBetween}>
+              <View>
+                <Text style={s.rowTitle}>Morning reminder</Text>
+                <Text style={s.rowSub}>Daily · after the compass orients the day</Text>
+              </View>
+              <Switch
+                value={settings.morningEnabled}
+                onValueChange={v => update('morningEnabled', v)}
+                trackColor={{ false: colors.border, true: colors.borderStrong }}
+                thumbColor={settings.morningEnabled ? colors.textPrimary : colors.textDim}
+              />
+            </View>
+            {settings.morningEnabled && (
+              <View style={s.timeSection}>
+                <Text style={s.timeLabel}>Remind me at</Text>
+                <TimeAdjuster
+                  hour={settings.morningHour}
+                  minute={settings.morningMinute}
+                  onHourChange={v => update('morningHour', v)}
+                  onMinuteChange={v => update('morningMinute', v)}
+                />
+                <Text style={s.timePreview}>{formatTime(settings.morningHour, settings.morningMinute)}</Text>
+                <View style={s.sampleMsg}>
+                  <Text style={s.sampleText}>"The hourglass turns. Your morning practice awaits."</Text>
                 </View>
               </View>
             )}
