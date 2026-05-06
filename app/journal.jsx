@@ -3,10 +3,12 @@ import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
   KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { colors, radius, spacing, font } from '../constants/theme';
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
@@ -215,6 +217,7 @@ export default function JournalScreen() {
   const [sessionType, setSessionType] = useState(defaultType);
   const isMorning = sessionType !== 'evening';
   const commitMindfulSession = useMindfulSession();
+  const journalMedPlayer = useMeditationPlayer();
 
   // Sync sessionType when navigating here explicitly from practice with a type param
   useEffect(() => {
@@ -465,27 +468,56 @@ export default function JournalScreen() {
                   </View>
                 )}
 
-                {!alreadySaved && (
-                  <TouchableOpacity
-                    style={s.listenCard}
-                    onPress={() => router.push({ pathname: '/meditate', params: { id: isMorning ? 'premeditatio' : 'evening-examination' } })}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="play-circle" size={32} color={colors.accent} />
-                    <View style={s.listenContent}>
-                      <Text style={s.listenEyebrow}>Listen first · 5 min</Text>
-                      <Text style={s.listenTitle}>
-                        {isMorning ? 'Premeditatio Malorum' : 'The Evening Examination'}
-                      </Text>
-                      <Text style={s.listenDesc}>
-                        {isMorning
-                          ? 'A meditation that primes the practice below.'
-                          : 'A meditation that primes the reflection below.'}
-                      </Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={16} color={colors.textDim} />
-                  </TouchableOpacity>
-                )}
+                {(() => {
+                  const journalMed = MEDITATIONS[isMorning ? 'premeditatio' : 'evening-examination'];
+                  const isCurrent = journalMedPlayer.currentMedId === journalMed.id;
+                  const jIsPlaying = isCurrent && journalMedPlayer.isPlaying;
+                  const jIsLoading = isCurrent && journalMedPlayer.isLoading;
+                  const jPosition = isCurrent ? journalMedPlayer.position : 0;
+                  const jDuration = isCurrent ? journalMedPlayer.duration : 0;
+                  const jProgress = jDuration > 0 ? jPosition / jDuration : 0;
+                  const jLoaded = jDuration > 0;
+                  return (
+                    <TouchableOpacity
+                      style={s.listenCard}
+                      onPress={() => { haptics.tap(); toggleMeditation(journalMed); }}
+                      activeOpacity={0.8}
+                      disabled={jIsLoading}
+                    >
+                      {jIsLoading ? (
+                        <ActivityIndicator color={colors.accent} />
+                      ) : (
+                        <Ionicons
+                          name={jIsPlaying ? 'pause-circle' : 'play-circle'}
+                          size={36}
+                          color={colors.accent}
+                        />
+                      )}
+                      <View style={s.listenContent}>
+                        <Text style={s.listenEyebrow}>Listen first · 5 min</Text>
+                        <Text style={s.listenTitle}>{journalMed.title}</Text>
+                        {jLoaded ? (
+                          <>
+                            <View style={s.listenProgressBar}>
+                              <View style={[s.listenProgressFill, { flex: jProgress }]} />
+                              <View style={{ flex: Math.max(0, 1 - jProgress) }} />
+                            </View>
+                            <View style={s.listenTimeRow}>
+                              <Text style={s.listenTimeText}>{formatMedTime(jPosition)}</Text>
+                              <Text style={s.listenTimeText}>{formatMedTime(jDuration)}</Text>
+                            </View>
+                          </>
+                        ) : (
+                          <Text style={s.listenDesc}>
+                            {isMorning
+                              ? 'A meditation that primes the practice below.'
+                              : 'A meditation that primes the reflection below.'}
+                          </Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })()}
 
                 {prompts.map((prompt, idx) => (
                   <TouchableOpacity
@@ -818,8 +850,15 @@ const s = StyleSheet.create({
   },
   listenContent: { flex: 1 },
   listenEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
-  listenTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, marginBottom: 2 },
+  listenTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 },
   listenDesc: { fontSize: 12, color: colors.textMuted, lineHeight: 18 },
+  listenProgressBar: {
+    height: 2, backgroundColor: colors.border, borderRadius: 1,
+    flexDirection: 'row', overflow: 'hidden', marginTop: 4, marginBottom: 6,
+  },
+  listenProgressFill: { backgroundColor: colors.accent, borderRadius: 1 },
+  listenTimeRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  listenTimeText: { fontSize: 10, color: colors.textDim, letterSpacing: 0.3 },
   promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
   promptCardOpen: { borderColor: colors.borderMid },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },

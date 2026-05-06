@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image, Animated, ActivityIndicator,
 } from 'react-native';
-import { Audio } from 'expo-av';
+import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -43,49 +43,14 @@ const virtueDetails = {
   justice: { definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
 };
 
-const MED_FILES = {
-  'premeditatio': require('../assets/meditations/premeditatio-malorum.mp3'),
-  'view-from-above': require('../assets/meditations/view-from-above.mp3'),
-  'evening-examination': require('../assets/meditations/evening-examination.mp3'),
-  'negative-visualization': require('../assets/meditations/negative-visualization.mp3'),
-  'present-moment': require('../assets/meditations/present-moment.mp3'),
-};
-
-function formatMedTime(ms) {
-  if (!ms) return '0:00';
-  const total = Math.floor(ms / 1000);
-  const m = Math.floor(total / 60);
-  const sec = total % 60;
-  return `${m}:${sec.toString().padStart(2, '0')}`;
-}
-
 // Pick a meditation contextual to the time of day:
 // morning -> Premeditatio Malorum (look ahead), midday -> View From Above
 // (perspective), evening -> Evening Examination (account for the day).
 function pickContextualMeditation() {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) {
-    return {
-      id: 'premeditatio',
-      subtitle: 'Preparation',
-      title: 'Premeditatio Malorum',
-      desc: 'Look at what might go wrong before the day begins so it cannot surprise you.',
-    };
-  }
-  if (hour >= 18 || hour < 5) {
-    return {
-      id: 'evening-examination',
-      subtitle: 'Accounting',
-      title: 'The Evening Examination',
-      desc: 'Ask three honest questions and put the day down.',
-    };
-  }
-  return {
-    id: 'view-from-above',
-    subtitle: 'Perspective',
-    title: 'The View From Above',
-    desc: 'Rise above your circumstances to see them at their actual scale.',
-  };
+  if (hour >= 5 && hour < 12) return MEDITATIONS['premeditatio'];
+  if (hour >= 18 || hour < 5) return MEDITATIONS['evening-examination'];
+  return MEDITATIONS['view-from-above'];
 }
 
 export default function PracticeScreen() {
@@ -104,74 +69,22 @@ export default function PracticeScreen() {
   const [eyebrowPhase, setEyebrowPhase] = useState(hasShownGreetingThisSession ? 'memento' : 'greeting');
   const eyebrowOpacity = useRef(new Animated.Value(1)).current;
 
-  // Inline meditation player on the practice card.
+  // Inline meditation player — backed by a module-level singleton in
+  // lib/meditationPlayer.js so audio survives navigation between tabs.
   const todayMed = pickContextualMeditation();
-  const medSoundRef = useRef(null);
-  const [medIsPlaying, setMedIsPlaying] = useState(false);
-  const [medIsLoading, setMedIsLoading] = useState(false);
-  const [medPosition, setMedPosition] = useState(0);
-  const [medDuration, setMedDuration] = useState(0);
-
-  useEffect(() => {
-    Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: true,
-    });
-    return () => {
-      if (medSoundRef.current) medSoundRef.current.unloadAsync();
-    };
-  }, []);
-
-  // Pause on screen blur so leaving the practice tab doesn't leave audio
-  // playing in the background. Position is preserved — tap again to resume.
-  useFocusEffect(useCallback(() => {
-    return () => {
-      if (medSoundRef.current) {
-        medSoundRef.current.pauseAsync().catch(() => {});
-        setMedIsPlaying(false);
-      }
-    };
-  }, []));
-
-  async function toggleMedPlay() {
-    haptics.tap();
-    if (!medSoundRef.current) {
-      setMedIsLoading(true);
-      try {
-        const { sound } = await Audio.Sound.createAsync(
-          MED_FILES[todayMed.id],
-          { shouldPlay: true },
-          (status) => {
-            if (!status.isLoaded) return;
-            setMedPosition(status.positionMillis || 0);
-            setMedDuration(status.durationMillis || 0);
-            if (status.didJustFinish) {
-              setMedIsPlaying(false);
-              setMedPosition(0);
-              sound.setPositionAsync(0);
-            }
-          }
-        );
-        medSoundRef.current = sound;
-        setMedIsPlaying(true);
-      } catch (e) {
-        console.log('Audio error', e);
-      } finally {
-        setMedIsLoading(false);
-      }
-      return;
-    }
-    if (medIsPlaying) {
-      await medSoundRef.current.pauseAsync();
-      setMedIsPlaying(false);
-    } else {
-      await medSoundRef.current.playAsync();
-      setMedIsPlaying(true);
-    }
-  }
-
+  const player = useMeditationPlayer();
+  const isCurrentMed = player.currentMedId === todayMed.id;
+  const medIsPlaying = isCurrentMed && player.isPlaying;
+  const medIsLoading = isCurrentMed && player.isLoading;
+  const medPosition = isCurrentMed ? player.position : 0;
+  const medDuration = isCurrentMed ? player.duration : 0;
   const medProgress = medDuration > 0 ? medPosition / medDuration : 0;
   const medHasLoaded = medDuration > 0;
+
+  function toggleMedPlay() {
+    haptics.tap();
+    toggleMeditation(todayMed);
+  }
 
   useEffect(() => {
     AsyncStorage.getItem('user_name').then(name => setUserName(name?.trim() || null));
