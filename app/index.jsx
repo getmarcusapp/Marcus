@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Image, Animated,
+  StyleSheet, SafeAreaView, Image, Animated, ActivityIndicator,
 } from 'react-native';
+import { Audio } from 'expo-av';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -41,6 +42,22 @@ const virtueDetails = {
   moderation: { definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation: the disciplined middle path.', question: 'Where am I in excess today?' },
   justice: { definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
 };
+
+const MED_FILES = {
+  'premeditatio': require('../assets/meditations/premeditatio-malorum.mp3'),
+  'view-from-above': require('../assets/meditations/view-from-above.mp3'),
+  'evening-examination': require('../assets/meditations/evening-examination.mp3'),
+  'negative-visualization': require('../assets/meditations/negative-visualization.mp3'),
+  'present-moment': require('../assets/meditations/present-moment.mp3'),
+};
+
+function formatMedTime(ms) {
+  if (!ms) return '0:00';
+  const total = Math.floor(ms / 1000);
+  const m = Math.floor(total / 60);
+  const sec = total % 60;
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
 
 // Pick a meditation contextual to the time of day:
 // morning -> Premeditatio Malorum (look ahead), midday -> View From Above
@@ -86,6 +103,75 @@ export default function PracticeScreen() {
   const [userName, setUserName] = useState(null);
   const [eyebrowPhase, setEyebrowPhase] = useState(hasShownGreetingThisSession ? 'memento' : 'greeting');
   const eyebrowOpacity = useRef(new Animated.Value(1)).current;
+
+  // Inline meditation player on the practice card.
+  const todayMed = pickContextualMeditation();
+  const medSoundRef = useRef(null);
+  const [medIsPlaying, setMedIsPlaying] = useState(false);
+  const [medIsLoading, setMedIsLoading] = useState(false);
+  const [medPosition, setMedPosition] = useState(0);
+  const [medDuration, setMedDuration] = useState(0);
+
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: true,
+    });
+    return () => {
+      if (medSoundRef.current) medSoundRef.current.unloadAsync();
+    };
+  }, []);
+
+  // Pause on screen blur so leaving the practice tab doesn't leave audio
+  // playing in the background. Position is preserved — tap again to resume.
+  useFocusEffect(useCallback(() => {
+    return () => {
+      if (medSoundRef.current) {
+        medSoundRef.current.pauseAsync().catch(() => {});
+        setMedIsPlaying(false);
+      }
+    };
+  }, []));
+
+  async function toggleMedPlay() {
+    haptics.tap();
+    if (!medSoundRef.current) {
+      setMedIsLoading(true);
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          MED_FILES[todayMed.id],
+          { shouldPlay: true },
+          (status) => {
+            if (!status.isLoaded) return;
+            setMedPosition(status.positionMillis || 0);
+            setMedDuration(status.durationMillis || 0);
+            if (status.didJustFinish) {
+              setMedIsPlaying(false);
+              setMedPosition(0);
+              sound.setPositionAsync(0);
+            }
+          }
+        );
+        medSoundRef.current = sound;
+        setMedIsPlaying(true);
+      } catch (e) {
+        console.log('Audio error', e);
+      } finally {
+        setMedIsLoading(false);
+      }
+      return;
+    }
+    if (medIsPlaying) {
+      await medSoundRef.current.pauseAsync();
+      setMedIsPlaying(false);
+    } else {
+      await medSoundRef.current.playAsync();
+      setMedIsPlaying(true);
+    }
+  }
+
+  const medProgress = medDuration > 0 ? medPosition / medDuration : 0;
+  const medHasLoaded = medDuration > 0;
 
   useEffect(() => {
     AsyncStorage.getItem('user_name').then(name => setUserName(name?.trim() || null));
@@ -253,30 +339,41 @@ export default function PracticeScreen() {
               <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
             </TouchableOpacity>
 
-            {(() => {
-              const med = pickContextualMeditation();
-              return (
+            <TouchableOpacity
+              style={s.medCard}
+              onPress={toggleMedPlay}
+              activeOpacity={0.8}
+              disabled={medIsLoading}
+            >
+              <View style={s.medTopRow}>
+                <Text style={s.medEyebrow}>Today's meditation</Text>
+                {medIsLoading ? (
+                  <ActivityIndicator color={colors.accent} />
+                ) : (
+                  <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={36} color={colors.accent} />
+                )}
+              </View>
+              <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
+              <Text style={s.medTitle}>{todayMed.title}</Text>
+              <Text style={s.medDesc}>{todayMed.desc}</Text>
+              {medHasLoaded ? (
                 <>
-                  <TouchableOpacity
-                    style={s.medCard}
-                    onPress={() => router.push({ pathname: '/meditate', params: { id: med.id } })}
-                    activeOpacity={0.8}
-                  >
-                    <View style={s.medTopRow}>
-                      <Text style={s.medEyebrow}>Today's meditation</Text>
-                      <Ionicons name="play-circle" size={32} color={colors.accent} />
-                    </View>
-                    <Text style={s.medSubtitle}>{med.subtitle}</Text>
-                    <Text style={s.medTitle}>{med.title}</Text>
-                    <Text style={s.medDesc}>{med.desc}</Text>
-                    <Text style={s.medMeta}>5 min · guided</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
-                    <Text style={s.medAllText}>All meditations →</Text>
-                  </TouchableOpacity>
+                  <View style={s.medProgressBar}>
+                    <View style={[s.medProgressFill, { flex: medProgress }]} />
+                    <View style={{ flex: Math.max(0, 1 - medProgress) }} />
+                  </View>
+                  <View style={s.medTimeRow}>
+                    <Text style={s.medTimeText}>{formatMedTime(medPosition)}</Text>
+                    <Text style={s.medTimeText}>{formatMedTime(medDuration)}</Text>
+                  </View>
                 </>
-              );
-            })()}
+              ) : (
+                <Text style={s.medMeta}>5 min · guided</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
+              <Text style={s.medAllText}>All meditations →</Text>
+            </TouchableOpacity>
           </Animated.View>
 
         </ScrollView>
@@ -439,30 +536,41 @@ export default function PracticeScreen() {
             <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
           </TouchableOpacity>
 
-          {(() => {
-            const med = pickContextualMeditation();
-            return (
+          <TouchableOpacity
+            style={s.medCard}
+            onPress={toggleMedPlay}
+            activeOpacity={0.8}
+            disabled={medIsLoading}
+          >
+            <View style={s.medTopRow}>
+              <Text style={s.medEyebrow}>Today's meditation</Text>
+              {medIsLoading ? (
+                <ActivityIndicator color={colors.accent} />
+              ) : (
+                <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={36} color={colors.accent} />
+              )}
+            </View>
+            <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
+            <Text style={s.medTitle}>{todayMed.title}</Text>
+            <Text style={s.medDesc}>{todayMed.desc}</Text>
+            {medHasLoaded ? (
               <>
-                <TouchableOpacity
-                  style={s.medCard}
-                  onPress={() => router.push({ pathname: '/meditate', params: { id: med.id } })}
-                  activeOpacity={0.8}
-                >
-                  <View style={s.medTopRow}>
-                    <Text style={s.medEyebrow}>Today's meditation</Text>
-                    <Ionicons name="play-circle" size={32} color={colors.accent} />
-                  </View>
-                  <Text style={s.medSubtitle}>{med.subtitle}</Text>
-                  <Text style={s.medTitle}>{med.title}</Text>
-                  <Text style={s.medDesc}>{med.desc}</Text>
-                  <Text style={s.medMeta}>5 min · guided</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
-                  <Text style={s.medAllText}>All meditations →</Text>
-                </TouchableOpacity>
+                <View style={s.medProgressBar}>
+                  <View style={[s.medProgressFill, { flex: medProgress }]} />
+                  <View style={{ flex: Math.max(0, 1 - medProgress) }} />
+                </View>
+                <View style={s.medTimeRow}>
+                  <Text style={s.medTimeText}>{formatMedTime(medPosition)}</Text>
+                  <Text style={s.medTimeText}>{formatMedTime(medDuration)}</Text>
+                </View>
               </>
-            );
-          })()}
+            ) : (
+              <Text style={s.medMeta}>5 min · guided</Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/meditate')} style={s.medAllBtn} activeOpacity={0.7}>
+            <Text style={s.medAllText}>All meditations →</Text>
+          </TouchableOpacity>
 
         </View>
       </ScrollView>
@@ -618,6 +726,17 @@ const s = StyleSheet.create({
   medTitle: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
   medDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 14 },
   medMeta: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
+  medProgressBar: {
+    height: 2,
+    backgroundColor: colors.border,
+    borderRadius: 1,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  medProgressFill: { backgroundColor: colors.accent, borderRadius: 1 },
+  medTimeRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  medTimeText: { fontSize: 11, color: colors.textDim, letterSpacing: 0.3 },
   medAllBtn: { alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 12, marginBottom: 20 },
   medAllText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

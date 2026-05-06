@@ -85,13 +85,31 @@ export default function MeditateScreen() {
     };
   }, []);
 
-  // Auto-select a meditation when arriving with ?id=... (deep-linked from
-  // practice card or journal screens).
+  // Auto-select + play when arriving with ?id=... (deep-linked from
+  // practice card or journal screens) so the user doesn't have to tap
+  // play after navigating.
   useEffect(() => {
     if (!params?.id) return;
     const med = MEDITATIONS.find(m => m.id === params.id);
-    if (med) selectMeditation(med);
+    if (med) selectAndPlay(med);
   }, [params?.id]);
+
+  async function loadAndPlay(med) {
+    setIsLoading(true);
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        med.file,
+        { shouldPlay: true },
+        onPlaybackStatus
+      );
+      soundRef.current = sound;
+      setIsPlaying(true);
+    } catch (e) {
+      console.log('Audio error:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   async function selectMeditation(med) {
     if (soundRef.current) {
@@ -104,27 +122,17 @@ export default function MeditateScreen() {
     setDuration(0);
   }
 
+  async function selectAndPlay(med) {
+    await selectMeditation(med);
+    await loadAndPlay(med);
+  }
+
   async function togglePlay() {
     if (!selected) return;
-
     if (!soundRef.current) {
-      setIsLoading(true);
-      try {
-        const { sound } = await Audio.Sound.createAsync(
-          selected.file,
-          { shouldPlay: true },
-          onPlaybackStatus
-        );
-        soundRef.current = sound;
-        setIsPlaying(true);
-      } catch (e) {
-        console.log('Audio error:', e);
-      } finally {
-        setIsLoading(false);
-      }
+      await loadAndPlay(selected);
       return;
     }
-
     if (isPlaying) {
       await soundRef.current.pauseAsync();
       setIsPlaying(false);
