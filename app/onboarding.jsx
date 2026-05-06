@@ -60,13 +60,14 @@ export default function OnboardingScreen() {
     <PhilosophyStep onNext={() => setStep(2)} />,
     <CompassStep compass={compass} setCompass={setCompass} onNext={() => setStep(3)} onSkip={() => setStep(3)} />,
     <PracticePreviewStep onNext={() => setStep(4)} />,
-    <RemindersStep onNext={() => setStep(5)} />,
+    <MeditationsStep onNext={() => setStep(5)} />,
+    <RemindersStep onNext={() => setStep(6)} />,
     <ReadyStep onFinish={handleFinish} />,
   ];
 
   return (
     <View style={{ flex: 1 }}>
-      {step > 0 && step < 5 && (
+      {step > 0 && step < 6 && (
         <TouchableOpacity
           onPress={() => setStep(step - 1)}
           style={s.onboardingBack}
@@ -327,6 +328,66 @@ function PracticePreviewStep({ onNext }) {
   );
 }
 
+function MeditationsStep({ onNext }) {
+  const meditations = [
+    { title: 'The View From Above', sub: 'Perspective' },
+    { title: 'Premeditatio Malorum', sub: 'Preparation' },
+    { title: 'The Evening Examination', sub: 'Accounting' },
+    { title: 'Negative Visualization', sub: 'Gratitude' },
+    { title: 'The Present Moment', sub: 'Attention' },
+  ];
+
+  return (
+    <SafeAreaView style={s.safe}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+        <View style={s.medOnbHero}>
+          <Image
+            source={require('../assets/meditations/img/view-from-above.jpg')}
+            style={s.medOnbHeroImg}
+            resizeMode="cover"
+          />
+          <LinearGradient
+            colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.55, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={s.medOnbHeroText}>
+            <Text style={s.previewEyebrow}>Five guided meditations</Text>
+            <Text style={s.previewTitle}>{`Ancient attention\ntraining, voiced.`}</Text>
+            <Text style={s.previewSub}>5 minutes each. Optional, but they deepen the practice.</Text>
+          </View>
+        </View>
+
+        <View style={s.previewBody}>
+          <View style={s.previewCard}>
+            {meditations.map((m, idx) => (
+              <View key={idx} style={[s.previewRow, idx < meditations.length - 1 && s.previewRowBorder]}>
+                <View style={s.previewDot} />
+                <View style={s.previewContent}>
+                  <Text style={s.previewItemTitle}>{m.title}</Text>
+                  <Text style={s.previewItemSub}>{m.sub}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={s.previewNote}>
+            <Text style={s.previewNoteText}>
+              The practice card surfaces the right one for the time of day. Listen on the way to work, before journaling, or anytime you need to return to yourself.
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      <View style={s.footer}>
+        <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
+          <Text style={s.primaryBtnText}>Continue →</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+}
+
 function RemindersStep({ onNext }) {
   async function handleEnable() {
     const granted = await requestNotificationPermissions();
@@ -498,6 +559,19 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     alignItems: 'center',
   },
+  // Meditations onboarding hero — same recipe as the in-app screens
+  // (image + dark gradient + bottom-pinned text).
+  medOnbHero: {
+    backgroundColor: colors.bgDeep,
+    minHeight: 320,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+  },
+  medOnbHeroImg: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  medOnbHeroText: { padding: 36, paddingTop: 48, paddingBottom: 32, alignItems: 'center' },
   previewEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' },
   previewTitle: { fontSize: 36, fontWeight: '300', color: colors.textPrimary, letterSpacing: -1.5, marginBottom: 12, textAlign: 'center', lineHeight: 42 },
   previewSub: { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
