@@ -186,7 +186,7 @@ function PhilosophyStep({ onNext }) {
     <SafeAreaView style={s.safe}>
       <ScrollView
         style={s.scroll}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View style={s.stepHero}>
@@ -247,7 +247,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
       >
         <ScrollView
           style={s.scroll}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ paddingBottom: 140 }}
@@ -335,7 +335,7 @@ function PracticePreviewStep({ onNext }) {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={s.previewHero}>
           <Text style={s.previewEyebrow}>Your daily practice</Text>
           <Text style={s.previewTitle}>{`This is what\neach day looks like.`}</Text>
@@ -404,7 +404,7 @@ function MeditationsStep({ onNext }) {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={s.medOnbHero}>
           <Image
             source={require('../assets/meditations/img/view-from-above.jpg')}
@@ -480,7 +480,7 @@ function RemindersStep({ onNext }) {
     <SafeAreaView style={s.safe}>
       <ScrollView
         style={s.scroll}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingBottom: 180 }}
       >
         <View style={s.stepHero}>

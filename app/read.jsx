@@ -389,7 +389,7 @@ Return only the JSON object.`;
       >
         <ScrollView
           style={s.scroll}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           contentInset={{ bottom: 40 }}

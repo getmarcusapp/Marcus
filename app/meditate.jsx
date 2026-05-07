@@ -70,7 +70,7 @@ export default function MeditateScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
 
         <View style={[s.header, !showHeaderImage && s.headerCompact]}>
           {showHeaderImage && (

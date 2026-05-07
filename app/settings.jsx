@@ -196,7 +196,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
         <View style={s.hero}>
           <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
             <Text style={s.backArrow}>‹</Text>
