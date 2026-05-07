@@ -60,12 +60,12 @@ const morningPrompts = [
   },
   {
     num: 'III · Name',
-    q: 'What are you postponing that matters? Name one thing.',
+    q: 'What am I postponing that matters? Name one thing.',
     hint: "Seneca wrote that we suffer more in imagination than in reality, but he also observed that we are experts at deferring what matters in favor of what is urgent, easy, or comfortable.\n\nThe Stoics were deeply aware of mortality as a clarifying force. If you knew today was your last, what would you regret not having done? That regret is information. It points at what actually matters to you beneath the noise of daily preference.\n\nNaming one thing — just one — makes it real. The act of naming is the act of committing. Not to completing it today necessarily, but to acknowledging that it exists and that you are responsible for it.",
   },
   {
     num: 'IV · Foresee',
-    q: 'What difficulty might arise today, and how would a person of Virtue meet it?',
+    q: 'What difficulty might I face today, and how would a person of Virtue meet it?',
     hint: "This is premeditatio malorum: the premeditation of adversity. The Stoics practiced it daily. Marcus Aurelius began most mornings by mentally rehearsing the difficult people and situations he would face.\n\nModern research confirms what the Stoics intuited: negative visualization — mentally simulating obstacles before they occur — reduces anxiety and improves performance. It works because the obstacle loses its power to surprise you. You've already met it, already chosen your response.\n\nAsk: not 'what bad thing might happen' in a fearful way, but 'how would a person who embodies wisdom, courage, and justice meet this?' You're not predicting disaster. You're rehearsing Virtue.",
   },
 ];
@@ -88,7 +88,7 @@ const eveningPrompts = [
   },
   {
     num: 'IV · Gratitude',
-    q: 'Name one thing — however small — that deserves your thanks.',
+    q: 'Name one thing — however small — that deserves my thanks.',
     hint: "Stoic gratitude is not the forced positivity of modern self-help. It is a corrective to a perceptual error: we habituate to what we have and stop seeing it. The practice is attention, not cheerfulness.\n\nMarcus Aurelius wrote long passages cataloging what specific people had taught him, what specific circumstances had given him. The specificity matters. 'I'm grateful for my health' is a thought. 'I noticed my body carried me through a hard day without complaint' is perception.\n\nOne thing. However small. The smaller the better, in some ways. It proves you were paying attention.",
   },
 ];
