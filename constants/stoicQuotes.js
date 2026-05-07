@@ -1465,6 +1465,126 @@ export const STOIC_QUOTES = [
     virtues: ['moderation', 'wisdom'],
     themes: ['self-mastery', 'discipline'],
   },
+
+  // ─── ETTY HILLESUM · Diaries (1941–1943) ─────────────────────────────────
+  // Hillesum's diaries from Nazi-occupied Amsterdam read as live Stoic
+  // practice — daily inner work to reclaim equanimity under affliction.
+  {
+    id: 'hillesum-diaries-1941-06-08-fleas',
+    quote: "We have to fight them daily, like fleas, those many small worries about the morrow, for they sap our energies.",
+    author: 'Etty Hillesum',
+    work: 'An Interrupted Life',
+    source: 'Diary, 8 June 1941',
+    virtues: ['wisdom', 'moderation'],
+    themes: ['attention', 'discipline', 'worry'],
+  },
+  {
+    id: 'hillesum-diaries-1941-moral-duty-peace',
+    quote: "Ultimately, we have just one moral duty: to reclaim large areas of peace in ourselves, more and more peace, and to reflect it toward others. And the more peace there is in us, the more peace there will also be in our troubled world.",
+    author: 'Etty Hillesum',
+    work: 'An Interrupted Life',
+    source: 'Diary, 1941',
+    virtues: ['justice', 'wisdom', 'moderation'],
+    themes: ['inner peace', 'duty', 'service'],
+  },
+
+  // ─── SIMONE WEIL · Letters / Gravity and Grace / Need for Roots ────────
+  {
+    id: 'weil-bousquet-1942-attention-generosity',
+    quote: "Attention is the rarest and purest form of generosity.",
+    author: 'Simone Weil',
+    work: 'Letter to Joë Bousquet',
+    source: '13 April 1942',
+    virtues: ['justice', 'wisdom'],
+    themes: ['attention', 'presence', 'love'],
+  },
+  {
+    id: 'weil-gravity-grace-sins-voids',
+    quote: "All sins are attempts to fill voids.",
+    author: 'Simone Weil',
+    work: 'Gravity and Grace',
+    source: '"The Self"',
+    virtues: ['wisdom', 'moderation'],
+    themes: ['self-knowledge', 'desire', 'discipline'],
+  },
+  {
+    id: 'weil-need-for-roots-rooted',
+    quote: "To be rooted is perhaps the most important and least recognized need of the human soul.",
+    author: 'Simone Weil',
+    work: 'The Need for Roots',
+    source: 'Part II, opening',
+    virtues: ['justice', 'wisdom'],
+    themes: ['belonging', 'community', 'roots'],
+  },
+
+  // ─── IRIS MURDOCH · Sovereignty of Good / Existentialists and Mystics ──
+  {
+    id: 'murdoch-sublime-good-1959-love-realisation',
+    quote: "Love is the perception of individuals. Love is the extremely difficult realisation that something other than oneself is real.",
+    author: 'Iris Murdoch',
+    work: '"The Sublime and the Good"',
+    source: 'Existentialists and Mystics, 1959',
+    virtues: ['justice', 'wisdom'],
+    themes: ['love', 'attention', 'unselfing'],
+  },
+  {
+    id: 'murdoch-sovereignty-personal-fantasy',
+    quote: "The chief enemy of excellence in morality (and also in art) is personal fantasy: the tissue of self-aggrandizing and consoling wishes and dreams which prevents one from seeing what is there outside one.",
+    author: 'Iris Murdoch',
+    work: 'The Sovereignty of Good',
+    source: "\"On 'God' and 'Good'\"",
+    virtues: ['wisdom', 'courage', 'moderation'],
+    themes: ['self-deception', 'attention', 'reality'],
+  },
+  {
+    id: 'murdoch-sovereignty-fat-relentless-ego',
+    quote: "In the moral life the enemy is the fat relentless ego.",
+    author: 'Iris Murdoch',
+    work: 'The Sovereignty of Good',
+    source: "\"On 'God' and 'Good'\"",
+    virtues: ['moderation', 'wisdom'],
+    themes: ['ego', 'self-mastery'],
+  },
+
+  // ─── HANNAH ARENDT · On Violence / Eichmann in Jerusalem ───────────────
+  {
+    id: 'arendt-on-violence-power-opposites',
+    quote: "Power and violence are opposites; where the one rules absolutely, the other is absent.",
+    author: 'Hannah Arendt',
+    work: 'On Violence',
+    source: 'Section II',
+    virtues: ['justice', 'wisdom'],
+    themes: ['power', 'character', 'restraint'],
+  },
+  {
+    id: 'arendt-eichmann-terribly-normal',
+    quote: "The trouble with Eichmann was precisely that so many were like him, and that the many were neither perverted nor sadistic, that they were, and still are, terribly and terrifyingly normal.",
+    author: 'Hannah Arendt',
+    work: 'Eichmann in Jerusalem',
+    source: 'Epilogue',
+    virtues: ['wisdom', 'justice'],
+    themes: ['evil', 'thoughtlessness', 'judgment'],
+  },
+
+  // ─── MAYA ANGELOU · Letter to My Daughter ──────────────────────────────
+  {
+    id: 'angelou-letter-to-daughter-changed-not-reduced',
+    quote: "I can be changed by what happens to me. But I refuse to be reduced by it.",
+    author: 'Maya Angelou',
+    work: 'Letter to My Daughter',
+    source: 'Introduction (Random House, 2008)',
+    virtues: ['courage', 'wisdom'],
+    themes: ['adversity', 'character', 'integrity'],
+  },
+  {
+    id: 'angelou-letter-to-daughter-defeats-not-defeated',
+    quote: "You may encounter many defeats, but you must not be defeated.",
+    author: 'Maya Angelou',
+    work: 'Letter to My Daughter',
+    source: 'Introduction (Random House, 2008)',
+    virtues: ['courage'],
+    themes: ['resilience', 'persistence'],
+  },
 ];
 
 // Helper used by the reading flow: pick candidates filtered by virtue + dedup
