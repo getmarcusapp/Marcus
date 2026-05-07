@@ -87,13 +87,16 @@ export default function PracticeScreen() {
 
   useEffect(() => {
     if (hasShownGreetingThisSession || eyebrowPhase !== 'greeting') return;
+    // Hold the personal greeting long enough to actually register (≈3.5s)
+    // before crossfading to "Memento mori". 1.8s read as too quick —
+    // the moment was over before users noticed it.
     const t = setTimeout(() => {
       Animated.timing(eyebrowOpacity, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => {
         hasShownGreetingThisSession = true;
         setEyebrowPhase('memento');
         Animated.timing(eyebrowOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
       });
-    }, 1800);
+    }, 3500);
     return () => clearTimeout(t);
   }, [eyebrowPhase]);
 
