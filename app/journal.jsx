@@ -377,8 +377,8 @@ export default function JournalScreen() {
               resizeMode="cover"
             />
             <LinearGradient
-              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.45)', 'rgba(0,0,0,0.88)', 'rgba(0,0,0,0.95)']}
-              locations={[0, 0.35, 0.7, 1]}
+              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.8)']}
+              locations={[0, 0.45, 0.75, 1]}
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.headerContent}>
