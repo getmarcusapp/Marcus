@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Alert, Share, Linking,
+  StyleSheet, SafeAreaView, Alert, Share, Linking, Switch,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getJournals, getTriggers, getStreak } from '../store/db';
 import * as health from '../lib/health';
+import { useAppLock, setLockEnabled, authenticate, getSupportedAuthLabel } from '../lib/appLock';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
@@ -35,6 +36,8 @@ export default function SettingsScreen() {
   const [healthAsked, setHealthAsked] = useState(false);
   const [healthAvailable, setHealthAvailable] = useState(false);
   const [reminderSummary, setReminderSummary] = useState('');
+  const [authLabel, setAuthLabel] = useState('FaceID');
+  const { lockEnabled } = useAppLock();
 
   useEffect(() => {
     (async () => {
@@ -50,6 +53,7 @@ export default function SettingsScreen() {
       } else {
         setReminderSummary('Configure your reminders');
       }
+      try { setAuthLabel(await getSupportedAuthLabel()); } catch {}
     })();
   }, []);
 
@@ -112,6 +116,28 @@ export default function SettingsScreen() {
     }
   }
 
+  async function handleToggleLock(next) {
+    if (next) {
+      // Confirm hardware works before persisting the setting — saves the
+      // user from enabling a lock they can't actually unlock.
+      const r = await authenticate().catch(() => ({ success: false }));
+      if (!r.success) {
+        Alert.alert(
+          '',
+          `Couldn't authenticate. Make sure ${authLabel} is set up in iOS Settings, then try again.`
+        );
+        return;
+      }
+      await setLockEnabled(true);
+    } else {
+      // Confirm before disabling so a casual phone-borrower can't turn
+      // the lock off without auth.
+      const r = await authenticate().catch(() => ({ success: false }));
+      if (!r.success) return;
+      await setLockEnabled(false);
+    }
+  }
+
   async function handleShareApp() {
     try {
       await Share.share({
@@ -156,6 +182,24 @@ export default function SettingsScreen() {
                 last
               />
             )}
+          </View>
+
+          <Text style={s.secLabel}>Privacy</Text>
+          <View style={s.card}>
+            <View style={s.lockRow}>
+              <View style={s.lockTextWrap}>
+                <Text style={s.rowLabel}>Require {authLabel} to open Marcus</Text>
+                <Text style={s.rowSub}>
+                  Your journal, emotions, and reflections stay private when others have access to your phone. Re-locks after the app has been backgrounded for 30 seconds.
+                </Text>
+              </View>
+              <Switch
+                value={lockEnabled}
+                onValueChange={handleToggleLock}
+                trackColor={{ false: colors.border, true: colors.borderMid }}
+                thumbColor={lockEnabled ? colors.accent : colors.textDim}
+              />
+            </View>
           </View>
 
           <Text style={s.secLabel}>Data</Text>
@@ -237,7 +281,9 @@ const s = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', padding: 18 },
   rowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
   rowLabel: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 3 },
-  rowSub: { fontSize: 13, color: colors.textDim },
+  rowSub: { fontSize: 13, color: colors.textDim, lineHeight: 18 },
+  lockRow: { flexDirection: 'row', alignItems: 'center', padding: 18, gap: 14 },
+  lockTextWrap: { flex: 1 },
   rowValue: { fontSize: 14, color: colors.textMuted, marginLeft: 12 },
   chev: { fontSize: 22, color: colors.textMuted, marginLeft: 12 },
 });

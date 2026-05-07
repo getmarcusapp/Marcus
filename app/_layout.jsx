@@ -10,6 +10,8 @@ import { scheduleReengagementNotifications, scheduleAllNotifications } from '../
 import * as health from '../lib/health';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MiniMeditationPlayer } from '../components/MiniMeditationPlayer';
+import { LockScreen } from '../components/LockScreen';
+import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
 
 function TabIcon({ name, color }) {
   return <Ionicons name={name} size={22} color={color} />;
@@ -33,7 +35,14 @@ function OnboardingGate() {
 }
 
 export default function Layout() {
+  const { isLocked } = useAppLock();
+
   useEffect(() => {
+    // Boot the app lock first so the lock screen can show immediately on
+    // cold start if the user enabled it. await isn't needed since the hook
+    // subscribes and re-renders when state lands.
+    initAppLock();
+
     initializePurchases();
     scheduleReengagementNotifications();
     scheduleAllNotifications();
@@ -48,10 +57,17 @@ export default function Layout() {
       AsyncStorage.setItem('has_premium', 'true');
     }
 
-    // Re-schedule notifications when the app foregrounds, so today's
-    // canceled notifications get re-created for tomorrow.
+    // AppState listener handles two things: re-schedule notifications on
+    // foreground (existing), and the app-lock background/foreground
+    // transitions (new). Re-lock kicks in if the app was backgrounded
+    // for more than the threshold defined in lib/appLock.js.
     const sub = AppState.addEventListener('change', state => {
-      if (state === 'active') scheduleAllNotifications();
+      if (state === 'active') {
+        scheduleAllNotifications();
+        handleForeground();
+      } else if (state === 'background' || state === 'inactive') {
+        handleBackground();
+      }
     });
     return () => sub.remove();
   }, []);
@@ -98,6 +114,7 @@ export default function Layout() {
         <Tabs.Screen name="paywall" options={{ href: null }} />
       </Tabs>
       <MiniMeditationPlayer />
+      {isLocked && <LockScreen />}
     </SafeAreaProvider>
   );
 }
