@@ -79,6 +79,7 @@ export default function ReviewScreen() {
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
   const [distortionBreakdown, setDistortionBreakdown] = useState([]);
   const [virtueFocusCounts, setVirtueFocusCounts] = useState({});
+  const [dailyIntensity, setDailyIntensity] = useState([]);
 
   useEffect(() => {
     async function load() {
@@ -109,6 +110,32 @@ export default function ReviewScreen() {
         }))
         .sort((a, b) => b.count - a.count);
       setEmotionBreakdown(emotionList);
+
+      // Daily intensity: 7 columns, oldest → today. Average all triggers
+      // logged on each day. Empty days stay null and render as a baseline
+      // mark — the absence is itself signal (calm day, or unobserved).
+      const todayMidnight = new Date();
+      todayMidnight.setHours(0, 0, 0, 0);
+      const dayMs = 86400000;
+      const daily = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(todayMidnight.getTime() - i * dayMs);
+        const dateKey = d.toDateString();
+        const dayTriggers = weekTriggers.filter(
+          t => new Date(t.date).toDateString() === dateKey
+        );
+        const avg = dayTriggers.length
+          ? dayTriggers.reduce((sum, t) => sum + (t.intensity || 5), 0) / dayTriggers.length
+          : null;
+        daily.push({
+          dateKey,
+          dayLetter: d.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0),
+          avg: avg !== null ? Math.round(avg * 10) / 10 : null,
+          count: dayTriggers.length,
+          isToday: i === 0,
+        });
+      }
+      setDailyIntensity(daily);
 
       const distMap = {};
       weekTriggers.forEach(t => {
@@ -200,6 +227,13 @@ export default function ReviewScreen() {
     }
     return true;
   });
+
+  // Sort virtues by how often they were the morning focus this week, desc.
+  // Virtues never picked fall to the bottom (count 0). Same order in both
+  // pickers so the user scans top → bottom in a single mental model.
+  const sortedVirtues = [...virtues].sort((a, b) =>
+    (virtueFocusCounts[b.id] || 0) - (virtueFocusCounts[a.id] || 0)
+  );
 
   return (
     <SafeAreaView style={s.safe}>
@@ -296,6 +330,55 @@ export default function ReviewScreen() {
             {emotionBreakdown.length > 0 && (
               <View style={s.insightCard}>
                 <Text style={s.insightCardTitle}>Emotions this week</Text>
+
+                {/* 7-day intensity sparkline — answers "is the storm getting smaller?" */}
+                <View style={s.sparkSection}>
+                  <Text style={s.sparkLabel}>Daily intensity · past 7 days</Text>
+                  <View style={s.sparkChart}>
+                    {dailyIntensity.map((d, i) => {
+                      const SPARK_HEIGHT = 72;
+                      const color = d.avg === null
+                        ? colors.borderMid
+                        : d.avg >= 7 ? colors.virtueBad
+                        : d.avg >= 4 ? colors.accent
+                        : colors.borderStrong;
+                      const barHeight = d.avg !== null
+                        ? Math.max(3, (d.avg / 10) * SPARK_HEIGHT)
+                        : 0;
+                      return (
+                        <View key={i} style={s.sparkCol}>
+                          <View style={[s.sparkBarTrack, { height: SPARK_HEIGHT }]}>
+                            {d.avg !== null ? (
+                              <View style={[s.sparkBar, { height: barHeight, backgroundColor: color }]} />
+                            ) : (
+                              <View style={s.sparkBaseline} />
+                            )}
+                          </View>
+                          <Text style={[s.sparkDay, d.isToday && s.sparkDayToday]}>
+                            {d.dayLetter}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                  {(() => {
+                    const days = dailyIntensity.filter(d => d.avg !== null);
+                    if (days.length < 2) return null;
+                    const half = Math.floor(days.length / 2);
+                    const firstAvg = days.slice(0, half).reduce((acc, d) => acc + d.avg, 0) / half;
+                    const secondAvg = days.slice(-half).reduce((acc, d) => acc + d.avg, 0) / half;
+                    const diff = secondAvg - firstAvg;
+                    const direction = diff < -0.5 ? 'trending calmer' : diff > 0.5 ? 'more turbulent' : 'steady';
+                    return (
+                      <Text style={s.sparkCaption}>
+                        Disturbed {days.length} of 7 days · {direction}
+                      </Text>
+                    );
+                  })()}
+                </View>
+
+                <View style={s.sparkDivider} />
+
                 {emotionBreakdown.map((item, idx) => (
                   <View key={idx} style={s.insightRow}>
                     <View style={s.insightRowLeft}>
@@ -314,7 +397,23 @@ export default function ReviewScreen() {
                     </View>
                   </View>
                 ))}
-                <Text style={s.insightFootnote}>Bar color reflects average intensity: gold = moderate, red = high</Text>
+                <View style={s.intensityLegend}>
+                  <Text style={s.intensityLegendLabel}>Avg intensity</Text>
+                  <View style={s.intensityLegendItems}>
+                    <View style={s.intensityLegendItem}>
+                      <View style={[s.intensityLegendDot, { backgroundColor: colors.borderStrong }]} />
+                      <Text style={s.intensityLegendText}>Low</Text>
+                    </View>
+                    <View style={s.intensityLegendItem}>
+                      <View style={[s.intensityLegendDot, { backgroundColor: colors.accent }]} />
+                      <Text style={s.intensityLegendText}>Moderate</Text>
+                    </View>
+                    <View style={s.intensityLegendItem}>
+                      <View style={[s.intensityLegendDot, { backgroundColor: colors.virtueBad }]} />
+                      <Text style={s.intensityLegendText}>High</Text>
+                    </View>
+                  </View>
+                </View>
               </View>
             )}
 
@@ -389,7 +488,7 @@ export default function ReviewScreen() {
               <View style={s.virtueRow}>
                 <View style={s.virtuePicker}>
                   <Text style={s.vpLabel}>Most embodied</Text>
-                  {virtues.map(v => (
+                  {sortedVirtues.map(v => (
                     <TouchableOpacity
                       key={v.id}
                       style={[s.vpBtn, bestVirtue === v.id && s.vpBtnActive]}
@@ -404,7 +503,7 @@ export default function ReviewScreen() {
                 </View>
                 <View style={s.virtuePicker}>
                   <Text style={s.vpLabel}>Least embodied</Text>
-                  {virtues.map(v => (
+                  {sortedVirtues.map(v => (
                     <TouchableOpacity
                       key={v.id}
                       style={[s.vpBtn, worstVirtue === v.id && s.vpBtnActive]}
@@ -632,9 +731,26 @@ const s = StyleSheet.create({
   insightIntensity: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5 },
   insightPill: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
   insightPillText: { fontSize: 12, color: colors.textMuted },
-  insightFootnote: { fontSize: 11, color: colors.textDim, marginTop: 4, marginBottom: 8 },
+  insightFootnote: { fontSize: 12, color: colors.textMuted, marginTop: 4, marginBottom: 8, lineHeight: 18 },
+  sparkSection: { marginBottom: 4 },
+  sparkLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 14 },
+  sparkChart: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 4 },
+  sparkCol: { flex: 1, alignItems: 'center' },
+  sparkBarTrack: { width: '100%', justifyContent: 'flex-end', alignItems: 'center' },
+  sparkBar: { width: '70%', borderRadius: 3, minHeight: 3 },
+  sparkBaseline: { width: '70%', height: 1.5, backgroundColor: colors.border, borderRadius: 1 },
+  sparkDay: { fontSize: 11, color: colors.textDim, marginTop: 8, letterSpacing: 0.4 },
+  sparkDayToday: { color: colors.accent, fontWeight: '600' },
+  sparkCaption: { fontSize: 12, color: colors.textMuted, marginTop: 14, textAlign: 'center', letterSpacing: 0.3, fontStyle: 'italic' },
+  sparkDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 18, marginBottom: 16 },
+  intensityLegend: { marginTop: 14, paddingTop: 14, borderTopWidth: 0.5, borderTopColor: colors.border },
+  intensityLegendLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 10 },
+  intensityLegendItems: { flexDirection: 'row', gap: 18, alignItems: 'center', flexWrap: 'wrap' },
+  intensityLegendItem: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  intensityLegendDot: { width: 10, height: 10, borderRadius: 5 },
+  intensityLegendText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.2 },
   // Virtue ledger (inside promptCard)
-  ledgerHint: { fontSize: 12, color: colors.textDim, lineHeight: 18, marginTop: 8 },
+  ledgerHint: { fontSize: 13, color: colors.textMuted, lineHeight: 20, marginTop: 8 },
   virtueRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
   virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' },
   vpLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', padding: 12, paddingHorizontal: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
