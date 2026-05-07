@@ -130,8 +130,8 @@ export default function NotificationsSettingsScreen() {
               <Switch
                 value={settings.compassEnabled}
                 onValueChange={v => update('compassEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.compassEnabled ? colors.textPrimary : colors.textDim}
+                trackColor={{ false: colors.border, true: colors.borderMid }}
+                thumbColor={settings.compassEnabled ? colors.accent : colors.textDim}
               />
             </View>
             {settings.compassEnabled && (
@@ -161,8 +161,8 @@ export default function NotificationsSettingsScreen() {
               <Switch
                 value={settings.morningEnabled}
                 onValueChange={v => update('morningEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.morningEnabled ? colors.textPrimary : colors.textDim}
+                trackColor={{ false: colors.border, true: colors.borderMid }}
+                thumbColor={settings.morningEnabled ? colors.accent : colors.textDim}
               />
             </View>
             {settings.morningEnabled && (
@@ -192,8 +192,8 @@ export default function NotificationsSettingsScreen() {
               <Switch
                 value={settings.middayEnabled}
                 onValueChange={v => update('middayEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.middayEnabled ? colors.textPrimary : colors.textDim}
+                trackColor={{ false: colors.border, true: colors.borderMid }}
+                thumbColor={settings.middayEnabled ? colors.accent : colors.textDim}
               />
             </View>
             {settings.middayEnabled && (
@@ -223,8 +223,8 @@ export default function NotificationsSettingsScreen() {
               <Switch
                 value={settings.eveningEnabled}
                 onValueChange={v => update('eveningEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.eveningEnabled ? colors.textPrimary : colors.textDim}
+                trackColor={{ false: colors.border, true: colors.borderMid }}
+                thumbColor={settings.eveningEnabled ? colors.accent : colors.textDim}
               />
             </View>
             {settings.eveningEnabled && (
@@ -254,8 +254,8 @@ export default function NotificationsSettingsScreen() {
               <Switch
                 value={settings.reviewEnabled}
                 onValueChange={v => update('reviewEnabled', v)}
-                trackColor={{ false: colors.border, true: colors.borderStrong }}
-                thumbColor={settings.reviewEnabled ? colors.textPrimary : colors.textDim}
+                trackColor={{ false: colors.border, true: colors.borderMid }}
+                thumbColor={settings.reviewEnabled ? colors.accent : colors.textDim}
               />
             </View>
             {settings.reviewEnabled && (
