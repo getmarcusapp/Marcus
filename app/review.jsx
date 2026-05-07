@@ -28,25 +28,25 @@ const DISTORTION_LABELS = {
 const reviewPrompts = [
   {
     num: 'I · Account',
-    q: 'What went well? Where did you act with Virtue this week?',
+    q: 'What went well? Where did I act with Virtue this week?',
     hint: 'This is not a victory lap. Notice the moments — even small ones — where you showed up as the person you want to be. Honest accounting cuts both ways: catalog what worked so you can repeat it.',
     key: 'wentWell',
   },
   {
     num: 'II · Reckon',
-    q: 'Where did you stray? Where did you fall short of your own standard?',
+    q: 'Where did I stray? Where did I fall short of my own standard?',
     hint: 'Without shame, without flinching. The Stoic practice is not about being perfect. It is about being awake to where you fell short. Naming it is the beginning of correcting it.',
     key: 'strayed',
   },
   {
     num: 'III · Pattern',
-    q: 'What patterns keep showing up? What is unresolved?',
+    q: 'What patterns am I noticing? What remains unresolved?',
     hint: 'A single bad day is a moment. The same bad day, three weeks running, is a pattern. Patterns are where the practice does its real work. They reveal what is actually shaping your life.',
     key: 'challenges',
   },
   {
     num: 'IV · Body',
-    q: 'How did you treat your physical self: sleep, movement, food, restraint?',
+    q: 'How did I treat my physical self: sleep, movement, food, restraint?',
     hint: 'The Stoics did not separate the body from the practice. Marcus Aurelius wrote about food, sleep, and exercise as moral matters. The body is the instrument of Virtue. How well did you maintain it?\n\nBefore answering, consider opening Apple Health and glancing at your Mindfulness, Sleep, and Activity tabs for the week. Real data beats memory. Honest reflection deserves honest evidence.',
     key: 'body',
   },
@@ -481,7 +481,7 @@ export default function ReviewScreen() {
               <View style={s.promptTopRow}>
                 <Text style={s.promptNum}>V · Ledger</Text>
               </View>
-              <Text style={s.promptQ}>Which Virtue did you most embody this week — and which did you fall short on?</Text>
+              <Text style={s.promptQ}>Which Virtue did I most embody this week — and which did I fall short on?</Text>
               {Object.keys(virtueFocusCounts).length > 0 && (
                 <Text style={s.ledgerHint}>Pre-filled from your morning focuses. Adjust if it doesn't match how the week actually went.</Text>
               )}
@@ -524,7 +524,7 @@ export default function ReviewScreen() {
               <View style={s.promptTopRow}>
                 <Text style={s.promptNum}>VI · Commit</Text>
               </View>
-              <Text style={s.promptQ}>What one thing will you do differently next week?</Text>
+              <Text style={s.promptQ}>What one thing will I do differently next week?</Text>
               <TextInput
                 style={s.intentionInput}
                 multiline
