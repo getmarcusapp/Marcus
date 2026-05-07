@@ -9,6 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { getJournals, getTriggers, getStreak } from '../store/db';
 import * as health from '../lib/health';
 import { useAppLock, setLockEnabled, authenticate, getSupportedAuthLabel } from '../lib/appLock';
+import { exportBackup, pickAndImportBackup } from '../lib/backup';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
@@ -116,6 +117,43 @@ export default function SettingsScreen() {
     }
   }
 
+  async function handleExportBackup() {
+    try {
+      await exportBackup();
+    } catch (e) {
+      Alert.alert('', e?.message || 'Could not export the backup file.');
+    }
+  }
+
+  function handleImportBackup() {
+    Alert.alert(
+      'Restore from a backup file?',
+      'Importing replaces every journal entry, emotion log, weekly review, compass, streak, and reading history on this device with the contents of the backup. This cannot be undone. If you have practice on this device you want to keep, export it first.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Choose file…',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await pickAndImportBackup();
+              if (result.canceled) return;
+              const exportedDate = result.exportedAt
+                ? new Date(result.exportedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                : 'an earlier date';
+              Alert.alert(
+                'Restored',
+                `Imported ${result.journalCount} journal entries, ${result.triggerCount} emotion logs, and ${result.reviewCount} weekly reviews from a backup made on ${exportedDate}. Force-close Marcus and reopen so the practice screen reflects the restored data.`,
+              );
+            } catch (e) {
+              Alert.alert('', e?.message || 'Could not import that file.');
+            }
+          },
+        },
+      ],
+    );
+  }
+
   async function handleToggleLock(next) {
     if (next) {
       // Confirm hardware works before persisting the setting — saves the
@@ -196,8 +234,8 @@ export default function SettingsScreen() {
               <Switch
                 value={lockEnabled}
                 onValueChange={handleToggleLock}
-                trackColor={{ false: colors.border, true: colors.borderMid }}
-                thumbColor={lockEnabled ? colors.accent : colors.textDim}
+                trackColor={{ false: colors.border, true: colors.accent }}
+                thumbColor={colors.textPrimary}
               />
             </View>
           </View>
@@ -205,8 +243,18 @@ export default function SettingsScreen() {
           <Text style={s.secLabel}>Data</Text>
           <View style={s.card}>
             <NavRow
-              label="Export your practice data"
-              sub="Share journal entries and emotion logs as text"
+              label="Export backup file"
+              sub="Save a complete copy to Files. Restore on a new device."
+              onPress={handleExportBackup}
+            />
+            <NavRow
+              label="Import backup file"
+              sub="Restore everything from a previous export"
+              onPress={handleImportBackup}
+            />
+            <NavRow
+              label="Export as text"
+              sub="Share journals and emotion logs in human-readable form"
               onPress={handleExport}
               last
             />
