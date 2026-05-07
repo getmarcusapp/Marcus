@@ -112,7 +112,7 @@ function JournalEntryEditor({ entry, onSave, onCancel }) {
   const prompts = isMorning ? morningPrompts : eveningPrompts;
   const [answers, setAnswers] = useState(entry.answers || {});
   const [selectedVirtue, setSelectedVirtue] = useState(entry.virtue || virtues[0].id);
-  const [openPrompt, setOpenPrompt] = useState(0);
+  const [openPrompt, setOpenPrompt] = useState(-1);
   const [openHint, setOpenHint] = useState(null);
 
   return (
@@ -233,7 +233,7 @@ export default function JournalScreen() {
 
   const [answers, setAnswers] = useState({});
   const [selectedVirtue, setSelectedVirtue] = useState(virtues[0].id);
-  const [openPrompt, setOpenPrompt] = useState(0);
+  const [openPrompt, setOpenPrompt] = useState(-1);
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
 
@@ -397,7 +397,7 @@ export default function JournalScreen() {
               )}
               <View style={s.typeToggle}>
                   {['morning', 'evening'].map(t => (
-                    <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setViewMode('write'); setOpenPrompt(0); setOpenHint(null); }} activeOpacity={0.7}>
+                    <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setViewMode('write'); setOpenPrompt(-1); setOpenHint(null); }} activeOpacity={0.7}>
                       <Text style={[s.typeBtnText, sessionType === t && s.typeBtnTextActive]}>{t === 'morning' ? '☽  Morning' : '◑  Evening'}</Text>
                     </TouchableOpacity>
                   ))}
