@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image, TextInput,
-  KeyboardAvoidingView, Platform,
+  KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,6 +10,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { saveCompass, setHasOnboarded } from '../store/db';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
+import { MEDITATIONS_LIST, playPreview, stopPreview, useMeditationPlayer } from '../lib/meditationPlayer';
+import { pickAndImportBackup } from '../lib/backup';
 
 const DEFAULT_NOTIF_SETTINGS = {
   // Compass orients the day, so it fires before the Morning Journal acts
@@ -84,12 +86,45 @@ export default function OnboardingScreen() {
 }
 
 function WelcomeStep({ onNext }) {
+  const router = useRouter();
   const [name, setName] = useState('');
 
   async function handleNext() {
     const trimmed = name.trim();
     if (trimmed) await AsyncStorage.setItem('user_name', trimmed);
     onNext();
+  }
+
+  function handleRestore() {
+    Alert.alert(
+      'Restore from backup?',
+      'Pick a backup file you exported from another device. Your practice — journals, emotion logs, weekly reviews, compass, streak — will be restored. You\'ll skip the rest of onboarding.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Choose file…',
+          onPress: async () => {
+            try {
+              const result = await pickAndImportBackup();
+              if (result.canceled) return;
+              const exportedDate = result.exportedAt
+                ? new Date(result.exportedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                : 'an earlier date';
+              // pickAndImportBackup already sets has_onboarded=true.
+              // Send to paywall so RevenueCat re-validates entitlement on
+              // the new device (subscription is tied to Apple ID, not local).
+              Alert.alert(
+                'Welcome back',
+                `Restored ${result.journalCount} journal entries, ${result.triggerCount} emotion logs, and ${result.reviewCount} weekly reviews from a backup made on ${exportedDate}. Your practice continues.`,
+                [{ text: 'Continue', onPress: () => router.replace('/paywall') }],
+              );
+            } catch (e) {
+              Alert.alert('', e?.message || 'Could not import that file.');
+            }
+          },
+        },
+      ],
+    );
   }
 
   return (
@@ -136,6 +171,9 @@ function WelcomeStep({ onNext }) {
             <TouchableOpacity style={s.primaryBtn} onPress={handleNext} activeOpacity={0.8}>
               <Text style={s.primaryBtnText}>Begin your practice</Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={handleRestore} activeOpacity={0.7} style={s.welcomeRestore}>
+              <Text style={s.welcomeRestoreText}>I have a backup from another device</Text>
+            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -170,7 +208,7 @@ function PhilosophyStep({ onNext }) {
             { title: 'Morning Journal', desc: 'Set your intention, choose your Virtue focus, and prepare for what the day requires.' },
             { title: 'Evening Journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
             { title: 'Emotion logger', desc: 'When strong emotions arise, log the trigger, examine your thinking, and choose your response.' },
-            { title: 'Weekly review', desc: 'Once a week, examine your patterns, assess your virtues, and set your intention forward.' },
+            { title: 'Weekly review', desc: 'Once a week, examine your patterns, assess your Virtues, and set your intention forward.' },
           ].map((item, idx) => (
             <View key={idx} style={s.practiceItem}>
               <View style={s.practiceItemDot} />
@@ -289,6 +327,12 @@ function PracticePreviewStep({ onNext }) {
     { title: 'Evening Journal', sub: 'Examine and release', tag: 'LATER' },
   ];
 
+  const extras = [
+    { title: 'Weekly Review', sub: 'Sunday reckoning · see the storm getting smaller across the week' },
+    { title: 'Emotion log', sub: 'Reframe what disturbs you, in the moment' },
+    { title: 'Optional FaceID lock', sub: 'Your practice stays private, even if your phone doesn’t' },
+  ];
+
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
@@ -319,6 +363,19 @@ function PracticePreviewStep({ onNext }) {
               Complete all four and the day is sealed. Your streak grows. The practice compounds.
             </Text>
           </View>
+
+          <Text style={s.extrasHeading}>Also in your kit</Text>
+          <View style={s.previewCard}>
+            {extras.map((item, idx) => (
+              <View key={idx} style={[s.previewRow, idx < extras.length - 1 && s.previewRowBorder]}>
+                <View style={s.previewDot} />
+                <View style={s.previewContent}>
+                  <Text style={s.previewItemTitle}>{item.title}</Text>
+                  <Text style={s.previewItemSub}>{item.sub}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
         </View>
       </ScrollView>
 
@@ -332,13 +389,18 @@ function PracticePreviewStep({ onNext }) {
 }
 
 function MeditationsStep({ onNext }) {
-  const meditations = [
-    { title: 'The View From Above', sub: 'Perspective' },
-    { title: 'Premeditatio Malorum', sub: 'Preparation' },
-    { title: 'The Evening Examination', sub: 'Accounting' },
-    { title: 'Negative Visualization', sub: 'Gratitude' },
-    { title: 'The Present Moment', sub: 'Attention' },
-  ];
+  const { previewMedId, isLoading } = useMeditationPlayer();
+
+  // Always stop any preview when leaving this step (user advances, hits
+  // back, or aborts onboarding) so audio doesn't bleed into the next screen.
+  useEffect(() => {
+    return () => { stopPreview().catch(() => {}); };
+  }, []);
+
+  function handleAdvance() {
+    stopPreview().catch(() => {});
+    onNext();
+  }
 
   return (
     <SafeAreaView style={s.safe}>
@@ -362,16 +424,29 @@ function MeditationsStep({ onNext }) {
         </View>
 
         <View style={s.previewBody}>
+          <Text style={s.previewHint}>Tap any to hear a 12-second excerpt.</Text>
           <View style={s.previewCard}>
-            {meditations.map((m, idx) => (
-              <View key={idx} style={[s.previewRow, idx < meditations.length - 1 && s.previewRowBorder]}>
-                <View style={s.previewDot} />
-                <View style={s.previewContent}>
-                  <Text style={s.previewItemTitle}>{m.title}</Text>
-                  <Text style={s.previewItemSub}>{m.sub}</Text>
-                </View>
-              </View>
-            ))}
+            {MEDITATIONS_LIST.map((m, idx) => {
+              const previewing = previewMedId === m.id;
+              const loading = previewing && isLoading;
+              return (
+                <TouchableOpacity
+                  key={m.id}
+                  activeOpacity={0.7}
+                  onPress={() => previewing ? stopPreview() : playPreview(m)}
+                  style={[s.previewRow, idx < MEDITATIONS_LIST.length - 1 && s.previewRowBorder]}
+                >
+                  <View style={[s.previewDot, previewing && s.previewDotActive]} />
+                  <View style={s.previewContent}>
+                    <Text style={[s.previewItemTitle, previewing && { color: colors.accent }]}>{m.title}</Text>
+                    <Text style={s.previewItemSub}>
+                      {loading ? 'Loading…' : previewing ? 'Listening · 12-second excerpt' : m.subtitle}
+                    </Text>
+                  </View>
+                  <Text style={s.previewPlayIcon}>{previewing ? '◼' : '▶'}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           <View style={s.previewNote}>
@@ -383,7 +458,7 @@ function MeditationsStep({ onNext }) {
       </ScrollView>
 
       <View style={s.footer}>
-        <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
+        <TouchableOpacity style={s.primaryBtn} onPress={handleAdvance} activeOpacity={0.8}>
           <Text style={s.primaryBtnText}>Continue →</Text>
         </TouchableOpacity>
       </View>
@@ -530,6 +605,8 @@ const s = StyleSheet.create({
     letterSpacing: 0.5,
     textAlign: 'center',
   },
+  welcomeRestore: { paddingVertical: 14, alignItems: 'center' },
+  welcomeRestoreText: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.4 },
   welcomeNameWrap: {
     marginTop: 36,
     width: '100%',
@@ -587,6 +664,9 @@ const s = StyleSheet.create({
   previewRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
   previewRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
   previewDot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.textMuted },
+  previewDotActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
+  previewPlayIcon: { fontSize: 13, color: colors.accentDim, marginLeft: 8, letterSpacing: 1 },
+  previewHint: { fontSize: 12, color: colors.textMuted, fontStyle: 'italic', marginBottom: 12, paddingHorizontal: 4, letterSpacing: 0.3 },
   previewContent: { flex: 1 },
   previewItemTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
   previewItemSub: { fontSize: 13, color: colors.textMuted },
@@ -597,6 +677,7 @@ const s = StyleSheet.create({
   previewTagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
   previewNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, backgroundColor: colors.bgDeep },
   previewNoteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
+  extrasHeading: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 28, marginBottom: 12, paddingHorizontal: 4 },
 
   readySkull: { width: 180, height: 180, marginBottom: 28, opacity: 1 },
   readyEyebrow: {
