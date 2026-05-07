@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Image,
+  FlatList, useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -44,6 +45,11 @@ export default function CompassScreen() {
   // Single-virtue accordion: only one Virtue card expanded at a time so
   // the page doesn't sprawl. null = all collapsed.
   const [expandedVirtueId, setExpandedVirtueId] = useState(null);
+  // Horizontal Virtue carousel — full-width swipeable deck. Track the
+  // active page so we can render the bottom dot indicator and collapse
+  // the prior card when the user swipes.
+  const [activeVirtueIdx, setActiveVirtueIdx] = useState(0);
+  const { width: screenWidth } = useWindowDimensions();
   const commitMindfulSession = useMindfulSession();
 
   useEffect(() => {
@@ -184,41 +190,61 @@ export default function CompassScreen() {
           ) : (
             <View>
               <Text style={s.secLabel}>The four cardinal Virtues</Text>
-              {virtues.map(v => {
-                const expanded = expandedVirtueId === v.id;
-                const detail = VIRTUE_DETAILS[v.id];
-                return (
-                  <TouchableOpacity
-                    key={v.id}
-                    style={s.virtueCard}
-                    onPress={() => { haptics.tap(); setExpandedVirtueId(expanded ? null : v.id); }}
-                    activeOpacity={0.85}
-                  >
-                    <View style={s.virtueImageWrap}>
-                      <Image source={v.image} style={s.virtueImage} resizeMode="cover" />
-                      <LinearGradient
-                        colors={['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.55)']}
-                        locations={[0.5, 1]}
-                        style={StyleSheet.absoluteFillObject}
-                      />
-                    </View>
-                    <View style={s.virtueBody}>
-                      <Text style={s.virtueName}>{v.name}</Text>
-                      <Text style={s.virtueDesc}>{v.desc}</Text>
-                      <View style={s.virtueDivider} />
-                      <Text style={s.virtueQuestion}>"{v.question}"</Text>
-                      {expanded && detail && (
-                        <View style={s.virtueExpand}>
-                          <View style={s.virtueDivider} />
-                          <Text style={s.virtueExpandText}>{detail.definition}</Text>
-                          <Text style={s.virtueExpandQuestion}>"{detail.question}"</Text>
-                        </View>
-                      )}
-                      <Text style={s.virtueChev}>{expanded ? '∨ Less' : '› More'}</Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
+              <View style={s.virtueDeckWrap}>
+                <FlatList
+                  data={virtues}
+                  keyExtractor={v => v.id}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onMomentumScrollEnd={(e) => {
+                    const idx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
+                    setActiveVirtueIdx(idx);
+                    setExpandedVirtueId(null);
+                  }}
+                  renderItem={({ item: v }) => {
+                    const expanded = expandedVirtueId === v.id;
+                    const detail = VIRTUE_DETAILS[v.id];
+                    return (
+                      <View style={{ width: screenWidth, paddingHorizontal: spacing.md }}>
+                        <TouchableOpacity
+                          style={s.virtueCard}
+                          onPress={() => { haptics.tap(); setExpandedVirtueId(expanded ? null : v.id); }}
+                          activeOpacity={0.85}
+                        >
+                          <View style={s.virtueImageWrap}>
+                            <Image source={v.image} style={s.virtueImage} resizeMode="cover" />
+                            <LinearGradient
+                              colors={['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.55)']}
+                              locations={[0.5, 1]}
+                              style={StyleSheet.absoluteFillObject}
+                            />
+                          </View>
+                          <View style={s.virtueBody}>
+                            <Text style={s.virtueName}>{v.name}</Text>
+                            <Text style={s.virtueDesc}>{v.desc}</Text>
+                            <View style={s.virtueDivider} />
+                            <Text style={s.virtueQuestion}>"{v.question}"</Text>
+                            {expanded && detail && (
+                              <View style={s.virtueExpand}>
+                                <View style={s.virtueDivider} />
+                                <Text style={s.virtueExpandText}>{detail.definition}</Text>
+                                <Text style={s.virtueExpandQuestion}>"{detail.question}"</Text>
+                              </View>
+                            )}
+                            <Text style={s.virtueChev}>{expanded ? '∨ Less' : '› More'}</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  }}
+                />
+              </View>
+              <View style={s.virtueDots}>
+                {virtues.map((v, i) => (
+                  <View key={v.id} style={[s.virtueDot, activeVirtueIdx === i && s.virtueDotActive]} />
+                ))}
+              </View>
             </View>
           )}
         </View>
@@ -326,6 +352,13 @@ const s = StyleSheet.create({
   virtueExpandText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontFamily: font.serif },
   virtueExpandQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22, fontStyle: 'italic', marginTop: 10 },
   virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 14, letterSpacing: 0.5 },
+  // Horizontal deck — extend beyond body padding so each page is full
+  // screen width. The card itself adds its own padding back via the
+  // wrapper around the renderItem.
+  virtueDeckWrap: { marginHorizontal: -spacing.md },
+  virtueDots: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 18, marginBottom: 8 },
+  virtueDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.borderMid },
+  virtueDotActive: { backgroundColor: colors.accent, transform: [{ scale: 1.4 }] },
   // Hint styles
   hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   hintLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
