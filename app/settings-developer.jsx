@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { cancelAllNotifications } from '../notifications';
-import { clearTodayPractice, sealTodayPractice } from '../store/db';
+import { clearTodayPractice, sealTodayPractice, seedWeekOfPracticeData } from '../store/db';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
@@ -68,6 +68,23 @@ export default function DeveloperSettingsScreen() {
     );
   }
 
+  function handleSeedWeek() {
+    Alert.alert(
+      'Seed a week of practice data?',
+      'Replaces existing journals and emotion logs with seven days of synthetic morning + evening entries and twelve emotion logs trending from high to low intensity. Useful for previewing the weekly review with realistic spread. Today is left untouched.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Seed',
+          onPress: async () => {
+            const r = await seedWeekOfPracticeData();
+            Alert.alert('', `Seeded ${r.journals} journal entries and ${r.triggers} emotion logs across the past 7 days. Open the Weekly Review to see the spread.`);
+          },
+        },
+      ]
+    );
+  }
+
   function handleSealTodayPractice() {
     Alert.alert(
       "Seal today's practice?",
@@ -111,6 +128,12 @@ export default function DeveloperSettingsScreen() {
           <TouchableOpacity style={s.resetBtn} onPress={handleSealTodayPractice} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Seal today's practice</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={s.resetBtn} onPress={handleSeedWeek} activeOpacity={0.8}>
+            <Text style={s.resetBtnText}>Seed week of practice data</Text>
+          </TouchableOpacity>
+          <Text style={s.helperText}>
+            Fills the past 7 days with morning + evening journals and 12 emotion logs trending down from high to low intensity. Sets streak to 7. Use this to preview the Weekly Review and trend visualizations.
+          </Text>
 
           <Text style={s.secLabel}>Onboarding</Text>
           <TouchableOpacity style={s.resetBtn} onPress={handleResetOnboarding} activeOpacity={0.8}>
@@ -140,7 +163,7 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
-  backRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, marginLeft: -4 },
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8, marginLeft: -4 },
   backArrow: { fontSize: 24, color: colors.accent },
   backLabel: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },

@@ -297,3 +297,103 @@ export async function updateTriggerEntry(updated) {
     return true;
   } catch (e) { return false; }
 }
+
+// Dev seed: 7 days of completed journals + a believable spread of emotion logs
+// with intensities trending down across the week, so weekly-review trend
+// visualizations have a clear directional signal to render. Wipes existing
+// journals and triggers so repeated presses stay idempotent. Today is left
+// untouched so the user can still test live practice on top.
+export async function seedWeekOfPracticeData() {
+  const dayMs = 86400000;
+  const now = Date.now();
+  const dayOffsets = [7, 6, 5, 4, 3, 2, 1];
+  const virtueRotation = ['wisdom', 'courage', 'justice', 'moderation', 'courage', 'wisdom', 'justice'];
+
+  const morningAnswers = [
+    { 0: 'Outcomes at work are not in my control. My focus and effort are.', 1: 'Telling my manager I cannot take on the third project this week.', 2: 'The performance-review write-up I have been postponing.', 3: 'Anxiety about the meeting at 2pm — meet it with preparation, not avoidance.' },
+    { 0: 'Other people\'s opinions of me are outside my control. My integrity is.', 1: 'Holding the line on the deadline I set for myself.', 2: 'Calling my father.', 3: 'A coworker may push back hard. Hear them, do not absorb their frustration.' },
+    { 0: 'Traffic, weather, what others say. I release these.', 1: 'Saying no to the after-work drinks I do not actually want.', 2: 'Reviewing the budget I have been avoiding.', 3: 'A difficult email may arrive. Read it once, respond once, do not relitigate.' },
+    { 0: 'I cannot control whether the deal closes. I can control how I prepare.', 1: 'Limiting myself to one coffee and stopping doomscrolling at lunch.', 2: 'Writing the apology message I owe.', 3: 'Tiredness will tempt me toward shortcuts. Slow down instead of rushing.' },
+    { 0: 'My reaction is mine. The provocation is not.', 1: 'Pushing back on the scope creep in this morning\'s standup.', 2: 'Booking the dentist appointment.', 3: 'Boredom in the afternoon. The sage works through dullness — they do not flee it.' },
+    { 0: 'How long this takes is not in my control. The quality of my attention is.', 1: 'Sitting with the discomfort of the hard conversation rather than rehearsing escape lines.', 2: 'The book I started six weeks ago.', 3: 'Comparison thoughts. They will arise. I will let them pass without engagement.' },
+    { 0: 'The outcome of the conversation is not mine. The honesty I bring to it is.', 1: 'Telling my friend the truth about the project even though it disappoints them.', 2: 'The thank-you note I owe.', 3: 'Fatigue. Meet it with steadiness — small steps, no dramatics.' },
+  ];
+
+  const eveningAnswers = [
+    { 0: 'Stayed calm when the deploy failed. Walked through the rollback methodically.', 1: 'Snapped at my partner over something small. The Stoic would have noticed the tiredness and held the comment.', 2: 'The lingering frustration about the meeting. It is over. I can put it down.', 3: 'A clear hour of focused work. Rare and worth noticing.' },
+    { 0: 'Said no, gently, to a request I did not have capacity for.', 1: 'Spent thirty minutes on social media when I had said I would read. The Stoic does what they planned.', 2: 'A worry about next month\'s rent. Tomorrow it will still be there. Tonight I let it go.', 3: 'A long walk after work. The cold air felt like a gift.' },
+    { 0: 'Kept my promise to call my father. The conversation went better than I expected.', 1: 'Cut someone off in the meeting. The Stoic would have waited and listened first.', 2: 'A regret about a decision I made last year. It is done. I cannot edit it.', 3: 'The meal a friend made for me. Simple food, presented with care.' },
+    { 0: 'Apologized clearly when I was wrong. No hedging.', 1: 'Avoided the difficult email until 4pm. I knew it was there. I should have opened it at 9.', 2: 'A small disappointment from a friend who did not show up. Not mine to carry overnight.', 3: 'My morning coffee. The exact taste of it. Attention paid.' },
+    { 0: 'Pushed back on the scope creep without making it personal.', 1: 'Ate too much at lunch out of boredom rather than hunger. The Stoic eats deliberately.', 2: 'A conversation that looped in my head. I have decided what I will say tomorrow. Tonight I sleep.', 3: 'Sunlight through the window in the afternoon. Five seconds of pure presence.' },
+    { 0: 'Sat with my discomfort during the hard conversation rather than rushing to resolve it.', 1: 'Refreshed my email three times in the last hour of the day. Not the practice I want.', 2: 'A small worry about my health. I have an appointment booked. The rest is not in my hands tonight.', 3: 'A line of poetry I read this morning that came back to me unprompted.' },
+    { 0: 'Told my friend the difficult truth, with kindness. They received it well.', 1: 'Was short with someone who asked me a reasonable question. I will follow up tomorrow.', 2: 'The sense that I am behind on something undefined. I will define it tomorrow morning. Tonight I rest.', 3: 'My health. Quiet, reliable, easy to forget.' },
+  ];
+
+  const journalsForWeek = [];
+  dayOffsets.forEach((offset, i) => {
+    const dayIso = new Date(now - offset * dayMs).toISOString();
+    journalsForWeek.push({
+      id: `seed-morning-${offset}-${now}`,
+      type: 'morning',
+      date: dayIso,
+      virtue: virtueRotation[i],
+      answers: morningAnswers[i],
+    });
+    journalsForWeek.push({
+      id: `seed-evening-${offset}-${now}`,
+      type: 'evening',
+      date: dayIso,
+      virtue: virtueRotation[i],
+      answers: eveningAnswers[i],
+    });
+  });
+
+  // 12 emotion logs spread across the week. Intensities trend down from 8
+  // early in the week to 3 late, so a weekly-review trend chart has a clear
+  // "got better" signal. Anxiety is the dominant emotion (~40%), so the
+  // breakdown bar chart shows a clean leader. Roughly half have a
+  // chosenResponse set, modeling reframes.
+  const triggerSpec = [
+    { offset: 7, hours: 11, emotion: 'anxiety',     intensity: 8, trigger: 'Manager scheduled an unexpected 1:1 for tomorrow.',                              reaction: 'Spiraled into worst-case scenarios for an hour.', chosen: '' },
+    { offset: 7, hours: 19, emotion: 'frustration', intensity: 7, trigger: 'Partner left dishes in the sink again after we agreed.',                          reaction: 'Snapped at them when they walked in.',           chosen: '' },
+    { offset: 6, hours: 9,  emotion: 'anger',       intensity: 8, trigger: 'Coworker took credit for my analysis in the team meeting.',                       reaction: 'Stewed about it for the rest of the morning.',   chosen: '' },
+    { offset: 6, hours: 16, emotion: 'anxiety',     intensity: 7, trigger: 'Saw an article about my industry that hit close to home.',                        reaction: 'Caught myself doomscrolling.',                   chosen: '' },
+    { offset: 5, hours: 14, emotion: 'envy',        intensity: 5, trigger: 'Saw a former classmate post about a promotion on LinkedIn.',                       reaction: 'Compared my last two years to theirs.',          chosen: '' },
+    { offset: 5, hours: 21, emotion: 'anxiety',     intensity: 6, trigger: 'Rent increase notice arrived in the mail.',                                       reaction: 'Tried to calculate everything at once.',         chosen: 'Acknowledge it, sit with it, and look at the numbers properly tomorrow with a clear head.' },
+    { offset: 4, hours: 10, emotion: 'frustration', intensity: 5, trigger: 'Build broke right before the demo.',                                              reaction: 'Felt my chest tighten.',                         chosen: '' },
+    { offset: 4, hours: 18, emotion: 'fear',        intensity: 5, trigger: 'Realized I had not prepared enough for tomorrow\'s presentation.',                reaction: 'Procrastinated more, ironically.',               chosen: 'I cannot make tomorrow not exist. I can prepare for the next ninety minutes. That is what is in my control.' },
+    { offset: 3, hours: 13, emotion: 'anxiety',     intensity: 4, trigger: 'Did not hear back from the recruiter for three days.',                            reaction: 'Wanted to send a follow-up immediately.',        chosen: 'Their silence is not about me. I will give it the rest of the week before following up. The wait is not mine to fill.' },
+    { offset: 3, hours: 22, emotion: 'grief',       intensity: 4, trigger: 'Anniversary of grandfather\'s death.',                                            reaction: 'Felt heavy all evening.',                        chosen: 'Sit with it. Honor him by remembering, not by performing okay-ness.' },
+    { offset: 2, hours: 12, emotion: 'frustration', intensity: 3, trigger: 'Traffic made me late to lunch.',                                                  reaction: 'Started planning angry texts in my head.',       chosen: 'The traffic is not in my control. My friend will understand. Arrive present, not still arguing with the cars.' },
+    { offset: 1, hours: 17, emotion: 'anxiety',     intensity: 3, trigger: 'Slight headache; first thought was the worst.',                                   reaction: 'Started searching symptoms.',                    chosen: 'Drink water, eat something, see if it passes. Most headaches are headaches.' },
+  ];
+  const triggers = triggerSpec.map((t, i) => {
+    const d = new Date(now - t.offset * dayMs);
+    d.setHours(t.hours, Math.floor(Math.random() * 60), 0, 0);
+    return {
+      id: `seed-trigger-${t.offset}-${i}-${now}`,
+      date: d.toISOString(),
+      emotion: t.emotion,
+      intensity: t.intensity,
+      timing: 'past',
+      trigger: t.trigger,
+      reaction: t.reaction,
+      stoicResponse: '',
+      chosenResponse: t.chosen,
+      distortions: [],
+    };
+  });
+
+  await AsyncStorage.setItem(KEYS.JOURNALS, JSON.stringify(journalsForWeek));
+  await AsyncStorage.setItem(KEYS.TRIGGERS, JSON.stringify(triggers));
+
+  const yesterday = new Date(now - dayMs).toDateString();
+  await AsyncStorage.setItem(KEYS.STREAK, JSON.stringify({
+    current: 7,
+    longest: 7,
+    totalDays: 7,
+    lastDate: yesterday,
+  }));
+
+  return { journals: journalsForWeek.length, triggers: triggers.length };
+}
