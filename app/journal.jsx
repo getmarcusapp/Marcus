@@ -55,7 +55,7 @@ const morningPrompts = [
   {
     num: 'II · Brace',
     q: 'Where will courage be required of me today?',
-    hint: "Courage (andreia) is one of the four cardinal virtues, but the Stoics meant something precise by it. Not recklessness, not aggression. The willingness to act rightly even when it is uncomfortable, costly, or unpopular.\n\nCourage is required whenever you know what the right thing is but feel resistance to doing it: the difficult conversation you've been avoiding, the boundary you need to hold, the work that demands your honest effort when distraction is easier.\n\nAsking this in the morning puts you on alert. You've named the moment before it arrives. When it comes, you've already decided.",
+    hint: "Courage (andreia) is one of the four cardinal Virtues, but the Stoics meant something precise by it. Not recklessness, not aggression. The willingness to act rightly even when it is uncomfortable, costly, or unpopular.\n\nCourage is required whenever you know what the right thing is but feel resistance to doing it: the difficult conversation you've been avoiding, the boundary you need to hold, the work that demands your honest effort when distraction is easier.\n\nAsking this in the morning puts you on alert. You've named the moment before it arrives. When it comes, you've already decided.",
   },
   {
     num: 'III · Name',
@@ -669,7 +669,7 @@ export default function JournalScreen() {
                   <Text style={s.emptyText}>
                     {isMorning
                       ? 'Four prompts each morning — what is in your control, where courage is required, what you are postponing, what difficulty might arise. Begin one when you are ready.'
-                      : 'Four movements each evening — where you acted with virtue, where you fell short, what you are carrying, and one thing that deserves your thanks.'}
+                      : 'Four movements each evening — where you acted with Virtue, where you fell short, what you are carrying, and one thing that deserves your thanks.'}
                   </Text>
                   <TouchableOpacity
                     style={s.emptyCta}

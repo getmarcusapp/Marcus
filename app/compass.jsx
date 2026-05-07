@@ -180,7 +180,7 @@ export default function CompassScreen() {
             )
           ) : (
             <View>
-              <Text style={s.secLabel}>The four cardinal virtues</Text>
+              <Text style={s.secLabel}>The four cardinal Virtues</Text>
               {virtues.map(v => (
                 <View key={v.id} style={s.virtueCard}>
                   <View style={s.virtueImageWrap}>

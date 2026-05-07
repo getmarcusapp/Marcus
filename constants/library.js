@@ -135,7 +135,7 @@ export const READING_LIST = [
     year: 2017,
     asin: '1541644530',
     isbn: '9781541644533',
-    why: "Pigliucci is a working philosopher who came to Stoicism in midlife. Frames the practice through imagined conversations with Epictetus and walks through the dichotomy of control, the role of virtue, and the ancient debates that shaped Stoic ethics. Less a manual than a thoughtful introduction.",
+    why: "Pigliucci is a working philosopher who came to Stoicism in midlife. Frames the practice through imagined conversations with Epictetus and walks through the dichotomy of control, the role of Virtue, and the ancient debates that shaped Stoic ethics. Less a manual than a thoughtful introduction.",
   },
   {
     id: 'robertson-roman-emperor',
@@ -285,6 +285,6 @@ export const READING_LIST = [
     year: -475,
     asin: '0231141653',
     isbn: '9780231141659',
-    why: "Twenty short books of fragments, conversations, and aphorisms collected by Confucius's students. The Watson translation is the most readable scholarly version. Less metaphysical than the Stoics; more concerned with how a person of integrity moves through political, family, and social life. Reads as a parallel manual on the Stoic virtue of justice.",
+    why: "Twenty short books of fragments, conversations, and aphorisms collected by Confucius's students. The Watson translation is the most readable scholarly version. Less metaphysical than the Stoics; more concerned with how a person of integrity moves through political, family, and social life. Reads as a parallel manual on the Stoic Virtue of justice.",
   },
 ];

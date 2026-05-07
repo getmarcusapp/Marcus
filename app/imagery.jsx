@@ -179,8 +179,8 @@ export default function ImageryScreen() {
           ))}
 
           <SectionHeader
-            eyebrow="The four virtues"
-            title="One artwork per virtue"
+            eyebrow="The four Virtues"
+            title="One artwork per Virtue"
             sub="Wisdom, Courage, Temperance, Justice — rotates daily on the practice screen."
           />
           {virtues.map(v => {

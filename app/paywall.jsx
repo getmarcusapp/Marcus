@@ -115,7 +115,7 @@ export default function PaywallScreen() {
             { icon: '◎', text: 'Daily compass, morning & evening journals' },
             { icon: '◎', text: 'Fresh Stoic readings every morning' },
             { icon: '◎', text: 'Emotion logger with Stoic reframes' },
-            { icon: '◎', text: 'Weekly virtue review' },
+            { icon: '◎', text: 'Weekly Virtue review' },
             { icon: '◎', text: 'No account. No data harvesting. Fully private.' },
           ].map((f, i) => (
             <View key={i} style={s.featureRow}>
