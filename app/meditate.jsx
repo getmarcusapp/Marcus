@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import {
   MEDITATIONS, MEDITATIONS_LIST,
@@ -119,13 +119,14 @@ export default function MeditateScreen() {
               </View>
               <View style={s.timeRow}>
                 <Text style={s.timeText}>{formatTime(position)}</Text>
-                <Text style={s.timeText}>{formatTime(duration)}</Text>
+                <Text style={s.timeText}>
+                  {duration > 0 ? `−${formatTime(duration - position)}` : formatTime(duration)}
+                </Text>
               </View>
 
               <View style={s.controls}>
                 <TouchableOpacity style={s.skipBtn} onPress={() => seek(-1)}>
-                  <Ionicons name="play-back" size={22} color={colors.textMuted} />
-                  <Text style={s.skipLabel}>15s</Text>
+                  <MaterialCommunityIcons name="rewind-15" size={30} color={colors.textMuted} />
                 </TouchableOpacity>
 
                 <TouchableOpacity style={s.playBtn} onPress={togglePlay}>
@@ -134,15 +135,15 @@ export default function MeditateScreen() {
                   ) : (
                     <Ionicons
                       name={isPlaying ? 'pause' : 'play'}
-                      size={28}
+                      size={22}
                       color={colors.bg}
+                      style={!isPlaying && { marginLeft: 2 }}
                     />
                   )}
                 </TouchableOpacity>
 
                 <TouchableOpacity style={s.skipBtn} onPress={() => seek(1)}>
-                  <Ionicons name="play-forward" size={22} color={colors.textMuted} />
-                  <Text style={s.skipLabel}>15s</Text>
+                  <MaterialCommunityIcons name="fast-forward-15" size={30} color={colors.textMuted} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -257,15 +258,14 @@ const s = StyleSheet.create({
 
   controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xl },
   playBtn: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  skipBtn: { alignItems: 'center', gap: 2 },
-  skipLabel: { fontSize: 10, color: colors.textDim },
+  skipBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 
   list: { paddingHorizontal: spacing.lg },
   sectionLabel: { fontSize: font.labelSize, color: colors.textDim, letterSpacing: 2, textTransform: 'uppercase', marginBottom: spacing.md },

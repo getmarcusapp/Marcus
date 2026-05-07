@@ -2,7 +2,7 @@ import React from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 import {
   MEDITATIONS, useMeditationPlayer,
@@ -66,19 +66,24 @@ export function MiniMeditationPlayer() {
         </TouchableOpacity>
         <View style={s.controls}>
           <TouchableOpacity onPress={() => seek(-15)} style={s.skipBtn}>
-            <Ionicons name="play-back" size={24} color={colors.textSecondary} />
-            <Text style={s.skipLabel}>15</Text>
+            <MaterialCommunityIcons name="rewind-15" size={26} color={colors.textSecondary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => toggle(med)} style={s.playBtn}>
-            {player.isLoading ? (
-              <ActivityIndicator color={colors.accent} size="small" />
-            ) : (
-              <Ionicons name={player.isPlaying ? 'pause' : 'play'} size={28} color={colors.accent} />
-            )}
+            <View style={s.playCircle}>
+              {player.isLoading ? (
+                <ActivityIndicator color={colors.accent} size="small" />
+              ) : (
+                <Ionicons
+                  name={player.isPlaying ? 'pause' : 'play'}
+                  size={20}
+                  color={colors.accent}
+                  style={!player.isPlaying && { marginLeft: 2 }}
+                />
+              )}
+            </View>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => seek(15)} style={s.skipBtn}>
-            <Ionicons name="play-forward" size={24} color={colors.textSecondary} />
-            <Text style={s.skipLabel}>15</Text>
+            <MaterialCommunityIcons name="fast-forward-15" size={26} color={colors.textSecondary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => unload()} style={s.closeBtn}>
             <Ionicons name="close" size={22} color={colors.textDim} />
@@ -123,9 +128,14 @@ const s = StyleSheet.create({
     width: 44, height: 44,
     alignItems: 'center', justifyContent: 'center',
   },
-  skipLabel: { fontSize: 10, color: colors.textDim, marginTop: -2, letterSpacing: 0.3, fontWeight: '500' },
   playBtn: {
-    width: 44, height: 44, borderRadius: 22,
+    width: 44, height: 44,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  playCircle: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: colors.accentBg,
+    borderWidth: 0.5, borderColor: colors.accentDim,
     alignItems: 'center', justifyContent: 'center',
   },
   closeBtn: {
