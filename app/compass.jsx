@@ -86,7 +86,7 @@ export default function CompassScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
 
         <View style={s.hero}>
           <Image

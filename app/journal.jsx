@@ -364,7 +364,7 @@ export default function JournalScreen() {
           scrollIndicatorInsets={{ bottom: 40 }}
           contentContainerStyle={{ paddingBottom: playerInset }}
           style={s.scroll}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
         >

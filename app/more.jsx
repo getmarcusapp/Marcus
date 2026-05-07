@@ -45,7 +45,7 @@ export default function MoreScreen() {
     <SafeAreaView style={s.safe}>
       <ScrollView
         style={s.scroll}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 

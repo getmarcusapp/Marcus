@@ -222,7 +222,7 @@ export default function PracticeScreen() {
         <ScrollView
           ref={sealedScrollRef}
           style={s.scroll}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           contentContainerStyle={{ paddingBottom: playerInset }}
         >
 
@@ -349,7 +349,7 @@ export default function PracticeScreen() {
     <SafeAreaView style={s.safe}>
       <ScrollView
         style={s.scroll}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 

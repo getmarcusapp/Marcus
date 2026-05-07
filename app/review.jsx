@@ -259,7 +259,7 @@ export default function ReviewScreen() {
       >
         <ScrollView
           style={s.scroll}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           keyboardDismissMode="on-drag"
           contentInset={{ bottom: 60 }}
           scrollIndicatorInsets={{ bottom: 60 }}
