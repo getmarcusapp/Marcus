@@ -10,7 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
-import { virtues } from '../constants/virtues';
+import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed, cancelJournalNotification } from '../notifications';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -35,13 +35,6 @@ const virtuePronunciations = {
   andreia: 'an-DRAY-ah',
   sophrosyne: 'soh-FROH-sih-nee',
   dikaiosyne: 'dee-KAY-oh-sih-nee',
-};
-
-const virtueDetails = {
-  wisdom: { definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly, not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
-  courage: { definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
-  moderation: { definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation: the disciplined middle path.', question: 'Where am I in excess today?' },
-  justice: { definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
 };
 
 // Pick a meditation contextual to the time of day:
@@ -292,8 +285,8 @@ export default function PracticeScreen() {
                 {virtueExpanded && (
                   <View style={s.virtueDetail}>
                     <View style={s.virtueDivider} />
-                    <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
-                    <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
+                    <Text style={s.virtueDetailText}>{VIRTUE_DETAILS[todayVirtue.id]?.definition}</Text>
+                    <Text style={s.virtueDetailQuestion}>"{VIRTUE_DETAILS[todayVirtue.id]?.question}"</Text>
                   </View>
                 )}
                 <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
@@ -525,8 +518,8 @@ export default function PracticeScreen() {
               {virtueExpanded && (
                 <View style={s.virtueDetail}>
                   <View style={s.virtueDivider} />
-                  <Text style={s.virtueDetailText}>{virtueDetails[todayVirtue.id]?.definition}</Text>
-                  <Text style={s.virtueDetailQuestion}>"{virtueDetails[todayVirtue.id]?.question}"</Text>
+                  <Text style={s.virtueDetailText}>{VIRTUE_DETAILS[todayVirtue.id]?.definition}</Text>
+                  <Text style={s.virtueDetailQuestion}>"{VIRTUE_DETAILS[todayVirtue.id]?.question}"</Text>
                 </View>
               )}
               <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>

@@ -6,7 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { virtues } from '../constants/virtues';
+import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { getCompass, saveCompass } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
 import * as haptics from '../lib/haptics';
@@ -41,6 +41,9 @@ export default function CompassScreen() {
   const [draft, setDraft] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
   const [nextStep, setNextStep] = useState(null);
+  // Single-virtue accordion: only one Virtue card expanded at a time so
+  // the page doesn't sprawl. null = all collapsed.
+  const [expandedVirtueId, setExpandedVirtueId] = useState(null);
   const commitMindfulSession = useMindfulSession();
 
   useEffect(() => {
@@ -181,24 +184,41 @@ export default function CompassScreen() {
           ) : (
             <View>
               <Text style={s.secLabel}>The four cardinal Virtues</Text>
-              {virtues.map(v => (
-                <View key={v.id} style={s.virtueCard}>
-                  <View style={s.virtueImageWrap}>
-                    <Image source={v.image} style={s.virtueImage} resizeMode="cover" />
-                    <LinearGradient
-                      colors={['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.55)']}
-                      locations={[0.5, 1]}
-                      style={StyleSheet.absoluteFillObject}
-                    />
-                  </View>
-                  <View style={s.virtueBody}>
-                    <Text style={s.virtueName}>{v.name}</Text>
-                    <Text style={s.virtueDesc}>{v.desc}</Text>
-                    <View style={s.virtueDivider} />
-                    <Text style={s.virtueQuestion}>"{v.question}"</Text>
-                  </View>
-                </View>
-              ))}
+              {virtues.map(v => {
+                const expanded = expandedVirtueId === v.id;
+                const detail = VIRTUE_DETAILS[v.id];
+                return (
+                  <TouchableOpacity
+                    key={v.id}
+                    style={s.virtueCard}
+                    onPress={() => { haptics.tap(); setExpandedVirtueId(expanded ? null : v.id); }}
+                    activeOpacity={0.85}
+                  >
+                    <View style={s.virtueImageWrap}>
+                      <Image source={v.image} style={s.virtueImage} resizeMode="cover" />
+                      <LinearGradient
+                        colors={['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.55)']}
+                        locations={[0.5, 1]}
+                        style={StyleSheet.absoluteFillObject}
+                      />
+                    </View>
+                    <View style={s.virtueBody}>
+                      <Text style={s.virtueName}>{v.name}</Text>
+                      <Text style={s.virtueDesc}>{v.desc}</Text>
+                      <View style={s.virtueDivider} />
+                      <Text style={s.virtueQuestion}>"{v.question}"</Text>
+                      {expanded && detail && (
+                        <View style={s.virtueExpand}>
+                          <View style={s.virtueDivider} />
+                          <Text style={s.virtueExpandText}>{detail.definition}</Text>
+                          <Text style={s.virtueExpandQuestion}>"{detail.question}"</Text>
+                        </View>
+                      )}
+                      <Text style={s.virtueChev}>{expanded ? '∨ Less' : '› More'}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
         </View>
@@ -302,6 +322,10 @@ const s = StyleSheet.create({
   virtueDesc: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
   virtueDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   virtueQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
+  virtueExpand: { marginTop: 0 },
+  virtueExpandText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontFamily: font.serif },
+  virtueExpandQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22, fontStyle: 'italic', marginTop: 10 },
+  virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 14, letterSpacing: 0.5 },
   // Hint styles
   hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   hintLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },

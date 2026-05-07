@@ -13,7 +13,7 @@ import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { colors, radius, spacing, font } from '../constants/theme';
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
-import { virtues } from '../constants/virtues';
+import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
 import { cancelJournalNotification } from '../notifications';
@@ -98,13 +98,6 @@ const virtuePronunciations = {
   andreia: 'an-DRAY-ah',
   sophrosyne: 'soh-FROH-sih-nee',
   dikaiosyne: 'dee-KAY-oh-sih-nee',
-};
-
-const virtueDetails = {
-  wisdom: {definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly, not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
-  courage: {definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
-  moderation: {definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation: the disciplined middle path.', question: 'Where am I in excess today?' },
-  justice: {definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
 };
 
 function JournalEntryEditor({ entry, onSave, onCancel }) {
@@ -283,7 +276,7 @@ export default function JournalScreen() {
 
   const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, prompts.length);
   const selectedVirtueObj = virtues.find(v => v.id === selectedVirtue);
-  const virtueDetail = virtueDetails[selectedVirtue];
+  const virtueDetail = VIRTUE_DETAILS[selectedVirtue];
 
   async function handleSave() {
     const entry = {

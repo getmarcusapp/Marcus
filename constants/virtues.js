@@ -48,6 +48,17 @@ export const emotions = [
   { id: 'other', label: 'Other' },
 ];
 
+// Deeper definition + sharper question per Virtue, used by the expandable
+// virtue cards on Practice, Compass, and the Journal Virtue picker. The
+// `virtues` array above carries the short hero copy; this map carries the
+// elaboration shown when the user taps "More".
+export const VIRTUE_DETAILS = {
+  wisdom: { definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly, not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
+  courage: { definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
+  moderation: { definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation: the disciplined middle path.', question: 'Where am I in excess today?' },
+  justice: { definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
+};
+
 export const stoicReframes = {
   anger: "Is this worth your peace? Their action is not in your control. Your response is. What does the situation actually require of you?",
   anxiety: "Separate what is in your control from what is not. Attend only to the former. The rest is not yours to carry.",
