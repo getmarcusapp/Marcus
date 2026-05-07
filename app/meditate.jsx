@@ -58,24 +58,31 @@ export default function MeditateScreen() {
 
   // Contextual meditation for the page hero (matches the practice card pick):
   // morning -> Premeditatio, midday -> View From Above, evening -> Evening Examination.
+  // Only shown when nothing is selected — once a meditation is loaded, the
+  // player below carries the visual weight and the header drops the image
+  // to avoid stacking the same painting twice on the page.
   const hour = new Date().getHours();
   const contextualMed =
     hour >= 5 && hour < 12 ? MEDITATIONS['premeditatio']
     : hour >= 18 || hour < 5 ? MEDITATIONS['evening-examination']
     : MEDITATIONS['view-from-above'];
-  const headerMed = selected || contextualMed;
+  const showHeaderImage = !selected;
 
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
 
-        <View style={s.header}>
-          <Image source={headerMed.image} style={s.headerImage} resizeMode="cover" />
-          <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.78)']}
-            locations={[0, 0.55, 1]}
-            style={StyleSheet.absoluteFillObject}
-          />
+        <View style={[s.header, !showHeaderImage && s.headerCompact]}>
+          {showHeaderImage && (
+            <>
+              <Image source={contextualMed.image} style={s.headerImage} resizeMode="cover" />
+              <LinearGradient
+                colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.78)']}
+                locations={[0, 0.55, 1]}
+                style={StyleSheet.absoluteFillObject}
+              />
+            </>
+          )}
           <View style={s.headerContent}>
             <TouchableOpacity style={s.backRow} onPress={() => router.replace(fromPath)}>
               <Text style={s.backArrow}>‹</Text>
@@ -193,6 +200,15 @@ const s = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
     justifyContent: 'flex-end',
+  },
+  // Compact header used when a meditation is selected — drops the image
+  // so it doesn't stack with the player below. Plain dark, just enough
+  // height for the back link + 'Meditations' title.
+  headerCompact: {
+    minHeight: 0,
+    backgroundColor: colors.bgDeep,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
   },
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   headerContent: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xl },
