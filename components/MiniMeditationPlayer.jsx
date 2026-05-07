@@ -12,6 +12,16 @@ import { colors, radius } from '../constants/theme';
 
 const TAB_BAR_HEIGHT = 84;
 
+// Approximate rendered height of the mini player (progress bar + body).
+// Tab screens add this as bottom padding to their scrolls when the player
+// is active so the last row isn't hidden behind the overlay.
+export const MINI_PLAYER_HEIGHT = 64;
+
+export function useMiniPlayerInset() {
+  const player = useMeditationPlayer();
+  return player.currentMedId ? MINI_PLAYER_HEIGHT : 0;
+}
+
 // Routes where the mini-player should NOT show: the full meditate screen
 // already has its own player, and onboarding/paywall hide the tab bar.
 const HIDDEN_ROUTES = new Set(['/meditate', '/onboarding', '/paywall']);

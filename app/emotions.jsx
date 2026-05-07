@@ -10,6 +10,7 @@ import { emotions, stoicReframes } from '../constants/virtues';
 import { saveTrigger, getTriggers, updateTriggerEntry } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 const EMOTION_COLORS = {
   anger:       { bg: '#FDF0EF', border: '#E8A09A', text: '#C0504A', tint: 'rgba(232,160,154,0.12)' },
@@ -95,6 +96,7 @@ function groupByMonth(entries) {
 }
 
 export default function EmotionsScreen() {
+  const playerInset = useMiniPlayerInset();
   const [tab, setTab] = useState('log');
   const [timing, setTiming] = useState('past'); // 'now' or 'past'
   const [selectedEmotion, setSelectedEmotion] = useState(null);
@@ -203,6 +205,7 @@ export default function EmotionsScreen() {
         <ScrollView
           contentInset={{ bottom: 40 }}
           scrollIndicatorInsets={{ bottom: 40 }}
+          contentContainerStyle={{ paddingBottom: playerInset }}
           style={s.scroll}
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"

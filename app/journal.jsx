@@ -9,6 +9,7 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { colors, radius, spacing, font } from '../constants/theme';
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
@@ -211,6 +212,7 @@ function groupByMonth(entries) {
 
 export default function JournalScreen() {
   const router = useRouter();
+  const playerInset = useMiniPlayerInset();
   const params = useLocalSearchParams();
   const fromPractice = !!params?.type;
   const fromPath = params?.from || '/';
@@ -367,6 +369,7 @@ export default function JournalScreen() {
         <ScrollView
           contentInset={{ bottom: 40 }}
           scrollIndicatorInsets={{ bottom: 40 }}
+          contentContainerStyle={{ paddingBottom: playerInset }}
           style={s.scroll}
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"

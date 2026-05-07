@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import { getStreak } from '../store/db';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 const menuItems = [
   {
@@ -34,6 +35,7 @@ const menuItems = [
 export default function MoreScreen() {
   const router = useRouter();
   const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
+  const playerInset = useMiniPlayerInset();
 
   useEffect(() => {
     getStreak().then(s => setStreak(s || { current: 0, longest: 0, totalDays: 0 }));
@@ -41,7 +43,11 @@ export default function MoreScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={s.scroll}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: playerInset }}
+      >
 
         <View style={s.hero}>
           <Text style={s.title}>Marcus</Text>

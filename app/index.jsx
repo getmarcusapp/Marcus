@@ -4,6 +4,7 @@ import {
   StyleSheet, SafeAreaView, Image, Animated, ActivityIndicator,
 } from 'react-native';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -55,6 +56,7 @@ function pickContextualMeditation() {
 
 export default function PracticeScreen() {
   const router = useRouter();
+  const playerInset = useMiniPlayerInset();
   const [morningDone, setMorningDone] = useState(false);
   const [eveningDone, setEveningDone] = useState(false);
   const [compassDone, setCompassDone] = useState(false);
@@ -224,7 +226,12 @@ export default function PracticeScreen() {
   if (allDone) {
     return (
       <SafeAreaView style={s.safe}>
-        <ScrollView ref={sealedScrollRef} style={s.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          ref={sealedScrollRef}
+          style={s.scroll}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: playerInset }}
+        >
 
           <AnimatedLinearGradient
             colors={HERO_GRADIENT}
@@ -347,7 +354,11 @@ export default function PracticeScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={s.scroll}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: playerInset }}
+      >
 
         <LinearGradient
           colors={HERO_GRADIENT}

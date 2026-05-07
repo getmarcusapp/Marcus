@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Alert, Share, Linking, Switch,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getJournals, getTriggers, getStreak } from '../store/db';
@@ -40,7 +40,10 @@ export default function SettingsScreen() {
   const [authLabel, setAuthLabel] = useState('FaceID');
   const { lockEnabled } = useAppLock();
 
-  useEffect(() => {
+  // Re-load on focus (not just mount) so the reminder summary refreshes
+  // when the user returns from the Notifications subscreen — otherwise
+  // toggling reminders there leaves the "X of 5 active" line stale.
+  useFocusEffect(useCallback(() => {
     (async () => {
       const asked = await AsyncStorage.getItem('health_permission_asked');
       setHealthAsked(asked === 'true');
@@ -56,7 +59,7 @@ export default function SettingsScreen() {
       }
       try { setAuthLabel(await getSupportedAuthLabel()); } catch {}
     })();
-  }, []);
+  }, []));
 
   async function handleConnectHealth() {
     if (healthAsked) {
