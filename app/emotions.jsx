@@ -248,6 +248,10 @@ export default function EmotionsScreen() {
           {tab === 'log' ? (
             <View style={s.body}>
 
+              <Text style={s.scopeNote}>
+                Bring disturbance here for examination. Gratitude and joy live in the evening journal.
+              </Text>
+
               <Text style={s.stageLabel}>I · Context</Text>
               <Text style={s.secLabel}>When did this happen?</Text>
               <View style={s.timingRow}>
@@ -676,6 +680,7 @@ const s = StyleSheet.create({
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
   stageLabel: { fontSize: 11, letterSpacing: 3, color: colors.accentDim, textTransform: 'uppercase', marginTop: 24, marginBottom: 4 },
+  scopeNote: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', lineHeight: 20, marginTop: 4, marginBottom: 4 },
   timingRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 16, backgroundColor: colors.bgElevated },
   timingBtnActive: { borderColor: colors.textSecondary, backgroundColor: colors.bgElevated },
