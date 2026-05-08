@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { TiltingSkull } from '../components/TiltingSkull';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -236,10 +237,9 @@ export default function PracticeScreen() {
             end={{ x: 0.5, y: 1 }}
             style={[s.heroSealed, sealedAnimStyle(0)]}
           >
-            <Image
+            <TiltingSkull
               source={require('../assets/skull.png')}
               style={s.skullIconSealed}
-              resizeMode="contain"
             />
             <Text style={s.sealedEyebrow}>{reviewDone && isReviewDay ? 'Week sealed' : 'Practice complete'}</Text>
             <Text style={s.sealedDate}>{dateStr}</Text>
@@ -363,10 +363,9 @@ export default function PracticeScreen() {
           end={{ x: 0.5, y: 1 }}
           style={s.hero}
         >
-          <Image
+          <TiltingSkull
             source={require('../assets/skull.png')}
             style={s.skullIcon}
-            resizeMode="contain"
           />
           <Animated.Text style={[s.eyebrow, { opacity: eyebrowOpacity }]}>{eyebrowText}</Animated.Text>
           <Text style={s.heroDate}>{dateStr}</Text>
