@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
-import { TiltingSkull } from '../components/TiltingSkull';
+import { useDeviceTilt } from '../lib/useDeviceTilt';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -51,6 +51,7 @@ function pickContextualMeditation() {
 export default function PracticeScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
+  const { tiltTransform } = useDeviceTilt();
   const [morningDone, setMorningDone] = useState(false);
   const [eveningDone, setEveningDone] = useState(false);
   const [compassDone, setCompassDone] = useState(false);
@@ -237,20 +238,23 @@ export default function PracticeScreen() {
             end={{ x: 0.5, y: 1 }}
             style={[s.heroSealed, sealedAnimStyle(0)]}
           >
-            <TiltingSkull
-              source={require('../assets/skull.png')}
-              style={s.skullIconSealed}
-            />
-            <Text style={s.sealedEyebrow}>{reviewDone && isReviewDay ? 'Week sealed' : 'Practice complete'}</Text>
-            <Text style={s.sealedDate}>{dateStr}</Text>
-            <Animated.Text
-              style={[
-                s.sealedStreak,
-                { opacity: streakOpacity, transform: [{ scale: streakScale }] },
-              ]}
-            >
-              {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
-            </Animated.Text>
+            <Animated.View style={[s.heroTiltGroup, tiltTransform]}>
+              <Image
+                source={require('../assets/skull.png')}
+                style={s.skullIconSealed}
+                resizeMode="contain"
+              />
+              <Text style={s.sealedEyebrow}>{reviewDone && isReviewDay ? 'Week sealed' : 'Practice complete'}</Text>
+              <Text style={s.sealedDate}>{dateStr}</Text>
+              <Animated.Text
+                style={[
+                  s.sealedStreak,
+                  { opacity: streakOpacity, transform: [{ scale: streakScale }] },
+                ]}
+              >
+                {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
+              </Animated.Text>
+            </Animated.View>
           </AnimatedLinearGradient>
 
           <Animated.View style={[s.sealedCard, sealedAnimStyle(1)]}>
@@ -363,15 +367,18 @@ export default function PracticeScreen() {
           end={{ x: 0.5, y: 1 }}
           style={s.hero}
         >
-          <TiltingSkull
-            source={require('../assets/skull.png')}
-            style={s.skullIcon}
-          />
-          <Animated.Text style={[s.eyebrow, { opacity: eyebrowOpacity }]}>{eyebrowText}</Animated.Text>
-          <Text style={s.heroDate}>{dateStr}</Text>
-          <Text style={s.heroSub}>
-            {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
-          </Text>
+          <Animated.View style={[s.heroTiltGroup, tiltTransform]}>
+            <Image
+              source={require('../assets/skull.png')}
+              style={s.skullIcon}
+              resizeMode="contain"
+            />
+            <Animated.Text style={[s.eyebrow, { opacity: eyebrowOpacity }]}>{eyebrowText}</Animated.Text>
+            <Text style={s.heroDate}>{dateStr}</Text>
+            <Text style={s.heroSub}>
+              {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
+            </Text>
+          </Animated.View>
         </LinearGradient>
 
         <View style={s.quoteCard}>
@@ -594,6 +601,11 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     alignItems: 'center',
   },
+  // Wrapper for the parallax-tilt — keeps the skull and the surrounding
+  // text "locked together" so the whole hero block tilts as a single
+  // 3D plane facing the user, instead of the skull floating against
+  // static text.
+  heroTiltGroup: { alignItems: 'center', alignSelf: 'stretch' },
   skullIcon: { width: 180, height: 180, marginBottom: 20, opacity: 0.9 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
   heroDate: { fontSize: font.heroSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -1, marginBottom: 8, textAlign: 'center' },
