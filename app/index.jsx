@@ -238,23 +238,21 @@ export default function PracticeScreen() {
             end={{ x: 0.5, y: 1 }}
             style={[s.heroSealed, sealedAnimStyle(0)]}
           >
-            <Animated.View style={[s.heroTiltGroup, tiltTransform]}>
-              <Image
-                source={require('../assets/skull.png')}
-                style={s.skullIconSealed}
-                resizeMode="contain"
-              />
-              <Text style={s.sealedEyebrow}>{reviewDone && isReviewDay ? 'Week sealed' : 'Practice complete'}</Text>
-              <Text style={s.sealedDate}>{dateStr}</Text>
-              <Animated.Text
-                style={[
-                  s.sealedStreak,
-                  { opacity: streakOpacity, transform: [{ scale: streakScale }] },
-                ]}
-              >
-                {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
-              </Animated.Text>
-            </Animated.View>
+            <Animated.Image
+              source={require('../assets/skull.png')}
+              style={[s.skullIconSealed, tiltTransform]}
+              resizeMode="contain"
+            />
+            <Text style={s.sealedEyebrow}>{reviewDone && isReviewDay ? 'Week sealed' : 'Practice complete'}</Text>
+            <Text style={s.sealedDate}>{dateStr}</Text>
+            <Animated.Text
+              style={[
+                s.sealedStreak,
+                { opacity: streakOpacity, transform: [{ scale: streakScale }] },
+              ]}
+            >
+              {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
+            </Animated.Text>
           </AnimatedLinearGradient>
 
           <Animated.View style={[s.sealedCard, sealedAnimStyle(1)]}>
@@ -367,18 +365,16 @@ export default function PracticeScreen() {
           end={{ x: 0.5, y: 1 }}
           style={s.hero}
         >
-          <Animated.View style={[s.heroTiltGroup, tiltTransform]}>
-            <Image
-              source={require('../assets/skull.png')}
-              style={s.skullIcon}
-              resizeMode="contain"
-            />
-            <Animated.Text style={[s.eyebrow, { opacity: eyebrowOpacity }]}>{eyebrowText}</Animated.Text>
-            <Text style={s.heroDate}>{dateStr}</Text>
-            <Text style={s.heroSub}>
-              {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
-            </Text>
-          </Animated.View>
+          <Animated.Image
+            source={require('../assets/skull.png')}
+            style={[s.skullIcon, tiltTransform]}
+            resizeMode="contain"
+          />
+          <Animated.Text style={[s.eyebrow, { opacity: eyebrowOpacity }]}>{eyebrowText}</Animated.Text>
+          <Text style={s.heroDate}>{dateStr}</Text>
+          <Text style={s.heroSub}>
+            {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
+          </Text>
         </LinearGradient>
 
         <View style={s.quoteCard}>
@@ -601,11 +597,6 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     alignItems: 'center',
   },
-  // Wrapper for the parallax-tilt — keeps the skull and the surrounding
-  // text "locked together" so the whole hero block tilts as a single
-  // 3D plane facing the user, instead of the skull floating against
-  // static text.
-  heroTiltGroup: { alignItems: 'center', alignSelf: 'stretch' },
   skullIcon: { width: 180, height: 180, marginBottom: 20, opacity: 0.9 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
   heroDate: { fontSize: font.heroSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -1, marginBottom: 8, textAlign: 'center' },
