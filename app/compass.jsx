@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput,
-  TouchableOpacity, StyleSheet, SafeAreaView, Image,
-  FlatList, useWindowDimensions,
+  TouchableOpacity, StyleSheet, SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { getCompass, saveCompass, getRoles, saveRoles } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
 import * as haptics from '../lib/haptics';
@@ -32,7 +30,7 @@ const COMPASS_HINTS = {
   },
 };
 
-const tabs = ['Why', 'Overcome', 'Aspire', 'Roles', 'Virtues'];
+const tabs = ['Why', 'Overcome', 'Aspire', 'Roles'];
 const tabKeys = ['why', 'overcome', 'aspire'];
 
 // Suggested roles offered in the empty state. Users tap to add. Kept
@@ -55,25 +53,15 @@ export default function CompassScreen() {
   const params = useLocalSearchParams();
   const fromPath = params?.from || '/';
   const fromLabel = params?.fromLabel || 'Practice';
-  // Allow callers to deep-link to a specific Compass tab via ?tab=roles
+  // Allow callers to deep-link to the Roles tab via ?tab=roles
   // (used by the daily Role card on Practice).
-  const initialTabIdx = params?.tab === 'roles' ? 3
-    : params?.tab === 'virtues' ? 4
-    : 0;
+  const initialTabIdx = params?.tab === 'roles' ? 3 : 0;
   const [activeTab, setActiveTab] = useState(initialTabIdx);
   const [compass, setCompass] = useState(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
   const [nextStep, setNextStep] = useState(null);
-  // Single-virtue accordion: only one Virtue card expanded at a time so
-  // the page doesn't sprawl. null = all collapsed.
-  const [expandedVirtueId, setExpandedVirtueId] = useState(null);
-  // Horizontal Virtue carousel — full-width swipeable deck. Track the
-  // active page so we can render the bottom dot indicator and collapse
-  // the prior card when the user swipes.
-  const [activeVirtueIdx, setActiveVirtueIdx] = useState(0);
-  const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const commitMindfulSession = useMindfulSession();
   // Roles tab state — list of {id, name, commitment}. editingRole is
@@ -391,66 +379,7 @@ export default function CompassScreen() {
                 </View>
               )}
             </View>
-          ) : (
-            <View>
-              <Text style={s.secLabel}>The four cardinal Virtues</Text>
-              <View style={s.virtueDeckWrap}>
-                <FlatList
-                  data={virtues}
-                  keyExtractor={v => v.id}
-                  horizontal
-                  pagingEnabled
-                  showsHorizontalScrollIndicator={false}
-                  onMomentumScrollEnd={(e) => {
-                    const idx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
-                    setActiveVirtueIdx(idx);
-                    setExpandedVirtueId(null);
-                  }}
-                  renderItem={({ item: v }) => {
-                    const expanded = expandedVirtueId === v.id;
-                    const detail = VIRTUE_DETAILS[v.id];
-                    return (
-                      <View style={{ width: screenWidth, paddingHorizontal: spacing.md }}>
-                        <TouchableOpacity
-                          style={s.virtueCard}
-                          onPress={() => { haptics.tap(); setExpandedVirtueId(expanded ? null : v.id); }}
-                          activeOpacity={0.85}
-                        >
-                          <View style={s.virtueImageWrap}>
-                            <Image source={v.image} style={s.virtueImage} resizeMode="cover" />
-                            <LinearGradient
-                              colors={['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.55)']}
-                              locations={[0.5, 1]}
-                              style={StyleSheet.absoluteFillObject}
-                            />
-                          </View>
-                          <View style={s.virtueBody}>
-                            <Text style={s.virtueName}>{v.name}</Text>
-                            <Text style={s.virtueDesc}>{v.desc}</Text>
-                            <View style={s.virtueDivider} />
-                            <Text style={s.virtueQuestion}>"{v.question}"</Text>
-                            {expanded && detail && (
-                              <View style={s.virtueExpand}>
-                                <View style={s.virtueDivider} />
-                                <Text style={s.virtueExpandText}>{detail.definition}</Text>
-                                <Text style={s.virtueExpandQuestion}>"{detail.question}"</Text>
-                              </View>
-                            )}
-                            <Text style={s.virtueChev}>{expanded ? '∨ Less' : '› More'}</Text>
-                          </View>
-                        </TouchableOpacity>
-                      </View>
-                    );
-                  }}
-                />
-              </View>
-              <View style={s.virtueDots}>
-                {virtues.map((v, i) => (
-                  <View key={v.id} style={[s.virtueDot, activeVirtueIdx === i && s.virtueDotActive]} />
-                ))}
-              </View>
-            </View>
-          )}
+          ) : null}
         </View>
 
       </ScrollView>
@@ -536,32 +465,6 @@ const s = StyleSheet.create({
   editBtnSave: { borderColor: colors.borderMid, backgroundColor: colors.bgElevated },
   editBtnText: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 14 },
-  virtueCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    marginBottom: 12, backgroundColor: colors.bgElevated,
-    overflow: 'hidden',
-  },
-  virtueImageWrap: {
-    width: '100%', height: 120, backgroundColor: '#000',
-    position: 'relative', overflow: 'hidden',
-  },
-  virtueImage: { width: '100%', height: '100%' },
-  virtueBody: { padding: 22 },
-  virtueName: { fontSize: 22, fontWeight: '400', color: colors.textPrimary, marginBottom: 8 },
-  virtueDesc: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
-  virtueDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
-  virtueQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
-  virtueExpand: { marginTop: 0 },
-  virtueExpandText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontFamily: font.serif },
-  virtueExpandQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22, fontStyle: 'italic', marginTop: 10 },
-  virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 14, letterSpacing: 0.5 },
-  // Horizontal deck — extend beyond body padding so each page is full
-  // screen width. The card itself adds its own padding back via the
-  // wrapper around the renderItem.
-  virtueDeckWrap: { marginHorizontal: -spacing.md },
-  virtueDots: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 18, marginBottom: 8 },
-  virtueDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.borderMid },
-  virtueDotActive: { backgroundColor: colors.accent, transform: [{ scale: 1.4 }] },
 
   // Roles tab
   rolesEmpty: { fontSize: 14, color: colors.textMuted, lineHeight: 22, marginBottom: 18, fontStyle: 'italic' },
