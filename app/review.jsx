@@ -63,7 +63,7 @@ export default function ReviewScreen() {
   const [bestVirtue, setBestVirtue] = useState(virtues[0].id);
   const [worstVirtue, setWorstVirtue] = useState(virtues[3].id);
   const [intention, setIntention] = useState('');
-  const [openPrompt, setOpenPrompt] = useState(0);
+  const [openPrompt, setOpenPrompt] = useState(-1);
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
   const intentionInputRef = useRef(null);
