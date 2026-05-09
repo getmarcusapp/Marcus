@@ -212,7 +212,7 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  headerContent: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xl },
+  headerContent: { paddingHorizontal: spacing.lg, paddingTop: 36, paddingBottom: spacing.xl },
   backRow: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: 'rgba(0,0,0,0.55)',

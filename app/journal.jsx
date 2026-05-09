@@ -846,7 +846,7 @@ const s = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  headerContent: { padding: spacing.xl, paddingTop: spacing.lg },
+  headerContent: { padding: spacing.xl, paddingTop: 36 },
   typeToggle: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   typeBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgCard },
   typeBtnActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
