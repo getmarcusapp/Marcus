@@ -14,11 +14,11 @@ const sections = [
   },
   {
     title: 'The daily practice',
-    content: 'Each day has four core elements:\n\n1. Stoic Compass: Read your personal North Star to anchor your intentions.\n\n2. Daily Reading: A quote generated fresh each day, personalized to your Virtue focus and compass. Switch between Timeless mode (drawn from the Stoic canon, untethered to news) and Topical mode (tied to a verified current event from the past 48 hours). Default is timeless. The mode toggle lives below the reading.\n\n3. Morning Journal: Set your Virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening Journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.',
+    content: 'Each day has four core elements:\n\n1. Stoic Compass: Read your personal North Star to anchor your intentions.\n\n2. Daily Reading: A quote generated fresh each day, personalized to your Virtue focus and compass. Switch between Timeless mode (drawn from the Stoic canon, untethered to news) and Topical mode (tied to a verified current event from the past 48 hours). Default is timeless. The mode toggle lives below the reading.\n\n3. Morning Journal: Set your Virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening Journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.\n\nGuided meditations are available alongside the daily practice. They are optional. Use them when they serve.',
   },
   {
     title: 'The Stoic Compass',
-    content: 'The compass is the foundation of your practice. It has three sections:\n\nWhy I practice: What draws you to Stoicism? What brought you here?\n\nWhat I want to overcome: The patterns, fears, and struggles you want to work through.\n\nWho I aspire to be: The person you are building toward.\n\nRead your compass every morning before journaling. It takes 60 seconds and reorients everything that follows. Edit it anytime from the More tab as your answers evolve.',
+    content: 'The compass is the foundation of your practice. It has four sections:\n\nWhy I practice: What draws you to Stoicism? What brought you here?\n\nWhat I want to overcome: The patterns, fears, and struggles you want to work through.\n\nWho I aspire to be: The person you are building toward.\n\nThe roles I am called to fulfill: The relational positions you actually occupy. Parent, partner, friend, colleague, citizen. The Stoics called these your kathēkonta, the appropriate actions owed to others by virtue of the position you occupy. Marcus Aurelius reminded himself of his roles every morning. So can you.\n\nRead your compass every morning before journaling. It takes 60 seconds and reorients everything that follows. Edit it anytime from the More tab as your answers evolve.',
   },
   {
     title: 'The four Virtues',
@@ -26,7 +26,7 @@ const sections = [
   },
   {
     title: 'The emotion logger',
-    content: 'Between stimulus and response there is a space. The emotion logger is that space made visible.\n\nWhen a strong emotion arises — anger, anxiety, frustration, shame — log it immediately. Name the emotion, rate the intensity, describe the trigger, and note your automatic reaction.\n\nThen read the Stoic reframe and write your chosen response. The difference between your automatic reaction and your chosen response is where the practice lives.\n\nYour logged triggers feed into the weekly review, where patterns become visible.',
+    content: 'Between stimulus and response there is a space. The emotion logger is that space made visible.\n\nWhen a strong emotion arises (anger, anxiety, frustration, shame), log it immediately. Name the emotion, rate the intensity, describe the trigger, and note your automatic reaction.\n\nThen read the Stoic reframe and write your chosen response. The difference between your automatic reaction and your chosen response is where the practice lives.\n\nYour logged triggers feed into the weekly review, where patterns become visible.',
   },
   {
     title: 'Cognitive distortions: the seven',
@@ -34,7 +34,11 @@ const sections = [
   },
   {
     title: 'The weekly review',
-    content: 'Once a week — on the day you choose in Settings — the weekly review appears in your Practice tab.\n\nSet aside 15–30 minutes. Review what went well, where you strayed, recurring challenges, and how you treated your body and health.\n\nThe Virtue Ledger asks which Virtue you most and least embodied this week. Over months, this data becomes a mirror.\n\nEnd the review with a single intention for the coming week. Not a list. One thing. Write it as a commitment, not a wish.',
+    content: 'Once a week, on the day you choose in Settings, the weekly review appears in your Practice tab.\n\nSet aside 15 to 30 minutes. The review walks you through where you embodied Virtue, where you fell short, the recurring challenges that kept showing up, and how you treated your body and health.\n\nThe Virtue Ledger asks which Virtue you most and least embodied this week. Over months, this data becomes a mirror.\n\nIf you have named your roles in the Compass, an Account prompt asks how you served each one this week. The Stoic discipline of action made visible week by week.\n\nEnd the review with a single Commit prompt: one thing you will do differently next week. Not a list. One thing. Write it as a commitment, not a wish.',
+  },
+  {
+    title: 'Guided meditations',
+    content: 'Five short audio sessions, voiced. Each runs less than five minutes. Optional alongside the daily practice, surfaced contextually for the time of day.\n\nView From Above: Rise above your circumstances to see them at scale.\n\nPremeditatio Malorum: Look at what might go wrong before the day begins, so it cannot surprise you. Best in the morning.\n\nThe Evening Examination: Three honest questions. Then put the day down.\n\nNegative Visualization: Imagine the absence of what you love, to see it clearly.\n\nThe Present Moment: Pure attention training. Not staying. Returning.\n\nUse them on the way to work, before journaling, or whenever you need to return to yourself. They are not required for your streak. They are a tool.',
   },
   {
     title: 'About streaks',
