@@ -4,6 +4,7 @@ import {
   StyleSheet, SafeAreaView, Image, Linking,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { READING_LIST, bookshopUrl, amazonUrl } from '../constants/library';
@@ -47,12 +48,13 @@ function BookCard({ book }) {
 export default function LibraryScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const fromPath = params?.from || '/more';
   const fromLabel = params?.fromLabel || 'More';
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+      <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>{fromLabel}</Text>
       </TouchableOpacity>

@@ -6,6 +6,7 @@ import {
   ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
@@ -230,6 +231,7 @@ function groupByMonth(entries) {
 export default function JournalScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const fromPractice = !!params?.type;
   const fromPath = params?.from || '/';
@@ -379,7 +381,7 @@ export default function JournalScreen() {
   return (
     <SafeAreaView style={s.safe}>
       {fromPractice && (
-        <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+        <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
           <Text style={s.backArrow}>‹</Text>
           <Text style={s.backLabel}>{fromLabel}</Text>
         </TouchableOpacity>

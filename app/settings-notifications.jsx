@@ -4,6 +4,7 @@ import {
   StyleSheet, SafeAreaView, Switch, Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
@@ -66,6 +67,7 @@ function TimeAdjuster({ hour, minute, onHourChange, onMinuteChange }) {
 
 export default function NotificationsSettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -98,7 +100,7 @@ export default function NotificationsSettingsScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace('/settings')} style={s.backRow} activeOpacity={0.7}>
+      <TouchableOpacity onPress={() => router.replace('/settings')} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>Settings</Text>
       </TouchableOpacity>

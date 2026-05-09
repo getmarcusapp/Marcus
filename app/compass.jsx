@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { getCompass, saveCompass, getRoles, saveRoles } from '../store/db';
@@ -73,6 +74,7 @@ export default function CompassScreen() {
   // the prior card when the user swipes.
   const [activeVirtueIdx, setActiveVirtueIdx] = useState(0);
   const { width: screenWidth } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const commitMindfulSession = useMindfulSession();
   // Roles tab state — list of {id, name, commitment}. editingRole is
   // either null (list view), 'new' (creating), or a role id (editing).
@@ -169,7 +171,7 @@ export default function CompassScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+      <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>{fromLabel}</Text>
       </TouchableOpacity>

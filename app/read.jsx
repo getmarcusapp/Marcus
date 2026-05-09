@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView, Platform, Image, Share,
 } from 'react-native';
 import { useFocusEffect, useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import SkullLoader from '../components/SkullLoader';
@@ -87,6 +88,7 @@ const virtueColor = {
 export default function ReadScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const fromPath = params?.from || '/';
   const fromLabel = params?.fromLabel || 'Practice';
   const [tab, setTab] = useState('today');
@@ -364,7 +366,7 @@ Return only the JSON object.`;
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+      <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>{fromLabel}</Text>
       </TouchableOpacity>

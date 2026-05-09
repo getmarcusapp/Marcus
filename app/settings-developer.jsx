@@ -4,6 +4,7 @@ import {
   StyleSheet, SafeAreaView, Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { cancelAllNotifications } from '../notifications';
@@ -13,6 +14,7 @@ const NOTIF_SETTINGS_KEY = 'notification_settings';
 
 export default function DeveloperSettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   async function handleResetOnboarding() {
     await AsyncStorage.removeItem('has_onboarded');
@@ -104,7 +106,7 @@ export default function DeveloperSettingsScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace('/settings')} style={s.backRow} activeOpacity={0.7}>
+      <TouchableOpacity onPress={() => router.replace('/settings')} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>Settings</Text>
       </TouchableOpacity>
