@@ -3,7 +3,6 @@ import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Image,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -177,11 +176,6 @@ export default function CompassScreen() {
             source={require('../assets/heroes/compass.jpg')}
             style={s.heroImage}
             resizeMode="cover"
-          />
-          <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,0.95)']}
-            locations={[0, 0.3, 0.65, 1]}
-            style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
             <Text style={s.eyebrow}>Stoic Compass</Text>
