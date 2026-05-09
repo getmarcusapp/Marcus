@@ -8,7 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
-import { saveReview, getReviews, getJournals, getTriggers } from '../store/db';
+import { saveReview, getReviews, getJournals, getTriggers, getRoles } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard } from '../components/ReviewShareCard';
@@ -80,6 +80,7 @@ export default function ReviewScreen() {
   const [distortionBreakdown, setDistortionBreakdown] = useState([]);
   const [virtueFocusCounts, setVirtueFocusCounts] = useState({});
   const [dailyIntensity, setDailyIntensity] = useState([]);
+  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     async function load() {
@@ -87,6 +88,8 @@ export default function ReviewScreen() {
       setHistory(reviews);
       const journals = await getJournals();
       const triggers = await getTriggers();
+      const userRoles = await getRoles();
+      setRoles(userRoles);
       const weekAgo = Date.now() - 7 * 86400000;
       const weekJournals = journals.filter(j => new Date(j.date).getTime() > weekAgo);
       const weekTriggers = triggers.filter(t => new Date(t.date).getTime() > weekAgo);
@@ -519,10 +522,38 @@ export default function ReviewScreen() {
               </View>
             </View>
 
-            {/* VI · Commit — the output of all reflection above */}
+            {/* VI · Account — role-fulfillment, only if user has defined roles */}
+            {roles.length > 0 && (
+              <View style={s.promptCard}>
+                <View style={s.promptTopRow}>
+                  <Text style={s.promptNum}>VI · Account</Text>
+                </View>
+                <Text style={s.promptQ}>Which role did I serve well this week? Which fell short?</Text>
+                <View style={s.roleChipRow}>
+                  {roles.map(r => (
+                    <View key={r.id} style={s.roleChip}>
+                      <Text style={s.roleChipText}>{r.name}</Text>
+                    </View>
+                  ))}
+                </View>
+                <TextInput
+                  style={s.intentionInput}
+                  multiline
+                  placeholder="Be specific. Name names, name moments..."
+                  placeholderTextColor={colors.textDim}
+                  value={answers.roles || ''}
+                  onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
+                  scrollEnabled={false}
+                  inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewIntentionAccessory' : undefined}
+                />
+              </View>
+            )}
+
+            {/* Commit — the output of all reflection above. Numbered VII
+                when the Roles · Account prompt is present, otherwise VI. */}
             <View style={s.promptCard}>
               <View style={s.promptTopRow}>
-                <Text style={s.promptNum}>VI · Commit</Text>
+                <Text style={s.promptNum}>{roles.length > 0 ? 'VII · Commit' : 'VI · Commit'}</Text>
               </View>
               <Text style={s.promptQ}>What one thing will I do differently next week?</Text>
               <TextInput
@@ -760,6 +791,14 @@ const s = StyleSheet.create({
   // Intention
   intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
   intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top', marginTop: 12 },
+  // Role chip strip shown above the VI · Account textarea to remind the
+  // user which roles are in scope while reflecting on the week.
+  roleChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12, marginBottom: 4 },
+  roleChip: {
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: 14,
+    paddingHorizontal: 10, paddingVertical: 4, backgroundColor: colors.bgElevated,
+  },
+  roleChipText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
   // Seal button
   sealBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
   sealBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },

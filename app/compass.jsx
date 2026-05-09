@@ -54,7 +54,12 @@ export default function CompassScreen() {
   const params = useLocalSearchParams();
   const fromPath = params?.from || '/';
   const fromLabel = params?.fromLabel || 'Practice';
-  const [activeTab, setActiveTab] = useState(0);
+  // Allow callers to deep-link to a specific Compass tab via ?tab=roles
+  // (used by the daily Role card on Practice).
+  const initialTabIdx = params?.tab === 'roles' ? 3
+    : params?.tab === 'virtues' ? 4
+    : 0;
+  const [activeTab, setActiveTab] = useState(initialTabIdx);
   const [compass, setCompass] = useState(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
