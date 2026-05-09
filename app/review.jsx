@@ -65,6 +65,7 @@ export default function ReviewScreen() {
   const [openPrompt, setOpenPrompt] = useState(0);
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
+  const intentionInputRef = useRef(null);
 
   useEffect(() => {
     if (openPrompt < 0) return;
@@ -264,6 +265,8 @@ export default function ReviewScreen() {
           style={s.scroll}
           showsVerticalScrollIndicator={true}
           keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
           contentInset={{ bottom: 60 }}
           scrollIndicatorInsets={{ bottom: 60 }}
         >
@@ -557,6 +560,7 @@ export default function ReviewScreen() {
               </View>
               <Text style={s.promptQ}>What one thing will I do differently next week?</Text>
               <TextInput
+                ref={intentionInputRef}
                 style={s.intentionInput}
                 multiline
                 placeholder="Write it as a commitment, not a wish..."
@@ -662,14 +666,18 @@ export default function ReviewScreen() {
               )}
             </View>
           </InputAccessoryView>
-          {/* VI · Account — Continue, not Seal — there's still Commit after */}
+          {/* VI · Account — auto-focus Commit, since there's still one prompt after */}
           <InputAccessoryView nativeID="reviewAccountAccessory">
             <View style={s.accessoryBar}>
               <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
                 <Text style={s.accessoryDoneText}>Done</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryAction} activeOpacity={0.7}>
-                <Text style={s.accessoryActionText}>Continue ↓</Text>
+              <TouchableOpacity
+                onPress={() => { haptics.tap(); intentionInputRef.current?.focus(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>Next prompt →</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
