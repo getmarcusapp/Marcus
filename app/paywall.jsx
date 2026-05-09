@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet,
   SafeAreaView, Image, ActivityIndicator, Alert, ScrollView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getOfferings, purchasePackage, restorePurchases } from '../store/purchases';
@@ -13,6 +13,11 @@ const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 
 export default function PaywallScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  // When the paywall is reached during fresh onboarding, the post-paywall
+  // landing is the ReadyStep ("Your practice begins now"). Otherwise
+  // (e.g., backup-restore flow) skip Ready and go straight to Practice.
+  const postPaywallRoute = params?.from === 'onboarding' ? '/ready' : '/';
   const [offerings, setOfferings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -60,7 +65,7 @@ export default function PaywallScreen() {
 
     if (result.success) {
       await AsyncStorage.setItem('has_premium', 'true');
-      router.replace('/');
+      router.replace(postPaywallRoute);
     } else if (!result.userCancelled) {
       Alert.alert('', 'Something went wrong. Please try again or restore your purchases.');
     }
@@ -74,7 +79,7 @@ export default function PaywallScreen() {
     if (result.isActive) {
       await AsyncStorage.setItem('has_premium', 'true');
       Alert.alert('', 'Purchase restored.', [
-        { text: 'Continue', onPress: () => router.replace('/') }
+        { text: 'Continue', onPress: () => router.replace(postPaywallRoute) }
       ]);
     } else {
       Alert.alert('', 'No active subscription found.');
@@ -221,7 +226,7 @@ const s = StyleSheet.create({
   },
   skull: { width: 80, height: 80, marginBottom: 20, opacity: 0.9 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12 },
-  title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -1, textAlign: 'center', marginBottom: 14, lineHeight: 42 },
+  title: { fontSize: 44, fontWeight: '700', color: '#FFFFFF', letterSpacing: -1.5, textAlign: 'center', marginBottom: 14, lineHeight: 52 },
   sub: { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
 
   features: {

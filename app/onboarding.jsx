@@ -36,6 +36,11 @@ const DEFAULT_NOTIF_SETTINGS = {
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 
+// Roman numerals used as left-side row markers in PracticePreview and
+// MeditationsStep. They convey order/sequence rather than completion,
+// avoiding the empty-circle "checkbox" misread.
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+
 const DEFAULT_COMPASS = {
   why: 'To cultivate the kind of person I want to be: disciplined in attention, deliberate in action, calm in the face of what I cannot control. Built from character, not from outcomes.',
   overcome: 'I want to worry less about what I cannot control. To respond instead of react. To free myself from the anxiety of other people\'s opinions and the tyranny of my own undisciplined mind.',
@@ -47,16 +52,20 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const [compass, setCompass] = useState({ ...DEFAULT_COMPASS });
 
+  // Onboarding ends by saving compass + has_onboarded, then routing to
+  // the paywall with ?from=onboarding so the paywall knows to send the
+  // user to the post-paywall ReadyStep ("Your practice begins now")
+  // rather than straight to Practice.
   async function handleFinish() {
     await saveCompass(compass);
     await setHasOnboarded();
-    router.replace('/paywall');
+    router.replace('/paywall?from=onboarding');
   }
 
   async function handleSkipCompass() {
     await saveCompass(DEFAULT_COMPASS);
     await setHasOnboarded();
-    router.replace('/paywall');
+    router.replace('/paywall?from=onboarding');
   }
 
   const steps = [
@@ -65,13 +74,12 @@ export default function OnboardingScreen() {
     <CompassStep compass={compass} setCompass={setCompass} onNext={() => setStep(3)} onSkip={() => setStep(3)} />,
     <PracticePreviewStep onNext={() => setStep(4)} />,
     <MeditationsStep onNext={() => setStep(5)} />,
-    <RemindersStep onNext={() => setStep(6)} />,
-    <ReadyStep onFinish={handleFinish} />,
+    <RemindersStep onNext={handleFinish} />,
   ];
 
   return (
     <View style={{ flex: 1 }}>
-      {step > 0 && step < 6 && (
+      {step > 0 && (
         <TouchableOpacity
           onPress={() => setStep(step - 1)}
           style={s.onboardingBack}
@@ -352,7 +360,7 @@ function PracticePreviewStep({ onNext }) {
           <View style={s.previewCard}>
             {items.map((item, idx) => (
               <View key={idx} style={[s.previewRow, idx < items.length - 1 && s.previewRowBorder]}>
-                <View style={s.previewDot} />
+                <Text style={s.previewNum}>{ROMAN[idx]}</Text>
                 <View style={s.previewContent}>
                   <Text style={s.previewItemTitle}>{item.title}</Text>
                   <Text style={s.previewItemSub}>{item.sub}</Text>
@@ -374,7 +382,7 @@ function PracticePreviewStep({ onNext }) {
           <View style={s.previewCard}>
             {extras.map((item, idx) => (
               <View key={idx} style={[s.previewRow, idx < extras.length - 1 && s.previewRowBorder]}>
-                <View style={s.previewDot} />
+                <Text style={s.previewNum}>{ROMAN[idx]}</Text>
                 <View style={s.previewContent}>
                   <Text style={s.previewItemTitle}>{item.title}</Text>
                   <Text style={s.previewItemSub}>{item.sub}</Text>
@@ -442,7 +450,7 @@ function MeditationsStep({ onNext }) {
                   onPress={() => previewing ? stopPreview() : playPreview(m)}
                   style={[s.previewRow, idx < MEDITATIONS_LIST.length - 1 && s.previewRowBorder]}
                 >
-                  <View style={[s.previewDot, previewing && s.previewDotActive]} />
+                  <Text style={[s.previewNum, previewing && { color: colors.accent }]}>{ROMAN[idx]}</Text>
                   <View style={s.previewContent}>
                     <Text style={[s.previewItemTitle, previewing && { color: colors.accent }]}>{m.title}</Text>
                     <Text style={s.previewItemSub}>
@@ -529,36 +537,6 @@ function RemindersStep({ onNext }) {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-  );
-}
-
-function ReadyStep({ onFinish }) {
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
-  return (
-    <LinearGradient
-      colors={HERO_GRADIENT}
-      locations={[0, 0.6, 1]}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
-      style={{ flex: 1 }}
-    >
-      <SafeAreaView style={s.safeTransparent}>
-        <View style={s.welcomeBody}>
-          <Image source={require('../assets/skull.png')} style={s.readySkull} resizeMode="contain" />
-          <Text style={s.readyEyebrow}>Memento mori</Text>
-          <Text style={s.readyTitle}>Your practice{'\n'}begins now.</Text>
-          <Text style={s.readyDate}>{dateStr}</Text>
-          <Text style={s.readyStreak}>Day 1</Text>
-        </View>
-        <View style={s.footer}>
-          <TouchableOpacity style={s.primaryBtn} onPress={onFinish} activeOpacity={0.8}>
-            <Text style={s.primaryBtnText}>Go to Practice →</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </LinearGradient>
   );
 }
 
@@ -663,14 +641,16 @@ const s = StyleSheet.create({
   medOnbHeroImg: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   medOnbHeroText: { padding: 36, paddingTop: 48, paddingBottom: 32, alignItems: 'center' },
   previewEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' },
-  previewTitle: { fontSize: 36, fontWeight: '300', color: colors.textPrimary, letterSpacing: -1.5, marginBottom: 12, textAlign: 'center', lineHeight: 42 },
-  previewSub: { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
+  previewTitle: { fontSize: 44, fontWeight: '700', color: '#FFFFFF', letterSpacing: -1.5, marginBottom: 14, textAlign: 'center', lineHeight: 52 },
+  previewSub: { fontSize: 17, color: colors.textMuted, textAlign: 'center', lineHeight: 26 },
   previewBody: { padding: 20 },
   previewCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, overflow: 'hidden', marginBottom: 16 },
   previewRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
   previewRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  previewDot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.textMuted },
-  previewDotActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
+  // Roman-numeral row marker. Replaces the open-circle previewDot so
+  // each row reads as ordered (sequence) instead of as a checkbox to
+  // complete.
+  previewNum: { width: 28, fontSize: 12, color: colors.accent, letterSpacing: 1.5, fontWeight: '600', textAlign: 'center' },
   previewPlayIcon: { fontSize: 13, color: colors.accentDim, marginLeft: 8, letterSpacing: 1 },
   previewHint: { fontSize: 12, color: colors.textMuted, fontStyle: 'italic', marginBottom: 12, paddingHorizontal: 4, letterSpacing: 0.3 },
   previewContent: { flex: 1 },
@@ -719,10 +699,13 @@ const s = StyleSheet.create({
 
   onboardingBack: {
     position: 'absolute',
-    top: 56,
-    left: 20,
+    top: 52,
+    left: 16,
     zIndex: 10,
-    padding: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 8,
   },
   onboardingBackText: {
     fontSize: 15,
