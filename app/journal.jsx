@@ -68,6 +68,16 @@ const morningPrompts = [
     q: 'What difficulty might I face today, and how would a person of Virtue meet it?',
     hint: "This is premeditatio malorum: the premeditation of adversity. The Stoics practiced it daily. Marcus Aurelius began most mornings by mentally rehearsing the difficult people and situations he would face.\n\nModern research confirms what the Stoics intuited: negative visualization — mentally simulating obstacles before they occur — reduces anxiety and improves performance. It works because the obstacle loses its power to surprise you. You've already met it, already chosen your response.\n\nAsk: not 'what bad thing might happen' in a fearful way, but 'how would a person who embodies wisdom, courage, and justice meet this?' You're not predicting disaster. You're rehearsing Virtue.",
   },
+  {
+    num: 'V · Question',
+    q: 'What impression are you carrying into today that deserves examination before you act on it?',
+    hint: "A worry, assumption, or reaction you haven't questioned yet.",
+    info: {
+      title: 'The Discipline of Assent',
+      source: 'Epictetus, Discourses 1.1',
+      body: "Epictetus taught that between every event and your response, there is a moment where an impression arises in the mind. Before you act on it, you can examine it. Is this impression accurate? Is what is troubling me actually harmful, or does it just feel that way?\n\nHe called this the discipline of assent — choosing which impressions to accept and which to question.\n\nExamples of impressions worth examining:\n\n• You check your phone and read a terse message. The impression: \"this person is angry with me.\" Is that what the words actually say, or is that one interpretation?\n\n• You have a difficult meeting today. The impression: \"this will go badly and I will not handle it well.\" Is that a fact, or a story?\n\n• Something didn't work out last week. The impression: \"I am behind, things aren't working.\" Is that an accurate reading of reality, or a judgment made on incomplete information?\n\nThe practice is not to eliminate the impression — it is to see it clearly before deciding whether to act on it.",
+    },
+  },
 ];
 
 const eveningPrompts = [
@@ -142,7 +152,7 @@ function JournalEntryEditor({ entry, onSave, onCancel }) {
         >
           <View style={s.promptTopRow}>
             <Text style={e.promptNum}>{prompt.num}</Text>
-            {prompt.hint && (
+            {(prompt.hint || prompt.info) && (
               <TouchableOpacity
                 style={s.hintBtn}
                 onPress={() => setOpenHint(openHint === idx ? null : idx)}
@@ -152,9 +162,23 @@ function JournalEntryEditor({ entry, onSave, onCancel }) {
             )}
           </View>
           <Text style={e.promptQ}>{prompt.q}</Text>
-          {openHint === idx && prompt.hint && (
+          {prompt.info && prompt.hint && (
+            <Text style={s.promptSub}>{prompt.hint}</Text>
+          )}
+          {openHint === idx && (prompt.info || prompt.hint) && (
             <View style={s.hintBox}>
-              <Text style={s.hintText}>{prompt.hint}</Text>
+              {prompt.info ? (
+                <>
+                  <Text style={s.hintTitle}>{prompt.info.title}</Text>
+                  <Text style={s.hintSource}>{prompt.info.source}</Text>
+                  <View style={s.hintDivider} />
+                  {prompt.info.body.split('\n\n').map((para, i) => (
+                    <Text key={i} style={[s.hintText, i > 0 && { marginTop: 10 }]}>{para}</Text>
+                  ))}
+                </>
+              ) : (
+                <Text style={s.hintText}>{prompt.hint}</Text>
+              )}
             </View>
           )}
           {openPrompt === idx && (
@@ -545,7 +569,7 @@ export default function JournalScreen() {
                   >
                     <View style={s.promptTopRow}>
                       <Text style={s.promptNum}>{prompt.num}</Text>
-                      {prompt.hint && (
+                      {(prompt.hint || prompt.info) && (
                         <TouchableOpacity
                           style={s.hintBtn}
                           onPress={() => setOpenHint(openHint === idx ? null : idx)}
@@ -555,9 +579,23 @@ export default function JournalScreen() {
                       )}
                     </View>
                     <Text style={s.promptQ}>{prompt.q}</Text>
-                    {openHint === idx && prompt.hint && (
+                    {prompt.info && prompt.hint && (
+                      <Text style={s.promptSub}>{prompt.hint}</Text>
+                    )}
+                    {openHint === idx && (prompt.info || prompt.hint) && (
                       <View style={s.hintBox}>
-                        <Text style={s.hintText}>{prompt.hint}</Text>
+                        {prompt.info ? (
+                          <>
+                            <Text style={s.hintTitle}>{prompt.info.title}</Text>
+                            <Text style={s.hintSource}>{prompt.info.source}</Text>
+                            <View style={s.hintDivider} />
+                            {prompt.info.body.split('\n\n').map((para, i) => (
+                              <Text key={i} style={[s.hintText, i > 0 && { marginTop: 10 }]}>{para}</Text>
+                            ))}
+                          </>
+                        ) : (
+                          <Text style={s.hintText}>{prompt.hint}</Text>
+                        )}
                       </View>
                     )}
                     {openPrompt === idx && (
@@ -935,6 +973,16 @@ const s = StyleSheet.create({
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
   hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
+  // Subtitle shown beneath the question for prompts that ship a richer
+  // info card (currently the discipline-of-assent prompt) — orients the
+  // user before they tap the ⓘ to read the teaching.
+  promptSub: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: 6, lineHeight: 20 },
+  // Header treatment inside the hintBox when prompt.info is present:
+  // small uppercase title in accent, dim source citation below, then a
+  // hairline divider before the body paragraphs.
+  hintTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+  hintSource: { fontSize: 12, color: colors.textDim, fontStyle: 'italic', letterSpacing: 0.3 },
+  hintDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 12, marginBottom: 12 },
   saveBtn: {
     borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
     padding: 18, alignItems: 'center', backgroundColor: colors.bgElevated, marginBottom: 36,
