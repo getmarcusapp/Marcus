@@ -150,7 +150,13 @@ function WelcomeStep({ onNext }) {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={0}
         >
-          <View style={s.welcomeBody}>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={s.welcomeBody}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
+          >
             <Image source={require('../assets/skull.png')} style={s.welcomeSkull} resizeMode="contain" />
             <Text style={s.welcomeTitle}>Marcus</Text>
             <Text style={s.welcomeSub}>A Stoic practice app</Text>
@@ -175,7 +181,7 @@ function WelcomeStep({ onNext }) {
                 onSubmitEditing={handleNext}
               />
             </View>
-          </View>
+          </ScrollView>
           <View style={s.footer}>
             <TouchableOpacity style={s.primaryBtn} onPress={handleNext} activeOpacity={0.8}>
               <Text style={s.primaryBtnText}>Begin your practice</Text>
@@ -196,7 +202,7 @@ function PhilosophyStep({ onNext }) {
       <ScrollView
         style={s.scroll}
         showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 140 }}
       >
         <View style={s.stepHero}>
           <Text style={s.stepEyebrow}>What is Marcus?</Text>
@@ -213,7 +219,7 @@ function PhilosophyStep({ onNext }) {
           {[
             { title: 'Stoic Compass', desc: 'Your personal North Star: why you practice, what you want to overcome, who you aspire to be.' },
             { title: 'Daily Reading', desc: 'A real quote, generated fresh each day and personalized to your Virtue focus. Grounded in today\'s world.' },
-            { title: 'Guided Meditations', desc: 'Five Stoic meditations, five minutes each. Voiced. Surfaced contextually for the time of day.' },
+            { title: 'Guided Meditations', desc: 'Five Stoic meditations, less than five minutes each. Voiced. Surfaced contextually for the time of day.' },
             { title: 'Morning Journal', desc: 'Set your intention, choose your Virtue focus, and prepare for what the day requires.' },
             { title: 'Evening Journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
             { title: 'Emotion logger', desc: 'When strong emotions arise, log the trigger, examine your thinking, and choose your response.' },
@@ -458,7 +464,7 @@ function PracticePreviewStep({ onNext }) {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 140 }}>
         <View style={s.previewHero}>
           <Text style={s.previewEyebrow}>Your daily practice</Text>
           <Text style={s.previewTitle}>{`This is what\neach day looks like.`}</Text>
@@ -527,7 +533,7 @@ function MeditationsStep({ onNext }) {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 140 }}>
         <View style={s.medOnbHero}>
           <Image
             source={require('../assets/meditations/img/view-from-above.jpg')}
@@ -542,7 +548,7 @@ function MeditationsStep({ onNext }) {
           <View style={s.medOnbHeroText}>
             <Text style={s.previewEyebrow}>Five guided meditations</Text>
             <Text style={s.previewTitle}>{`Ancient attention\ntraining, voiced.`}</Text>
-            <Text style={s.previewSub}>5 minutes each. Optional, but they deepen the practice.</Text>
+            <Text style={s.previewSub}>Less than 5 minutes each. Optional, but they deepen the practice.</Text>
           </View>
         </View>
 
@@ -654,13 +660,18 @@ const s = StyleSheet.create({
   safeTransparent: { flex: 1, backgroundColor: 'transparent' },
   scroll: { flex: 1 },
 
-  // Welcome
+  // Welcome — used as contentContainerStyle on a ScrollView so small
+  // screens can scroll past the absolute footer instead of being
+  // obstructed by it. flexGrow: 1 + justifyContent: 'center' keeps the
+  // content centered when it fits; on shorter phones, the input scrolls
+  // into view above the footer thanks to the generous paddingBottom.
   welcomeBody: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 36,
-    paddingBottom: 40,
+    paddingTop: 32,
+    paddingBottom: 200,
   },
   welcomeSkull: { width: 180, height: 180, marginBottom: 32, opacity: 0.95 },
   welcomeTitle: {
