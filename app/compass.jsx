@@ -27,7 +27,7 @@ const COMPASS_HINTS = {
     hint: "Name a pattern you can observe in yourself, not a circumstance or another person. Those are outside your control.\n\nWhat you can overcome is your habitual judgment about events. 'I want to overcome anxiety' is external. 'I want to stop treating anxiety as a verdict rather than an impression' is internal.\n\nThat distinction is where the Stoic practice lives.",
   },
   roles: {
-    hint: "The Stoics called these your kathēkonta — the appropriate actions owed to others by virtue of the position you occupy. You are not just one person. You are a parent or child, a partner, a friend, a colleague, a citizen, a human being among other rational creatures.\n\nEach role asks something specific of you. Naming the roles that actually apply to your life — not titles, not aspirations, but real relational positions — is the first move. The second is asking, regularly, what each one requires of you right now.\n\nMarcus Aurelius reminded himself of his roles every morning. So can you.",
+    hint: "The Stoics called these your kathēkonta: the appropriate actions owed to others by virtue of the position you occupy. You are not just one person. You are a parent or child, a partner, a friend, a colleague, a citizen, a human being among other rational creatures.\n\nEach role asks something specific of you. Naming the roles that actually apply to your life, not titles or aspirations but real relational positions, is the first move. The second is asking, regularly, what each one requires of you right now.\n\nMarcus Aurelius reminded himself of his roles every morning. So can you.",
   },
 };
 
