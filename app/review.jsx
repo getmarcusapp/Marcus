@@ -59,7 +59,6 @@ export default function ReviewScreen() {
   const insets = useSafeAreaInsets();
   const fromPath = params?.from || '/';
   const fromLabel = params?.fromLabel || 'Practice';
-  const [tab, setTab] = useState('current');
   const [answers, setAnswers] = useState({});
   const [bestVirtue, setBestVirtue] = useState(virtues[0].id);
   const [worstVirtue, setWorstVirtue] = useState(virtues[3].id);
@@ -75,7 +74,6 @@ export default function ReviewScreen() {
     return () => clearTimeout(t);
   }, [openPrompt]);
   const [history, setHistory] = useState([]);
-  const [filterRange, setFilterRange] = useState('all');
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
   const shareCardRef = useRef(null);
   const [shareEntry, setShareEntry] = useState(null);
@@ -190,7 +188,7 @@ export default function ReviewScreen() {
     setHistory(updated);
     Alert.alert('Week sealed.', 'Saved to your review archive.', [
       { text: 'Share', onPress: () => shareReviewEntry(entry) },
-      { text: 'Done', onPress: () => setTab('history') },
+      { text: 'View archive', onPress: () => router.push('/review-archive') },
     ]);
   }
 
@@ -224,15 +222,6 @@ export default function ReviewScreen() {
       try { await Share.share({ message: fallback }); } catch {}
     }
   }
-
-  const filteredHistory = history.filter(e => {
-    if (filterRange !== 'all') {
-      const days = filterRange === 'week' ? 7 : 30;
-      const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-      if (new Date(e.date).getTime() < cutoff) return false;
-    }
-    return true;
-  });
 
   // Sort virtues by how often they were the morning focus this week, desc.
   // Virtues never picked fall to the bottom (count 0). Same order in both
@@ -289,34 +278,25 @@ export default function ReviewScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
-            <Text style={s.eyebrow}>Weekly review</Text>
+            <Text style={s.eyebrow}>Weekly Review</Text>
             <Text style={s.title}>
-              {tab === 'current'
-                ? `Week of ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                : 'Your archive'}
+              {`Week of ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
             </Text>
-            <Text style={s.sub}>
-              {tab === 'current' ? 'Sunday reckoning' : 'The examined life, recorded'}
-            </Text>
+            <Text style={s.sub}>Sunday reckoning</Text>
           </View>
         </View>
 
-        <View style={s.tabRow}>
-          {['current', 'history'].map(t => (
-            <TouchableOpacity
-              key={t}
-              style={[s.tabBtn, tab === t && s.tabBtnActive]}
-              onPress={() => setTab(t)}
-            >
-              <Text style={[s.tabBtnText, tab === t && s.tabBtnTextActive]}>
-                {t === 'current' ? 'This week' : 'Archive'}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        <View style={s.pastReviewsRow}>
+          <TouchableOpacity
+            onPress={() => router.push('/review-archive')}
+            style={s.pastReviewsBtn}
+            activeOpacity={0.7}
+          >
+            <Text style={s.pastReviewsText}>Past reviews ›</Text>
+          </TouchableOpacity>
         </View>
 
-        {tab === 'current' ? (
-          <View style={s.body}>
+        <View style={s.body}>
 
             {/* Stats row */}
             <View style={s.statRow}>
@@ -580,69 +560,6 @@ export default function ReviewScreen() {
             </TouchableOpacity>
 
           </View>
-        ) : (
-          <View>
-            <View style={s.filterRow}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 8 }}>
-                {[['all','All time'],['month','This month'],['week','This week']].map(([val, label]) => (
-                  <TouchableOpacity
-                    key={val}
-                    style={[s.filterPill, filterRange === val && s.filterPillActive]}
-                    onPress={() => setFilterRange(val)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[s.filterPillText, filterRange === val && s.filterPillTextActive]}>{label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-            {filteredHistory.length !== history.length && (
-              <Text style={[s.filterCount, { paddingHorizontal: 16, paddingBottom: 8 }]}>{filteredHistory.length} of {history.length} reviews</Text>
-            )}
-
-            {filteredHistory.length === 0 && history.length > 0 ? (
-              <View style={s.empty}>
-                <Text style={s.emptyText}>Nothing in this range. Open the field wider.</Text>
-              </View>
-            ) : filteredHistory.length === 0 ? (
-              <View style={s.empty}>
-                <Text style={s.emptyEyebrow}>Sunday reckoning</Text>
-                <Text style={s.emptyTitle}>No weeks sealed yet.</Text>
-                <Text style={s.emptyText}>
-                  At week's end, the practice asks five questions. Account for the wins. Reckon with the shortfalls. Notice the patterns. Examine the body. Commit to the next.{'\n\n'}Seal one — and a record gathers here.
-                </Text>
-                <TouchableOpacity
-                  style={s.emptyCta}
-                  onPress={() => setTab('current')}
-                  activeOpacity={0.8}
-                >
-                  <Text style={s.emptyCtaText}>Open this week's review →</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              filteredHistory.map(entry => (
-                <View key={entry.id} style={s.histRow}>
-                  <View style={s.histTop}>
-                    <Text style={s.histDate}>Week of {entry.weekOf}</Text>
-                    <Text style={s.histStreak}>{entry.stats?.journaled || 0}/7 days</Text>
-                  </View>
-                  {entry.bestVirtue && <Text style={s.histBest}>{entry.bestVirtue} · most embodied</Text>}
-                  {entry.worstVirtue && <Text style={s.histWorst}>{entry.worstVirtue} · least embodied</Text>}
-                  {entry.answers?.wentWell && (
-                    <Text style={s.histPreview}>"{entry.answers.wentWell.slice(0, 140)}..."</Text>
-                  )}
-                  <TouchableOpacity
-                    style={s.histShareBtn}
-                    onPress={() => shareReviewEntry(entry)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={s.histShareText}>Share →</Text>
-                  </TouchableOpacity>
-                </View>
-              ))
-            )}
-          </View>
-        )}
 
         </ScrollView>
       </KeyboardAvoidingView>
@@ -731,11 +648,11 @@ const s = StyleSheet.create({
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
-  tabRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep },
-  tabBtn: { flex: 1, paddingVertical: 16, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  tabBtnActive: { borderBottomColor: colors.accent },
-  tabBtnText: { fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', color: colors.textDim },
-  tabBtnTextActive: { color: colors.accent },
+  // "Past reviews ›" link below the hero. Replaced the This Week / Archive
+  // tab row — archive now lives at /review-archive.
+  pastReviewsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  pastReviewsBtn: { paddingHorizontal: 8, paddingVertical: 4 },
+  pastReviewsText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
   body: { padding: spacing.md },
   // Stats
   statRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
@@ -825,37 +742,4 @@ const s = StyleSheet.create({
   sealBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
   sealBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
   sealBtnSub: { fontSize: 12, color: colors.textDim, marginTop: 5 },
-  // History
-  histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  histTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  histDate: { fontSize: 17, fontWeight: '600', color: colors.textSecondary },
-  histStreak: { fontSize: 13, color: colors.textDim },
-  histBest: { fontSize: 14, color: colors.virtueGood, marginBottom: 4 },
-  histWorst: { fontSize: 14, color: colors.virtueBad, marginBottom: 4 },
-  histPreview: { fontSize: 14, color: colors.textDim, lineHeight: 22, marginTop: 6 },
-  histShareBtn: {
-    alignSelf: 'flex-start',
-    marginTop: 14,
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: 6,
-    paddingHorizontal: 12, paddingVertical: 6,
-  },
-  histShareText: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
-  // Archive filters
-  empty: { padding: 40, paddingTop: 56, alignItems: 'center', backgroundColor: colors.bgCard },
-  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
-  emptyTitle: { fontSize: 18, fontWeight: '400', color: colors.textPrimary, marginBottom: 12, textAlign: 'center', fontFamily: font.serif },
-  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
-  emptyCta: {
-    marginTop: 28,
-    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
-    paddingVertical: 14, paddingHorizontal: 22,
-    backgroundColor: colors.accentBg,
-  },
-  emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
-  filterRow: { paddingVertical: 8 },
-  filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
-  filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
-  filterPillText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3 },
-  filterPillTextActive: { color: colors.accent },
-  filterCount: { fontSize: 12, color: colors.textMuted },
 });

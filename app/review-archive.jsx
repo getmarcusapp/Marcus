@@ -1,0 +1,215 @@
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity,
+  StyleSheet, SafeAreaView, Share,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, radius, spacing, font } from '../constants/theme';
+import { getReviews } from '../store/db';
+import * as haptics from '../lib/haptics';
+import { captureRef } from 'react-native-view-shot';
+import { ReviewShareCard } from '../components/ReviewShareCard';
+
+export default function ReviewArchiveScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const [history, setHistory] = useState([]);
+  const [filterRange, setFilterRange] = useState('all');
+  const shareCardRef = useRef(null);
+  const [shareEntry, setShareEntry] = useState(null);
+
+  useEffect(() => {
+    getReviews().then(setHistory);
+  }, []);
+
+  const filteredHistory = history.filter(e => {
+    if (filterRange !== 'all') {
+      const days = filterRange === 'week' ? 7 : 30;
+      const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+      if (new Date(e.date).getTime() < cutoff) return false;
+    }
+    return true;
+  });
+
+  async function shareReviewEntry(entry) {
+    haptics.tap();
+    setShareEntry(entry);
+    await new Promise(r => setTimeout(r, 80));
+    const intentionText = (entry?.intention || '').trim();
+    const message = [
+      intentionText ? `Intention for the week ahead:\n\n${intentionText}` : null,
+      intentionText ? '' : null,
+      '— Marcus · a daily Stoic practice',
+    ].filter(v => v !== null).join('\n');
+    try {
+      const uri = await captureRef(shareCardRef, {
+        format: 'jpg',
+        quality: 0.92,
+        result: 'tmpfile',
+      });
+      await Share.share({ url: uri, message });
+    } catch (e) {
+      console.log('Review share image failed, falling back:', e?.message);
+      const fallback = [
+        `Week of ${entry?.weekOf || ''}`,
+        '',
+        intentionText ? `Intention for the week ahead:\n${intentionText}` : null,
+        intentionText ? '' : null,
+        '— Marcus · a daily Stoic practice',
+      ].filter(Boolean).join('\n');
+      try { await Share.share({ message: fallback }); } catch {}
+    }
+  }
+
+  return (
+    <SafeAreaView style={s.safe}>
+      {/* Off-screen share card. Re-renders when shareEntry changes. */}
+      {shareEntry && (
+        <View
+          ref={shareCardRef}
+          collapsable={false}
+          style={{ position: 'absolute', left: -10000, top: -10000, width: 1080 }}
+        >
+          <ReviewShareCard
+            weekOf={shareEntry.weekOf}
+            answers={shareEntry.answers || {}}
+            bestVirtue={shareEntry.bestVirtue}
+            worstVirtue={shareEntry.worstVirtue}
+            intention={shareEntry.intention}
+            stats={shareEntry.stats}
+          />
+        </View>
+      )}
+
+      <TouchableOpacity onPress={() => router.replace('/review')} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
+        <Text style={s.backArrow}>‹</Text>
+        <Text style={s.backLabel}>Weekly Review</Text>
+      </TouchableOpacity>
+
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 60 }}>
+        <View style={s.hero}>
+          <LinearGradient
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.92)']}
+            locations={[0, 0.5, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={s.heroContent}>
+            <Text style={s.eyebrow}>Weekly Review</Text>
+            <Text style={s.title}>Your archive</Text>
+            <Text style={s.sub}>The examined life, recorded</Text>
+          </View>
+        </View>
+
+        <View style={s.filterRow}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 8 }}>
+            {[['all','All time'],['month','This month'],['week','This week']].map(([val, label]) => (
+              <TouchableOpacity
+                key={val}
+                style={[s.filterPill, filterRange === val && s.filterPillActive]}
+                onPress={() => setFilterRange(val)}
+                activeOpacity={0.7}
+              >
+                <Text style={[s.filterPillText, filterRange === val && s.filterPillTextActive]}>{label}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+        {filteredHistory.length !== history.length && (
+          <Text style={s.filterCount}>{filteredHistory.length} of {history.length} reviews</Text>
+        )}
+
+        {filteredHistory.length === 0 && history.length > 0 ? (
+          <View style={s.empty}>
+            <Text style={s.emptyText}>Nothing in this range. Open the field wider.</Text>
+          </View>
+        ) : filteredHistory.length === 0 ? (
+          <View style={s.empty}>
+            <Text style={s.emptyEyebrow}>Sunday reckoning</Text>
+            <Text style={s.emptyTitle}>No weeks sealed yet.</Text>
+            <Text style={s.emptyText}>
+              At week's end, the practice asks five questions. Account for the wins. Reckon with the shortfalls. Notice the patterns. Examine the body. Commit to the next.{'\n\n'}Seal one and a record gathers here.
+            </Text>
+            <TouchableOpacity
+              style={s.emptyCta}
+              onPress={() => router.replace('/review')}
+              activeOpacity={0.8}
+            >
+              <Text style={s.emptyCtaText}>Open this week's review →</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          filteredHistory.map(entry => (
+            <View key={entry.id} style={s.histRow}>
+              <View style={s.histTop}>
+                <Text style={s.histDate}>Week of {entry.weekOf}</Text>
+                <Text style={s.histStreak}>{entry.stats?.journaled || 0}/7 days</Text>
+              </View>
+              {entry.bestVirtue && <Text style={s.histBest}>{entry.bestVirtue} · most embodied</Text>}
+              {entry.worstVirtue && <Text style={s.histWorst}>{entry.worstVirtue} · least embodied</Text>}
+              {entry.answers?.wentWell && (
+                <Text style={s.histPreview}>"{entry.answers.wentWell.slice(0, 140)}..."</Text>
+              )}
+              <TouchableOpacity
+                style={s.histShareBtn}
+                onPress={() => shareReviewEntry(entry)}
+                activeOpacity={0.7}
+              >
+                <Text style={s.histShareText}>Share →</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const s = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
+  scroll: { flex: 1 },
+  hero: {
+    backgroundColor: colors.bgDeep,
+    minHeight: 220,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+  },
+  heroContent: { padding: spacing.xl, paddingTop: 52 },
+  backRow: {
+    position: 'absolute', left: 16, zIndex: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 8,
+  },
+  backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
+  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5 },
+  sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8 },
+  filterRow: { paddingTop: 14, paddingBottom: 6 },
+  filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
+  filterPillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
+  filterPillText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
+  filterPillTextActive: { color: colors.accent, fontWeight: '500' },
+  filterCount: { fontSize: 12, color: colors.textDim, paddingHorizontal: 16, paddingBottom: 8 },
+  empty: { padding: 40, paddingTop: 56, alignItems: 'center' },
+  emptyEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 14 },
+  emptyTitle: { fontSize: 22, color: colors.textPrimary, fontFamily: font.serif, marginBottom: 14, textAlign: 'center' },
+  emptyText: { fontSize: 15, color: colors.textMuted, lineHeight: 24, textAlign: 'center', maxWidth: 360 },
+  emptyCta: { marginTop: 28, borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, paddingVertical: 14, paddingHorizontal: 22, backgroundColor: colors.accentBg },
+  emptyCtaText: { fontSize: 13, color: colors.accent, letterSpacing: 0.5, textTransform: 'uppercase' },
+  histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  histTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  histDate: { fontSize: 17, fontWeight: '600', color: colors.textSecondary },
+  histStreak: { fontSize: 13, color: colors.textDim },
+  histBest: { fontSize: 14, color: colors.virtueGood, marginBottom: 4 },
+  histWorst: { fontSize: 14, color: colors.virtueBad, marginBottom: 4 },
+  histPreview: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic', marginTop: 6, lineHeight: 22 },
+  histShareBtn: { marginTop: 12, paddingVertical: 4 },
+  histShareText: { fontSize: 12, color: colors.accent, letterSpacing: 0.5, textTransform: 'uppercase' },
+});

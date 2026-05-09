@@ -113,6 +113,8 @@ export default function Layout() {
         <Tabs.Screen name="library" options={{ href: null }} />
         <Tabs.Screen name="paywall" options={{ href: null }} />
         <Tabs.Screen name="ready" options={{ href: null }} />
+        <Tabs.Screen name="journal-history" options={{ href: null }} />
+        <Tabs.Screen name="review-archive" options={{ href: null }} />
       </Tabs>
       <MiniMeditationPlayer />
       {isLocked && <LockScreen />}

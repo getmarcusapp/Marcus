@@ -15,7 +15,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
-import { saveJournal, getTodayJournal, getJournals, incrementStreak, updateJournalEntry } from '../store/db';
+import { saveJournal, getTodayJournal, incrementStreak } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
@@ -48,61 +48,10 @@ async function maybeAskHealthPermission() {
   );
 }
 
-const morningPrompts = [
-  {
-    num: 'I · Discern',
-    q: 'What is in my control today — and what must I release?',
-    hint: "The Stoics divide all things into two categories: what is 'up to us' and what is not. Up to us: our judgments, intentions, how we respond. Not up to us: other people's behavior, outcomes, reputation, the weather, the economy.\n\nImportantly, your thoughts themselves are not fully in your control: they arise unbidden. What is in your control is whether you assent to a thought, dwell on it, act on it. The Stoic practice is not suppression but discernment: this impression is mine to engage with; that one I can let pass.\n\nReleasing what is not yours doesn't mean you don't care. It means you stop exhausting yourself on things you cannot move.",
-  },
-  {
-    num: 'II · Brace',
-    q: 'Where will courage be required of me today?',
-    hint: "Courage (andreia) is one of the four cardinal Virtues, but the Stoics meant something precise by it. Not recklessness, not aggression. The willingness to act rightly even when it is uncomfortable, costly, or unpopular.\n\nCourage is required whenever you know what the right thing is but feel resistance to doing it: the difficult conversation you've been avoiding, the boundary you need to hold, the work that demands your honest effort when distraction is easier.\n\nAsking this in the morning puts you on alert. You've named the moment before it arrives. When it comes, you've already decided.",
-  },
-  {
-    num: 'III · Name',
-    q: 'What am I postponing that matters? Name one thing.',
-    hint: "Seneca wrote that we suffer more in imagination than in reality, but he also observed that we are experts at deferring what matters in favor of what is urgent, easy, or comfortable.\n\nThe Stoics were deeply aware of mortality as a clarifying force. If you knew today was your last, what would you regret not having done? That regret is information. It points at what actually matters to you beneath the noise of daily preference.\n\nNaming one thing — just one — makes it real. The act of naming is the act of committing. Not to completing it today necessarily, but to acknowledging that it exists and that you are responsible for it.",
-  },
-  {
-    num: 'IV · Foresee',
-    q: 'What difficulty might I face today, and how would a person of Virtue meet it?',
-    hint: "This is premeditatio malorum: the premeditation of adversity. The Stoics practiced it daily. Marcus Aurelius began most mornings by mentally rehearsing the difficult people and situations he would face.\n\nModern research confirms what the Stoics intuited: negative visualization — mentally simulating obstacles before they occur — reduces anxiety and improves performance. It works because the obstacle loses its power to surprise you. You've already met it, already chosen your response.\n\nAsk: not 'what bad thing might happen' in a fearful way, but 'how would a person who embodies wisdom, courage, and justice meet this?' You're not predicting disaster. You're rehearsing Virtue.",
-  },
-  {
-    num: 'V · Question',
-    q: 'What impression am I carrying into today that deserves examination before I act on it?',
-    hint: "A worry, assumption, or reaction I haven't questioned yet.",
-    info: {
-      title: 'The Discipline of Assent',
-      source: 'Epictetus, Discourses 1.1',
-      body: "Epictetus taught that between every event and your response, there is a moment where an impression arises in the mind. Before you act on it, you can examine it. Is this impression accurate? Is what is troubling me actually harmful, or does it just feel that way?\n\nHe called this the discipline of assent: choosing which impressions to accept and which to question.\n\nExamples of impressions worth examining:\n\n• You check your phone and read a terse message. The impression: \"this person is angry with me.\" Is that what the words actually say, or is that one interpretation?\n\n• You have a difficult meeting today. The impression: \"this will go badly and I will not handle it well.\" Is that a fact, or a story?\n\n• Something didn't work out last week. The impression: \"I am behind, things aren't working.\" Is that an accurate reading of reality, or a judgment made on incomplete information?\n\nThe practice is not to eliminate the impression. It is to see it clearly before deciding whether to act on it.",
-    },
-  },
-];
-
-const eveningPrompts = [
-  {
-    num: 'I · Examine',
-    q: 'Where did I act in accordance with my Virtue today?',
-    hint: "The evening Examen begins with what went right, not as self-congratulation but as honest accounting. The Stoics believed Virtue was not an abstract aspiration but something demonstrated in specific moments: how you treated a person who frustrated you, whether you kept your word, whether you were present.\n\nLooking for evidence of Virtue is a skill. Most people are faster to notice their failures than their successes. Naming what you did well isn't vanity. It's recognizing the character you're building, reinforcing the pattern you want to continue.\n\nBe specific. 'I was patient' is less useful than 'I stayed calm when the meeting ran over and I still gave my colleague my full attention.'",
-  },
-  {
-    num: 'II · Confess',
-    q: 'Where did I fall short? What would the Stoic have done?',
-    hint: "The Stoics were unflinching self-examiners. Seneca wrote that we should 'censure' ourselves each evening, not to generate guilt but to learn. The goal is not punishment. It's accuracy.\n\nWhere you fell short tells you something true about yourself: a pattern of avoidance, a recurring trigger, a Virtue you haven't yet developed. That information is valuable only if you look at it clearly rather than explaining it away or dwelling in shame.\n\nThe second question — what would the Stoic have done? — is the productive pivot. It transforms the failure from a verdict into a lesson. You're not broken. You're practicing.",
-  },
-  {
-    num: 'III · Release',
-    q: 'What am I carrying that I must set down before I sleep?',
-    hint: "Epictetus taught that many of our burdens are not ours to carry. We've picked them up through habit, obligation, or the failure to distinguish what is ours from what is not.\n\nSome things you carry are legitimate: responsibilities, relationships, real problems that need your attention tomorrow. But many are not: the conversation that looped all day, the slight that happened and cannot be undone, the worry about something you cannot control.\n\nSetting something down doesn't mean it disappears. It means you stop running it in the background when it serves no purpose. Sleep is not for processing. What needs to be carried tomorrow will be there tomorrow. What doesn't — let it go tonight.",
-  },
-  {
-    num: 'IV · Gratitude',
-    q: 'Name one thing — however small — that deserves my thanks.',
-    hint: "Stoic gratitude is not the forced positivity of modern self-help. It is a corrective to a perceptual error: we habituate to what we have and stop seeing it. The practice is attention, not cheerfulness.\n\nMarcus Aurelius wrote long passages cataloging what specific people had taught him, what specific circumstances had given him. The specificity matters. 'I'm grateful for my health' is a thought. 'I noticed my body carried me through a hard day without complaint' is perception.\n\nOne thing. However small. The smaller the better, in some ways. It proves you were paying attention.",
-  },
-];
+// Morning + Evening prompts live in constants/journalPrompts.js so the
+// Past Entries view can render the same prompt copy when displaying or
+// editing past entries.
+import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
 
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
@@ -110,123 +59,6 @@ const virtuePronunciations = {
   sophrosyne: 'soh-FROH-sih-nee',
   dikaiosyne: 'dee-KAY-oh-sih-nee',
 };
-
-function JournalEntryEditor({ entry, onSave, onCancel }) {
-  const isMorning = entry.type === 'morning';
-  const prompts = isMorning ? morningPrompts : eveningPrompts;
-  const [answers, setAnswers] = useState(entry.answers || {});
-  const [selectedVirtue, setSelectedVirtue] = useState(entry.virtue || virtues[0].id);
-  const [openPrompt, setOpenPrompt] = useState(-1);
-  const [openHint, setOpenHint] = useState(null);
-
-  return (
-    <View style={e.container}>
-      <View style={e.header}>
-        <Text style={e.headerTitle}>Edit {isMorning ? 'morning' : 'evening'} entry</Text>
-        <Text style={e.headerDate}>{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
-      </View>
-
-      {isMorning && (
-        <View style={e.virtueSection}>
-          <Text style={e.sectionLabel}>Virtue Focus</Text>
-          <View style={e.virtuePills}>
-            {virtues.map(v => (
-              <TouchableOpacity
-                key={v.id}
-                style={[e.vpill, selectedVirtue === v.id && e.vpillActive]}
-                onPress={() => setSelectedVirtue(v.id)}
-                activeOpacity={0.7}
-              >
-                <Text style={[e.vpillName, selectedVirtue === v.id && e.vpillNameActive]}>{v.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      )}
-
-      {prompts.map((prompt, idx) => (
-        <TouchableOpacity
-          key={idx}
-          style={[e.promptCard, openPrompt === idx && e.promptCardOpen]}
-          onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)}
-          activeOpacity={0.8}
-        >
-          <View style={s.promptTopRow}>
-            <Text style={e.promptNum}>{prompt.num}</Text>
-            {(prompt.hint || prompt.info) && (
-              <TouchableOpacity
-                style={s.hintBtn}
-                onPress={() => setOpenHint(openHint === idx ? null : idx)}
-              >
-                <Text style={s.hintBtnText}>ⓘ</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-          <Text style={e.promptQ}>{prompt.q}</Text>
-          {prompt.info && prompt.hint && (
-            <Text style={s.promptSub}>{prompt.hint}</Text>
-          )}
-          {openHint === idx && (prompt.info || prompt.hint) && (
-            <View style={s.hintBox}>
-              {prompt.info ? (
-                <>
-                  <Text style={s.hintTitle}>{prompt.info.title}</Text>
-                  <Text style={s.hintSource}>{prompt.info.source}</Text>
-                  <View style={s.hintDivider} />
-                  {prompt.info.body.split('\n\n').map((para, i) => (
-                    <Text key={i} style={[s.hintText, i > 0 && { marginTop: 10 }]}>{para}</Text>
-                  ))}
-                </>
-              ) : (
-                <Text style={s.hintText}>{prompt.hint}</Text>
-              )}
-            </View>
-          )}
-          {openPrompt === idx && (
-            <View style={e.promptAnswer}>
-              <TextInput
-                style={e.promptInput}
-                multiline
-                placeholder="Write here..."
-                placeholderTextColor={colors.textDim}
-                value={answers[idx] || ''}
-                onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
-                scrollEnabled={false}
-              />
-            </View>
-          )}
-        </TouchableOpacity>
-      ))}
-
-      <View style={e.btnRow}>
-        <TouchableOpacity style={e.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
-          <Text style={e.cancelBtnText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={e.saveBtn}
-          onPress={() => onSave({ ...entry, answers, virtue: selectedVirtue })}
-          activeOpacity={0.8}
-        >
-          <Text style={e.saveBtnText}>Save changes</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
-
-
-// Group entries by month for chronological browsing
-function groupByMonth(entries) {
-  const groups = {};
-  entries.forEach(entry => {
-    const d = new Date(entry.date);
-    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-    const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    if (!groups[key]) groups[key] = { label, entries: [] };
-    groups[key].entries.push(entry);
-  });
-  return Object.keys(groups).sort().reverse().map(k => groups[k]);
-}
 
 export default function JournalScreen() {
   const router = useRouter();
@@ -263,21 +95,12 @@ export default function JournalScreen() {
   }, [openPrompt]);
   const [alreadySaved, setAlreadySaved] = useState(false);
   const [showVirtueDetail, setShowVirtueDetail] = useState(false);
-  const [viewMode, setViewMode] = useState('write'); // 'write' | 'history'
-  const [history, setHistory] = useState([]);
-  const [searchQ, setSearchQ] = useState('');
-  const [filterVirtue, setFilterVirtue] = useState('all');
-  const [sortMode, setSortMode] = useState('date'); // 'date' | 'virtue'
-  const [filterMonth, setFilterMonth] = useState('all');
-  const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => {
     async function reload() {
       const existing = await getTodayJournal(isMorning ? 'morning' : 'evening');
       if (existing) { setAnswers(existing.answers || {}); setSelectedVirtue(existing.virtue || virtues[0].id); setAlreadySaved(true); }
       else { setAnswers({}); setSelectedVirtue(virtues[0].id); setAlreadySaved(false); }
-      const all = await getJournals();
-      setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
     }
     reload();
   }, [sessionType]);
@@ -294,8 +117,6 @@ export default function JournalScreen() {
         setSelectedVirtue(virtues[0].id);
         setAlreadySaved(false);
       }
-      const all = await getJournals();
-      setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
     }
     load();
   }, [sessionType]));
@@ -320,8 +141,6 @@ export default function JournalScreen() {
       maybeAskHealthPermission();
       await incrementStreak();
       setAlreadySaved(true);
-      const all = await getJournals();
-      setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
 
       if (isMorning) {
         const next = await getNextPracticeAfter('morning');
@@ -339,44 +158,6 @@ export default function JournalScreen() {
       }
     }
   }
-
- async function handleEditSave(updated) {
-  const ok = await updateJournalEntry(updated);
-  if (ok) {
-    haptics.action();
-    const all = await getJournals();
-    setHistory(all.filter(j => j.type === (isMorning ? 'morning' : 'evening')));
-    setEditingEntry(null);
-    Alert.alert('', 'Entry updated.');
-  }
-}
-
-  // Filtered + sorted history
-  // Available months from history
-  const availableMonths = [...new Set(history.map(e => {
-    const d = new Date(e.date);
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-  }))].sort().reverse();
-
-  const filteredHistory = history
-    .filter(e => {
-      if (filterVirtue !== 'all' && e.virtue !== filterVirtue) return false;
-      if (filterMonth !== 'all') {
-        const d = new Date(e.date);
-        const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-        if (key !== filterMonth) return false;
-      }
-      if (searchQ.trim()) {
-        const q = searchQ.toLowerCase();
-        const text = Object.values(e.answers || {}).join(' ').toLowerCase();
-        if (!text.includes(q)) return false;
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortMode === 'virtue') return (a.virtue || '').localeCompare(b.virtue || '');
-      return new Date(b.date) - new Date(a.date);
-    });
 
   return (
     <SafeAreaView style={s.safe}>
@@ -416,7 +197,7 @@ export default function JournalScreen() {
             <View style={s.headerContent}>
               <View style={s.typeToggle}>
                   {['morning', 'evening'].map(t => (
-                    <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setViewMode('write'); setOpenPrompt(-1); setOpenHint(null); }} activeOpacity={0.7}>
+                    <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setOpenPrompt(-1); setOpenHint(null); }} activeOpacity={0.7}>
                       <Text style={[s.typeBtnText, sessionType === t && s.typeBtnTextActive]}>{t === 'morning' ? '☽  Morning' : '◑  Evening'}</Text>
                     </TouchableOpacity>
                   ))}
@@ -432,23 +213,17 @@ export default function JournalScreen() {
             </View>
           </View>
 
-          <View style={s.tabRow}>
-            {['write', 'history'].map(t => (
-              <TouchableOpacity
-                key={t}
-                style={[s.tabBtn, viewMode === t && s.tabBtnActive]}
-                onPress={() => setViewMode(t)}
-              >
-                <Text style={[s.tabBtnText, viewMode === t && s.tabBtnTextActive]}>
-                  {t === 'write' ? (alreadySaved ? 'Today' : 'Write') : 'History'}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View style={s.pastEntriesRow}>
+            <TouchableOpacity
+              onPress={() => router.push(`/journal-history?type=${sessionType}&from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
+              style={s.pastEntriesBtn}
+              activeOpacity={0.7}
+            >
+              <Text style={s.pastEntriesText}>Past entries ›</Text>
+            </TouchableOpacity>
           </View>
 
-          {viewMode === 'write' ? (
-            <>
-              <LinearGradient
+          <LinearGradient
                 colors={HERO_GRADIENT}
                 locations={[0, 0.6, 1]}
                 start={{ x: 0.5, y: 0 }}
@@ -626,147 +401,6 @@ export default function JournalScreen() {
                   <Text style={s.saveBtnSub}>{answeredCount} of {prompts.length} prompts answered</Text>
                 </TouchableOpacity>
               </View>
-            </>
-          ) : (
-            <View style={s.body}>
-              {/* Search + Filter bar */}
-              <View style={s.searchBar}>
-                <TextInput
-                  style={s.searchInput}
-                  placeholder="Search entries..."
-                  placeholderTextColor={colors.textDim}
-                  value={searchQ}
-                  onChangeText={setSearchQ}
-                  clearButtonMode="while-editing"
-                />
-              </View>
-              <View style={s.filterRow}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}>
-                  {['all', ...virtues.map(v => v.id)].map(v => (
-                    <TouchableOpacity
-                      key={v}
-                      style={[s.filterPill, filterVirtue === v && s.filterPillActive]}
-                      onPress={() => setFilterVirtue(v)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[s.filterPillText, filterVirtue === v && s.filterPillTextActive]}>
-                        {v === 'all' ? 'All virtues' : virtues.find(x => x.id === v)?.name || v}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-              {availableMonths.length > 1 && (
-                <View style={[s.filterRow, { paddingTop: 0 }]}>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}>
-                    <TouchableOpacity
-                      style={[s.filterPill, filterMonth === 'all' && s.filterPillActive]}
-                      onPress={() => setFilterMonth('all')}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[s.filterPillText, filterMonth === 'all' && s.filterPillTextActive]}>All time</Text>
-                    </TouchableOpacity>
-                    {availableMonths.map(mk => {
-                      const [yr, mo] = mk.split('-');
-                      const d = new Date(parseInt(yr, 10), parseInt(mo, 10) - 1, 1);
-                      const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                      return (
-                        <TouchableOpacity
-                          key={mk}
-                          style={[s.filterPill, filterMonth === mk && s.filterPillActive]}
-                          onPress={() => setFilterMonth(mk)}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={[s.filterPillText, filterMonth === mk && s.filterPillTextActive]}>{label}</Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </ScrollView>
-                </View>
-              )}
-              <View style={s.sortRow}>
-                <TouchableOpacity onPress={() => setSortMode(sortMode === 'date' ? 'virtue' : 'date')} style={s.sortBtn}>
-                  <Text style={s.sortBtnText}>Sort: {sortMode === 'date' ? 'Date ↓' : 'Virtue A–Z'}</Text>
-                </TouchableOpacity>
-                {filteredHistory.length !== history.length && (
-                  <Text style={s.filterCount}>{filteredHistory.length} of {history.length}</Text>
-                )}
-              </View>
-
-              {filteredHistory.length === 0 && history.length > 0 ? (
-                <View style={s.empty}>
-                  <Text style={s.emptyTitle}>Nothing matches your filter.</Text>
-                  <Text style={s.emptyText}>Adjust your search or open the field wider.</Text>
-                </View>
-              ) : filteredHistory.length === 0 ? (
-                <View style={s.empty}>
-                  <Text style={s.emptyIcon}>{isMorning ? '☼' : '☽'}</Text>
-                  <Text style={s.emptyTitle}>Your {isMorning ? 'mornings' : 'evenings'} are not yet written.</Text>
-                  <Text style={s.emptyText}>
-                    {isMorning
-                      ? 'Four prompts each morning — what is in your control, where courage is required, what you are postponing, what difficulty might arise. Begin one when you are ready.'
-                      : 'Four movements each evening — where you acted with Virtue, where you fell short, what you are carrying, and one thing that deserves your thanks.'}
-                  </Text>
-                  <TouchableOpacity
-                    style={s.emptyCta}
-                    onPress={() => setViewMode('write')}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={s.emptyCtaText}>
-                      {isMorning ? 'Begin morning practice →' : 'Begin evening practice →'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                groupByMonth(filteredHistory).map(group => (
-                  <View key={group.label}>
-                    <View style={s.monthHeader}><Text style={s.monthHeaderText}>{group.label}</Text></View>
-                    {group.entries.map(entry => (
-                  <View key={entry.id}>
-                    {editingEntry?.id === entry.id ? (
-                      <JournalEntryEditor
-                        entry={editingEntry}
-                        onSave={handleEditSave}
-                        onCancel={() => setEditingEntry(null)}
-                      />
-                    ) : (
-                      <View style={s.histEntry}>
-                        <View style={s.histEntryHeader}>
-                          <View>
-                            <Text style={s.histEntryDate}>
-                              {new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                            </Text>
-                            {entry.virtue && (
-                              <Text style={s.histEntryVirtue}>{entry.virtue}</Text>
-                            )}
-                          </View>
-                          <TouchableOpacity
-                            style={s.editBtn}
-                            onPress={() => setEditingEntry(entry)}
-                            activeOpacity={0.7}
-                          >
-                            <Text style={s.editBtnText}>Edit</Text>
-                          </TouchableOpacity>
-                        </View>
-                        {Object.entries(entry.answers || {}).map(([idx, answer]) => {
-                          if (!answer || !answer.trim()) return null;
-                          const prompt = prompts[parseInt(idx)];
-                          return (
-                            <View key={idx} style={s.histAnswerBlock}>
-                              {prompt && <Text style={s.histPromptNum}>{prompt.num}</Text>}
-                              <Text style={s.histAnswer}>{answer}</Text>
-                            </View>
-                          );
-                        })}
-                      </View>
-                    )}
-                  </View>
-                ))}
-                  </View>
-                ))
-              )}
-            </View>
-          )}
         </ScrollView>
       </KeyboardAvoidingView>
       {Platform.OS === 'ios' && (
@@ -805,36 +439,6 @@ export default function JournalScreen() {
   );
 }
 
-const e = StyleSheet.create({
-  container: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg, overflow: 'hidden', marginBottom: 12 },
-  header: { backgroundColor: colors.accentBg, padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, textTransform: 'uppercase', letterSpacing: 0.8 },
-  headerDate: { fontSize: 13, color: colors.accentDim },
-  virtueSection: { padding: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  sectionLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
-  virtuePills: { flexDirection: 'row', gap: 6 },
-  vpill: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center' },
-  vpillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  vpillName: { fontSize: 11, fontWeight: '500', color: colors.textDim },
-  vpillNameActive: { color: colors.accent },
-  promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, padding: 14, backgroundColor: colors.bgCard },
-  promptCardOpen: { backgroundColor: colors.bgElevated },
-  promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 6 },
-  promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontFamily: font.serif },
-  promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 },
-  promptInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 80, textAlignVertical: 'top' },
-  btnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
-  cancelBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, alignItems: 'center' },
-  cancelBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.8, textTransform: 'uppercase' },
-  saveBtn: { flex: 2, borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, padding: 14, alignItems: 'center', backgroundColor: colors.accentBg },
-  saveBtnText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
-  promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  hintBtn: { padding: 4 },
-  hintBtnText: { fontSize: 18, color: colors.accent },
-  hintBox: { marginTop: 12, padding: 12, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
-  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
-});
-
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
@@ -866,24 +470,11 @@ const s = StyleSheet.create({
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
-  tabRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep },
-  searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
-  searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
-  filterRow: { paddingVertical: 6 },
-  filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
-  filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
-  filterPillText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3 },
-  filterPillTextActive: { color: colors.accent },
-  sortRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8 },
-  sortBtn: { padding: 4 },
-  sortBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
-  filterCount: { fontSize: 12, color: colors.textMuted },
-  monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
-  tabBtn: { flex: 1, paddingVertical: 16, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  tabBtnActive: { borderBottomColor: colors.accent },
-  tabBtnText: { fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', color: colors.textDim },
-  tabBtnTextActive: { color: colors.accent },
+  // "Past entries ›" link below the hero. Replaced the Write/History
+  // tab row — history now lives at /journal-history.
+  pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  pastEntriesBtn: { paddingHorizontal: 8, paddingVertical: 4 },
+  pastEntriesText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
   mementoStrip: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
@@ -990,24 +581,4 @@ const s = StyleSheet.create({
   },
   saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
   saveBtnSub: { fontSize: 12, color: colors.textMuted, marginTop: 5 },
-  empty: { padding: 40, paddingTop: 56, alignItems: 'center', backgroundColor: colors.bgCard },
-  emptyIcon: { fontSize: 32, marginBottom: 16, color: colors.accentDim },
-  emptyTitle: { fontSize: 18, fontWeight: '400', color: colors.textPrimary, marginBottom: 12, textAlign: 'center', fontFamily: font.serif },
-  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
-  emptyCta: {
-    marginTop: 28,
-    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
-    paddingVertical: 14, paddingHorizontal: 22,
-    backgroundColor: colors.accentBg,
-  },
-  emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
-  histEntry: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden', backgroundColor: colors.bgElevated },
-  histEntryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: colors.bgCard, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  histEntryDate: { fontSize: 15, fontWeight: '500', color: colors.textPrimary, marginBottom: 3 },
-  histEntryVirtue: { fontSize: 12, color: colors.textMuted, textTransform: 'capitalize', letterSpacing: 0.5 },
-  editBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6 },
-  editBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.5 },
-  histAnswerBlock: { padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  histPromptNum: { fontSize: 9, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase', marginBottom: 5 },
-  histAnswer: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
 });
