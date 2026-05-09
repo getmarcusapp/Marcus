@@ -544,7 +544,7 @@ export default function ReviewScreen() {
                   value={answers.roles || ''}
                   onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
                   scrollEnabled={false}
-                  inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewIntentionAccessory' : undefined}
+                  inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewAccountAccessory' : undefined}
                 />
               </View>
             )}
@@ -662,6 +662,18 @@ export default function ReviewScreen() {
               )}
             </View>
           </InputAccessoryView>
+          {/* VI · Account — Continue, not Seal — there's still Commit after */}
+          <InputAccessoryView nativeID="reviewAccountAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryAction} activeOpacity={0.7}>
+                <Text style={s.accessoryActionText}>Continue ↓</Text>
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+          {/* VII · Commit — final prompt; Seal triggers save */}
           <InputAccessoryView nativeID="reviewIntentionAccessory">
             <View style={s.accessoryBar}>
               <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
