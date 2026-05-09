@@ -674,17 +674,16 @@ const s = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  heroContent: { padding: spacing.xl, paddingTop: 36 },
-  // Dark pill behind the back link so the gold reads cleanly over any
-  // bright spot in the hero painting. Self-contained — doesn't affect
-  // the surrounding image.
+  heroContent: { padding: spacing.xl, paddingTop: 52 },
+  // Floating back button — absolutely positioned at the same top/left
+  // across every screen so it lands at the same Y/X regardless of the
+  // hero's height or content.
   backRow: {
+    position: 'absolute', top: 12, left: 16, zIndex: 10,
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: 'rgba(0,0,0,0.55)',
     paddingHorizontal: 10, paddingVertical: 5,
     borderRadius: 8,
-    alignSelf: 'flex-start',
-    marginBottom: 18,
   },
   backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
   backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
