@@ -291,7 +291,6 @@ export default function PracticeScreen() {
                   <View style={s.virtueDetail}>
                     <View style={s.virtueDivider} />
                     <Text style={s.virtueDetailText}>{VIRTUE_DETAILS[todayVirtue.id]?.definition}</Text>
-                    <Text style={s.virtueDetailQuestion}>"{VIRTUE_DETAILS[todayVirtue.id]?.question}"</Text>
                   </View>
                 )}
                 <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
@@ -336,7 +335,7 @@ export default function PracticeScreen() {
                     </View>
                   </>
                 ) : (
-                  <Text style={s.medMeta}>5 min · guided</Text>
+                  <Text style={s.medMeta}>{'< 5 min · guided'}</Text>
                 )}
               </View>
             </TouchableOpacity>
@@ -524,7 +523,6 @@ export default function PracticeScreen() {
                 <View style={s.virtueDetail}>
                   <View style={s.virtueDivider} />
                   <Text style={s.virtueDetailText}>{VIRTUE_DETAILS[todayVirtue.id]?.definition}</Text>
-                  <Text style={s.virtueDetailQuestion}>"{VIRTUE_DETAILS[todayVirtue.id]?.question}"</Text>
                 </View>
               )}
               <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
@@ -569,7 +567,7 @@ export default function PracticeScreen() {
                   </View>
                 </>
               ) : (
-                <Text style={s.medMeta}>5 min · guided</Text>
+                <Text style={s.medMeta}>{'< 5 min · guided'}</Text>
               )}
             </View>
           </TouchableOpacity>
@@ -683,7 +681,7 @@ const s = StyleSheet.create({
   tag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
   tagDone: { borderColor: colors.border },
   tagNow: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  tagLater: { borderWidth: 0, paddingHorizontal: 0, paddingVertical: 0 },
+  tagLater: { borderColor: 'transparent', backgroundColor: 'transparent' },
   tagAccent: { borderColor: colors.borderMid },
   tagText: { fontSize: 10, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' },
   tagTextNow: { color: colors.accent, fontWeight: '500' },
@@ -712,8 +710,7 @@ const s = StyleSheet.create({
   virtueQuestion: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24 },
   virtueDetail: { marginTop: 14 },
   virtueDivider: { height: 0.5, backgroundColor: colors.border, marginBottom: 14 },
-  virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif, marginBottom: 10 },
-  virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif },
+  virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
   virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 12, letterSpacing: 0.5 },
 
   morningCompleteCard: {

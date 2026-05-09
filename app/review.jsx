@@ -539,8 +539,19 @@ export default function ReviewScreen() {
             <View style={s.promptCard}>
               <View style={s.promptTopRow}>
                 <Text style={s.promptNum}>{roles.length > 0 ? 'VII · Commit' : 'VI · Commit'}</Text>
+                <TouchableOpacity
+                  style={s.hintBtn}
+                  onPress={() => setOpenHint(openHint === 'commit' ? null : 'commit')}
+                >
+                  <Text style={s.hintBtnText}>ⓘ</Text>
+                </TouchableOpacity>
               </View>
               <Text style={s.promptQ}>What one thing will I do differently next week?</Text>
+              {openHint === 'commit' && (
+                <View style={s.hintBox}>
+                  <Text style={s.hintText}>One change, not many. The Stoics measured the year by what they actually did, not by what they intended. A single concrete commitment, kept, reshapes next week more than a long list you abandon by Wednesday. Make it specific. Make it visible. Make it doable in the conditions you actually live in.</Text>
+                </View>
+              )}
               <TextInput
                 ref={intentionInputRef}
                 style={s.intentionInput}

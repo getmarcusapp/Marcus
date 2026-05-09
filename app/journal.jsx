@@ -323,7 +323,7 @@ export default function JournalScreen() {
                         </View>
                       </View>
                       <View style={s.listenContent}>
-                        <Text style={s.listenEyebrow}>Optional · 5 min meditation</Text>
+                        <Text style={s.listenEyebrow}>Optional · &lt; 5 min meditation</Text>
                         <Text style={s.listenTitle}>{journalMed.title}</Text>
                         {jLoaded ? (
                           <>
