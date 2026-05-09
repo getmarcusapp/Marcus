@@ -164,7 +164,14 @@ export default function CompassScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
+      <ScrollView
+        style={s.scroll}
+        showsVerticalScrollIndicator={true}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={{ paddingBottom: 80 }}
+      >
 
         <View style={s.hero}>
           <Image
@@ -577,14 +584,14 @@ const s = StyleSheet.create({
   roleEditLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 16, marginBottom: 12 },
   roleEditSub: { fontSize: 13, color: colors.textMuted, marginTop: 14, marginBottom: 8 },
   roleNameInput: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
-    padding: 14, fontSize: 16, color: colors.textPrimary,
+    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.lg,
+    padding: 18, fontSize: 16, color: colors.textPrimary, lineHeight: 26,
     backgroundColor: colors.bgElevated,
   },
   roleCommitmentInput: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
-    padding: 14, fontSize: 15, color: colors.textPrimary, lineHeight: 22,
-    minHeight: 80, textAlignVertical: 'top',
+    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.lg,
+    padding: 18, fontSize: 16, color: colors.textPrimary, lineHeight: 26,
+    minHeight: 120, textAlignVertical: 'top',
     backgroundColor: colors.bgElevated, marginBottom: 12,
   },
   roleDeleteBtn: { padding: 14, alignItems: 'center', marginTop: 4 },

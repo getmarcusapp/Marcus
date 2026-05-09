@@ -304,6 +304,12 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
               </View>
             ))}
 
+            <View style={s.compassFooterNote}>
+              <Text style={s.compassFooterText}>
+                Your Compass also has a Roles section for naming the relational positions you occupy: parent, partner, colleague, citizen. You can fill that in once your practice begins, in Compass · Roles.
+              </Text>
+            </View>
+
             <TouchableOpacity onPress={onSkip} style={s.skipLink}>
               <Text style={s.skipLinkText}>Skip for now, use the defaults</Text>
             </TouchableOpacity>
@@ -854,6 +860,20 @@ const s = StyleSheet.create({
     fontSize: 14,
     color: colors.textDim,
     marginBottom: 16,
+  },
+  compassFooterNote: {
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    backgroundColor: colors.bgDeep,
+    padding: 16,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  compassFooterText: {
+    fontSize: 13,
+    color: colors.textMuted,
+    lineHeight: 20,
   },
   compassInput: {
     fontSize: 16,
