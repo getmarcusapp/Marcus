@@ -273,9 +273,20 @@ export default function JournalScreen() {
                     )}
                     {showVirtueDetail && virtueDetail && (
                       <View style={s.virtueDetailCard}>
-                        <Text style={s.virtueDetailText}>{virtueDetail.definition}</Text>
-                        <View style={s.virtueDetailDivider} />
-                        <Text style={s.virtueDetailQuestion}>"{virtueDetail.question}"</Text>
+                        {selectedVirtueObj?.image && (
+                          <View style={s.virtueDetailImageWrap}>
+                            <Image
+                              source={selectedVirtueObj.image}
+                              style={s.virtueDetailImage}
+                              resizeMode="cover"
+                            />
+                          </View>
+                        )}
+                        <View style={s.virtueDetailBody}>
+                          <Text style={s.virtueDetailText}>{virtueDetail.definition}</Text>
+                          <View style={s.virtueDetailDivider} />
+                          <Text style={s.virtueDetailQuestion}>"{virtueDetail.question}"</Text>
+                        </View>
                       </View>
                     )}
                   </View>
@@ -312,7 +323,7 @@ export default function JournalScreen() {
                         </View>
                       </View>
                       <View style={s.listenContent}>
-                        <Text style={s.listenEyebrow}>Listen first · 5 min</Text>
+                        <Text style={s.listenEyebrow}>Optional · 5 min meditation</Text>
                         <Text style={s.listenTitle}>{journalMed.title}</Text>
                         {jLoaded ? (
                           <>
@@ -328,8 +339,8 @@ export default function JournalScreen() {
                         ) : (
                           <Text style={s.listenDesc}>
                             {isMorning
-                              ? 'A meditation that primes the practice below.'
-                              : 'A meditation that primes the reflection below.'}
+                              ? 'Tap if you want to listen before writing. Skip if you don\'t.'
+                              : 'Tap if you want to listen before reflecting. Skip if you don\'t.'}
                           </Text>
                         )}
                       </View>
@@ -505,8 +516,15 @@ const s = StyleSheet.create({
   virtueInfoChev: { fontSize: 20, color: colors.textDim },
   virtueDetailCard: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 18, marginBottom: 8, backgroundColor: colors.bgCard,
+    marginBottom: 8, backgroundColor: colors.bgCard,
+    overflow: 'hidden',
   },
+  // Painting banner that surfaces when the user expands a Virtue.
+  // Same classical art used on the Imagery page (Athena / Caravaggio
+  // David / Pollaiolo Temperance / Heemskerck Iustitia).
+  virtueDetailImageWrap: { width: '100%', height: 140, backgroundColor: '#000' },
+  virtueDetailImage: { width: '100%', height: '100%' },
+  virtueDetailBody: { padding: 18 },
   virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
   virtueDetailDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
