@@ -237,67 +237,90 @@ function PhilosophyStep({ onNext }) {
   );
 }
 
+// Three-question Compass setup. Default mode is a summary screen
+// framing the defaults as a complete starting point ("Your Compass is
+// ready"), with one primary continue path and a secondary
+// "Customize each one" link. The customize flow is a focused 1-of-3
+// card sequence with progress dots — single prompt + input + save.
+// User feedback that drove this: showing all 3 fields at once was
+// overwhelming, and the pre-filled paragraphs read as fixed copy
+// rather than something they could edit.
+const COMPASS_FIELDS = [
+  {
+    key: 'why', label: 'Why I practice', sub: 'What draws you to Stoicism?',
+    placeholder: 'e.g. To act with integrity regardless of outcome. To be the kind of person my future self would be proud of.',
+    hint: "The Stoics held that Virtue, not outcome, is the only true good. Your Why should reflect what is in your control: your character, your intentions, how you show up.\n\nA Stoic Why doesn't depend on external circumstances. 'I want to be respected' is external. 'I want to act with integrity regardless of outcome' is internal: yours to achieve regardless of what happens around you.",
+  },
+  {
+    key: 'overcome', label: 'What I want to overcome', sub: 'What patterns or struggles brought you here?',
+    placeholder: 'e.g. My tendency to avoid difficult conversations. Mistaking busyness for progress.',
+    hint: "Name a pattern you can observe in yourself, not a circumstance or another person. Those are outside your control. What you can overcome is your habitual response to them.\n\n'I want to overcome anxiety' is external. 'I want to stop treating anxiety as a verdict rather than an impression' is internal. That is where the Stoic practice lives.",
+  },
+  {
+    key: 'aspire', label: 'Who I aspire to be', sub: 'What does the best version of you look like?',
+    placeholder: 'e.g. To respond to difficulty with reason rather than reaction. To be present with the people I love.',
+    hint: "Aspiration in Stoic terms is the cultivation of Virtue: wisdom, courage, temperance, justice. The test is whether your aspiration describes who you are becoming, not what you are getting.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.'",
+  },
+];
+
 function CompassStep({ compass, setCompass, onNext, onSkip }) {
-  const [openHint, setOpenHint] = React.useState(null);
+  // mode: 'summary' shows the three defaults as compact preview cards
+  //       'edit'    shows ONE prompt at a time (1/3, 2/3, 3/3) for focused customization
+  const [mode, setMode] = useState('summary');
+  const [editIdx, setEditIdx] = useState(0);
+  const [hintOpen, setHintOpen] = useState(false);
 
-  const HINTS = {
-    why: "The Stoics held that Virtue — not outcome — is the only true good. Your Why should reflect what is in your control: your character, your intentions, how you show up.\n\nA Stoic Why doesn't depend on external circumstances. 'I want to be respected' is external. 'I want to act with integrity regardless of outcome' is internal: yours to achieve regardless of what happens around you.",
-    overcome: "Name a pattern you can observe in yourself, not a circumstance or another person. Those are outside your control. What you can overcome is your habitual response to them.\n\n'I want to overcome anxiety' is external. 'I want to stop treating anxiety as a verdict rather than an impression' is internal. That is where the Stoic practice lives.",
-    aspire: "Aspiration in Stoic terms is the cultivation of Virtue: wisdom, courage, temperance, justice. The test is whether your aspiration describes who you are becoming, not what you are getting.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.'",
-  };
+  function startCustomize() {
+    setMode('edit');
+    setEditIdx(0);
+    setHintOpen(false);
+  }
 
-  return (
-    <SafeAreaView style={s.safe}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
-      >
-        <ScrollView
-          style={s.scroll}
-          showsVerticalScrollIndicator={true}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 140 }}
+  function advanceOrFinish() {
+    if (editIdx < COMPASS_FIELDS.length - 1) {
+      setEditIdx(editIdx + 1);
+      setHintOpen(false);
+    } else {
+      setMode('summary');
+    }
+  }
+
+  if (mode === 'edit') {
+    const field = COMPASS_FIELDS[editIdx];
+    return (
+      <SafeAreaView style={s.safe}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={0}
         >
-          <View style={s.stepHero}>
-            <Text style={s.stepEyebrow}>Your compass</Text>
-            <Text style={s.stepTitle}>Set your{'\n'}North Star</Text>
-            <Text style={s.stepSub}>
-              These three questions anchor your daily practice. They come pre-filled. Edit each one to make it yours, or leave the defaults and customize later.
-            </Text>
-          </View>
+          <ScrollView
+            style={s.scroll}
+            showsVerticalScrollIndicator={true}
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 140 }}
+          >
+            <View style={s.stepHero}>
+              <Text style={s.stepEyebrow}>{editIdx + 1} of {COMPASS_FIELDS.length}</Text>
+              <Text style={s.stepTitle}>{field.label}</Text>
+              <Text style={s.stepSub}>{field.sub}</Text>
+            </View>
 
-          <View style={s.stepBody}>
-            {[
-              {
-                key: 'why', label: 'Why I practice', sub: 'What draws you to Stoicism?',
-                placeholder: 'e.g. To act with integrity regardless of outcome. To be the kind of person my future self would be proud of.',
-              },
-              {
-                key: 'overcome', label: 'What I want to overcome', sub: 'What patterns or struggles brought you here?',
-                placeholder: 'e.g. My tendency to avoid difficult conversations. Mistaking busyness for progress.',
-              },
-              {
-                key: 'aspire', label: 'Who I aspire to be', sub: 'What does the best version of you look like?',
-                placeholder: 'e.g. To respond to difficulty with reason rather than reaction. To be present with the people I love.',
-              },
-            ].map(field => (
-              <View key={field.key} style={s.compassField}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <Text style={s.compassFieldLabel}>{field.label}</Text>
+            <View style={s.stepBody}>
+              <View style={s.compassField}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 4 }}>
                   <TouchableOpacity
-                    onPress={() => setOpenHint(openHint === field.key ? null : field.key)}
+                    onPress={() => setHintOpen(!hintOpen)}
                     style={{ padding: 4 }}
                     activeOpacity={0.7}
                   >
                     <Text style={{ fontSize: 18, color: colors.accent }}>ⓘ</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={s.compassFieldSub}>{field.sub}</Text>
-                {openHint === field.key && (
+                {hintOpen && (
                   <View style={{ backgroundColor: colors.bg, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, padding: 14, marginBottom: 10 }}>
-                    <Text style={{ fontSize: 13, color: colors.textMuted, lineHeight: 21 }}>{HINTS[field.key]}</Text>
+                    <Text style={{ fontSize: 13, color: colors.textMuted, lineHeight: 21 }}>{field.hint}</Text>
                   </View>
                 )}
                 <TextInput
@@ -308,27 +331,83 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
                   placeholder={field.placeholder}
                   placeholderTextColor={colors.textDim}
                   scrollEnabled={false}
+                  autoFocus
                 />
               </View>
-            ))}
 
-            <View style={s.compassFooterNote}>
-              <Text style={s.compassFooterText}>
-                Your Compass also has a Roles section for naming the relational positions you occupy: parent, partner, colleague, citizen. You can fill that in once your practice begins, in Compass · Roles.
-              </Text>
+              <View style={s.compassDots}>
+                {COMPASS_FIELDS.map((_, i) => (
+                  <View key={i} style={[s.compassDot, i === editIdx && s.compassDotActive]} />
+                ))}
+              </View>
+
+              <TouchableOpacity onPress={() => setMode('summary')} style={s.skipLink}>
+                <Text style={s.skipLinkText}>Done customizing</Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity onPress={onSkip} style={s.skipLink}>
-              <Text style={s.skipLinkText}>Skip for now, use the defaults</Text>
+          </ScrollView>
+          <View style={s.footer}>
+            <TouchableOpacity style={s.primaryBtn} onPress={advanceOrFinish} activeOpacity={0.8}>
+              <Text style={s.primaryBtnText}>
+                {editIdx < COMPASS_FIELDS.length - 1 ? 'Save & next →' : 'Save & finish →'}
+              </Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-        <View style={s.footer}>
-          <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-            <Text style={s.primaryBtnText}>Save my compass</Text>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  }
+
+  // Summary mode (default)
+  return (
+    <SafeAreaView style={s.safe}>
+      <ScrollView
+        style={s.scroll}
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={{ paddingBottom: 140 }}
+      >
+        <View style={s.stepHero}>
+          <Text style={s.stepEyebrow}>Your compass</Text>
+          <Text style={s.stepTitle}>Your Compass{'\n'}is ready.</Text>
+          <Text style={s.stepSub}>
+            Three answers anchor your daily practice. The defaults below are a complete starting point. Customize them now or anytime later in Compass.
+          </Text>
+        </View>
+
+        <View style={s.stepBody}>
+          {COMPASS_FIELDS.map((field, i) => (
+            <TouchableOpacity
+              key={field.key}
+              style={s.compassPreview}
+              onPress={() => { setMode('edit'); setEditIdx(i); setHintOpen(false); }}
+              activeOpacity={0.75}
+            >
+              <View style={s.compassPreviewHeader}>
+                <Text style={s.compassPreviewLabel}>{field.label}</Text>
+                <Text style={s.compassPreviewEdit}>✎ Edit</Text>
+              </View>
+              <Text style={s.compassPreviewText} numberOfLines={3}>
+                {compass[field.key] || field.placeholder}
+              </Text>
+            </TouchableOpacity>
+          ))}
+
+          <View style={s.compassFooterNote}>
+            <Text style={s.compassFooterText}>
+              Your Compass also has a Roles section for naming the relational positions you occupy: parent, partner, colleague, citizen. You can fill that in once your practice begins, in Compass · Roles.
+            </Text>
+          </View>
+
+          <TouchableOpacity onPress={startCustomize} style={s.skipLink}>
+            <Text style={s.skipLinkText}>Customize each one →</Text>
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </ScrollView>
+      <View style={s.footer}>
+        <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
+          <Text style={s.primaryBtnText}>Use these to start →</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -862,10 +941,49 @@ const s = StyleSheet.create({
     fontSize: 16,
     color: colors.textSecondary,
     lineHeight: 26,
-    minHeight: 80,
+    minHeight: 140,
     textAlignVertical: 'top',
     fontFamily: font.serif,
   },
+  // Summary mode preview cards — show each default in a compact form
+  // with a clear ✎ Edit affordance so users see the customization path
+  // without having to wade through three full inputs.
+  compassPreview: {
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: 16,
+    marginBottom: 12,
+    backgroundColor: colors.bgCard,
+  },
+  compassPreviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  compassPreviewLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    letterSpacing: 0.2,
+  },
+  compassPreviewEdit: {
+    fontSize: 12,
+    color: colors.accent,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  compassPreviewText: {
+    fontSize: 14,
+    color: colors.textMuted,
+    lineHeight: 22,
+    fontFamily: font.serif,
+  },
+  // Edit-mode progress dots (1/3, 2/3, 3/3)
+  compassDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 18 },
+  compassDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.borderMid },
+  compassDotActive: { backgroundColor: colors.accent, transform: [{ scale: 1.4 }] },
   skipLink: { paddingVertical: 20, alignItems: 'center' },
   skipLinkText: { fontSize: 15, color: colors.textDim },
 
