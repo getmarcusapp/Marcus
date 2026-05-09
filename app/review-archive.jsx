@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getReviews } from '../store/db';
 import * as haptics from '../lib/haptics';
@@ -85,21 +84,14 @@ export default function ReviewArchiveScreen() {
 
       <TouchableOpacity onPress={() => router.replace('/review')} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
         <Text style={s.backArrow}>‹</Text>
-        <Text style={s.backLabel}>Weekly Review</Text>
+        <Text style={s.backLabel}>Back</Text>
       </TouchableOpacity>
 
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 60 }}>
         <View style={s.hero}>
-          <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.92)']}
-            locations={[0, 0.5, 1]}
-            style={StyleSheet.absoluteFillObject}
-          />
-          <View style={s.heroContent}>
-            <Text style={s.eyebrow}>Weekly Review</Text>
-            <Text style={s.title}>Your archive</Text>
-            <Text style={s.sub}>The examined life, recorded</Text>
-          </View>
+          <Text style={s.eyebrow}>Weekly Review</Text>
+          <Text style={s.title}>Your archive</Text>
+          <Text style={s.sub}>The examined life, recorded</Text>
         </View>
 
         <View style={s.filterRow}>
@@ -171,14 +163,11 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   hero: {
     backgroundColor: colors.bgDeep,
-    minHeight: 220,
+    padding: spacing.xl,
+    paddingTop: 52,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
-    position: 'relative',
-    overflow: 'hidden',
-    justifyContent: 'flex-end',
   },
-  heroContent: { padding: spacing.xl, paddingTop: 52 },
   backRow: {
     position: 'absolute', left: 16, zIndex: 10,
     flexDirection: 'row', alignItems: 'center', gap: 4,

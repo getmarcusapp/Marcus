@@ -87,7 +87,7 @@ export default function JournalHistoryScreen() {
     <SafeAreaView style={s.safe}>
       <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
         <Text style={s.backArrow}>‹</Text>
-        <Text style={s.backLabel}>{isMorning ? 'Morning' : 'Evening'} Journal</Text>
+        <Text style={s.backLabel}>Back</Text>
       </TouchableOpacity>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 60 }}>
         <View style={s.hero}>
