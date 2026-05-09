@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput,
-  TouchableOpacity, StyleSheet, SafeAreaView,
+  TouchableOpacity, StyleSheet, SafeAreaView, Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
