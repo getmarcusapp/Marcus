@@ -70,8 +70,8 @@ const morningPrompts = [
   },
   {
     num: 'V · Question',
-    q: 'What impression are you carrying into today that deserves examination before you act on it?',
-    hint: "A worry, assumption, or reaction you haven't questioned yet.",
+    q: 'What impression am I carrying into today that deserves examination before I act on it?',
+    hint: "A worry, assumption, or reaction I haven't questioned yet.",
     info: {
       title: 'The Discipline of Assent',
       source: 'Epictetus, Discourses 1.1',
