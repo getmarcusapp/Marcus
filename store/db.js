@@ -5,6 +5,7 @@ const KEYS = {
   TRIGGERS: 'triggers',
   REVIEWS: 'reviews',
   COMPASS: 'compass',
+  ROLES: 'compass_roles',
   STREAK: 'streak',
 };
 
@@ -77,6 +78,25 @@ export async function getCompass() {
       aspire: 'I want to meet adversity with calm and fortune with humility. To live each day with intention — not perfectly, but deliberately. To be someone who acts in accordance with their values, even when it\'s hard.',
     };
   } catch (e) { return {}; }
+}
+
+// Stoic discipline of action — the user's named relational positions
+// (parent, partner, colleague, citizen, human being, etc.) with an
+// optional one-line commitment per role. Lives alongside the Compass
+// values because roles are part of orientation. Schema:
+//   [{ id, name, commitment }]
+export async function getRoles() {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.ROLES);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+
+export async function saveRoles(roles) {
+  try {
+    await AsyncStorage.setItem(KEYS.ROLES, JSON.stringify(roles));
+    return true;
+  } catch (e) { return false; }
 }
 
 export async function getStreak() {

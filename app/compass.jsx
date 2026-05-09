@@ -8,7 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
-import { getCompass, saveCompass } from '../store/db';
+import { getCompass, saveCompass, getRoles, saveRoles } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
@@ -26,10 +26,28 @@ const COMPASS_HINTS = {
     placeholder: "e.g. My tendency to avoid difficult conversations. Mistaking busyness for progress.",
     hint: "Name a pattern you can observe in yourself, not a circumstance or another person. Those are outside your control.\n\nWhat you can overcome is your habitual judgment about events. 'I want to overcome anxiety' is external. 'I want to stop treating anxiety as a verdict rather than an impression' is internal.\n\nThat distinction is where the Stoic practice lives.",
   },
+  roles: {
+    hint: "The Stoics called these your kathēkonta — the appropriate actions owed to others by virtue of the position you occupy. You are not just one person. You are a parent or child, a partner, a friend, a colleague, a citizen, a human being among other rational creatures.\n\nEach role asks something specific of you. Naming the roles that actually apply to your life — not titles, not aspirations, but real relational positions — is the first move. The second is asking, regularly, what each one requires of you right now.\n\nMarcus Aurelius reminded himself of his roles every morning. So can you.",
+  },
 };
 
-const tabs = ['Why', 'Overcome', 'Aspire', 'Virtues'];
+const tabs = ['Why', 'Overcome', 'Aspire', 'Roles', 'Virtues'];
 const tabKeys = ['why', 'overcome', 'aspire'];
+
+// Suggested roles offered in the empty state. Users tap to add. Kept
+// short so it doesn't read as prescriptive — these are starting points,
+// not a checklist. Custom roles are also supported.
+const ROLE_SUGGESTIONS = [
+  'Partner',
+  'Parent',
+  'Child',
+  'Sibling',
+  'Friend',
+  'Colleague',
+  'Neighbor',
+  'Citizen',
+  'Human being',
+];
 
 export default function CompassScreen() {
   const router = useRouter();
@@ -51,11 +69,60 @@ export default function CompassScreen() {
   const [activeVirtueIdx, setActiveVirtueIdx] = useState(0);
   const { width: screenWidth } = useWindowDimensions();
   const commitMindfulSession = useMindfulSession();
+  // Roles tab state — list of {id, name, commitment}. editingRole is
+  // either null (list view), 'new' (creating), or a role id (editing).
+  const [roles, setRoles] = useState([]);
+  const [editingRole, setEditingRole] = useState(null);
+  const [roleNameDraft, setRoleNameDraft] = useState('');
+  const [roleCommitmentDraft, setRoleCommitmentDraft] = useState('');
 
   useEffect(() => {
     getCompass().then(setCompass);
+    getRoles().then(setRoles);
     getNextPracticeAfter('compass').then(setNextStep);
   }, []);
+
+  function startEditRole(role) {
+    setEditingRole(role.id);
+    setRoleNameDraft(role.name);
+    setRoleCommitmentDraft(role.commitment || '');
+  }
+
+  function startNewRole(prefilledName = '') {
+    setEditingRole('new');
+    setRoleNameDraft(prefilledName);
+    setRoleCommitmentDraft('');
+  }
+
+  function cancelRoleEdit() {
+    setEditingRole(null);
+    setRoleNameDraft('');
+    setRoleCommitmentDraft('');
+  }
+
+  async function handleSaveRole() {
+    const name = roleNameDraft.trim();
+    if (!name) return;
+    const commitment = roleCommitmentDraft.trim();
+    let next;
+    if (editingRole === 'new') {
+      next = [...roles, { id: Date.now().toString(), name, commitment }];
+    } else {
+      next = roles.map(r => r.id === editingRole ? { ...r, name, commitment } : r);
+    }
+    await saveRoles(next);
+    haptics.action();
+    setRoles(next);
+    cancelRoleEdit();
+  }
+
+  async function handleDeleteRole(id) {
+    const next = roles.filter(r => r.id !== id);
+    await saveRoles(next);
+    haptics.tap();
+    setRoles(next);
+    cancelRoleEdit();
+  }
 
   async function handleSave() {
     const key = tabKeys[activeTab];
@@ -187,6 +254,108 @@ export default function CompassScreen() {
                 </TouchableOpacity>
               </View>
             )
+          ) : activeTab === 3 ? (
+            <View>
+              <View style={s.hintRow}>
+                <Text style={s.hintLabel}>Roles</Text>
+                <TouchableOpacity style={s.hintBtn} onPress={() => setHintOpen(!hintOpen)} activeOpacity={0.7}>
+                  <Text style={s.hintBtnText}>ⓘ</Text>
+                </TouchableOpacity>
+              </View>
+              {hintOpen && (
+                <View style={s.hintBox}>
+                  <Text style={s.hintText}>{COMPASS_HINTS.roles.hint}</Text>
+                </View>
+              )}
+
+              {editingRole ? (
+                <View>
+                  <Text style={s.roleEditLabel}>{editingRole === 'new' ? 'Add a role' : 'Edit role'}</Text>
+                  <TextInput
+                    style={s.roleNameInput}
+                    value={roleNameDraft}
+                    onChangeText={setRoleNameDraft}
+                    placeholder="Name (e.g. Parent, Citizen)"
+                    placeholderTextColor={colors.textDim}
+                    autoCapitalize="words"
+                    autoFocus
+                  />
+                  <Text style={s.roleEditSub}>What does this role ask of you? (Optional, one line.)</Text>
+                  <TextInput
+                    style={s.roleCommitmentInput}
+                    multiline
+                    value={roleCommitmentDraft}
+                    onChangeText={setRoleCommitmentDraft}
+                    placeholder="e.g. To listen first. To be the steady one."
+                    placeholderTextColor={colors.textDim}
+                  />
+                  <View style={s.editBtns}>
+                    <TouchableOpacity style={s.editBtn} onPress={cancelRoleEdit}>
+                      <Text style={s.editBtnText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[s.editBtn, s.editBtnSave]} onPress={handleSaveRole}>
+                      <Text style={[s.editBtnText, { color: colors.textSecondary }]}>
+                        {editingRole === 'new' ? 'Add' : 'Save'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  {editingRole !== 'new' && (
+                    <TouchableOpacity style={s.roleDeleteBtn} onPress={() => handleDeleteRole(editingRole)}>
+                      <Text style={s.roleDeleteText}>Remove this role</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ) : (
+                <View>
+                  {roles.length > 0 ? (
+                    <>
+                      {roles.map(role => (
+                        <TouchableOpacity
+                          key={role.id}
+                          style={s.roleCard}
+                          onPress={() => startEditRole(role)}
+                          activeOpacity={0.75}
+                        >
+                          <View style={{ flex: 1 }}>
+                            <Text style={s.roleName}>{role.name}</Text>
+                            {role.commitment ? (
+                              <Text style={s.roleCommitment}>{role.commitment}</Text>
+                            ) : (
+                              <Text style={s.roleCommitmentEmpty}>No commitment yet — tap to add one.</Text>
+                            )}
+                          </View>
+                          <Text style={s.roleChev}>›</Text>
+                        </TouchableOpacity>
+                      ))}
+                      <TouchableOpacity style={s.roleAddBtn} onPress={() => startNewRole()} activeOpacity={0.7}>
+                        <Text style={s.roleAddBtnText}>+ Add a role</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <View>
+                      <Text style={s.rolesEmpty}>You haven't named your roles yet. Tap any below to add it, or write your own.</Text>
+                      <View style={s.roleSuggestRow}>
+                        {ROLE_SUGGESTIONS
+                          .filter(name => !roles.some(r => r.name.toLowerCase() === name.toLowerCase()))
+                          .map(name => (
+                            <TouchableOpacity
+                              key={name}
+                              style={s.roleSuggestPill}
+                              onPress={() => startNewRole(name)}
+                              activeOpacity={0.7}
+                            >
+                              <Text style={s.roleSuggestText}>{name}</Text>
+                            </TouchableOpacity>
+                          ))}
+                      </View>
+                      <TouchableOpacity style={s.roleAddBtn} onPress={() => startNewRole()} activeOpacity={0.7}>
+                        <Text style={s.roleAddBtnText}>+ Add a custom role</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
           ) : (
             <View>
               <Text style={s.secLabel}>The four cardinal Virtues</Text>
@@ -359,6 +528,44 @@ const s = StyleSheet.create({
   virtueDots: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 18, marginBottom: 8 },
   virtueDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.borderMid },
   virtueDotActive: { backgroundColor: colors.accent, transform: [{ scale: 1.4 }] },
+
+  // Roles tab
+  rolesEmpty: { fontSize: 14, color: colors.textMuted, lineHeight: 22, marginBottom: 16, fontStyle: 'italic' },
+  roleSuggestRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  roleSuggestPill: {
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: 20,
+    paddingHorizontal: 14, paddingVertical: 8, backgroundColor: colors.accentBg,
+  },
+  roleSuggestText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
+  roleCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
+    padding: 16, marginBottom: 8, backgroundColor: colors.bgElevated,
+  },
+  roleName: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
+  roleCommitment: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
+  roleCommitmentEmpty: { fontSize: 13, color: colors.textDim, fontStyle: 'italic' },
+  roleChev: { fontSize: 22, color: colors.textDim, marginLeft: 8 },
+  roleAddBtn: {
+    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
+    padding: 14, alignItems: 'center', marginTop: 8, marginBottom: 28,
+  },
+  roleAddBtnText: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.5 },
+  roleEditLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 16, marginBottom: 12 },
+  roleEditSub: { fontSize: 13, color: colors.textMuted, marginTop: 14, marginBottom: 8 },
+  roleNameInput: {
+    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
+    padding: 14, fontSize: 16, color: colors.textPrimary,
+    backgroundColor: colors.bgElevated,
+  },
+  roleCommitmentInput: {
+    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
+    padding: 14, fontSize: 15, color: colors.textPrimary, lineHeight: 22,
+    minHeight: 80, textAlignVertical: 'top',
+    backgroundColor: colors.bgElevated, marginBottom: 12,
+  },
+  roleDeleteBtn: { padding: 14, alignItems: 'center', marginTop: 4 },
+  roleDeleteText: { fontSize: 12, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
   // Hint styles
   hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   hintLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
