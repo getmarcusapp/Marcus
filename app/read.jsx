@@ -364,6 +364,10 @@ Return only the JSON object.`;
 
   return (
     <SafeAreaView style={s.safe}>
+      <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+        <Text style={s.backArrow}>‹</Text>
+        <Text style={s.backLabel}>{fromLabel}</Text>
+      </TouchableOpacity>
       {/* Off-screen share card. Rendered into the layout tree so captureRef
           can reach it but positioned far off-screen so the user never sees
           it directly. Only mounted once a reading exists to avoid empty
@@ -408,10 +412,6 @@ Return only the JSON object.`;
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.heroContent}>
-              <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
-                <Text style={s.backArrow}>‹</Text>
-                <Text style={s.backLabel}>{fromLabel}</Text>
-              </TouchableOpacity>
               <Text style={s.eyebrow}>Daily Reading</Text>
               <Text style={s.title}>
                 {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}

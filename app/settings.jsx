@@ -196,12 +196,12 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+        <Text style={s.backArrow}>‹</Text>
+        <Text style={s.backLabel}>{fromLabel}</Text>
+      </TouchableOpacity>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
         <View style={s.hero}>
-          <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
-            <Text style={s.backArrow}>‹</Text>
-            <Text style={s.backLabel}>{fromLabel}</Text>
-          </TouchableOpacity>
           <Text style={s.eyebrow}>Marcus</Text>
           <Text style={s.title}>Settings</Text>
           <Text style={s.sub}>Configure your daily practice</Text>

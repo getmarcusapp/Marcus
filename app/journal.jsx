@@ -378,6 +378,12 @@ export default function JournalScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      {fromPractice && (
+        <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+          <Text style={s.backArrow}>‹</Text>
+          <Text style={s.backLabel}>{fromLabel}</Text>
+        </TouchableOpacity>
+      )}
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: colors.bg }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -406,12 +412,6 @@ export default function JournalScreen() {
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.headerContent}>
-              {fromPractice && (
-                <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
-                  <Text style={s.backArrow}>‹</Text>
-                  <Text style={s.backLabel}>{fromLabel}</Text>
-                </TouchableOpacity>
-              )}
               <View style={s.typeToggle}>
                   {['morning', 'evening'].map(t => (
                     <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setViewMode('write'); setOpenPrompt(-1); setOpenHint(null); }} activeOpacity={0.7}>

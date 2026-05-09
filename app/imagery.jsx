@@ -142,6 +142,10 @@ export default function ImageryScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+        <Text style={s.backArrow}>‹</Text>
+        <Text style={s.backLabel}>{fromLabel}</Text>
+      </TouchableOpacity>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 60 }}>
 
         <View style={s.hero}>
@@ -156,10 +160,6 @@ export default function ImageryScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
-            <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
-              <Text style={s.backArrow}>‹</Text>
-              <Text style={s.backLabel}>{fromLabel}</Text>
-            </TouchableOpacity>
             <Text style={s.eyebrow}>The artwork</Text>
             <Text style={s.title}>The classical{'\n'}imagery in Marcus.</Text>
             <Text style={s.sub}>

@@ -241,6 +241,10 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+        <Text style={s.backArrow}>‹</Text>
+        <Text style={s.backLabel}>{fromLabel}</Text>
+      </TouchableOpacity>
       {/* Off-screen share card. Re-renders when shareEntry changes. */}
       {shareEntry && (
         <View
@@ -283,10 +287,6 @@ export default function ReviewScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
-            <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
-              <Text style={s.backArrow}>‹</Text>
-              <Text style={s.backLabel}>{fromLabel}</Text>
-            </TouchableOpacity>
             <Text style={s.eyebrow}>Weekly review</Text>
             <Text style={s.title}>
               {tab === 'current'

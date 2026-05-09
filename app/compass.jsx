@@ -169,6 +169,10 @@ export default function CompassScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+        <Text style={s.backArrow}>‹</Text>
+        <Text style={s.backLabel}>{fromLabel}</Text>
+      </TouchableOpacity>
       <ScrollView
         style={s.scroll}
         showsVerticalScrollIndicator={true}
@@ -190,10 +194,6 @@ export default function CompassScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
-            <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow}>
-              <Text style={s.backArrow}>‹</Text>
-              <Text style={s.backLabel}>{fromLabel}</Text>
-            </TouchableOpacity>
             <Text style={s.eyebrow}>Stoic Compass</Text>
             <Text style={s.title}>Your North Star</Text>
             <Text style={s.heroQuote}>“Know, first, who you are, and then adorn yourself accordingly.”</Text>

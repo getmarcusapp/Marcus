@@ -104,12 +104,12 @@ export default function DeveloperSettingsScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      <TouchableOpacity onPress={() => router.replace('/settings')} style={s.backRow} activeOpacity={0.7}>
+        <Text style={s.backArrow}>‹</Text>
+        <Text style={s.backLabel}>Settings</Text>
+      </TouchableOpacity>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
         <View style={s.hero}>
-          <TouchableOpacity onPress={() => router.replace('/settings')} style={s.backRow}>
-            <Text style={s.backArrow}>‹</Text>
-            <Text style={s.backLabel}>Settings</Text>
-          </TouchableOpacity>
           <Text style={s.eyebrow}>Developer</Text>
           <Text style={s.title}>Developer Tools</Text>
           <Text style={s.sub}>Diagnostics and test seeds for development builds</Text>

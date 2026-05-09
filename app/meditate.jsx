@@ -70,6 +70,10 @@ export default function MeditateScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      <TouchableOpacity onPress={() => router.replace(fromPath)} style={s.backRow} activeOpacity={0.7}>
+        <Text style={s.backArrow}>‹</Text>
+        <Text style={s.backLabel}>{fromLabel}</Text>
+      </TouchableOpacity>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
 
         <View style={[s.header, !showHeaderImage && s.headerCompact]}>
@@ -84,10 +88,6 @@ export default function MeditateScreen() {
             </>
           )}
           <View style={s.headerContent}>
-            <TouchableOpacity style={s.backRow} onPress={() => router.replace(fromPath)}>
-              <Text style={s.backArrow}>‹</Text>
-              <Text style={s.backLabel}>{fromLabel}</Text>
-            </TouchableOpacity>
             <Text style={s.eyebrow}>Meditations</Text>
             <Text style={s.title}>Stoic practice.</Text>
             <Text style={s.sub}>Ancient attention training for the modern day.</Text>
