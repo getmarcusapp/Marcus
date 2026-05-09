@@ -116,6 +116,17 @@ export default function CompassScreen() {
     cancelRoleEdit();
   }
 
+  // Single-tap add for suggestion pills. Adds the role with empty
+  // commitment so the pill flow stays one-tap. User can fill in a
+  // commitment later by tapping the role card.
+  async function quickAddRole(name) {
+    if (roles.some(r => r.name.toLowerCase() === name.toLowerCase())) return;
+    const next = [...roles, { id: Date.now().toString(), name, commitment: '' }];
+    await saveRoles(next);
+    haptics.tap();
+    setRoles(next);
+  }
+
   async function handleDeleteRole(id) {
     const next = roles.filter(r => r.id !== id);
     await saveRoles(next);
@@ -307,8 +318,13 @@ export default function CompassScreen() {
                 </View>
               ) : (
                 <View>
-                  {roles.length > 0 ? (
+                  {roles.length === 0 && (
+                    <Text style={s.rolesEmpty}>Choose the roles that actually apply to you. Tap any suggestion below to add it. You can write a personal commitment later by tapping the role card.</Text>
+                  )}
+
+                  {roles.length > 0 && (
                     <>
+                      <Text style={s.roleSectionLabel}>Your roles</Text>
                       {roles.map(role => (
                         <TouchableOpacity
                           key={role.id}
@@ -321,38 +337,44 @@ export default function CompassScreen() {
                             {role.commitment ? (
                               <Text style={s.roleCommitment}>{role.commitment}</Text>
                             ) : (
-                              <Text style={s.roleCommitmentEmpty}>No commitment yet — tap to add one.</Text>
+                              <Text style={s.roleCommitmentEmpty}>Tap to add a commitment.</Text>
                             )}
                           </View>
                           <Text style={s.roleChev}>›</Text>
                         </TouchableOpacity>
                       ))}
-                      <TouchableOpacity style={s.roleAddBtn} onPress={() => startNewRole()} activeOpacity={0.7}>
-                        <Text style={s.roleAddBtnText}>+ Add a role</Text>
-                      </TouchableOpacity>
                     </>
-                  ) : (
-                    <View>
-                      <Text style={s.rolesEmpty}>You haven't named your roles yet. Tap any below to add it, or write your own.</Text>
-                      <View style={s.roleSuggestRow}>
-                        {ROLE_SUGGESTIONS
-                          .filter(name => !roles.some(r => r.name.toLowerCase() === name.toLowerCase()))
-                          .map(name => (
+                  )}
+
+                  {(() => {
+                    const remaining = ROLE_SUGGESTIONS.filter(
+                      name => !roles.some(r => r.name.toLowerCase() === name.toLowerCase())
+                    );
+                    if (remaining.length === 0) return null;
+                    return (
+                      <View style={{ marginTop: roles.length > 0 ? 16 : 0 }}>
+                        {roles.length > 0 && (
+                          <Text style={s.roleSectionLabel}>Suggested</Text>
+                        )}
+                        <View style={s.roleSuggestRow}>
+                          {remaining.map(name => (
                             <TouchableOpacity
                               key={name}
                               style={s.roleSuggestPill}
-                              onPress={() => startNewRole(name)}
+                              onPress={() => quickAddRole(name)}
                               activeOpacity={0.7}
                             >
-                              <Text style={s.roleSuggestText}>{name}</Text>
+                              <Text style={s.roleSuggestText}>+ {name}</Text>
                             </TouchableOpacity>
                           ))}
+                        </View>
                       </View>
-                      <TouchableOpacity style={s.roleAddBtn} onPress={() => startNewRole()} activeOpacity={0.7}>
-                        <Text style={s.roleAddBtnText}>+ Add a custom role</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
+                    );
+                  })()}
+
+                  <TouchableOpacity style={s.roleAddBtn} onPress={() => startNewRole()} activeOpacity={0.7}>
+                    <Text style={s.roleAddBtnText}>+ Add a custom role</Text>
+                  </TouchableOpacity>
                 </View>
               )}
             </View>
@@ -530,7 +552,8 @@ const s = StyleSheet.create({
   virtueDotActive: { backgroundColor: colors.accent, transform: [{ scale: 1.4 }] },
 
   // Roles tab
-  rolesEmpty: { fontSize: 14, color: colors.textMuted, lineHeight: 22, marginBottom: 16, fontStyle: 'italic' },
+  rolesEmpty: { fontSize: 14, color: colors.textMuted, lineHeight: 22, marginBottom: 18, fontStyle: 'italic' },
+  roleSectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
   roleSuggestRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   roleSuggestPill: {
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: 20,
