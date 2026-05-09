@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image, TextInput,
@@ -270,6 +270,16 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
   const [mode, setMode] = useState('summary');
   const [editIdx, setEditIdx] = useState(0);
   const [hintOpen, setHintOpen] = useState(false);
+  const editInputRef = useRef(null);
+
+  // Re-focus the textarea each time the user advances to the next prompt.
+  // autoFocus fires only on mount; the input is reused across prompt
+  // indices, so we drive focus imperatively instead.
+  useEffect(() => {
+    if (mode !== 'edit') return;
+    const t = setTimeout(() => editInputRef.current?.focus(), 80);
+    return () => clearTimeout(t);
+  }, [mode, editIdx]);
 
   function startCustomize() {
     setMode('edit');
@@ -325,6 +335,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
                   </View>
                 )}
                 <TextInput
+                  ref={editInputRef}
                   style={s.compassInput}
                   multiline
                   value={compass[field.key]}
@@ -332,7 +343,6 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
                   placeholder={field.placeholder}
                   placeholderTextColor={colors.textDim}
                   scrollEnabled={false}
-                  autoFocus
                   inputAccessoryViewID={Platform.OS === 'ios' ? 'compassEditAccessory' : undefined}
                 />
               </View>
@@ -343,8 +353,8 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
                 ))}
               </View>
 
-              <TouchableOpacity onPress={() => setMode('summary')} style={s.skipLink}>
-                <Text style={s.skipLinkText}>Done customizing</Text>
+              <TouchableOpacity onPress={() => setMode('summary')} style={s.compassExitLink} activeOpacity={0.7}>
+                <Text style={s.compassExitLinkText}>‹ Back to summary</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -1004,6 +1014,11 @@ const s = StyleSheet.create({
   compassDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 18 },
   compassDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.borderMid },
   compassDotActive: { backgroundColor: colors.accent, transform: [{ scale: 1.4 }] },
+  // Exit link from edit mode back to the summary preview cards. Uses
+  // accent color + arrow so it reads clearly as a button rather than a
+  // stray sentence.
+  compassExitLink: { paddingVertical: 16, alignItems: 'center' },
+  compassExitLinkText: { fontSize: 14, color: colors.accent, letterSpacing: 0.5 },
   // Keyboard accessory (iOS) — surfaces Save & next above the keyboard
   // so the action isn't hidden behind it.
   accessoryBar: {
