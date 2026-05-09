@@ -738,18 +738,19 @@ const s = StyleSheet.create({
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif },
   virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 12, letterSpacing: 0.5 },
 
-  // Today's role — daily rotation, contemplative card. No image (roles
-  // don't have art); text-forward instead. Lives between the Virtue
-  // card and the meditation card on Practice.
+  // Today's role — daily rotation, intentionally a quieter card than
+  // the image-heavy Virtue and Meditation cards above and below. Warm
+  // gold-tinted background so it reads as deliberate, not as an
+  // image-card missing its image.
   roleCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 22, marginTop: 14, marginBottom: 14, backgroundColor: colors.bgCard,
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg,
+    padding: 18, marginTop: 14, marginBottom: 14, backgroundColor: colors.accentBg,
   },
-  roleEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
-  roleName: { fontSize: 28, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, fontFamily: font.serif, marginBottom: 8 },
-  roleCommitment: { fontSize: 15, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 24 },
-  roleDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 16, marginBottom: 14 },
-  roleQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
+  roleEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
+  roleName: { fontSize: 24, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, fontFamily: font.serif, marginBottom: 6 },
+  roleCommitment: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 22 },
+  roleDivider: { height: 0.5, backgroundColor: colors.accentDim, marginTop: 12, marginBottom: 12 },
+  roleQuestion: { fontSize: 13, color: colors.textMuted, lineHeight: 20 },
   morningCompleteCard: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,

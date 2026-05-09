@@ -792,13 +792,14 @@ const s = StyleSheet.create({
   intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
   intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top', marginTop: 12 },
   // Role chip strip shown above the VI · Account textarea to remind the
-  // user which roles are in scope while reflecting on the week.
+  // user which roles are in scope while reflecting on the week. Warm
+  // accent tint so they read against the dark prompt card.
   roleChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12, marginBottom: 4 },
   roleChip: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: 14,
-    paddingHorizontal: 10, paddingVertical: 4, backgroundColor: colors.bgElevated,
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: 14,
+    paddingHorizontal: 10, paddingVertical: 4, backgroundColor: colors.accentBg,
   },
-  roleChipText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
+  roleChipText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   // Seal button
   sealBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
   sealBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
