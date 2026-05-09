@@ -198,8 +198,7 @@ export default function CompassScreen() {
           <View style={s.heroContent}>
             <Text style={s.eyebrow}>Stoic Compass</Text>
             <Text style={s.title}>Your North Star</Text>
-            <Text style={s.heroQuote}>“Know, first, who you are, and then adorn yourself accordingly.”</Text>
-            <Text style={s.heroAttr}>— Epictetus, Discourses</Text>
+            <Text style={s.sub}>What anchors your day</Text>
           </View>
         </View>
 
@@ -490,8 +489,7 @@ const s = StyleSheet.create({
   backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10 },
-  heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24, marginBottom: 6 },
-  heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
+  sub: { fontSize: font.subSize, color: colors.textMuted },
   nextRow: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
