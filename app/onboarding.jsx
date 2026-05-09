@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image, TextInput,
   KeyboardAvoidingView, Platform, Alert,
+  InputAccessoryView, Keyboard,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -332,6 +333,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
                   placeholderTextColor={colors.textDim}
                   scrollEnabled={false}
                   autoFocus
+                  inputAccessoryViewID={Platform.OS === 'ios' ? 'compassEditAccessory' : undefined}
                 />
               </View>
 
@@ -354,6 +356,24 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
+        {Platform.OS === 'ios' && (
+          <InputAccessoryView nativeID="compassEditAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { Keyboard.dismiss(); advanceOrFinish(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>
+                  {editIdx < COMPASS_FIELDS.length - 1 ? 'Save & next →' : 'Save & finish →'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+        )}
       </SafeAreaView>
     );
   }
@@ -984,6 +1004,18 @@ const s = StyleSheet.create({
   compassDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 18 },
   compassDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.borderMid },
   compassDotActive: { backgroundColor: colors.accent, transform: [{ scale: 1.4 }] },
+  // Keyboard accessory (iOS) — surfaces Save & next above the keyboard
+  // so the action isn't hidden behind it.
+  accessoryBar: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    backgroundColor: colors.bgElevated,
+    borderTopWidth: 0.5, borderTopColor: colors.border,
+    paddingHorizontal: 16, paddingVertical: 8,
+  },
+  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
+  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   skipLink: { paddingVertical: 20, alignItems: 'center' },
   skipLinkText: { fontSize: 15, color: colors.textDim },
 
