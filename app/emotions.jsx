@@ -4,35 +4,15 @@ import {
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
   KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { emotions, stoicReframes } from '../constants/virtues';
-import { saveTrigger, getTriggers, updateTriggerEntry } from '../store/db';
+import { emotions } from '../constants/virtues';
+import { EMOTION_COLORS, DISTORTIONS } from '../constants/emotionsData';
+import { saveTrigger } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
-
-const EMOTION_COLORS = {
-  anger:       { bg: '#FDF0EF', border: '#E8A09A', text: '#C0504A', tint: 'rgba(232,160,154,0.12)' },
-  anxiety:     { bg: '#EFF4FD', border: '#9AB4E8', text: '#4A6EC0', tint: 'rgba(154,180,232,0.12)' },
-  frustration: { bg: '#FDF8EF', border: '#E8C87A', text: '#A07830', tint: 'rgba(232,200,122,0.12)' },
-  shame:       { bg: '#F5EFFd', border: '#C09AE8', text: '#7050B0', tint: 'rgba(192,154,232,0.12)' },
-  avoidance:   { bg: '#EFF8F5', border: '#7AC8B4', text: '#307870', tint: 'rgba(122,200,180,0.12)' },
-  envy:        { bg: '#EFF8EF', border: '#80C880', text: '#307030', tint: 'rgba(128,200,128,0.12)' },
-  grief:       { bg: '#F0F0F8', border: '#A0A0D0', text: '#505090', tint: 'rgba(160,160,208,0.12)' },
-  fear:        { bg: '#FDF2EF', border: '#E8B09A', text: '#B06040', tint: 'rgba(232,176,154,0.12)' },
-  other:       { bg: '#F5F5F5', border: '#C0C0C0', text: '#707070', tint: 'rgba(192,192,192,0.10)' },
-};
-
-const DISTORTIONS = [
-  { id: 'catastrophizing', label: 'Catastrophizing', q: 'Am I imagining the worst possible outcome?' },
-  { id: 'mind_reading', label: 'Mind-reading', q: 'Am I assuming I know what others think or feel?' },
-  { id: 'overgeneralizing', label: 'Overgeneralizing', q: 'Am I treating one event as a permanent pattern?' },
-  { id: 'personalizing', label: 'Personalizing', q: 'Am I taking responsibility for things outside my control?' },
-  { id: 'filtering', label: 'Filtering', q: 'Am I ignoring the good and fixating on the bad?' },
-  { id: 'emotional_reasoning', label: 'Emotional reasoning', q: 'Am I treating a feeling as proof that something is true?' },
-  { id: 'should_statements', label: 'Should statements', q: 'Am I imposing rigid rules on myself or others?' },
-];
 
 // Situation-agnostic reframes
 const stoicReframesUpdated = {
@@ -82,34 +62,16 @@ const iss = StyleSheet.create({
   value: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, minWidth: 48, textAlign: 'right' },
 });
 
-
-function groupByMonth(entries) {
-  const groups = {};
-  entries.forEach(entry => {
-    const d = new Date(entry.date);
-    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-    const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    if (!groups[key]) groups[key] = { label, entries: [] };
-    groups[key].entries.push(entry);
-  });
-  return Object.keys(groups).sort().reverse().map(k => groups[k]);
-}
-
 export default function EmotionsScreen() {
+  const router = useRouter();
   const playerInset = useMiniPlayerInset();
-  const [tab, setTab] = useState('log');
-  const [timing, setTiming] = useState('past'); // 'now' or 'past'
+  const [timing, setTiming] = useState('now'); // 'now' or 'past'
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [intensity, setIntensity] = useState(5);
   const [trigger, setTrigger] = useState('');
   const [reaction, setReaction] = useState('');
   const [chosenResponse, setChosenResponse] = useState('');
   const [selectedDistortions, setSelectedDistortions] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [searchQ, setSearchQ] = useState('');
-  const [filterEmotion, setFilterEmotion] = useState('all');
-  const [filterDistortion, setFilterDistortion] = useState('all');
-  const [filterIntensity, setFilterIntensity] = useState(0); // 0 = all, 7 = high only
   const commitMindfulSession = useMindfulSession();
   const triggerInputRef = useRef(null);
   const reactionInputRef = useRef(null);
@@ -123,10 +85,6 @@ export default function EmotionsScreen() {
     const t = setTimeout(() => triggerInputRef.current?.focus(), 250);
     return () => clearTimeout(t);
   }, [selectedEmotion]);
-  const [sortMode, setSortMode] = useState('date'); // 'date' | 'intensity'
-  const [editingEntry, setEditingEntry] = useState(null);
-
-  useEffect(() => { getTriggers().then(setHistory); }, []);
 
   function toggleDistortion(id) {
     haptics.tap();
@@ -155,45 +113,15 @@ export default function EmotionsScreen() {
     await saveTrigger(entry);
     haptics.success();
     commitMindfulSession();
-    const updated = await getTriggers();
-    setHistory(updated);
     setSelectedEmotion(null);
     setTrigger('');
     setReaction('');
     setChosenResponse('');
     setSelectedDistortions([]);
     setIntensity(5);
-    setTiming('past');
+    setTiming('now');
     Alert.alert('', 'Trigger logged.', [{ text: 'Done' }]);
-    setTab('history');
   }
-
-  async function handleEditSave(updated) {
-  const ok = await updateTriggerEntry(updated);
-  if (ok) {
-    const updated2 = await getTriggers();
-    setHistory(updated2);
-    setEditingEntry(null);
-    Alert.alert('', 'Entry updated.');
-  }
-}
-
-  const filteredHistory = history
-    .filter(e => {
-      if (filterEmotion !== 'all' && e.emotion !== filterEmotion) return false;
-      if (filterDistortion !== 'all' && !(e.distortions || []).includes(filterDistortion)) return false;
-      if (filterIntensity > 0 && (e.intensity || 0) < filterIntensity) return false;
-      if (searchQ.trim()) {
-        const q = searchQ.toLowerCase();
-        const text = [e.trigger, e.reaction, e.chosenResponse].join(' ').toLowerCase();
-        if (!text.includes(q)) return false;
-      }
-      return true;
-    })
-    .sort((a, b) => sortMode === 'intensity'
-      ? (b.intensity || 0) - (a.intensity || 0)
-      : new Date(b.date) - new Date(a.date)
-    );
 
   return (
     <SafeAreaView style={s.safe}>
@@ -225,379 +153,180 @@ export default function EmotionsScreen() {
             />
             <View style={s.heroContent}>
               <Text style={s.eyebrow}>Emotional mastery</Text>
-              <Text style={s.title}>{tab === 'log' ? 'Log a trigger' : 'Your history'}</Text>
-              <Text style={s.sub}>
-                {tab === 'log'
-                  ? 'Between stimulus and response\nthere is a space. This is that space.'
-                  : 'Patterns reveal what single moments cannot'}
-              </Text>
+              <Text style={s.title}>Log a trigger</Text>
+              <Text style={s.sub}>Between stimulus and response{'\n'}there is a space. This is that space.</Text>
             </View>
           </View>
 
-          <View style={s.tabRow}>
-            {['log', 'history'].map(t => (
+          <View style={s.pastEntriesRow}>
+            <TouchableOpacity
+              onPress={() => router.push('/emotions-history')}
+              style={s.pastEntriesBtn}
+              activeOpacity={0.7}
+            >
+              <Text style={s.pastEntriesText}>Past triggers ›</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={s.body}>
+
+            <Text style={s.scopeNote}>
+              Bring disturbance here for examination. Gratitude and joy live in the evening journal.
+            </Text>
+
+            <Text style={s.stageLabel}>I · Context</Text>
+            <Text style={s.secLabel}>When did this happen?</Text>
+            <View style={s.timingRow}>
               <TouchableOpacity
-                key={t}
-                style={[s.tabBtn, tab === t && s.tabBtnActive]}
-                onPress={() => setTab(t)}
+                style={[s.timingBtn, timing === 'now' && s.timingBtnActive]}
+                onPress={() => setTiming('now')}
+                activeOpacity={0.7}
               >
-                <Text style={[s.tabBtnText, tab === t && s.tabBtnTextActive]}>
-                  {t === 'log' ? 'Log trigger' : 'History'}
+                <Text style={[s.timingBtnText, timing === 'now' && s.timingBtnTextActive]}>
+                  Happening now
+                </Text>
+                <Text style={[s.timingBtnSub, timing === 'now' && s.timingBtnSubActive]}>
+                  How will I respond?
                 </Text>
               </TouchableOpacity>
-            ))}
-          </View>
-
-          {tab === 'log' ? (
-            <View style={s.body}>
-
-              <Text style={s.scopeNote}>
-                Bring disturbance here for examination. Gratitude and joy live in the evening journal.
-              </Text>
-
-              <Text style={s.stageLabel}>I · Context</Text>
-              <Text style={s.secLabel}>When did this happen?</Text>
-              <View style={s.timingRow}>
-                <TouchableOpacity
-                  style={[s.timingBtn, timing === 'now' && s.timingBtnActive]}
-                  onPress={() => setTiming('now')}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[s.timingBtnText, timing === 'now' && s.timingBtnTextActive]}>
-                    Happening now
-                  </Text>
-                  <Text style={[s.timingBtnSub, timing === 'now' && s.timingBtnSubActive]}>
-                    How will I respond?
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[s.timingBtn, timing === 'past' && s.timingBtnActive]}
-                  onPress={() => setTiming('past')}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[s.timingBtnText, timing === 'past' && s.timingBtnTextActive]}>
-                    Already happened
-                  </Text>
-                  <Text style={[s.timingBtnSub, timing === 'past' && s.timingBtnSubActive]}>
-                    How should I have responded?
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <Text style={s.secLabel}>What are you feeling?</Text>
-              <View style={s.emotionGrid}>
-                {emotions.map(e => {
-                  const ec = EMOTION_COLORS[e.id];
-                  const isSelected = selectedEmotion === e.id;
-                  return (
-                    <TouchableOpacity
-                      key={e.id}
-                      style={[s.ePill, isSelected && { backgroundColor: ec.tint, borderColor: ec.border }]}
-                      onPress={() => { haptics.tap(); setSelectedEmotion(e.id); }}
-                      activeOpacity={0.7}
-                    >
-                      <View style={[s.eAccent, { backgroundColor: ec.border, opacity: isSelected ? 1 : 0.55 }]} />
-                      <Text style={[s.ePillName, isSelected && { color: ec.border, fontWeight: '600' }]}>
-                        {e.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
-              <Text style={s.stageLabel}>II · Describe</Text>
-
-              <View style={s.fieldCard}>
-                <Text style={s.fieldLabel}>Intensity</Text>
-                <IntensitySlider value={intensity} onChange={setIntensity} />
-              </View>
-
-              <View style={s.fieldCard}>
-                <Text style={s.fieldLabel}>What triggered it?</Text>
-                <TextInput
-                  ref={triggerInputRef}
-                  style={s.fieldInput}
-                  multiline
-                  placeholder="Describe the situation..."
-                  placeholderTextColor={colors.textDim}
-                  value={trigger}
-                  onChangeText={setTrigger}
-                  scrollEnabled={false}
-                  inputAccessoryViewID={Platform.OS === 'ios' ? 'emoTriggerAccessory' : undefined}
-                />
-              </View>
-
-              <View style={s.fieldCard}>
-                <Text style={s.fieldLabel}>My automatic reaction</Text>
-                <TextInput
-                  ref={reactionInputRef}
-                  style={s.fieldInput}
-                  multiline
-                  placeholder="What did you want to do or say?"
-                  placeholderTextColor={colors.textDim}
-                  value={reaction}
-                  onChangeText={setReaction}
-                  scrollEnabled={false}
-                  inputAccessoryViewID={Platform.OS === 'ios' ? 'emoReactionAccessory' : undefined}
-                />
-              </View>
-
-              {selectedEmotion && (
-                <>
-                  <Text style={s.stageLabel}>III · Reframe</Text>
-                  <View style={[s.reframeCard, { borderColor: EMOTION_COLORS[selectedEmotion].border, backgroundColor: EMOTION_COLORS[selectedEmotion].tint }]}>
-                  <Text style={[s.reframeEyebrow, { color: EMOTION_COLORS[selectedEmotion].text }]}>
-                    The Stoic reframe
-                  </Text>
-                  <Text style={s.reframeText}>{stoicReframesUpdated[selectedEmotion]}</Text>
-
-                  <View style={s.reframeDivider} />
-
-                  <Text style={s.fieldLabel}>What story are you telling yourself?</Text>
-                  <Text style={s.distortionSub}>Select any patterns you notice in your thinking</Text>
-                  <View style={s.distortionGrid}>
-                    {DISTORTIONS.map(d => {
-                      const isSelected = selectedDistortions.includes(d.id);
-                      const ec = EMOTION_COLORS[selectedEmotion];
-                      return (
-                        <TouchableOpacity
-                          key={d.id}
-                          style={[
-                            s.distortionPill,
-                            isSelected && { borderColor: ec.border, backgroundColor: ec.bg },
-                          ]}
-                          onPress={() => toggleDistortion(d.id)}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={[s.distortionLabel, isSelected && { color: ec.text }]}>
-                            {d.label}
-                          </Text>
-                          <Text style={[s.distortionQ, isSelected && { color: ec.text }]}>
-                            {d.q}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-
-                  <View style={s.reframeDivider} />
-
-                  <Text style={s.fieldLabel}>
-                    {timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
-                  </Text>
-                  <TextInput
-                    ref={responseInputRef}
-                    style={s.fieldInput}
-                    multiline
-                    placeholder={timing === 'now'
-                      ? "What is your chosen response going forward?"
-                      : "Looking back, what would the Stoic have done?"}
-                    placeholderTextColor={colors.textDim}
-                    value={chosenResponse}
-                    onChangeText={setChosenResponse}
-                    scrollEnabled={false}
-                    inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}
-                  />
-                </View>
-                </>
-              )}
-
-              <TouchableOpacity style={s.saveBtn} onPress={handleLog} activeOpacity={0.8}>
-                <Text style={s.saveBtnText}>Log this trigger</Text>
-                <Text style={s.saveBtnSub}>Saved privately · used in weekly review</Text>
+              <TouchableOpacity
+                style={[s.timingBtn, timing === 'past' && s.timingBtnActive]}
+                onPress={() => setTiming('past')}
+                activeOpacity={0.7}
+              >
+                <Text style={[s.timingBtnText, timing === 'past' && s.timingBtnTextActive]}>
+                  Already happened
+                </Text>
+                <Text style={[s.timingBtnSub, timing === 'past' && s.timingBtnSubActive]}>
+                  How should I have responded?
+                </Text>
               </TouchableOpacity>
-
             </View>
-          ) : (
-            <View>
-              <View style={s.searchBar}>
-                <TextInput
-                  style={s.searchInput}
-                  placeholder="Search triggers..."
-                  placeholderTextColor={colors.textDim}
-                  value={searchQ}
-                  onChangeText={setSearchQ}
-                  clearButtonMode="while-editing"
-                />
-              </View>
-              <View style={s.filterRow}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 4 }}>
-                  {['all', ...emotions.map(e => e.id)].map(em => (
-                    <TouchableOpacity
-                      key={em}
-                      style={[s.filterPill, filterEmotion === em && s.filterPillActive]}
-                      onPress={() => setFilterEmotion(em)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[s.filterPillText, filterEmotion === em && s.filterPillTextActive]}>
-                        {em === 'all' ? 'All emotions' : emotions.find(x => x.id === em)?.label || em}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+
+            <Text style={s.secLabel}>What are you feeling?</Text>
+            <View style={s.emotionGrid}>
+              {emotions.map(e => {
+                const ec = EMOTION_COLORS[e.id];
+                const isSelected = selectedEmotion === e.id;
+                return (
                   <TouchableOpacity
-                    style={[s.filterPill, filterIntensity >= 7 && s.filterPillActive]}
-                    onPress={() => setFilterIntensity(filterIntensity >= 7 ? 0 : 7)}
+                    key={e.id}
+                    style={[s.ePill, isSelected && { backgroundColor: ec.tint, borderColor: ec.border }]}
+                    onPress={() => { haptics.tap(); setSelectedEmotion(e.id); }}
                     activeOpacity={0.7}
                   >
-                    <Text style={[s.filterPillText, filterIntensity >= 7 && s.filterPillTextActive]}>High intensity</Text>
+                    <View style={[s.eAccent, { backgroundColor: ec.border, opacity: isSelected ? 1 : 0.55 }]} />
+                    <Text style={[s.ePillName, isSelected && { color: ec.border, fontWeight: '600' }]}>
+                      {e.label}
+                    </Text>
                   </TouchableOpacity>
-                </ScrollView>
-              </View>
-              <View style={s.sortRow}>
-                <TouchableOpacity onPress={() => setSortMode(sortMode === 'date' ? 'intensity' : 'date')} style={s.sortBtn}>
-                  <Text style={s.sortBtnText}>Sort: {sortMode === 'date' ? 'Date ↓' : 'Intensity ↓'}</Text>
-                </TouchableOpacity>
-                {filteredHistory.length !== history.length && (
-                  <Text style={s.filterCount}>{filteredHistory.length} of {history.length}</Text>
-                )}
-              </View>
+                );
+              })}
+            </View>
 
-              {filteredHistory.length === 0 && history.length > 0 ? (
-                <View style={s.empty}>
-                  <Text style={s.emptyTitle}>Nothing matches your filter.</Text>
-                  <Text style={s.emptyText}>Adjust your search or open the field wider.</Text>
-                </View>
-              ) : filteredHistory.length === 0 ? (
-                <View style={s.empty}>
-                  <Text style={s.emptyEyebrow}>The space between stimulus and response</Text>
-                  <Text style={s.emptyTitle}>Nothing logged yet.{'\n'}That is its own kind of clarity.</Text>
-                  <Text style={s.emptyText}>
-                    When a strong emotion arises, open this logger before you react. Name it, rate it, describe what triggered it. Then read the Stoic reframe. The practice lives in that pause.
-                  </Text>
-                  <TouchableOpacity
-                    style={s.emptyCta}
-                    onPress={() => setTab('log')}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={s.emptyCtaText}>Log a trigger →</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                groupByMonth(filteredHistory).map(group => (
-                  <View key={group.label}>
-                    <View style={s.monthHeader}><Text style={s.monthHeaderText}>{group.label}</Text></View>
-                    {group.entries.map(entry => {
-  const ec = EMOTION_COLORS[entry.emotion] || EMOTION_COLORS.other;
+            <Text style={s.stageLabel}>II · Describe</Text>
 
-  if (editingEntry?.id === entry.id) {
-    return (
-      <View key={entry.id} style={[s.editCard, { borderColor: ec.border }]}>
-        <View style={[s.editCardHeader, { backgroundColor: ec.bg }]}>
-          <Text style={[s.editCardTitle, { color: ec.text }]}>Editing · {entry.emotion}</Text>
-          <Text style={s.editCardDate}>{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
-        </View>
-        <View style={s.editCardBody}>
-          <Text style={s.editFieldLabel}>What triggered it?</Text>
-          <TextInput
-            style={s.editFieldInput}
-            multiline
-            value={editingEntry.trigger}
-            onChangeText={text => setEditingEntry(prev => ({ ...prev, trigger: text }))}
-            placeholderTextColor={colors.textDim}
-            scrollEnabled={false}
-          />
-          <View style={s.editDivider} />
-          <Text style={s.editFieldLabel}>My automatic reaction</Text>
-          <TextInput
-            style={s.editFieldInput}
-            multiline
-            value={editingEntry.reaction || ''}
-            onChangeText={text => setEditingEntry(prev => ({ ...prev, reaction: text }))}
-            placeholderTextColor={colors.textDim}
-            scrollEnabled={false}
-          />
-          <View style={s.editDivider} />
-          <Text style={s.editFieldLabel}>
-            {editingEntry.timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
-          </Text>
-          <TextInput
-            style={s.editFieldInput}
-            multiline
-            value={editingEntry.chosenResponse || ''}
-            onChangeText={text => setEditingEntry(prev => ({ ...prev, chosenResponse: text }))}
-            placeholderTextColor={colors.textDim}
-            scrollEnabled={false}
-          />
-          <View style={s.editDivider} />
-          <Text style={s.editFieldLabel}>Cognitive distortions</Text>
-          <Text style={[s.editFieldLabel, { fontSize: 12, color: colors.textDim, fontWeight: '400', marginTop: -8, marginBottom: 12 }]}>Tap to add or remove</Text>
-          <View style={s.distortionGrid}>
-            {DISTORTIONS.map(d => {
-              const isSelected = (editingEntry.distortions || []).includes(d.id);
-              return (
-                <TouchableOpacity
-                  key={d.id}
-                  style={[s.distortionPill, isSelected && { backgroundColor: ec.bg, borderColor: ec.border }]}
-                  onPress={() => {
-                    haptics.tap();
-                    const current = editingEntry.distortions || [];
-                    const updated = isSelected
-                      ? current.filter(x => x !== d.id)
-                      : [...current, d.id];
-                    setEditingEntry(prev => ({ ...prev, distortions: updated }));
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[s.distortionLabel, isSelected && { color: ec.text }]}>{d.label}</Text>
-                  <Text style={[s.distortionQ, isSelected && { color: ec.text }]}>{d.q}</Text>
-                </TouchableOpacity>
-              );
-            })}
+            <View style={s.fieldCard}>
+              <Text style={s.fieldLabel}>Intensity</Text>
+              <IntensitySlider value={intensity} onChange={setIntensity} />
+            </View>
+
+            <View style={s.fieldCard}>
+              <Text style={s.fieldLabel}>What triggered it?</Text>
+              <TextInput
+                ref={triggerInputRef}
+                style={s.fieldInput}
+                multiline
+                placeholder="Describe the situation..."
+                placeholderTextColor={colors.textDim}
+                value={trigger}
+                onChangeText={setTrigger}
+                scrollEnabled={false}
+                inputAccessoryViewID={Platform.OS === 'ios' ? 'emoTriggerAccessory' : undefined}
+              />
+            </View>
+
+            <View style={s.fieldCard}>
+              <Text style={s.fieldLabel}>My automatic reaction</Text>
+              <TextInput
+                ref={reactionInputRef}
+                style={s.fieldInput}
+                multiline
+                placeholder="What did you want to do or say?"
+                placeholderTextColor={colors.textDim}
+                value={reaction}
+                onChangeText={setReaction}
+                scrollEnabled={false}
+                inputAccessoryViewID={Platform.OS === 'ios' ? 'emoReactionAccessory' : undefined}
+              />
+            </View>
+
+            {selectedEmotion && (
+              <>
+                <Text style={s.stageLabel}>III · Reframe</Text>
+                <View style={[s.reframeCard, { borderColor: EMOTION_COLORS[selectedEmotion].border, backgroundColor: EMOTION_COLORS[selectedEmotion].tint }]}>
+                <Text style={[s.reframeEyebrow, { color: EMOTION_COLORS[selectedEmotion].text }]}>
+                  The Stoic reframe
+                </Text>
+                <Text style={s.reframeText}>{stoicReframesUpdated[selectedEmotion]}</Text>
+
+                <View style={s.reframeDivider} />
+
+                <Text style={s.fieldLabel}>What story are you telling yourself?</Text>
+                <Text style={s.distortionSub}>Select any patterns you notice in your thinking</Text>
+                <View style={s.distortionGrid}>
+                  {DISTORTIONS.map(d => {
+                    const isSelected = selectedDistortions.includes(d.id);
+                    const ec = EMOTION_COLORS[selectedEmotion];
+                    return (
+                      <TouchableOpacity
+                        key={d.id}
+                        style={[
+                          s.distortionPill,
+                          isSelected && { borderColor: ec.border, backgroundColor: ec.bg },
+                        ]}
+                        onPress={() => toggleDistortion(d.id)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[s.distortionLabel, isSelected && { color: ec.text }]}>
+                          {d.label}
+                        </Text>
+                        <Text style={[s.distortionQ, isSelected && { color: ec.text }]}>
+                          {d.q}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                <View style={s.reframeDivider} />
+
+                <Text style={s.fieldLabel}>
+                  {timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
+                </Text>
+                <TextInput
+                  ref={responseInputRef}
+                  style={s.fieldInput}
+                  multiline
+                  placeholder={timing === 'now'
+                    ? "What is your chosen response going forward?"
+                    : "Looking back, what would the Stoic have done?"}
+                  placeholderTextColor={colors.textDim}
+                  value={chosenResponse}
+                  onChangeText={setChosenResponse}
+                  scrollEnabled={false}
+                  inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}
+                />
+              </View>
+              </>
+            )}
+
+            <TouchableOpacity style={s.saveBtn} onPress={handleLog} activeOpacity={0.8}>
+              <Text style={s.saveBtnText}>Log this trigger</Text>
+              <Text style={s.saveBtnSub}>Saved privately · used in weekly review</Text>
+            </TouchableOpacity>
+
           </View>
-        </View>
-        <View style={s.editBtnRow}>
-          <TouchableOpacity style={s.editCancelBtn} onPress={() => setEditingEntry(null)} activeOpacity={0.7}>
-            <Text style={s.editCancelBtnText}>Cancel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[s.editSaveBtn, { borderColor: ec.border, backgroundColor: ec.bg }]} onPress={() => handleEditSave(editingEntry)} activeOpacity={0.8}>
-            <Text style={[s.editSaveBtnText, { color: ec.text }]}>Save changes</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  return (
-    <View key={entry.id} style={s.histRow}>
-      <View style={s.histTop}>
-        <View style={[s.histBadge, { backgroundColor: ec.bg, borderColor: ec.border }]}>
-          <Text style={[s.histEmotion, { color: ec.text }]}>{entry.emotion}</Text>
-        </View>
-        <View style={s.histTopRight}>
-          {entry.timing && (
-            <Text style={s.histTiming}>{entry.timing === 'now' ? 'In the moment' : 'After the fact'}</Text>
-          )}
-          <Text style={s.histDate}>
-            {new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-          </Text>
-        </View>
-      </View>
-      <Text style={s.histIntensity}>Intensity {entry.intensity}/10</Text>
-      {entry.distortions && entry.distortions.length > 0 && (
-        <View style={s.histDistortions}>
-          {entry.distortions.map(d => (
-            <View key={d} style={[s.histDistortionTag, { borderColor: ec.border, backgroundColor: ec.bg }]}>
-              <Text style={[s.histDistortionText, { color: ec.text }]}>{d.replace('_', ' ')}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-      <Text style={s.histTrigger}>{entry.trigger}</Text>
-      {entry.chosenResponse ? (
-        <Text style={s.histResponse}>"{entry.chosenResponse}"</Text>
-      ) : null}
-      <TouchableOpacity style={s.histEditBtn} onPress={() => setEditingEntry({ ...entry })} activeOpacity={0.7}>
-        <Text style={s.histEditBtnText}>Edit entry</Text>
-      </TouchableOpacity>
-    </View>
-  );
-})}
-                  </View>
-                ))
-              )}
-
-            </View>
-          )}
         </ScrollView>
       </KeyboardAvoidingView>
       {Platform.OS === 'ios' && (
@@ -630,8 +359,12 @@ export default function EmotionsScreen() {
                   <Text style={s.accessoryActionText}>Next →</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryAction} activeOpacity={0.7}>
-                  <Text style={s.accessoryActionText}>Continue ↓</Text>
+                <TouchableOpacity
+                  onPress={() => { Keyboard.dismiss(); handleLog(); }}
+                  style={s.accessoryAction}
+                  activeOpacity={0.7}
+                >
+                  <Text style={s.accessoryActionText}>Log this trigger →</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -670,19 +403,17 @@ const s = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  heroContent: { padding: spacing.xl, paddingTop: 36 },
+  heroContent: { padding: spacing.xl, paddingTop: 52 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
-  tabRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgDeep },
-  tabBtn: { flex: 1, paddingVertical: 16, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  tabBtnActive: { borderBottomColor: colors.accent },
-  tabBtnText: { fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', color: colors.textDim },
-  tabBtnTextActive: { color: colors.accent },
+  pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  pastEntriesBtn: { paddingHorizontal: 8, paddingVertical: 4 },
+  pastEntriesText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
   // Light body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
-  stageLabel: { fontSize: 11, letterSpacing: 3, color: colors.accentDim, textTransform: 'uppercase', marginTop: 24, marginBottom: 4 },
+  stageLabel: { fontSize: 11, letterSpacing: 3, color: colors.accentDim, textTransform: 'uppercase', marginTop: 36, marginBottom: 14 },
   scopeNote: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', lineHeight: 20, marginTop: 4, marginBottom: 4 },
   timingRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 16, backgroundColor: colors.bgElevated },
@@ -695,7 +426,7 @@ const s = StyleSheet.create({
   ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 18, alignItems: 'center', backgroundColor: colors.bgElevated, overflow: 'hidden' },
   eAccent: { position: 'absolute', top: 0, left: 0, right: 0, height: 3 },
   ePillName: { fontSize: 13, color: colors.textSecondary, fontWeight: '400' },
-  fieldCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 12, backgroundColor: colors.bgElevated },
+  fieldCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
   fieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 12 },
   fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 25, minHeight: 64, textAlignVertical: 'top', paddingBottom: 16 },
   reframeCard: { borderWidth: 1, borderRadius: radius.lg, padding: 26, marginBottom: 12, backgroundColor: colors.bgCard },
@@ -710,60 +441,6 @@ const s = StyleSheet.create({
   saveBtn: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgElevated, marginBottom: 36 },
   saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
   saveBtnSub: { fontSize: 12, color: colors.textMuted, marginTop: 5 },
-  // History — light
-  histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
-  histTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
-  histTopRight: { alignItems: 'flex-end', gap: 3 },
-  histBadge: { borderWidth: 0.5, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
-  histEmotion: { fontSize: 13, fontWeight: '600', textTransform: 'capitalize' },
-  histTiming: { fontSize: 10, color: colors.textDim, letterSpacing: 0.5 },
-  histDate: { fontSize: 12, color: colors.textDim },
-  histIntensity: { fontSize: 12, color: colors.textMuted, marginBottom: 6 },
-  histDistortions: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
-  histDistortionTag: { borderWidth: 0.5, borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
-  histDistortionText: { fontSize: 11, textTransform: 'capitalize', letterSpacing: 0.3, fontWeight: '500' },
-  histTrigger: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
-  histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, lineHeight: 22 },
-  empty: { padding: 40, paddingTop: 56, alignItems: 'center', backgroundColor: colors.bgCard },
-  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
-  emptyCta: {
-    marginTop: 28,
-    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
-    paddingVertical: 14, paddingHorizontal: 22,
-    backgroundColor: colors.accentBg,
-  },
-  emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
-  searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8, backgroundColor: colors.bgCard },
-  searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
-  filterRow: { paddingVertical: 6, backgroundColor: colors.bgCard },
-  filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgElevated },
-  filterPillActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
-  filterPillText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3 },
-  filterPillTextActive: { color: colors.accent },
-  sortRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8, backgroundColor: colors.bgCard },
-  sortBtn: { padding: 4 },
-  sortBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
-  filterCount: { fontSize: 12, color: colors.textMuted },
-  monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
-  emptyIcon: { fontSize: 32, marginBottom: 16, color: colors.accentDim },
-  emptyTitle: { fontSize: 18, fontWeight: '400', color: colors.textPrimary, marginBottom: 12, textAlign: 'center', fontFamily: font.serif, lineHeight: 26 },
-  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
-  editCard: { borderWidth: 1, borderRadius: radius.lg, marginBottom: 12, overflow: 'hidden' },
-  editCardHeader: { padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  editCardTitle: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
-  editCardDate: { fontSize: 12, color: colors.textDim },
-  editCardBody: { padding: 16, backgroundColor: colors.bgElevated },
-  editFieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase', marginBottom: 10 },
-  editFieldInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top', paddingBottom: 16, marginBottom: 4 },
-  editDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
-  editBtnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgCard },
-  editCancelBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 13, alignItems: 'center' },
-  editCancelBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
-  editSaveBtn: { flex: 2, borderWidth: 1, borderRadius: radius.md, padding: 13, alignItems: 'center' },
-  editSaveBtnText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
-  histEditBtn: { marginTop: 10, borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start' },
-  histEditBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
   accessoryBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
