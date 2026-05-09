@@ -12,7 +12,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
-import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews, getRoles } from '../store/db';
+import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed, cancelJournalNotification } from '../notifications';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
@@ -62,7 +62,6 @@ export default function PracticeScreen() {
   const [reviewDone, setReviewDone] = useState(false);
   const [totalDays, setTotalDays] = useState(0);
   const [virtueExpanded, setVirtueExpanded] = useState(false);
-  const [roles, setRoles] = useState([]);
   const [userName, setUserName] = useState(null);
   const [eyebrowPhase, setEyebrowPhase] = useState(hasShownGreetingThisSession ? 'memento' : 'greeting');
   const eyebrowOpacity = useRef(new Animated.Value(1)).current;
@@ -109,9 +108,6 @@ export default function PracticeScreen() {
   const today = todayDate;
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const [todayVirtue, setTodayVirtue] = useState(virtues[today.getDate() % 4]);
-  // Date-cycle through the user's roles so each one surfaces predictably
-  // (a 5-role list cycles through every 5 days). null when no roles set.
-  const todayRole = roles.length > 0 ? roles[today.getDate() % roles.length] : null;
   // Show weekly review for 3 days: the review day + 2 days after
   // Requires minimum 3 completed practice days before surfacing
   const dayOfWeek = today.getDay();
@@ -134,8 +130,6 @@ export default function PracticeScreen() {
       const evening = await getTodayJournal('evening');
       const reading = await getTodayReading();
       const compassToday = await getCompassDone();
-      const userRoles = await getRoles();
-      setRoles(userRoles);
       const s = await getStreak();
       setTotalDays(s.totalDays || 0);
       const settings = await AsyncStorage.getItem('notification_settings');
@@ -537,22 +531,6 @@ export default function PracticeScreen() {
             </View>
           </TouchableOpacity>
 
-          {todayRole && (
-            <TouchableOpacity
-              style={s.roleCard}
-              onPress={() => router.push('/compass?from=/&fromLabel=Practice&tab=roles')}
-              activeOpacity={0.85}
-            >
-              <Text style={s.roleEyebrow}>Today, as a</Text>
-              <Text style={s.roleName}>{todayRole.name}</Text>
-              {todayRole.commitment ? (
-                <Text style={s.roleCommitment}>"{todayRole.commitment}"</Text>
-              ) : null}
-              <View style={s.roleDivider} />
-              <Text style={s.roleQuestion}>What does this role ask of me right now?</Text>
-            </TouchableOpacity>
-          )}
-
           <TouchableOpacity
             style={s.medCard}
             onPress={toggleMedPlay}
@@ -715,7 +693,7 @@ const s = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: colors.border,
     borderRadius: radius.lg,
-    marginBottom: 14,
+    marginBottom: 32,
     backgroundColor: colors.bgCard,
     overflow: 'hidden',
   },
@@ -738,19 +716,6 @@ const s = StyleSheet.create({
   virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif },
   virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 12, letterSpacing: 0.5 },
 
-  // Today's role — daily rotation, intentionally a quieter card than
-  // the image-heavy Virtue and Meditation cards above and below. Warm
-  // gold-tinted background so it reads as deliberate, not as an
-  // image-card missing its image.
-  roleCard: {
-    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg,
-    padding: 18, marginTop: 14, marginBottom: 14, backgroundColor: colors.accentBg,
-  },
-  roleEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  roleName: { fontSize: 24, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, fontFamily: font.serif, marginBottom: 6 },
-  roleCommitment: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, lineHeight: 22 },
-  roleDivider: { height: 0.5, backgroundColor: colors.accentDim, marginTop: 12, marginBottom: 12 },
-  roleQuestion: { fontSize: 13, color: colors.textMuted, lineHeight: 20 },
   morningCompleteCard: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
@@ -779,7 +744,7 @@ const s = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: colors.border,
     borderRadius: radius.lg,
-    marginTop: 0,
+    marginTop: -16,
     marginBottom: 12,
     backgroundColor: colors.bgCard,
     overflow: 'hidden',
