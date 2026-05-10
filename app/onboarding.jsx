@@ -218,9 +218,9 @@ function PhilosophyStep({ onNext }) {
 
           {[
             { title: 'Stoic Compass', desc: 'Your personal North Star: why you practice, what you want to overcome, who you aspire to be.' },
-            { title: 'Daily Reading', desc: 'A real quote, generated fresh each day and personalized to your Virtue focus. Grounded in today\'s world.' },
+            { title: 'Daily Reading', desc: 'A real Stoic quote chosen for you each day, drawn from the canon and grounded in your Compass.' },
             { title: 'Guided Meditations', desc: 'Five Stoic meditations, less than five minutes each. Voiced. Surfaced contextually for the time of day.' },
-            { title: 'Morning Journal', desc: 'Set your intention, choose your Virtue focus, and prepare for what the day requires.' },
+            { title: 'Morning Journal', desc: 'Reflect on what is in your control, foresee what may come, and prepare for what the day requires.' },
             { title: 'Evening Journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
             { title: 'Emotion logger', desc: 'When strong emotions arise, log the trigger, examine your thinking, and choose your response.' },
             { title: 'Weekly review', desc: 'Once a week, examine your patterns, assess your Virtues, and set your intention forward.' },
@@ -451,7 +451,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
 function PracticePreviewStep({ onNext }) {
   const items = [
     { title: 'Stoic Compass', sub: 'Your North Star · read daily', tag: 'NOW' },
-    { title: 'Daily Reading', sub: 'Personalized to your practice, fresh each day', tag: 'READ' },
+    { title: 'Daily Reading', sub: 'Personalized to your practice, fresh each day', tag: 'NOW' },
     { title: 'Morning Journal', sub: 'Reflect and intend', tag: 'NOW' },
     { title: 'Evening Journal', sub: 'Examine and release', tag: 'LATER' },
   ];
@@ -778,7 +778,7 @@ const s = StyleSheet.create({
   previewItemSub: { fontSize: 13, color: colors.textMuted },
   previewTag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
   previewTagNow: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  previewTagLater: { borderWidth: 0, paddingHorizontal: 0, paddingVertical: 0 },
+  previewTagLater: { borderColor: 'transparent', backgroundColor: 'transparent' },
   previewTagTextNow: { color: colors.accent, fontWeight: '500' },
   previewTagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
   previewNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, backgroundColor: colors.bgDeep },

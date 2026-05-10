@@ -183,7 +183,7 @@ export default function ImageryScreen() {
           <SectionHeader
             eyebrow="The four Virtues"
             title="One artwork per Virtue"
-            sub="Wisdom, Courage, Temperance, Justice — rotates daily on the practice screen."
+            sub="Wisdom, Courage, Temperance, Justice. The unified frame of the Stoic life."
           />
           {virtues.map(v => {
             const note = VIRTUE_NOTES[v.id];

@@ -14,7 +14,7 @@ const sections = [
   },
   {
     title: 'The daily practice',
-    content: 'Each day has four core elements:\n\n1. Stoic Compass: Read your personal North Star to anchor your intentions.\n\n2. Daily Reading: A quote generated fresh each day, personalized to your Virtue focus and compass. Switch between Timeless mode (drawn from the Stoic canon, untethered to news) and Topical mode (tied to a verified current event from the past 48 hours). Default is timeless. The mode toggle lives below the reading.\n\n3. Morning Journal: Set your Virtue focus, reflect on what\'s in your control, and prepare for the day.\n\n4. Evening Journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.\n\nGuided meditations are available alongside the daily practice. They are optional. Use them when they serve.',
+    content: 'Each day has four core elements:\n\n1. Stoic Compass: Read your personal North Star to anchor your intentions.\n\n2. Daily Reading: A real Stoic quote chosen for you each day, grounded in your Compass, with a 3-4 sentence reflection in your voice. Save your own insight underneath; it accumulates in Past readings.\n\n3. Morning Journal: Reflect on what is in your control, foresee what may come, and prepare for the day.\n\n4. Evening Journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.\n\nGuided meditations are available alongside the daily practice. They are optional. Use them when they serve.',
   },
   {
     title: 'The Stoic Compass',
@@ -22,7 +22,7 @@ const sections = [
   },
   {
     title: 'The four Virtues',
-    content: 'Stoicism centers on four cardinal Virtues. Each morning you choose one as your focus.\n\nWisdom: Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage: Doing the right thing even when it is hard or costly.\n\nModeration: Neither too much nor too little. Temperance in all things.\n\nJustice: Acting rightly toward others. Community, fairness, duty.\n\nOver time, tracking which Virtues you embody and which you struggle with reveals patterns worth examining.',
+    content: 'Stoicism centers on four cardinal Virtues. They are not menu choices, and they are not separable. Wisdom without Justice is shallow. Courage without Moderation is recklessness. The Stoic does not pick one virtue for the day; the Stoic watches for all four in every situation.\n\nWisdom: Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage: Doing the right thing even when it is hard or costly.\n\nModeration: Neither too much nor too little. Temperance in all things.\n\nJustice: Acting rightly toward others. Community, fairness, duty.\n\nThe weekly review asks which Virtue you most embodied and which you fell short on. Over months, that answer becomes a mirror.',
   },
   {
     title: 'The emotion logger',

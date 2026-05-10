@@ -14,7 +14,6 @@ import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { colors, radius, spacing, font } from '../constants/theme';
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
-import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { saveJournal, getTodayJournal, incrementStreak } from '../store/db';
 import { getNextPracticeAfter } from '../store/practice-flow';
 import { cancelJournalNotification } from '../notifications';
@@ -83,7 +82,6 @@ export default function JournalScreen() {
   const prompts = isMorning ? morningPrompts : eveningPrompts;
 
   const [answers, setAnswers] = useState({});
-  const [selectedVirtue, setSelectedVirtue] = useState(virtues[0].id);
   const [openPrompt, setOpenPrompt] = useState(-1);
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
@@ -94,13 +92,12 @@ export default function JournalScreen() {
     return () => clearTimeout(t);
   }, [openPrompt]);
   const [alreadySaved, setAlreadySaved] = useState(false);
-  const [showVirtueDetail, setShowVirtueDetail] = useState(false);
 
   useEffect(() => {
     async function reload() {
       const existing = await getTodayJournal(isMorning ? 'morning' : 'evening');
-      if (existing) { setAnswers(existing.answers || {}); setSelectedVirtue(existing.virtue || virtues[0].id); setAlreadySaved(true); }
-      else { setAnswers({}); setSelectedVirtue(virtues[0].id); setAlreadySaved(false); }
+      if (existing) { setAnswers(existing.answers || {}); setAlreadySaved(true); }
+      else { setAnswers({}); setAlreadySaved(false); }
     }
     reload();
   }, [sessionType]);
@@ -110,11 +107,9 @@ export default function JournalScreen() {
       const existing = await getTodayJournal(isMorning ? 'morning' : 'evening');
       if (existing) {
         setAnswers(existing.answers || {});
-        setSelectedVirtue(existing.virtue || virtues[0].id);
         setAlreadySaved(true);
       } else {
         setAnswers({});
-        setSelectedVirtue(virtues[0].id);
         setAlreadySaved(false);
       }
     }
@@ -122,15 +117,12 @@ export default function JournalScreen() {
   }, [sessionType]));
 
   const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, prompts.length);
-  const selectedVirtueObj = virtues.find(v => v.id === selectedVirtue);
-  const virtueDetail = VIRTUE_DETAILS[selectedVirtue];
 
   async function handleSave() {
     const entry = {
       id: Date.now().toString(),
       type: isMorning ? 'morning' : 'evening',
       date: new Date().toISOString(),
-      virtue: selectedVirtue,
       answers,
     };
     const ok = await saveJournal(entry);
@@ -241,57 +233,6 @@ export default function JournalScreen() {
               </LinearGradient>
 
               <View style={s.body}>
-                {isMorning && (
-                  <View style={s.virtueSection}>
-                    <Text style={s.secLabel}>Today's Virtue Focus</Text>
-                    <View style={s.virtuePills}>
-                      {virtues.map(v => (
-                        <TouchableOpacity
-                          key={v.id}
-                          style={[s.vpill, selectedVirtue === v.id && s.vpillActive]}
-                          onPress={() => { setSelectedVirtue(v.id); setShowVirtueDetail(false); }}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={[s.vpillName, selectedVirtue === v.id && s.vpillNameActive]}>
-                            {v.name}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                    {selectedVirtueObj && (
-                      <TouchableOpacity
-                        style={s.virtueInfoCard}
-                        onPress={() => setShowVirtueDetail(!showVirtueDetail)}
-                        activeOpacity={0.8}
-                      >
-                        <View style={s.virtueInfoLeft}>
-                          <Text style={s.virtueInfoName}>{selectedVirtueObj.name}</Text>
-                          <Text style={s.virtueInfoDesc}>{selectedVirtueObj.desc}</Text>
-                        </View>
-                        <Text style={s.virtueInfoChev}>{showVirtueDetail ? '∨' : '›'}</Text>
-                      </TouchableOpacity>
-                    )}
-                    {showVirtueDetail && virtueDetail && (
-                      <View style={s.virtueDetailCard}>
-                        {selectedVirtueObj?.image && (
-                          <View style={s.virtueDetailImageWrap}>
-                            <Image
-                              source={selectedVirtueObj.image}
-                              style={s.virtueDetailImage}
-                              resizeMode="cover"
-                            />
-                          </View>
-                        )}
-                        <View style={s.virtueDetailBody}>
-                          <Text style={s.virtueDetailText}>{virtueDetail.definition}</Text>
-                          <View style={s.virtueDetailDivider} />
-                          <Text style={s.virtueDetailQuestion}>"{virtueDetail.question}"</Text>
-                        </View>
-                      </View>
-                    )}
-                  </View>
-                )}
-
                 {(() => {
                   const journalMed = MEDITATIONS[isMorning ? 'premeditatio' : 'evening-examination'];
                   const isCurrent = journalMedPlayer.currentMedId === journalMed.id;
@@ -499,35 +440,6 @@ const s = StyleSheet.create({
   // Light writing surface
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
-  virtueSection: { marginBottom: 8 },
-  virtuePills: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  vpill: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center', backgroundColor: colors.bgElevated },
-  vpillActive: { borderColor: colors.textSecondary, backgroundColor: colors.bgElevated },
-  vpillName: { fontSize: 12, fontWeight: '400', color: colors.textDim },
-  vpillNameActive: { color: colors.textPrimary, fontWeight: '500' },
-  virtueInfoCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 18, marginBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: colors.bgElevated,
-  },
-  virtueInfoLeft: { flex: 1 },
-  virtueInfoName: { fontSize: 20, fontWeight: '400', color: colors.textPrimary, marginBottom: 2 },
-  virtueInfoDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 21 },
-  virtueInfoChev: { fontSize: 20, color: colors.textDim },
-  virtueDetailCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    marginBottom: 8, backgroundColor: colors.bgCard,
-    overflow: 'hidden',
-  },
-  // Painting banner that surfaces when the user expands a Virtue.
-  // Same classical art used on the Imagery page (Athena / Caravaggio
-  // David / Pollaiolo Temperance / Heemskerck Iustitia).
-  virtueDetailImageWrap: { width: '100%', height: 140, backgroundColor: '#000' },
-  virtueDetailImage: { width: '100%', height: '100%' },
-  virtueDetailBody: { padding: 18 },
-  virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
-  virtueDetailDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
-  virtueDetailQuestion: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
   listenCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg,

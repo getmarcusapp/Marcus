@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, radius, font } from '../constants/theme';
-import { virtues } from '../constants/virtues';
 import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
 
 // Inline editor for editing a saved journal entry. Used from the
 // Past Entries view (app/journal-history.jsx). Rebuilds the same prompt
 // card UI as the live Journal write flow, but pre-populates with the
-// stored answers and Virtue focus.
+// stored answers.
 export function JournalEntryEditor({ entry, onSave, onCancel }) {
   const isMorning = entry.type === 'morning';
   const prompts = isMorning ? morningPrompts : eveningPrompts;
   const [answers, setAnswers] = useState(entry.answers || {});
-  const [selectedVirtue, setSelectedVirtue] = useState(entry.virtue || virtues[0].id);
   const [openPrompt, setOpenPrompt] = useState(-1);
   const [openHint, setOpenHint] = useState(null);
 
@@ -22,24 +20,6 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
         <Text style={s.headerTitle}>Edit {isMorning ? 'morning' : 'evening'} entry</Text>
         <Text style={s.headerDate}>{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
       </View>
-
-      {isMorning && (
-        <View style={s.virtueSection}>
-          <Text style={s.sectionLabel}>Virtue Focus</Text>
-          <View style={s.virtuePills}>
-            {virtues.map(v => (
-              <TouchableOpacity
-                key={v.id}
-                style={[s.vpill, selectedVirtue === v.id && s.vpillActive]}
-                onPress={() => setSelectedVirtue(v.id)}
-                activeOpacity={0.7}
-              >
-                <Text style={[s.vpillName, selectedVirtue === v.id && s.vpillNameActive]}>{v.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      )}
 
       {prompts.map((prompt, idx) => (
         <TouchableOpacity
@@ -101,7 +81,7 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
         </TouchableOpacity>
         <TouchableOpacity
           style={s.saveBtn}
-          onPress={() => onSave({ ...entry, answers, virtue: selectedVirtue })}
+          onPress={() => onSave({ ...entry, answers })}
           activeOpacity={0.8}
         >
           <Text style={s.saveBtnText}>Save changes</Text>

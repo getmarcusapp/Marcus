@@ -79,7 +79,6 @@ export default function ReviewScreen() {
   const [shareEntry, setShareEntry] = useState(null);
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
   const [distortionBreakdown, setDistortionBreakdown] = useState([]);
-  const [virtueFocusCounts, setVirtueFocusCounts] = useState({});
   const [dailyIntensity, setDailyIntensity] = useState([]);
   const [roles, setRoles] = useState([]);
 
@@ -153,24 +152,6 @@ export default function ReviewScreen() {
         .slice(0, 5);
       setDistortionBreakdown(distList);
 
-      // Pre-fill the Virtue Ledger from the week's morning focuses.
-      // Most embodied = most-picked focus. Least embodied = a virtue never picked
-      // (strongest signal of avoidance), falling back to the least-picked.
-      const focusCounts = {};
-      weekJournals.forEach(j => {
-        if (j.type === 'morning' && j.virtue) {
-          focusCounts[j.virtue] = (focusCounts[j.virtue] || 0) + 1;
-        }
-      });
-      setVirtueFocusCounts(focusCounts);
-      const sortedDesc = Object.entries(focusCounts).sort((a, b) => b[1] - a[1]);
-      if (sortedDesc.length > 0) {
-        setBestVirtue(sortedDesc[0][0]);
-        const allIds = virtues.map(v => v.id);
-        const unpicked = allIds.filter(id => !focusCounts[id]);
-        if (unpicked.length > 0) setWorstVirtue(unpicked[0]);
-        else setWorstVirtue(sortedDesc[sortedDesc.length - 1][0]);
-      }
     }
     load();
   }, []);
@@ -222,13 +203,6 @@ export default function ReviewScreen() {
       try { await Share.share({ message: fallback }); } catch {}
     }
   }
-
-  // Sort virtues by how often they were the morning focus this week, desc.
-  // Virtues never picked fall to the bottom (count 0). Same order in both
-  // pickers so the user scans top → bottom in a single mental model.
-  const sortedVirtues = [...virtues].sort((a, b) =>
-    (virtueFocusCounts[b.id] || 0) - (virtueFocusCounts[a.id] || 0)
-  );
 
   return (
     <SafeAreaView style={s.safe}>
@@ -464,19 +438,16 @@ export default function ReviewScreen() {
               </TouchableOpacity>
             ))}
 
-            {/* V · Ledger — pre-filled from the week's morning focuses */}
+            {/* V · Ledger — pure honest self-assessment, no pre-fill */}
             <View style={s.promptCard}>
               <View style={s.promptTopRow}>
                 <Text style={s.promptNum}>V · Ledger</Text>
               </View>
-              <Text style={s.promptQ}>Which Virtue did I most embody this week — and which did I fall short on?</Text>
-              {Object.keys(virtueFocusCounts).length > 0 && (
-                <Text style={s.ledgerHint}>Pre-filled from your morning focuses. Adjust if it doesn't match how the week actually went.</Text>
-              )}
+              <Text style={s.promptQ}>Which Virtue did I most embody this week, and which did I fall short on?</Text>
               <View style={s.virtueRow}>
                 <View style={s.virtuePicker}>
                   <Text style={s.vpLabel}>Most embodied</Text>
-                  {sortedVirtues.map(v => (
+                  {virtues.map(v => (
                     <TouchableOpacity
                       key={v.id}
                       style={[s.vpBtn, bestVirtue === v.id && s.vpBtnActive]}
@@ -484,14 +455,13 @@ export default function ReviewScreen() {
                     >
                       <Text style={[s.vpBtnText, bestVirtue === v.id && { color: colors.virtueGood, fontWeight: '600' }]}>
                         {v.name}
-                        {virtueFocusCounts[v.id] ? ` · ${virtueFocusCounts[v.id]}d` : ''}
                       </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
                 <View style={s.virtuePicker}>
                   <Text style={s.vpLabel}>Least embodied</Text>
-                  {sortedVirtues.map(v => (
+                  {virtues.map(v => (
                     <TouchableOpacity
                       key={v.id}
                       style={[s.vpBtn, worstVirtue === v.id && s.vpBtnActive]}
@@ -499,7 +469,6 @@ export default function ReviewScreen() {
                     >
                       <Text style={[s.vpBtnText, worstVirtue === v.id && { color: colors.virtueBad, fontWeight: '600' }]}>
                         {v.name}
-                        {virtueFocusCounts[v.id] ? ` · ${virtueFocusCounts[v.id]}d` : ''}
                       </Text>
                     </TouchableOpacity>
                   ))}

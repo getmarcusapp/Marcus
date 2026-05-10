@@ -11,7 +11,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
-import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed, cancelJournalNotification } from '../notifications';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -61,7 +60,6 @@ export default function PracticeScreen() {
   const [reviewDay, setReviewDay] = useState(0);
   const [reviewDone, setReviewDone] = useState(false);
   const [totalDays, setTotalDays] = useState(0);
-  const [virtueExpanded, setVirtueExpanded] = useState(false);
   const [userName, setUserName] = useState(null);
   const [eyebrowPhase, setEyebrowPhase] = useState(hasShownGreetingThisSession ? 'memento' : 'greeting');
   const eyebrowOpacity = useRef(new Animated.Value(1)).current;
@@ -107,7 +105,6 @@ export default function PracticeScreen() {
 
   const today = todayDate;
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const [todayVirtue, setTodayVirtue] = useState(virtues[today.getDate() % 4]);
   // Show weekly review for 3 days: the review day + 2 days after
   // Requires minimum 3 completed practice days before surfacing
   const dayOfWeek = today.getDay();
@@ -125,7 +122,6 @@ export default function PracticeScreen() {
     async function load() {
       const now = new Date();
       setTodayDate(now);
-      setTodayVirtue(virtues[now.getDate() % 4]);
       const morning = await getTodayJournal('morning');
       const evening = await getTodayJournal('evening');
       const reading = await getTodayReading();
@@ -149,10 +145,6 @@ export default function PracticeScreen() {
       setStreak(s);
       // Cancel notifications for anything already done today
       refreshNotificationsForToday().catch(() => {});
-      if (morning?.virtue) {
-        const found = virtues.find(v => v.id === morning.virtue);
-        if (found) setTodayVirtue(found);
-      }
     }
     load();
   }, []));
@@ -267,36 +259,6 @@ export default function PracticeScreen() {
           </Animated.View>
 
           <Animated.View style={[s.body, sealedAnimStyle(3)]}>
-            <TouchableOpacity
-              style={s.virtueCard}
-              onPress={() => setVirtueExpanded(!virtueExpanded)}
-              activeOpacity={0.85}
-            >
-              <View style={s.virtueImageWrap}>
-                <Image source={todayVirtue.image} style={s.virtueImage} resizeMode="cover" />
-                <LinearGradient
-                  colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
-                  locations={[0, 0.55, 1]}
-                  style={StyleSheet.absoluteFillObject}
-                />
-                <View style={s.virtueImageBottom}>
-                  <Text style={s.virtueEyebrow}>Virtue focus</Text>
-                </View>
-              </View>
-              <View style={s.virtueBody}>
-                <Text style={s.virtueName}>{todayVirtue.name}</Text>
-                <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
-                <Text style={s.virtueQuestion}>"{todayVirtue.question}"</Text>
-                {virtueExpanded && (
-                  <View style={s.virtueDetail}>
-                    <View style={s.virtueDivider} />
-                    <Text style={s.virtueDetailText}>{VIRTUE_DETAILS[todayVirtue.id]?.definition}</Text>
-                  </View>
-                )}
-                <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
-              </View>
-            </TouchableOpacity>
-
             <TouchableOpacity
               style={s.medCard}
               onPress={toggleMedPlay}
@@ -446,7 +408,7 @@ export default function PracticeScreen() {
                 <Text style={s.routineSub}>Ancient wisdom for this day</Text>
               </View>
               <View style={[s.tag, readingDone ? s.tagDone : s.tagNow]}>
-                <Text style={[s.tagText, !readingDone && s.tagTextNow]}>{readingDone ? 'DONE' : 'READ'}</Text>
+                <Text style={[s.tagText, !readingDone && s.tagTextNow]}>{readingDone ? 'DONE' : 'NOW'}</Text>
               </View>
             </TouchableOpacity>
 
@@ -498,36 +460,6 @@ export default function PracticeScreen() {
             )}
 
           </View>
-
-          <TouchableOpacity
-            style={s.virtueCard}
-            onPress={() => setVirtueExpanded(!virtueExpanded)}
-            activeOpacity={0.85}
-          >
-            <View style={s.virtueImageWrap}>
-              <Image source={todayVirtue.image} style={s.virtueImage} resizeMode="cover" />
-              <LinearGradient
-                colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
-                locations={[0, 0.55, 1]}
-                style={StyleSheet.absoluteFillObject}
-              />
-              <View style={s.virtueImageBottom}>
-                <Text style={s.virtueEyebrow}>Virtue focus</Text>
-              </View>
-            </View>
-            <View style={s.virtueBody}>
-              <Text style={s.virtueName}>{todayVirtue.name}</Text>
-              <Text style={s.virtueDesc}>{todayVirtue.desc}</Text>
-              <Text style={s.virtueQuestion}>"{todayVirtue.question}"</Text>
-              {virtueExpanded && (
-                <View style={s.virtueDetail}>
-                  <View style={s.virtueDivider} />
-                  <Text style={s.virtueDetailText}>{VIRTUE_DETAILS[todayVirtue.id]?.definition}</Text>
-                </View>
-              )}
-              <Text style={s.virtueChev}>{virtueExpanded ? '∨ Less' : '› More'}</Text>
-            </View>
-          </TouchableOpacity>
 
           <TouchableOpacity
             style={s.medCard}
@@ -686,32 +618,6 @@ const s = StyleSheet.create({
   tagText: { fontSize: 10, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' },
   tagTextNow: { color: colors.accent, fontWeight: '500' },
   tagTextAccent: { color: colors.textMuted },
-
-  virtueCard: {
-    borderWidth: 0.5,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    marginBottom: 32,
-    backgroundColor: colors.bgCard,
-    overflow: 'hidden',
-  },
-  virtueImageWrap: {
-    width: '100%',
-    height: 160,
-    backgroundColor: '#000',
-    overflow: 'hidden',
-  },
-  virtueImage: { width: '100%', height: '100%' },
-  virtueImageBottom: { position: 'absolute', left: 22, right: 22, bottom: 14 },
-  virtueBody: { padding: 22, paddingTop: 18 },
-  virtueEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
-  virtueName: { fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
-  virtueDesc: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, marginBottom: 12 },
-  virtueQuestion: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24 },
-  virtueDetail: { marginTop: 14 },
-  virtueDivider: { height: 0.5, backgroundColor: colors.border, marginBottom: 14 },
-  virtueDetailText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.serif },
-  virtueChev: { fontSize: 12, color: colors.accentDim, marginTop: 12, letterSpacing: 0.5 },
 
   morningCompleteCard: {
     backgroundColor: colors.accentBg,
