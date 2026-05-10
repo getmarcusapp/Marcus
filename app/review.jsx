@@ -19,36 +19,29 @@ const EMOTION_LABELS = {
   shame: 'Shame', avoidance: 'Avoidance', envy: 'Envy',
   grief: 'Grief', fear: 'Fear', other: 'Other',
 };
-const DISTORTION_LABELS = {
-  catastrophizing: 'Catastrophizing', mind_reading: 'Mind-reading',
-  overgeneralizing: 'Overgeneralizing', personalizing: 'Personalizing',
-  filtering: 'Filtering', emotional_reasoning: 'Emotional reasoning',
-  should_statements: 'Should statements',
-};
-
 const reviewPrompts = [
   {
-    num: 'I · Account',
+    num: 'I · Honor',
     q: 'What went well? Where did I act with Virtue this week?',
-    hint: 'This is not a victory lap. Notice the moments — even small ones — where you showed up as the person you want to be. Honest accounting cuts both ways: catalog what worked so you can repeat it.',
+    hint: 'Notice the small moments where you showed up as the person you want to be. Catalog what worked so you can repeat it.',
     key: 'wentWell',
   },
   {
     num: 'II · Reckon',
     q: 'Where did I stray? Where did I fall short of my own standard?',
-    hint: 'Without shame, without flinching. The Stoic practice is not about being perfect. It is about being awake to where you fell short. Naming it is the beginning of correcting it.',
+    hint: 'Without shame, without flinching. Naming where you fell short is the beginning of correcting it.',
     key: 'strayed',
   },
   {
     num: 'III · Pattern',
     q: 'What patterns am I noticing? What remains unresolved?',
-    hint: 'A single bad day is a moment. The same bad day, three weeks running, is a pattern. Patterns are where the practice does its real work. They reveal what is actually shaping your life.',
+    hint: 'A single bad day is a moment. The same bad day three weeks running is a pattern, and patterns are where the practice does its real work.',
     key: 'challenges',
   },
   {
     num: 'IV · Body',
     q: 'How did I treat my physical self: sleep, movement, food, restraint?',
-    hint: 'The Stoics did not separate the body from the practice. Marcus Aurelius wrote about food, sleep, and exercise as moral matters. The body is the instrument of Virtue. How well did you maintain it?\n\nBefore answering, consider opening Apple Health and glancing at your Mindfulness, Sleep, and Activity tabs for the week. Real data beats memory. Honest reflection deserves honest evidence.',
+    hint: 'The Stoics treated food, sleep, and movement as moral matters; the body is the instrument of Virtue. Glance at Apple Health if you want real data instead of memory.',
     key: 'body',
   },
 ];
@@ -78,7 +71,6 @@ export default function ReviewScreen() {
   const shareCardRef = useRef(null);
   const [shareEntry, setShareEntry] = useState(null);
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
-  const [distortionBreakdown, setDistortionBreakdown] = useState([]);
   const [dailyIntensity, setDailyIntensity] = useState([]);
   const [roles, setRoles] = useState([]);
 
@@ -139,19 +131,6 @@ export default function ReviewScreen() {
         });
       }
       setDailyIntensity(daily);
-
-      const distMap = {};
-      weekTriggers.forEach(t => {
-        (t.distortions || []).forEach(d => {
-          distMap[d] = (distMap[d] || 0) + 1;
-        });
-      });
-      const distList = Object.entries(distMap)
-        .map(([id, count]) => ({ id, label: DISTORTION_LABELS[id] || id, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
-      setDistortionBreakdown(distList);
-
     }
     load();
   }, []);
@@ -256,7 +235,6 @@ export default function ReviewScreen() {
             <Text style={s.title}>
               {`Week of ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
             </Text>
-            <Text style={s.sub}>Sunday reckoning</Text>
           </View>
         </View>
 
@@ -272,130 +250,15 @@ export default function ReviewScreen() {
 
         <View style={s.body}>
 
-            {/* Stats row */}
-            <View style={s.statRow}>
-              <View style={s.stat}>
-                <Text style={s.statNum}>{stats.journaled}</Text>
-                <Text style={s.statLbl}>Days{'\n'}journaled</Text>
-              </View>
-              <View style={s.stat}>
-                <Text style={[s.statNum, { color: colors.virtueGood }]}>{stats.reframed}</Text>
-                <Text style={s.statLbl}>Triggers{'\n'}reframed</Text>
-              </View>
-              <View style={s.stat}>
-                <Text style={[s.statNum, { color: colors.virtueBad }]}>{stats.triggers}</Text>
-                <Text style={s.statLbl}>Total{'\n'}triggers</Text>
-              </View>
-            </View>
-
-            {/* Emotion data first — informs reflection */}
-            {emotionBreakdown.length > 0 && (
-              <View style={s.insightCard}>
-                <Text style={s.insightCardTitle}>Emotions this week</Text>
-
-                {/* 7-day intensity sparkline — answers "is the storm getting smaller?" */}
-                <View style={s.sparkSection}>
-                  <Text style={s.sparkLabel}>Daily intensity · past 7 days</Text>
-                  <View style={s.sparkChart}>
-                    {dailyIntensity.map((d, i) => {
-                      const SPARK_HEIGHT = 72;
-                      const color = d.avg === null
-                        ? colors.borderMid
-                        : d.avg >= 7 ? colors.virtueBad
-                        : d.avg >= 4 ? colors.accent
-                        : colors.borderStrong;
-                      const barHeight = d.avg !== null
-                        ? Math.max(3, (d.avg / 10) * SPARK_HEIGHT)
-                        : 0;
-                      return (
-                        <View key={i} style={s.sparkCol}>
-                          <View style={[s.sparkBarTrack, { height: SPARK_HEIGHT }]}>
-                            {d.avg !== null ? (
-                              <View style={[s.sparkBar, { height: barHeight, backgroundColor: color }]} />
-                            ) : (
-                              <View style={s.sparkBaseline} />
-                            )}
-                          </View>
-                          <Text style={[s.sparkDay, d.isToday && s.sparkDayToday]}>
-                            {d.dayLetter}
-                          </Text>
-                        </View>
-                      );
-                    })}
-                  </View>
-                  {(() => {
-                    const days = dailyIntensity.filter(d => d.avg !== null);
-                    if (days.length < 2) return null;
-                    const half = Math.floor(days.length / 2);
-                    const firstAvg = days.slice(0, half).reduce((acc, d) => acc + d.avg, 0) / half;
-                    const secondAvg = days.slice(-half).reduce((acc, d) => acc + d.avg, 0) / half;
-                    const diff = secondAvg - firstAvg;
-                    const direction = diff < -0.5 ? 'trending calmer' : diff > 0.5 ? 'more turbulent' : 'steady';
-                    return (
-                      <Text style={s.sparkCaption}>
-                        Disturbed {days.length} of 7 days · {direction}
-                      </Text>
-                    );
-                  })()}
-                </View>
-
-                <View style={s.sparkDivider} />
-
-                {emotionBreakdown.map((item, idx) => (
-                  <View key={idx} style={s.insightRow}>
-                    <View style={s.insightRowLeft}>
-                      <Text style={s.insightEmotionLabel}>{item.label}</Text>
-                      <View style={s.insightBar}>
-                        <View style={[s.insightBarFill, {
-                          flex: item.count / (emotionBreakdown[0]?.count || 1),
-                          backgroundColor: item.avgIntensity >= 7 ? colors.virtueBad : item.avgIntensity >= 4 ? colors.accent : colors.borderStrong,
-                        }]} />
-                        <View style={{ flex: 1 - (item.count / (emotionBreakdown[0]?.count || 1)) }} />
-                      </View>
-                    </View>
-                    <View style={s.insightRowRight}>
-                      <Text style={s.insightCount}>{item.count}×</Text>
-                      <Text style={s.insightIntensity}>avg {item.avgIntensity}/10</Text>
-                    </View>
-                  </View>
-                ))}
-                <View style={s.intensityLegend}>
-                  <Text style={s.intensityLegendLabel}>Avg intensity</Text>
-                  <View style={s.intensityLegendItems}>
-                    <View style={s.intensityLegendItem}>
-                      <View style={[s.intensityLegendDot, { backgroundColor: colors.borderStrong }]} />
-                      <Text style={s.intensityLegendText}>Low</Text>
-                    </View>
-                    <View style={s.intensityLegendItem}>
-                      <View style={[s.intensityLegendDot, { backgroundColor: colors.accent }]} />
-                      <Text style={s.intensityLegendText}>Moderate</Text>
-                    </View>
-                    <View style={s.intensityLegendItem}>
-                      <View style={[s.intensityLegendDot, { backgroundColor: colors.virtueBad }]} />
-                      <Text style={s.intensityLegendText}>High</Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            )}
-
-            {distortionBreakdown.length > 0 && (
-              <View style={s.insightCard}>
-                <Text style={s.insightCardTitle}>Recurring distortions</Text>
-                {distortionBreakdown.map((item, idx) => (
-                  <View key={idx} style={[s.insightRow, { alignItems: 'center', marginBottom: 10 }]}>
-                    <Text style={[s.insightEmotionLabel, { flex: 1, marginBottom: 0 }]}>{item.label}</Text>
-                    <View style={s.insightPill}>
-                      <Text style={s.insightPillText}>{item.count}×</Text>
-                    </View>
-                  </View>
-                ))}
-                <Text style={s.insightFootnote}>Let these patterns inform your reflection below.</Text>
-              </View>
-            )}
-
-            {/* Reflection prompts */}
-            {reviewPrompts.map((p, idx) => (
+            {/* Reflection prompts. The III · Pattern card injects the
+                7-day disturbance sparkline + a one-line summary as
+                inline context for the question — data informing
+                reflection rather than competing with it. */}
+            {reviewPrompts.map((p, idx) => {
+              const isPattern = p.key === 'challenges';
+              const days = dailyIntensity.filter(d => d.avg !== null);
+              const showPatternData = isPattern && days.length > 0;
+              return (
               <TouchableOpacity
                 key={p.key}
                 style={[s.promptCard, openPrompt === idx && s.promptCardOpen]}
@@ -413,6 +276,59 @@ export default function ReviewScreen() {
                     </TouchableOpacity>
                   )}
                 </View>
+
+                {showPatternData && (() => {
+                  const half = Math.floor(days.length / 2);
+                  const firstAvg = days.slice(0, half).reduce((acc, d) => acc + d.avg, 0) / Math.max(half, 1);
+                  const secondAvg = days.slice(-half).reduce((acc, d) => acc + d.avg, 0) / Math.max(half, 1);
+                  const diff = secondAvg - firstAvg;
+                  const direction = days.length < 2
+                    ? null
+                    : diff < -0.5 ? 'trending calmer'
+                    : diff > 0.5 ? 'more turbulent'
+                    : 'steady';
+                  const top = emotionBreakdown[0];
+                  const summaryParts = [
+                    `Disturbed ${days.length} of 7 days`,
+                    direction,
+                    top ? `${top.label.toLowerCase()} appeared most often` : null,
+                  ].filter(Boolean);
+                  return (
+                    <View style={s.patternData}>
+                      <Text style={s.patternSummary}>
+                        {summaryParts.join(' · ')}
+                      </Text>
+                      <View style={s.sparkChart}>
+                        {dailyIntensity.map((d, i) => {
+                          const SPARK_HEIGHT = 60;
+                          const color = d.avg === null
+                            ? colors.borderMid
+                            : d.avg >= 7 ? colors.virtueBad
+                            : d.avg >= 4 ? colors.accent
+                            : colors.borderStrong;
+                          const barHeight = d.avg !== null
+                            ? Math.max(3, (d.avg / 10) * SPARK_HEIGHT)
+                            : 0;
+                          return (
+                            <View key={i} style={s.sparkCol}>
+                              <View style={[s.sparkBarTrack, { height: SPARK_HEIGHT }]}>
+                                {d.avg !== null ? (
+                                  <View style={[s.sparkBar, { height: barHeight, backgroundColor: color }]} />
+                                ) : (
+                                  <View style={s.sparkBaseline} />
+                                )}
+                              </View>
+                              <Text style={[s.sparkDay, d.isToday && s.sparkDayToday]}>
+                                {d.dayLetter}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  );
+                })()}
+
                 <Text style={s.promptQ}>{p.q}</Text>
                 {openHint === idx && p.hint && (
                   <View style={s.hintBox}>
@@ -436,14 +352,26 @@ export default function ReviewScreen() {
                   </View>
                 )}
               </TouchableOpacity>
-            ))}
+              );
+            })}
 
             {/* V · Ledger — pure honest self-assessment, no pre-fill */}
             <View style={s.promptCard}>
               <View style={s.promptTopRow}>
                 <Text style={s.promptNum}>V · Ledger</Text>
+                <TouchableOpacity
+                  style={s.hintBtn}
+                  onPress={() => setOpenHint(openHint === 'ledger' ? null : 'ledger')}
+                >
+                  <Text style={s.hintBtnText}>ⓘ</Text>
+                </TouchableOpacity>
               </View>
               <Text style={s.promptQ}>Which Virtue did I most embody this week, and which did I fall short on?</Text>
+              {openHint === 'ledger' && (
+                <View style={s.hintBox}>
+                  <Text style={s.hintText}>The four Virtues are inseparable. Wisdom without Justice is shallow. Courage without Moderation is recklessness. This question is not which Virtue you remembered to do; it is a sober assessment of where the unified character was tested most, and where it held.</Text>
+                </View>
+              )}
               <View style={s.virtueRow}>
                 <View style={s.virtuePicker}>
                   <Text style={s.vpLabel}>Most embodied</Text>
@@ -634,11 +562,6 @@ const s = StyleSheet.create({
   pastReviewsBtn: { paddingHorizontal: 8, paddingVertical: 4 },
   pastReviewsText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
   body: { padding: spacing.md },
-  // Stats
-  statRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  stat: { flex: 1, backgroundColor: colors.bgCard, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, alignItems: 'center' },
-  statNum: { fontSize: 30, fontWeight: '600', color: colors.textSecondary, marginBottom: 6 },
-  statLbl: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase', textAlign: 'center', lineHeight: 16 },
   // Prompts
   promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
   promptCardOpen: { borderColor: colors.borderMid },
@@ -667,22 +590,11 @@ const s = StyleSheet.create({
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
   hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
-  // Insight cards (shared by emotions, distortions, virtue ledger)
-  insightCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
-  insightCardTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12 },
-  insightRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 },
-  insightRowLeft: { flex: 1, marginRight: 12 },
-  insightRowRight: { alignItems: 'flex-end' },
-  insightEmotionLabel: { fontSize: 14, color: colors.textSecondary, marginBottom: 6 },
-  insightBar: { height: 3, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden', flexDirection: 'row' },
-  insightBarFill: { height: 3, borderRadius: 2 },
-  insightCount: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, marginBottom: 2 },
-  insightIntensity: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5 },
-  insightPill: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
-  insightPillText: { fontSize: 12, color: colors.textMuted },
-  insightFootnote: { fontSize: 12, color: colors.textMuted, marginTop: 4, marginBottom: 8, lineHeight: 18 },
-  sparkSection: { marginBottom: 4 },
-  sparkLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 14 },
+  // Inline pattern context — appears inside the III · Pattern card to
+  // ground the question in the week's actual data without preceding it
+  // with a separate analytics surface.
+  patternData: { marginBottom: 16, paddingBottom: 16, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  patternSummary: { fontSize: 13, color: colors.textMuted, marginBottom: 12, letterSpacing: 0.2, lineHeight: 19 },
   sparkChart: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 4 },
   sparkCol: { flex: 1, alignItems: 'center' },
   sparkBarTrack: { width: '100%', justifyContent: 'flex-end', alignItems: 'center' },
@@ -690,16 +602,7 @@ const s = StyleSheet.create({
   sparkBaseline: { width: '70%', height: 1.5, backgroundColor: colors.border, borderRadius: 1 },
   sparkDay: { fontSize: 11, color: colors.textDim, marginTop: 8, letterSpacing: 0.4 },
   sparkDayToday: { color: colors.accent, fontWeight: '600' },
-  sparkCaption: { fontSize: 12, color: colors.textMuted, marginTop: 14, textAlign: 'center', letterSpacing: 0.3, fontStyle: 'italic' },
-  sparkDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 18, marginBottom: 16 },
-  intensityLegend: { marginTop: 14, paddingTop: 14, borderTopWidth: 0.5, borderTopColor: colors.border },
-  intensityLegendLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 10 },
-  intensityLegendItems: { flexDirection: 'row', gap: 18, alignItems: 'center', flexWrap: 'wrap' },
-  intensityLegendItem: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  intensityLegendDot: { width: 10, height: 10, borderRadius: 5 },
-  intensityLegendText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.2 },
   // Virtue ledger (inside promptCard)
-  ledgerHint: { fontSize: 13, color: colors.textMuted, lineHeight: 20, marginTop: 8 },
   virtueRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
   virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' },
   vpLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', padding: 12, paddingHorizontal: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
