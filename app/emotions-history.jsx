@@ -10,6 +10,7 @@ import { emotions } from '../constants/virtues';
 import { EMOTION_COLORS, DISTORTIONS } from '../constants/emotionsData';
 import { getTriggers, updateTriggerEntry } from '../store/db';
 import * as haptics from '../lib/haptics';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 function groupByMonth(entries) {
   const groups = {};
@@ -26,6 +27,7 @@ function groupByMonth(entries) {
 export default function EmotionsHistoryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const playerInset = useMiniPlayerInset();
 
   const [history, setHistory] = useState([]);
   const [searchQ, setSearchQ] = useState('');
@@ -70,7 +72,7 @@ export default function EmotionsHistoryScreen() {
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>Back</Text>
       </TouchableOpacity>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 60 }}>
+      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Emotional mastery</Text>
           <Text style={s.title}>Past triggers</Text>
@@ -132,13 +134,6 @@ export default function EmotionsHistoryScreen() {
               <Text style={s.emptyText}>
                 When a strong emotion arises, open the logger before you react. Name it, rate it, describe what triggered it. Then read the Stoic reframe. The practice lives in that pause.
               </Text>
-              <TouchableOpacity
-                style={s.emptyCta}
-                onPress={() => router.replace('/emotions')}
-                activeOpacity={0.8}
-              >
-                <Text style={s.emptyCtaText}>Log a trigger →</Text>
-              </TouchableOpacity>
             </View>
           ) : (
             groupByMonth(filteredHistory).map(group => (

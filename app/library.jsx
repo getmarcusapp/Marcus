@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { READING_LIST, bookshopUrl, amazonUrl } from '../constants/library';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 const SECTIONS = [
   { key: 'Primary sources',     short: 'Primary',    sub: 'The three core Stoics in their own words, plus Cicero and Musonius.' },
@@ -57,6 +58,7 @@ export default function LibraryScreen() {
   const fromLabel = params?.fromLabel || 'More';
 
   const scrollRef = useRef(null);
+  const playerInset = useMiniPlayerInset();
   const [searchQ, setSearchQ] = useState('');
   const [sortMode, setSortMode] = useState('section'); // 'section' | 'title'
   const [sectionY, setSectionY] = useState({});
@@ -91,9 +93,9 @@ export default function LibraryScreen() {
       </TouchableOpacity>
       <ScrollView
         ref={scrollRef}
-        style={s.scroll}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
         showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ paddingBottom: 60 }}
+        contentContainerStyle={{ paddingBottom: playerInset }}
         stickyHeaderIndices={sortMode === 'section' && !searchQ.trim() ? [2] : []}
       >
 

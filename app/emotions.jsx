@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
   KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { emotions } from '../constants/virtues';
@@ -72,10 +72,12 @@ export default function EmotionsScreen() {
   const [reaction, setReaction] = useState('');
   const [chosenResponse, setChosenResponse] = useState('');
   const [selectedDistortions, setSelectedDistortions] = useState([]);
+  const [hintOpen, setHintOpen] = useState(false);
   const commitMindfulSession = useMindfulSession();
   const triggerInputRef = useRef(null);
   const reactionInputRef = useRef(null);
   const responseInputRef = useRef(null);
+  const scrollRef = useRef(null);
 
   // Auto-focus the trigger textarea when an emotion is selected — bypasses
   // the post-pick scroll-and-tap friction. iOS keyboard avoidance handles
@@ -85,6 +87,11 @@ export default function EmotionsScreen() {
     const t = setTimeout(() => triggerInputRef.current?.focus(), 250);
     return () => clearTimeout(t);
   }, [selectedEmotion]);
+
+  useFocusEffect(useCallback(() => {
+    setHintOpen(false);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []));
 
   function toggleDistortion(id) {
     haptics.tap();
@@ -131,10 +138,10 @@ export default function EmotionsScreen() {
         keyboardVerticalOffset={0}
       >
         <ScrollView
-          contentInset={{ bottom: 40 }}
-          scrollIndicatorInsets={{ bottom: 40 }}
+          ref={scrollRef}
+          scrollIndicatorInsets={{ bottom: 36 }}
           contentContainerStyle={{ paddingBottom: playerInset }}
-          style={s.scroll}
+          style={[s.scroll, { backgroundColor: colors.bgCard }]}
           showsVerticalScrollIndicator={true}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
@@ -170,11 +177,7 @@ export default function EmotionsScreen() {
 
           <View style={s.body}>
 
-            <Text style={s.scopeNote}>
-              Bring disturbance here for examination. Gratitude and joy live in the evening journal.
-            </Text>
-
-            <Text style={s.stageLabel}>I · Context</Text>
+            <Text style={[s.stageLabel, { marginTop: 16 }]}>I · Context</Text>
             <Text style={s.secLabel}>When did this happen?</Text>
             <View style={s.timingRow}>
               <TouchableOpacity
@@ -203,7 +206,19 @@ export default function EmotionsScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text style={s.secLabel}>What are you feeling?</Text>
+            <View style={s.feelingHeader}>
+              <Text style={[s.secLabel, { marginTop: 0, marginBottom: 0 }]}>What are you feeling?</Text>
+              <TouchableOpacity onPress={() => setHintOpen(!hintOpen)} style={s.hintBtn} activeOpacity={0.7}>
+                <Text style={s.hintBtnText}>ⓘ</Text>
+              </TouchableOpacity>
+            </View>
+            {hintOpen && (
+              <View style={s.hintBox}>
+                <Text style={s.hintText}>
+                  Marcus focuses on disturbing emotions because that's where the practice has work to do. Joy and contentment need no Stoic intervention; anger, anxiety, and shame do. Logging them here gives you the space between stimulus and response.
+                </Text>
+              </View>
+            )}
             <View style={s.emotionGrid}>
               {emotions.map(e => {
                 const ec = EMOTION_COLORS[e.id];
@@ -261,65 +276,72 @@ export default function EmotionsScreen() {
               />
             </View>
 
-            {selectedEmotion && (
-              <>
-                <Text style={s.stageLabel}>III · Reframe</Text>
-                <View style={[s.reframeCard, { borderColor: EMOTION_COLORS[selectedEmotion].border, backgroundColor: EMOTION_COLORS[selectedEmotion].tint }]}>
-                <Text style={[s.reframeEyebrow, { color: EMOTION_COLORS[selectedEmotion].text }]}>
-                  The Stoic reframe
-                </Text>
-                <Text style={s.reframeText}>{stoicReframesUpdated[selectedEmotion]}</Text>
+            <Text style={s.stageLabel}>III · Reframe</Text>
+            <View
+              style={[
+                s.reframeCard,
+                selectedEmotion
+                  ? { borderColor: EMOTION_COLORS[selectedEmotion].border, backgroundColor: EMOTION_COLORS[selectedEmotion].tint }
+                  : { borderColor: colors.border, backgroundColor: colors.bgElevated },
+              ]}
+            >
+              <Text style={[s.reframeEyebrow, { color: selectedEmotion ? EMOTION_COLORS[selectedEmotion].text : colors.textDim }]}>
+                The Stoic reframe
+              </Text>
+              <Text style={[s.reframeText, !selectedEmotion && s.reframeTextMuted]}>
+                {selectedEmotion
+                  ? stoicReframesUpdated[selectedEmotion]
+                  : 'Pick what you are feeling above. A Stoic reframe will appear here, with patterns to notice and a place to choose your response.'}
+              </Text>
 
-                <View style={s.reframeDivider} />
+              <View style={s.reframeDivider} />
 
-                <Text style={s.fieldLabel}>What story are you telling yourself?</Text>
-                <Text style={s.distortionSub}>Select any patterns you notice in your thinking</Text>
-                <View style={s.distortionGrid}>
-                  {DISTORTIONS.map(d => {
-                    const isSelected = selectedDistortions.includes(d.id);
-                    const ec = EMOTION_COLORS[selectedEmotion];
-                    return (
-                      <TouchableOpacity
-                        key={d.id}
-                        style={[
-                          s.distortionPill,
-                          isSelected && { borderColor: ec.border, backgroundColor: ec.bg },
-                        ]}
-                        onPress={() => toggleDistortion(d.id)}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={[s.distortionLabel, isSelected && { color: ec.text }]}>
-                          {d.label}
-                        </Text>
-                        <Text style={[s.distortionQ, isSelected && { color: ec.text }]}>
-                          {d.q}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-
-                <View style={s.reframeDivider} />
-
-                <Text style={s.fieldLabel}>
-                  {timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
-                </Text>
-                <TextInput
-                  ref={responseInputRef}
-                  style={s.fieldInput}
-                  multiline
-                  placeholder={timing === 'now'
-                    ? "What is your chosen response going forward?"
-                    : "Looking back, what would the Stoic have done?"}
-                  placeholderTextColor={colors.textDim}
-                  value={chosenResponse}
-                  onChangeText={setChosenResponse}
-                  scrollEnabled={false}
-                  inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}
-                />
+              <Text style={[s.fieldLabel, !selectedEmotion && s.fieldLabelMuted]}>What story are you telling yourself?</Text>
+              <Text style={s.distortionSub}>Select any patterns you notice in your thinking</Text>
+              <View style={s.distortionGrid}>
+                {DISTORTIONS.map(d => {
+                  const isSelected = selectedDistortions.includes(d.id);
+                  const ec = selectedEmotion ? EMOTION_COLORS[selectedEmotion] : null;
+                  return (
+                    <TouchableOpacity
+                      key={d.id}
+                      style={[
+                        s.distortionPill,
+                        isSelected && ec && { borderColor: ec.border, backgroundColor: ec.bg },
+                      ]}
+                      onPress={() => toggleDistortion(d.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.distortionLabel, isSelected && ec && { color: ec.text }]}>
+                        {d.label}
+                      </Text>
+                      <Text style={[s.distortionQ, isSelected && ec && { color: ec.text }]}>
+                        {d.q}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-              </>
-            )}
+
+              <View style={s.reframeDivider} />
+
+              <Text style={[s.fieldLabel, !selectedEmotion && s.fieldLabelMuted]}>
+                {timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
+              </Text>
+              <TextInput
+                ref={responseInputRef}
+                style={s.fieldInput}
+                multiline
+                placeholder={timing === 'now'
+                  ? "What is your chosen response going forward?"
+                  : "Looking back, what would the Stoic have done?"}
+                placeholderTextColor={colors.textDim}
+                value={chosenResponse}
+                onChangeText={setChosenResponse}
+                scrollEnabled={false}
+                inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}
+              />
+            </View>
 
             <TouchableOpacity style={s.saveBtn} onPress={handleLog} activeOpacity={0.8}>
               <Text style={s.saveBtnText}>Log this trigger</Text>
@@ -414,7 +436,11 @@ const s = StyleSheet.create({
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
   stageLabel: { fontSize: 11, letterSpacing: 3, color: colors.accentDim, textTransform: 'uppercase', marginTop: 36, marginBottom: 14 },
-  scopeNote: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', lineHeight: 20, marginTop: 4, marginBottom: 4 },
+  feelingHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, marginBottom: 12 },
+  hintBtn: { padding: 6, marginTop: -6 },
+  hintBtnText: { fontSize: 20, color: colors.accent },
+  hintBox: { backgroundColor: colors.bgDeep, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, marginBottom: 14 },
+  hintText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
   timingRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 16, backgroundColor: colors.bgElevated },
   timingBtnActive: { borderColor: colors.textSecondary, backgroundColor: colors.bgElevated },
@@ -432,6 +458,8 @@ const s = StyleSheet.create({
   reframeCard: { borderWidth: 1, borderRadius: radius.lg, padding: 26, marginBottom: 12, backgroundColor: colors.bgCard },
   reframeEyebrow: { fontSize: font.microSize, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12, fontWeight: '600' },
   reframeText: { fontSize: 16, color: colors.textSecondary, fontFamily: font.serif, lineHeight: 26, marginBottom: 16 },
+  reframeTextMuted: { color: colors.textDim, fontStyle: 'italic' },
+  fieldLabelMuted: { color: colors.textDim },
   reframeDivider: { height: 0.5, backgroundColor: colors.border, marginBottom: 16 },
   distortionSub: { fontSize: 13, color: colors.textMuted, marginBottom: 14 },
   distortionGrid: { gap: 10, marginBottom: 16 },

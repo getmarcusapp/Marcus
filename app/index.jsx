@@ -391,9 +391,11 @@ export default function PracticeScreen() {
                     <Text style={s.undoBtnText}>Undo</Text>
                   </TouchableOpacity>
                 )}
-                <View style={[s.tag, compassDone ? s.tagDone : s.tagNow]}>
-                  <Text style={[s.tagText, !compassDone && s.tagTextNow]}>{compassDone ? 'DONE' : 'NOW'}</Text>
-                </View>
+                {nextItem === 'compass' && (
+                  <View style={[s.tag, s.tagNext]}>
+                    <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
+                  </View>
+                )}
               </View>
             </TouchableOpacity>
 
@@ -407,9 +409,11 @@ export default function PracticeScreen() {
                 <Text style={[s.routineTitle, readingDone && s.titleDone]}>Daily Reading</Text>
                 <Text style={s.routineSub}>Ancient wisdom for this day</Text>
               </View>
-              <View style={[s.tag, readingDone ? s.tagDone : s.tagNow]}>
-                <Text style={[s.tagText, !readingDone && s.tagTextNow]}>{readingDone ? 'DONE' : 'NOW'}</Text>
-              </View>
+              {nextItem === 'reading' && (
+                <View style={[s.tag, s.tagNext]}>
+                  <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
+                </View>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -422,13 +426,15 @@ export default function PracticeScreen() {
                 <Text style={[s.routineTitle, morningDone && s.titleDone]}>Morning Journal</Text>
                 <Text style={s.routineSub}>Reflect and intend</Text>
               </View>
-              <View style={[s.tag, morningDone ? s.tagDone : s.tagNow]}>
-                <Text style={[s.tagText, !morningDone && s.tagTextNow]}>{morningDone ? 'DONE' : 'NOW'}</Text>
-              </View>
+              {nextItem === 'morning' && (
+                <View style={[s.tag, s.tagNext]}>
+                  <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
+                </View>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[s.routineRow, isReviewDay && s.routineRowBorder, nextItem === 'evening' && s.routineRowNext]}
+              style={[s.routineRow, nextItem === 'evening' && s.routineRowNext]}
               onPress={() => router.push({ pathname: '/journal', params: { type: 'evening' } })}
               activeOpacity={0.7}
             >
@@ -437,29 +443,71 @@ export default function PracticeScreen() {
                 <Text style={[s.routineTitle, eveningDone && s.titleDone]}>Evening Journal</Text>
                 <Text style={s.routineSub}>Examine and release</Text>
               </View>
-              <View style={[s.tag, eveningDone ? s.tagDone : s.tagLater]}>
-                <Text style={s.tagText}>{eveningDone ? 'DONE' : 'LATER'}</Text>
-              </View>
+              {nextItem === 'evening' && (
+                <View style={[s.tag, s.tagNext]}>
+                  <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
+                </View>
+              )}
             </TouchableOpacity>
 
-            {isReviewDay && (
-              <TouchableOpacity
-                style={s.routineRow}
-                onPress={() => router.push('/review?from=/&fromLabel=Practice')}
-                activeOpacity={0.7}
-              >
-                <View style={s.dot} />
-                <View style={s.routineContent}>
-                  <Text style={s.routineTitle}>Weekly review</Text>
-                  <Text style={s.routineSub}>Seal the week</Text>
-                </View>
-                <View style={[s.tag, s.tagAccent]}>
-                  <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
-                </View>
-              </TouchableOpacity>
-            )}
-
           </View>
+
+          {(() => {
+            const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            const hasEnough = totalDays >= 3;
+            const sealed = reviewDone;
+            const today = isReviewDay && !sealed;
+            const available = hasEnough && !today && !sealed;
+            const locked = !hasEnough;
+            const reviewDayName = days[reviewDay] || 'Sunday';
+            const sub = locked
+              ? 'After 3 days of practice'
+              : sealed
+                ? 'Sealed for this week'
+                : today
+                  ? 'Seal the week'
+                  : `Available ${reviewDayName}`;
+            const onPress = locked
+              ? null
+              : sealed
+                ? () => router.push('/review-archive')
+                : () => router.push('/review?from=/&fromLabel=Practice');
+            return (
+              <>
+                <View style={s.practiceHeader}>
+                  <Text style={s.secLabel}>Weekly</Text>
+                </View>
+                <View style={s.routineCard}>
+                  <TouchableOpacity
+                    style={[s.routineRow, today && s.routineRowNext]}
+                    onPress={onPress}
+                    disabled={locked}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[s.dot, sealed && s.dotDone]}>
+                      {sealed && <Ionicons name="checkmark" size={13} color={colors.bg} />}
+                    </View>
+                    <View style={s.routineContent}>
+                      <Text style={[s.routineTitle, locked && s.titleLocked, sealed && s.titleDone]}>
+                        Weekly review
+                      </Text>
+                      <Text style={s.routineSub}>{sub}</Text>
+                    </View>
+                    {locked && (
+                      <View style={[s.tag, s.tagAccent]}>
+                        <Text style={[s.tagText, s.tagTextAccent]}>{totalDays}/3</Text>
+                      </View>
+                    )}
+                    {today && (
+                      <View style={[s.tag, s.tagAccent]}>
+                        <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </>
+            );
+          })()}
 
           <TouchableOpacity
             style={s.medCard}
@@ -606,17 +654,16 @@ const s = StyleSheet.create({
   routineContent: { flex: 1 },
   routineTitle: { fontSize: 15, fontWeight: '400', color: colors.textPrimary, marginBottom: 3 },
   titleDone: { color: colors.textDim, textDecorationLine: 'line-through' },
+  titleLocked: { color: colors.textDim },
   routineSub: { fontSize: 12, color: colors.textMuted },
   tagRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   undoBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
   undoBtnText: { fontSize: 11, color: colors.textMuted },
   tag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
-  tagDone: { borderColor: colors.border },
-  tagNow: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  tagLater: { borderColor: 'transparent', backgroundColor: 'transparent' },
+  tagNext: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   tagAccent: { borderColor: colors.borderMid },
   tagText: { fontSize: 10, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' },
-  tagTextNow: { color: colors.accent, fontWeight: '500' },
+  tagTextNext: { color: colors.accent, fontWeight: '500' },
   tagTextAccent: { color: colors.textMuted },
 
   morningCompleteCard: {
@@ -647,7 +694,7 @@ const s = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: colors.border,
     borderRadius: radius.lg,
-    marginTop: -16,
+    marginTop: 8,
     marginBottom: 12,
     backgroundColor: colors.bgCard,
     overflow: 'hidden',

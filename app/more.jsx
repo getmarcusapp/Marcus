@@ -1,26 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity,
   StyleSheet, SafeAreaView, ScrollView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { getStreak } from '../store/db';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 const menuItems = [
-  {
-    section: 'Practice',
-    items: [
-      { label: 'Stoic Compass', sub: 'Your north star', icon: 'compass-outline', route: '/compass' },
-      { label: 'Meditations', sub: 'Guided Stoic practice', icon: 'headset-outline', route: '/meditate' },
-      { label: 'Daily Reading', sub: 'Personalized to your practice', icon: 'book-outline', route: '/read' },
-      { label: 'Morning Journal', sub: "Today's reflection and history", icon: 'sunny-outline', route: '/journal?type=morning' },
-      { label: 'Evening Journal', sub: "Tonight's reflection and history", icon: 'moon-outline', route: '/journal?type=evening' },
-      { label: 'Weekly review', sub: 'Examine the week', icon: 'layers-outline', route: '/review' },
-    ],
-  },
   {
     section: 'App',
     items: [
@@ -36,15 +25,21 @@ export default function MoreScreen() {
   const router = useRouter();
   const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
   const playerInset = useMiniPlayerInset();
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     getStreak().then(s => setStreak(s || { current: 0, longest: 0, totalDays: 0 }));
   }, []);
 
+  useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []));
+
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView
-        style={s.scroll}
+        ref={scrollRef}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
@@ -75,7 +70,6 @@ export default function MoreScreen() {
 
         {menuItems.map(section => (
           <View key={section.section} style={s.section}>
-            <Text style={s.sectionLabel}>{section.section}</Text>
             <View style={s.card}>
               {section.items.map((item, idx) => (
                 <TouchableOpacity
@@ -137,7 +131,7 @@ const s = StyleSheet.create({
   statDivider: { width: 0.5, backgroundColor: colors.border },
   heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24 },
   heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase', marginTop: 8 },
-  section: { paddingHorizontal: spacing.md, paddingTop: spacing.lg },
+  section: { paddingHorizontal: spacing.md, paddingTop: spacing.lg, paddingBottom: 36 },
   sectionLabel: {
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,

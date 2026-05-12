@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, font } from '../constants/theme';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 const sections = [
   {
@@ -61,6 +62,13 @@ export default function HowToScreen() {
   const fromPath = params?.from || '/more';
   const fromLabel = params?.fromLabel || 'More';
   const [openSection, setOpenSection] = useState(null);
+  const scrollRef = useRef(null);
+  const playerInset = useMiniPlayerInset();
+
+  useFocusEffect(useCallback(() => {
+    setOpenSection(null);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []));
 
   return (
     <SafeAreaView style={s.safe}>
@@ -68,7 +76,12 @@ export default function HowToScreen() {
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>{fromLabel}</Text>
       </TouchableOpacity>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
+      <ScrollView
+        ref={scrollRef}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={{ paddingBottom: playerInset }}
+      >
 
         <View style={s.hero}>
           <Text style={s.eyebrow}>Marcus</Text>
@@ -143,7 +156,7 @@ const s = StyleSheet.create({
   sectionChev: { fontSize: 20, color: colors.textDim, marginLeft: 12 },
   sectionBody: { padding: 18, borderTopWidth: 0.5, borderTopColor: colors.border, backgroundColor: colors.bgDeep },
   sectionContent: { fontSize: 15, color: colors.textSecondary, lineHeight: 26 },
-  footer: { padding: spacing.xl, paddingBottom: 48, alignItems: 'center' },
+  footer: { padding: spacing.xl, paddingBottom: 36, alignItems: 'center' },
   footerQuote: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif, textAlign: 'center', lineHeight: 22, marginBottom: 8 },
   footerAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
 });

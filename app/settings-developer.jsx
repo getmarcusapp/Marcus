@@ -9,12 +9,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { cancelAllNotifications } from '../notifications';
 import { clearTodayPractice, sealTodayPractice, seedWeekOfPracticeData } from '../store/db';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
 export default function DeveloperSettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const playerInset = useMiniPlayerInset();
 
   async function handleResetOnboarding() {
     await AsyncStorage.removeItem('has_onboarded');
@@ -110,7 +112,7 @@ export default function DeveloperSettingsScreen() {
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>Settings</Text>
       </TouchableOpacity>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
+      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Developer</Text>
           <Text style={s.title}>Developer Tools</Text>
@@ -177,7 +179,7 @@ const s = StyleSheet.create({
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
-  body: { padding: spacing.md, paddingBottom: 60 },
+  body: { padding: spacing.md, paddingBottom: 36 },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 20, marginBottom: 10 },
   dangerBtn: { borderWidth: 0.5, borderColor: '#5a2a2a', borderRadius: radius.md, padding: 16, alignItems: 'center', backgroundColor: '#1a0a0a', marginBottom: 8 },
   dangerBtnText: { fontSize: 14, color: '#cc6666', letterSpacing: 0.5 },

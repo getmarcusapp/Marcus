@@ -76,7 +76,7 @@ export default function MeditateScreen() {
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>{fromLabel}</Text>
       </TouchableOpacity>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
+      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 }}>
 
         <View style={[s.header, !showHeaderImage && s.headerCompact]}>
           {showHeaderImage && (
@@ -186,8 +186,6 @@ export default function MeditateScreen() {
             );
           })}
         </View>
-
-        <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );

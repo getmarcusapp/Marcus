@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getReadingLog } from '../store/db';
 
@@ -29,6 +30,7 @@ function groupByMonth(entries) {
 
 export default function ReadArchiveScreen() {
   const router = useRouter();
+  const playerInset = useMiniPlayerInset();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const fromPath = params?.from
@@ -71,7 +73,7 @@ export default function ReadArchiveScreen() {
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>Back</Text>
       </TouchableOpacity>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 60 }}>
+      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Daily Reading</Text>
           <Text style={s.title}>Past readings</Text>
@@ -139,13 +141,6 @@ export default function ReadArchiveScreen() {
               <Text style={s.emptyText}>
                 Each day, a fresh reading: a real Stoic passage chosen for you, with space to write your own insight before the day begins. Save the first, and the days accumulate here.
               </Text>
-              <TouchableOpacity
-                style={s.emptyCta}
-                onPress={() => router.replace(fromPath)}
-                activeOpacity={0.8}
-              >
-                <Text style={s.emptyCtaText}>Read today's →</Text>
-              </TouchableOpacity>
             </View>
           ) : (
             groupByMonth(filteredLog).map(group => (

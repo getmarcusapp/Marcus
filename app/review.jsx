@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
   KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image, Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
@@ -13,6 +13,8 @@ import { saveReview, getReviews, getJournals, getTriggers, getRoles } from '../s
 import * as haptics from '../lib/haptics';
 import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard } from '../components/ReviewShareCard';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { PracticeHeader } from '../components/PracticeHeader';
 
 const EMOTION_LABELS = {
   anger: 'Anger', anxiety: 'Anxiety', frustration: 'Frustration',
@@ -47,6 +49,7 @@ const reviewPrompts = [
 ];
 
 export default function ReviewScreen() {
+  const playerInset = useMiniPlayerInset();
   const router = useRouter();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -66,6 +69,10 @@ export default function ReviewScreen() {
     const t = setTimeout(() => promptInputRefs.current[openPrompt]?.focus(), 200);
     return () => clearTimeout(t);
   }, [openPrompt]);
+
+  useFocusEffect(useCallback(() => {
+    setOpenHint(null);
+  }, []));
   const [history, setHistory] = useState([]);
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
   const shareCardRef = useRef(null);
@@ -185,10 +192,7 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
-        <Text style={s.backArrow}>‹</Text>
-        <Text style={s.backLabel}>{fromLabel}</Text>
-      </TouchableOpacity>
+      <PracticeHeader current="review" />
       {/* Off-screen share card. Re-renders when shareEntry changes. */}
       {shareEntry && (
         <View
@@ -210,13 +214,13 @@ export default function ReviewScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
-          style={s.scroll}
+          style={[s.scroll, { backgroundColor: colors.bgCard }]}
           showsVerticalScrollIndicator={true}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
-          contentInset={{ bottom: 60 }}
-          scrollIndicatorInsets={{ bottom: 60 }}
+          contentContainerStyle={{ paddingBottom: playerInset }}
+          scrollIndicatorInsets={{ bottom: 36 }}
         >
 
         <View style={s.hero}>
@@ -231,7 +235,6 @@ export default function ReviewScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
-            <Text style={s.eyebrow}>Weekly Review</Text>
             <Text style={s.title}>
               {`Week of ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
             </Text>
@@ -530,7 +533,7 @@ export default function ReviewScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.bgDeep },
   shareCardOffscreen: { position: 'absolute', left: -99999, top: 0 },
   scroll: { flex: 1 },
   hero: {

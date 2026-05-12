@@ -10,9 +10,11 @@ import { getReviews } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard } from '../components/ReviewShareCard';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 export default function ReviewArchiveScreen() {
   const router = useRouter();
+  const playerInset = useMiniPlayerInset();
   const insets = useSafeAreaInsets();
   const [history, setHistory] = useState([]);
   const [filterRange, setFilterRange] = useState('all');
@@ -87,7 +89,7 @@ export default function ReviewArchiveScreen() {
         <Text style={s.backLabel}>Back</Text>
       </TouchableOpacity>
 
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 60 }}>
+      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Weekly Review</Text>
           <Text style={s.title}>Your archive</Text>
@@ -123,13 +125,6 @@ export default function ReviewArchiveScreen() {
             <Text style={s.emptyText}>
               At week's end, the practice asks five questions. Account for the wins. Reckon with the shortfalls. Notice the patterns. Examine the body. Commit to the next.{'\n\n'}Seal one and a record gathers here.
             </Text>
-            <TouchableOpacity
-              style={s.emptyCta}
-              onPress={() => router.replace('/review')}
-              activeOpacity={0.8}
-            >
-              <Text style={s.emptyCtaText}>Open this week's review →</Text>
-            </TouchableOpacity>
           </View>
         ) : (
           filteredHistory.map(entry => (

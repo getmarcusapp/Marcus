@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
@@ -68,6 +69,7 @@ function TimeAdjuster({ hour, minute, onHourChange, onMinuteChange }) {
 export default function NotificationsSettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const playerInset = useMiniPlayerInset();
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -104,7 +106,7 @@ export default function NotificationsSettingsScreen() {
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>Settings</Text>
       </TouchableOpacity>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
+      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: playerInset }}>
 
         <View style={s.hero}>
           <Text style={s.eyebrow}>Notifications</Text>
@@ -354,7 +356,7 @@ const s = StyleSheet.create({
   },
   permissionTitle: { fontSize: 13, fontWeight: '600', color: '#7aaddd', marginBottom: 6 },
   permissionText: { fontSize: 13, color: '#3a5a7a', lineHeight: 20 },
-  body: { padding: spacing.md },
+  body: { padding: spacing.md, paddingBottom: 36 },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 20, marginBottom: 10 },
   card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

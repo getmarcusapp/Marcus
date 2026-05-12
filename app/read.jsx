@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert, ActivityIndicator,
-  KeyboardAvoidingView, Platform, Image, Share,
+  Platform, Image, Share, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { useFocusEffect, useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,12 +11,13 @@ import { Ionicons } from '@expo/vector-icons';
 import SkullLoader from '../components/SkullLoader';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingHistory, getCompass } from '../store/db';
-import { getNextPracticeAfter } from '../store/practice-flow';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { captureRef } from 'react-native-view-shot';
 import { ReadingShareCard } from '../components/ReadingShareCard';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { PracticeHeader } from '../components/PracticeHeader';
 import { STOIC_QUOTES, selectCandidates } from '../constants/stoicQuotes';
 
 const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom generating a personalized daily reading for a user of a Stoic practice app.
@@ -67,7 +68,9 @@ export default function ReadScreen() {
   const [insightSaved, setInsightSaved] = useState(false);
   const [sourceHintOpen, setSourceHintOpen] = useState(false);
   const shareCardRef = useRef(null);
+  const scrollRef = useRef(null);
   const commitMindfulSession = useMindfulSession();
+  const playerInset = useMiniPlayerInset();
 
   useFocusEffect(useCallback(() => {
     async function load() {
@@ -84,6 +87,9 @@ export default function ReadScreen() {
       }
     }
     load();
+    // Reset scaffolding state on focus.
+    setSourceHintOpen(false);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, []));
 
   async function generateReading() {
@@ -234,18 +240,8 @@ Return only the JSON object.`;
     haptics.action();
     commitMindfulSession();
     setInsightSaved(true);
-
-    const next = await getNextPracticeAfter('reading');
-    if (next) {
-      Alert.alert('', 'Insight saved.', [
-        { text: `${next.label} →`, onPress: () => router.replace(next.href) },
-        { text: 'Back to Practice', style: 'cancel', onPress: () => router.replace('/') },
-      ]);
-    } else {
-      Alert.alert('', 'Insight saved.', [
-        { text: 'Back to Practice', onPress: () => router.replace('/') },
-      ]);
-    }
+    // Auto-advance to the literal next step in the practice sequence.
+    router.replace('/journal?type=morning');
   }
 
   async function handleShare() {
@@ -286,10 +282,7 @@ Return only the JSON object.`;
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
-        <Text style={s.backArrow}>‹</Text>
-        <Text style={s.backLabel}>{fromLabel}</Text>
-      </TouchableOpacity>
+      <PracticeHeader current="reading" />
       {/* Off-screen share card. Rendered into the layout tree so captureRef
           can reach it but positioned far off-screen so the user never sees
           it directly. Only mounted once a reading exists to avoid empty
@@ -308,19 +301,16 @@ Return only the JSON object.`;
         </View>
       )}
 
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.bg }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
+      <ScrollView
+        ref={scrollRef}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
+        showsVerticalScrollIndicator={true}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={{ paddingBottom: playerInset }}
+        scrollIndicatorInsets={{ bottom: 36 }}
       >
-        <ScrollView
-          style={s.scroll}
-          showsVerticalScrollIndicator={true}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
-          contentInset={{ bottom: 40 }}
-          scrollIndicatorInsets={{ bottom: 40 }}
-        >
 
           <View style={s.hero}>
             <Image
@@ -334,11 +324,10 @@ Return only the JSON object.`;
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.heroContent}>
-              <Text style={s.eyebrow}>Daily Reading</Text>
               <Text style={s.title}>
+                {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
                 {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
               </Text>
-              <Text style={s.sub}>Chosen for you.</Text>
             </View>
           </View>
 
@@ -412,6 +401,8 @@ Return only the JSON object.`;
                     onChangeText={text => setInsight(text)}
                     scrollEnabled={false}
                     editable={!insightSaved}
+                    keyboardAppearance="dark"
+                    inputAccessoryViewID={Platform.OS === 'ios' ? 'readingInsightAccessory' : undefined}
                   />
                 </View>
 
@@ -440,14 +431,30 @@ Return only the JSON object.`;
             )}
           </View>
 
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </ScrollView>
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID="readingInsightAccessory">
+          <View style={s.accessoryBar}>
+            <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+              <Text style={s.accessoryDoneText}>Done</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => { Keyboard.dismiss(); handleSaveInsight(); }}
+              style={s.accessoryAction}
+              activeOpacity={0.7}
+              disabled={!insight.trim()}
+            >
+              <Text style={[s.accessoryActionText, !insight.trim() && { opacity: 0.4 }]}>Save insight →</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      )}
     </SafeAreaView>
   );
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.bgDeep },
   // Position the share card far off-screen so it's laid out (so captureRef
   // can find it) but never visible to the user. left:-99999 keeps it out
   // of the visible viewport on every device.
@@ -541,4 +548,14 @@ const s = StyleSheet.create({
     padding: 20, alignItems: 'center', backgroundColor: colors.bgElevated, marginTop: 8,
   },
   generateBtnText: { fontSize: 14, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
+  accessoryBar: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    backgroundColor: colors.bgElevated,
+    borderTopWidth: 0.5, borderTopColor: colors.border,
+    paddingHorizontal: 16, paddingVertical: 8,
+  },
+  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
+  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard,
+  Platform, InputAccessoryView, Keyboard,
   ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
@@ -11,11 +11,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { PracticeHeader } from '../components/PracticeHeader';
 import { colors, radius, spacing, font } from '../constants/theme';
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
 import { saveJournal, getTodayJournal, incrementStreak } from '../store/db';
-import { getNextPracticeAfter } from '../store/practice-flow';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 import * as health from '../lib/health';
@@ -114,6 +114,8 @@ export default function JournalScreen() {
       }
     }
     load();
+    // Reset scaffolding state on focus — info bubbles are help, not user input.
+    setOpenHint(null);
   }, [sessionType]));
 
   const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, prompts.length);
@@ -133,46 +135,24 @@ export default function JournalScreen() {
       maybeAskHealthPermission();
       await incrementStreak();
       setAlreadySaved(true);
-
-      if (isMorning) {
-        const next = await getNextPracticeAfter('morning');
-        if (next) {
-          Alert.alert('', 'Morning reflection saved.', [
-            { text: 'Go to Practice', onPress: () => router.replace('/') },
-            { text: `${next.label} →`, onPress: () => router.replace(next.href) },
-          ]);
-        } else {
-          router.replace('/');
-        }
-      } else {
-        // Evening — never redirect to other practice items; just go home.
-        router.replace('/');
-      }
+      // Both morning and evening saves return to Practice. On the last day-step,
+      // Practice renders the sealed state automatically when everything's done.
+      router.replace('/');
     }
   }
 
   return (
     <SafeAreaView style={s.safe}>
-      {fromPractice && (
-        <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
-          <Text style={s.backArrow}>‹</Text>
-          <Text style={s.backLabel}>{fromLabel}</Text>
-        </TouchableOpacity>
-      )}
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.bg }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
+      <PracticeHeader current={isMorning ? 'morning' : 'evening'} />
+      <ScrollView
+        scrollIndicatorInsets={{ bottom: 36 }}
+        contentContainerStyle={{ paddingBottom: playerInset }}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
+        showsVerticalScrollIndicator={true}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
       >
-        <ScrollView
-          contentInset={{ bottom: 40 }}
-          scrollIndicatorInsets={{ bottom: 40 }}
-          contentContainerStyle={{ paddingBottom: playerInset }}
-          style={s.scroll}
-          showsVerticalScrollIndicator={true}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
-        >
           <View style={s.header}>
             <Image
               source={isMorning
@@ -187,20 +167,9 @@ export default function JournalScreen() {
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.headerContent}>
-              <View style={s.typeToggle}>
-                  {['morning', 'evening'].map(t => (
-                    <TouchableOpacity key={t} style={[s.typeBtn, sessionType === t && s.typeBtnActive]} onPress={() => { setSessionType(t); setOpenPrompt(-1); setOpenHint(null); }} activeOpacity={0.7}>
-                      <Text style={[s.typeBtnText, sessionType === t && s.typeBtnTextActive]}>{t === 'morning' ? '☽  Morning' : '◑  Evening'}</Text>
-                    </TouchableOpacity>
-                  ))}
-              </View>
-              <Text style={s.eyebrow}>{isMorning ? 'Morning Journal' : 'Evening Journal'}</Text>
               <Text style={s.title}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
                 {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-              </Text>
-              <Text style={s.sub}>
-                {isMorning ? 'Before the world begins' : 'Before the day closes'}
               </Text>
             </View>
           </View>
@@ -353,8 +322,7 @@ export default function JournalScreen() {
                   <Text style={s.saveBtnSub}>{answeredCount} of {prompts.length} prompts answered</Text>
                 </TouchableOpacity>
               </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </ScrollView>
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="journalAccessory">
           <View style={s.accessoryBar}>
@@ -392,7 +360,7 @@ export default function JournalScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.bgDeep },
   scroll: { flex: 1 },
   header: {
     backgroundColor: colors.bgDeep,

@@ -595,11 +595,60 @@ function MeditationsStep({ onNext }) {
   );
 }
 
+function formatReminderTime(hour, minute, weekday) {
+  const h = hour % 12 || 12;
+  const m = minute.toString().padStart(2, '0');
+  const ampm = hour < 12 ? 'AM' : 'PM';
+  const dayPrefix = weekday !== undefined ? `${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][weekday]} ` : '';
+  return `${dayPrefix}${h}:${m} ${ampm}`;
+}
+
+function ReminderTimeAdjuster({ hour, minute, onHourChange, onMinuteChange }) {
+  return (
+    <View style={s.reminderAdjuster}>
+      <View style={s.reminderAdjusterCol}>
+        <TouchableOpacity style={s.reminderAdjusterBtn} onPress={() => onHourChange((hour + 1) % 24)}>
+          <Text style={s.reminderAdjusterArrow}>▲</Text>
+        </TouchableOpacity>
+        <Text style={s.reminderAdjusterVal}>{(hour % 12 || 12).toString().padStart(2, '0')}</Text>
+        <TouchableOpacity style={s.reminderAdjusterBtn} onPress={() => onHourChange((hour + 23) % 24)}>
+          <Text style={s.reminderAdjusterArrow}>▼</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={s.reminderAdjusterColon}>:</Text>
+      <View style={s.reminderAdjusterCol}>
+        <TouchableOpacity style={s.reminderAdjusterBtn} onPress={() => onMinuteChange((minute + 5) % 60)}>
+          <Text style={s.reminderAdjusterArrow}>▲</Text>
+        </TouchableOpacity>
+        <Text style={s.reminderAdjusterVal}>{minute.toString().padStart(2, '0')}</Text>
+        <TouchableOpacity style={s.reminderAdjusterBtn} onPress={() => onMinuteChange((minute + 55) % 60)}>
+          <Text style={s.reminderAdjusterArrow}>▼</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={s.reminderAdjusterAmpm}>{hour < 12 ? 'AM' : 'PM'}</Text>
+    </View>
+  );
+}
+
+const REMINDER_ROWS = [
+  { name: 'Stoic Compass', hourKey: 'compassHour', minuteKey: 'compassMinute' },
+  { name: 'Morning Journal', hourKey: 'morningHour', minuteKey: 'morningMinute' },
+  { name: 'Evening Journal', hourKey: 'eveningHour', minuteKey: 'eveningMinute' },
+  { name: 'Weekly Review', hourKey: 'reviewHour', minuteKey: 'reviewMinute', weekdayKey: 'reviewDay' },
+];
+
 function RemindersStep({ onNext }) {
+  const [settings, setSettings] = useState(DEFAULT_NOTIF_SETTINGS);
+  const [editingRow, setEditingRow] = useState(null);
+
+  function update(key, value) {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  }
+
   async function handleEnable() {
     const granted = await requestNotificationPermissions();
     if (granted) {
-      await AsyncStorage.setItem('notification_settings', JSON.stringify(DEFAULT_NOTIF_SETTINGS));
+      await AsyncStorage.setItem('notification_settings', JSON.stringify(settings));
       await scheduleAllNotifications();
     }
     onNext();
@@ -624,17 +673,36 @@ function RemindersStep({ onNext }) {
 
           <Text style={s.practiceHeading}>Out of the box</Text>
           <View style={s.reminderList}>
-            {[
-              { time: '7:00 AM', name: 'Stoic Compass' },
-              { time: '7:30 AM', name: 'Morning Journal' },
-              { time: '8:00 PM', name: 'Evening Journal' },
-              { time: 'Sun 9:00 AM', name: 'Weekly Review' },
-            ].map((r, i, arr) => (
-              <View key={r.name} style={[s.reminderRow, i < arr.length - 1 && s.reminderRowBorder]}>
-                <Text style={s.reminderTime}>{r.time}</Text>
-                <Text style={s.reminderName}>{r.name}</Text>
-              </View>
-            ))}
+            {REMINDER_ROWS.map((r, i, arr) => {
+              const hour = settings[r.hourKey];
+              const minute = settings[r.minuteKey];
+              const weekday = r.weekdayKey !== undefined ? settings[r.weekdayKey] : undefined;
+              const isEditing = editingRow === r.name;
+              return (
+                <View key={r.name} style={[s.reminderRow, i < arr.length - 1 && s.reminderRowBorder]}>
+                  <View style={s.reminderRowTop}>
+                    <Text style={s.reminderTime}>{formatReminderTime(hour, minute, weekday)}</Text>
+                    <Text style={s.reminderName}>{r.name}</Text>
+                    <TouchableOpacity
+                      onPress={() => setEditingRow(isEditing ? null : r.name)}
+                      style={s.reminderEditBtn}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Text style={s.reminderEditText}>{isEditing ? '✓ Done' : '✎ Edit'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {isEditing && (
+                    <ReminderTimeAdjuster
+                      hour={hour}
+                      minute={minute}
+                      onHourChange={v => update(r.hourKey, v)}
+                      onMinuteChange={v => update(r.minuteKey, v)}
+                    />
+                  )}
+                </View>
+              );
+            })}
           </View>
 
           <Text style={s.reminderNote}>
@@ -890,10 +958,12 @@ const s = StyleSheet.create({
     marginBottom: 16,
   },
   reminderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 18,
+  },
+  reminderRowTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 16,
   },
   reminderRowBorder: {
@@ -904,13 +974,60 @@ const s = StyleSheet.create({
     fontSize: 13,
     color: colors.accent,
     letterSpacing: 0.5,
-    minWidth: 84,
+    minWidth: 96,
   },
   reminderName: {
     fontSize: 15,
     color: colors.textSecondary,
     fontWeight: '500',
     flex: 1,
+  },
+  reminderEditBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+  },
+  reminderEditText: {
+    fontSize: 12,
+    color: colors.accent,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  reminderAdjuster: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 14,
+  },
+  reminderAdjusterCol: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  reminderAdjusterBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  reminderAdjusterArrow: {
+    fontSize: 12,
+    color: colors.accent,
+  },
+  reminderAdjusterVal: {
+    fontSize: 22,
+    fontWeight: '300',
+    color: colors.textPrimary,
+    minWidth: 32,
+    textAlign: 'center',
+  },
+  reminderAdjusterColon: {
+    fontSize: 22,
+    color: colors.textMuted,
+    fontWeight: '300',
+  },
+  reminderAdjusterAmpm: {
+    fontSize: 12,
+    color: colors.textDim,
+    letterSpacing: 1,
+    marginLeft: 8,
   },
   reminderNote: {
     fontSize: 13,

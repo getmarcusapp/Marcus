@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Image,
+  Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getCompass, saveCompass, getRoles, saveRoles } from '../store/db';
-import { getNextPracticeAfter } from '../store/practice-flow';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { PracticeHeader } from '../components/PracticeHeader';
 
 const COMPASS_HINTS = {
   why: {
@@ -48,6 +50,28 @@ const ROLE_SUGGESTIONS = [
   'Human being',
 ];
 
+// Per-role placeholder one-liners. Surfaced as `e.g. ...` hints in the
+// editor and as a faint preview on a role card with no commitment yet.
+// Never written as a saved value — kathēkonta is the user's own answer,
+// the placeholder just lowers the blank-page barrier.
+const ROLE_PLACEHOLDERS = {
+  partner: 'To bring my full presence home. To assume the best.',
+  parent: 'To be the calm in the room. To listen before correcting.',
+  child: 'To honor the bond, even when we disagree. To call without being asked.',
+  sibling: 'To keep the bond from going quiet. To show up plainly.',
+  friend: 'To show up before being needed. To remember what matters to them.',
+  colleague: 'To do work I can sign my name to. To be useful, not impressive.',
+  neighbor: 'To notice. To be the help that is actually nearby.',
+  citizen: 'To act on what I owe the common good, however small.',
+  'human being': 'To remember everyone is fighting something. To be just.',
+};
+const DEFAULT_ROLE_PLACEHOLDER = 'e.g. To listen first. To be the steady one.';
+
+function placeholderFor(name) {
+  const key = (name || '').trim().toLowerCase();
+  return ROLE_PLACEHOLDERS[key] || null;
+}
+
 export default function CompassScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -61,21 +85,29 @@ export default function CompassScreen() {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
-  const [nextStep, setNextStep] = useState(null);
   const insets = useSafeAreaInsets();
   const commitMindfulSession = useMindfulSession();
+  const playerInset = useMiniPlayerInset();
   // Roles tab state — list of {id, name, commitment}. editingRole is
   // either null (list view), 'new' (creating), or a role id (editing).
   const [roles, setRoles] = useState([]);
   const [editingRole, setEditingRole] = useState(null);
   const [roleNameDraft, setRoleNameDraft] = useState('');
   const [roleCommitmentDraft, setRoleCommitmentDraft] = useState('');
+  const editInputRef = useRef(null);
+  const roleNameInputRef = useRef(null);
+  const roleCommitmentInputRef = useRef(null);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     getCompass().then(setCompass);
     getRoles().then(setRoles);
-    getNextPracticeAfter('compass').then(setNextStep);
   }, []);
+
+  useFocusEffect(useCallback(() => {
+    setHintOpen(false);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []));
 
   function startEditRole(role) {
     setEditingRole(role.id);
@@ -145,31 +177,19 @@ export default function CompassScreen() {
     setEditing(true);
   }
 
-  function handleNext() {
-    if (nextStep) router.push(nextStep.href);
-    else router.replace('/');
-  }
-
-  function nextLabel() {
-    if (nextStep) return `Continue to ${nextStep.label.toLowerCase()}`;
-    return 'Back to practice';
-  }
-
   if (!compass) return <SafeAreaView style={s.safe} />;
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
-        <Text style={s.backArrow}>‹</Text>
-        <Text style={s.backLabel}>{fromLabel}</Text>
-      </TouchableOpacity>
+      <PracticeHeader current="compass" />
       <ScrollView
-        style={s.scroll}
+        ref={scrollRef}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
         showsVerticalScrollIndicator={true}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         automaticallyAdjustKeyboardInsets
-        contentContainerStyle={{ paddingBottom: 80 }}
+        contentContainerStyle={{ paddingBottom: playerInset }}
       >
 
         <View style={s.hero}>
@@ -184,21 +204,8 @@ export default function CompassScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
-            <Text style={s.eyebrow}>Stoic Compass</Text>
             <Text style={s.title}>Your North Star</Text>
-            <Text style={s.sub}>What anchors your day</Text>
           </View>
-        </View>
-
-        <View style={s.nextRow}>
-          <TouchableOpacity
-            style={s.nextBtn}
-            onPress={handleNext}
-            activeOpacity={0.7}
-          >
-            <Text style={s.nextBtnText}>{nextLabel()}</Text>
-            <Text style={s.nextBtnChev}>›</Text>
-          </TouchableOpacity>
         </View>
 
         <View style={s.navRow}>
@@ -229,12 +236,16 @@ export default function CompassScreen() {
                   </View>
                 )}
                 <TextInput
+                  ref={editInputRef}
                   style={s.editInput}
                   multiline
                   value={draft}
                   onChangeText={setDraft}
                   placeholder={COMPASS_HINTS[tabKeys[activeTab]]?.placeholder || ''}
                   placeholderTextColor={colors.textDim}
+                  scrollEnabled={false}
+                  keyboardAppearance="dark"
+                  inputAccessoryViewID={Platform.OS === 'ios' ? 'compassEditAccessory' : undefined}
                 />
                 <View style={s.editBtns}>
                   <TouchableOpacity style={s.editBtn} onPress={() => setEditing(false)}>
@@ -284,6 +295,7 @@ export default function CompassScreen() {
                 <View>
                   <Text style={s.roleEditLabel}>{editingRole === 'new' ? 'Add a role' : 'Edit role'}</Text>
                   <TextInput
+                    ref={roleNameInputRef}
                     style={s.roleNameInput}
                     value={roleNameDraft}
                     onChangeText={setRoleNameDraft}
@@ -291,15 +303,23 @@ export default function CompassScreen() {
                     placeholderTextColor={colors.textDim}
                     autoCapitalize="words"
                     autoFocus
+                    keyboardAppearance="dark"
+                    inputAccessoryViewID={Platform.OS === 'ios' ? 'roleNameAccessory' : undefined}
                   />
                   <Text style={s.roleEditSub}>What does this role ask of you? (Optional, one line.)</Text>
                   <TextInput
+                    ref={roleCommitmentInputRef}
                     style={s.roleCommitmentInput}
                     multiline
                     value={roleCommitmentDraft}
                     onChangeText={setRoleCommitmentDraft}
-                    placeholder="e.g. To listen first. To be the steady one."
+                    placeholder={placeholderFor(roleNameDraft)
+                      ? `e.g. ${placeholderFor(roleNameDraft)}`
+                      : DEFAULT_ROLE_PLACEHOLDER}
                     placeholderTextColor={colors.textDim}
+                    scrollEnabled={false}
+                    keyboardAppearance="dark"
+                    inputAccessoryViewID={Platform.OS === 'ios' ? 'roleCommitmentAccessory' : undefined}
                   />
                   <View style={s.editBtns}>
                     <TouchableOpacity style={s.editBtn} onPress={cancelRoleEdit}>
@@ -337,6 +357,8 @@ export default function CompassScreen() {
                             <Text style={s.roleName}>{role.name}</Text>
                             {role.commitment ? (
                               <Text style={s.roleCommitment}>{role.commitment}</Text>
+                            ) : placeholderFor(role.name) ? (
+                              <Text style={s.roleCommitmentEmpty}>e.g. {placeholderFor(role.name)}</Text>
                             ) : (
                               <Text style={s.roleCommitmentEmpty}>Tap to add a commitment.</Text>
                             )}
@@ -383,12 +405,58 @@ export default function CompassScreen() {
         </View>
 
       </ScrollView>
+      {Platform.OS === 'ios' && (
+        <>
+          <InputAccessoryView nativeID="compassEditAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { Keyboard.dismiss(); handleSave(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>Save →</Text>
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+          <InputAccessoryView nativeID="roleNameAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { haptics.tap(); roleCommitmentInputRef.current?.focus(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>Next →</Text>
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+          <InputAccessoryView nativeID="roleCommitmentAccessory">
+            <View style={s.accessoryBar}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
+                <Text style={s.accessoryDoneText}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { Keyboard.dismiss(); handleSaveRole(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>{editingRole === 'new' ? 'Add →' : 'Save →'}</Text>
+              </TouchableOpacity>
+            </View>
+          </InputAccessoryView>
+        </>
+      )}
     </SafeAreaView>
   );
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.bgDeep },
   scroll: { flex: 1 },
   // Dark header with hero image
   hero: {
@@ -432,13 +500,30 @@ const s = StyleSheet.create({
   nextBtnText: { fontSize: 14, color: colors.accent, fontWeight: '500' },
   nextBtnChev: { fontSize: 20, color: colors.accent },
   navRow: {
-    flexDirection: 'row', borderBottomWidth: 0.5,
-    borderBottomColor: colors.border, backgroundColor: colors.bgDeep,
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    backgroundColor: colors.bgDeep,
+    borderBottomWidth: 0.5, borderBottomColor: colors.border,
   },
-  navPill: { flex: 1, paddingVertical: 16, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  navPillActive: { borderBottomColor: colors.accent },
-  navPillText: { fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', color: colors.textDim },
-  navPillTextActive: { color: colors.accent },
+  navPill: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    backgroundColor: 'transparent',
+  },
+  navPillActive: {
+    backgroundColor: colors.accentBg,
+    borderColor: colors.accentDim,
+  },
+  navPillText: { fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: colors.textDim },
+  navPillTextActive: { color: colors.accent, fontWeight: '600' },
   // Light reading/editing body
   body: { padding: spacing.md, paddingTop: spacing.lg, backgroundColor: colors.bgCard },
   textCard: {
@@ -511,4 +596,14 @@ const s = StyleSheet.create({
   hintBtnText: { fontSize: 20, color: colors.accent },
   hintBox: { backgroundColor: colors.bgDeep, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, marginBottom: 14 },
   hintText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
+  accessoryBar: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    backgroundColor: colors.bgElevated,
+    borderTopWidth: 0.5, borderTopColor: colors.border,
+    paddingHorizontal: 16, paddingVertical: 8,
+  },
+  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
+  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

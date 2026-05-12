@@ -11,6 +11,7 @@ import { getJournals, getTriggers, getStreak } from '../store/db';
 import * as health from '../lib/health';
 import { useAppLock, setLockEnabled, authenticate, getSupportedAuthLabel } from '../lib/appLock';
 import { exportBackup, pickAndImportBackup } from '../lib/backup';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
@@ -41,6 +42,7 @@ export default function SettingsScreen() {
   const [reminderSummary, setReminderSummary] = useState('');
   const [authLabel, setAuthLabel] = useState('FaceID');
   const { lockEnabled } = useAppLock();
+  const playerInset = useMiniPlayerInset();
 
   // Re-load on focus (not just mount) so the reminder summary refreshes
   // when the user returns from the Notifications subscreen — otherwise
@@ -202,7 +204,7 @@ export default function SettingsScreen() {
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>{fromLabel}</Text>
       </TouchableOpacity>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true}>
+      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Marcus</Text>
           <Text style={s.title}>Settings</Text>
@@ -334,7 +336,7 @@ const s = StyleSheet.create({
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted },
-  body: { padding: spacing.md, paddingBottom: 60 },
+  body: { padding: spacing.md, paddingBottom: 36 },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 20, marginBottom: 10 },
   card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', padding: 18 },

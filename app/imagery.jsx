@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { MEDITATIONS_LIST } from '../lib/meditationPlayer';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 // Per-image attribution + reasoning, mirrors the Notion gallery doc.
 // Keys match meditation IDs and virtue IDs; hero entries are listed
@@ -141,6 +142,7 @@ export default function ImageryScreen() {
   const insets = useSafeAreaInsets();
   const fromPath = params?.from || '/more';
   const fromLabel = params?.fromLabel || 'More';
+  const playerInset = useMiniPlayerInset();
 
   return (
     <SafeAreaView style={s.safe}>
@@ -148,7 +150,7 @@ export default function ImageryScreen() {
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>{fromLabel}</Text>
       </TouchableOpacity>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 60 }}>
+      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: playerInset }}>
 
         <View style={s.hero}>
           <Image

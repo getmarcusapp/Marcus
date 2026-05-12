@@ -10,6 +10,7 @@ import { virtues } from '../constants/virtues';
 import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
 import { JournalEntryEditor } from '../components/JournalEntryEditor';
 import { getJournals, updateJournalEntry } from '../store/db';
+import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 // Group entries by month for chronological browsing
 function groupByMonth(entries) {
@@ -26,6 +27,7 @@ function groupByMonth(entries) {
 
 export default function JournalHistoryScreen() {
   const router = useRouter();
+  const playerInset = useMiniPlayerInset();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   // ?type=morning|evening sets which set of entries to show; defaults
@@ -89,7 +91,7 @@ export default function JournalHistoryScreen() {
         <Text style={s.backArrow}>‹</Text>
         <Text style={s.backLabel}>Back</Text>
       </TouchableOpacity>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 60 }}>
+      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>{isMorning ? 'Morning Journal' : 'Evening Journal'}</Text>
           <Text style={s.title}>Past entries</Text>
@@ -174,15 +176,6 @@ export default function JournalHistoryScreen() {
                   ? 'Four prompts each morning — what is in your control, where courage is required, what you are postponing, what difficulty might arise. Begin one when you are ready.'
                   : 'Four movements each evening — where you acted with Virtue, where you fell short, what you are carrying, and one thing that deserves your thanks.'}
               </Text>
-              <TouchableOpacity
-                style={s.emptyCta}
-                onPress={() => router.replace(`/journal?type=${sessionType}`)}
-                activeOpacity={0.8}
-              >
-                <Text style={s.emptyCtaText}>
-                  {isMorning ? 'Begin morning practice →' : 'Begin evening practice →'}
-                </Text>
-              </TouchableOpacity>
             </View>
           ) : (
             groupByMonth(filteredHistory).map(group => (
