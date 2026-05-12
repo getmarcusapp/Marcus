@@ -4,12 +4,12 @@ import {
   StyleSheet, SafeAreaView, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { MEDITATIONS_LIST } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { ScreenHeader } from '../components/ScreenHeader';
 
 // Per-image attribution + reasoning, mirrors the Notion gallery doc.
 // Keys match meditation IDs and virtue IDs; hero entries are listed
@@ -39,6 +39,11 @@ const MEDITATION_NOTES = {
     artist: 'Francisco de Zurbarán',
     work: 'Cup of Water and a Rose on a Silver Plate (c. 1630)',
     why: 'Zurbarán painted everyday objects with the kind of attention monks brought to prayer. A glass of water, a rose, a silver plate — that\'s the entire painting. The attention given to these small things is the meditation.',
+  },
+  'memento-mori': {
+    artist: 'Frans Hals',
+    work: 'Young Man with a Skull (c. 1626–28, National Gallery, London)',
+    why: 'A young man holding a skull, eyes meeting the viewer\'s. Memento mori without the cliché of the old monk contemplating death — a young person looking right at it. That\'s the spirit of the practice: not deathbed wisdom, but living wisdom.',
   },
 };
 
@@ -161,17 +166,13 @@ function SectionHeader({ eyebrow, title, sub }) {
 export default function ImageryScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
   const fromPath = params?.from || '/more';
   const fromLabel = params?.fromLabel || 'More';
   const playerInset = useMiniPlayerInset();
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
-        <Text style={s.backArrow}>‹</Text>
-        <Text style={s.backLabel}>{fromLabel}</Text>
-      </TouchableOpacity>
+      <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
       <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: playerInset }}>
 
         <View style={s.hero}>
@@ -228,7 +229,7 @@ export default function ImageryScreen() {
           ))}
 
           <SectionHeader
-            eyebrow="The five meditations"
+            eyebrow="The six meditations"
             title="One artwork per meditation"
             sub="Surfaced contextually based on the time of day."
           />
@@ -259,7 +260,7 @@ export default function ImageryScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.bgDeep },
   scroll: { flex: 1 },
 
   hero: {
@@ -273,15 +274,6 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  backRow: {
-    position: 'absolute', top: 12, left: 16, zIndex: 10,
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 8,
-  },
-  backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
-  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10, lineHeight: 38 },
   sub: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },

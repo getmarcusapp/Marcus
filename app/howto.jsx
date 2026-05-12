@@ -4,9 +4,9 @@ import {
   StyleSheet, SafeAreaView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { ScreenHeader } from '../components/ScreenHeader';
 
 const sections = [
   {
@@ -39,7 +39,7 @@ const sections = [
   },
   {
     title: 'Guided meditations',
-    content: 'Five short audio sessions, voiced. Each runs less than five minutes. Optional alongside the daily practice, surfaced contextually for the time of day.\n\nView From Above: Rise above your circumstances to see them at scale.\n\nPremeditatio Malorum: Look at what might go wrong before the day begins, so it cannot surprise you. Best in the morning.\n\nThe Evening Examination: Three honest questions. Then put the day down.\n\nNegative Visualization: Imagine the absence of what you love, to see it clearly.\n\nThe Present Moment: Pure attention training. Not staying. Returning.\n\nUse them on the way to work, before journaling, or whenever you need to return to yourself. They are not required for your streak. They are a tool.',
+    content: 'Six short audio sessions, voiced. Each runs less than five minutes. Optional alongside the daily practice, surfaced contextually for the time of day.\n\nView From Above: Rise above your circumstances to see them at scale.\n\nPremeditatio Malorum: Look at what might go wrong before the day begins, so it cannot surprise you. Best in the morning.\n\nThe Evening Examination: Three honest questions. Then put the day down.\n\nNegative Visualization: Imagine the absence of what you love, to see it clearly.\n\nThe Present Moment: Pure attention training. Not staying. Returning.\n\nMemento Mori: Remember that you will die. Not to grieve, but to live differently.\n\nUse them on the way to work, before journaling, or whenever you need to return to yourself. They are not required for your streak. They are a tool.',
   },
   {
     title: 'About streaks',
@@ -58,7 +58,6 @@ const sections = [
 export default function HowToScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
   const fromPath = params?.from || '/more';
   const fromLabel = params?.fromLabel || 'More';
   const [openSection, setOpenSection] = useState(null);
@@ -72,10 +71,7 @@ export default function HowToScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
-        <Text style={s.backArrow}>‹</Text>
-        <Text style={s.backLabel}>{fromLabel}</Text>
-      </TouchableOpacity>
+      <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
@@ -121,7 +117,7 @@ export default function HowToScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.bgDeep },
   scroll: { flex: 1 },
   hero: {
     backgroundColor: colors.bgDeep,
@@ -130,15 +126,6 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
-  backRow: {
-    position: 'absolute', top: 12, left: 16, zIndex: 10,
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 8,
-  },
-  backArrow: { fontSize: 18, color: colors.accent, marginTop: -2 },
-  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 8 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },

@@ -40,13 +40,9 @@ export function PracticeHeader({ current }) {
       const totalDays = streak?.totalDays || 0;
       const reviewDay = settingsRaw ? (JSON.parse(settingsRaw)?.reviewDay ?? 0) : 0;
       const dow = new Date().getDay();
-      // Match Practice screen logic: 3-day window starting on the chosen review day,
-      // and only after 3+ days of practice have accumulated.
-      const inReviewWindow = totalDays >= 3 && (
-        dow === reviewDay ||
-        ((dow - reviewDay + 7) % 7 === 1) ||
-        ((dow - reviewDay + 7) % 7 === 2)
-      );
+      // Match Practice screen logic: review step only appears in the
+      // sequence on the chosen review day itself (after 3+ days of practice).
+      const inReviewWindow = totalDays >= 3 && dow === reviewDay;
       const weekAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
       const reviewedThisWindow = reviews.some(r => new Date(r.date).getTime() > weekAgo);
       setIncludeReview(inReviewWindow || current === 'review');

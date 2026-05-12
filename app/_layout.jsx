@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Tabs, useRouter, useSegments } from 'expo-router';
+import { Tabs, useRouter, useSegments, usePathname } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { View, AppState } from 'react-native';
+import { View, Text, AppState } from 'react-native';
 import { colors } from '../constants/theme';
 import { hasOnboarded } from '../store/db';
 import { initializePurchases } from '../store/purchases';
@@ -15,6 +15,36 @@ import { initAppLock, handleForeground, handleBackground, useAppLock } from '../
 
 function TabIcon({ name, color }) {
   return <Ionicons name={name} size={22} color={color} />;
+}
+
+// Maps the current pathname to the logical tab a user is "in" so the
+// right tab icon stays illuminated even when the underlying route is
+// one of the hidden (href:null) flow screens like /compass or /journal.
+const PRACTICE_ROUTES = new Set([
+  '/', '/index', '/compass', '/read', '/journal', '/review', '/meditate',
+  '/journal-history', '/read-archive', '/review-archive',
+]);
+const EMOTIONS_ROUTES = new Set(['/emotions', '/emotions-history']);
+function useLogicalTabKey() {
+  const pathname = usePathname();
+  const path = (pathname || '/').split('?')[0];
+  if (PRACTICE_ROUTES.has(path)) return 'practice';
+  if (EMOTIONS_ROUTES.has(path)) return 'emotions';
+  return 'more';
+}
+
+function ManagedTabIcon({ iconName, tabKey }) {
+  const active = useLogicalTabKey() === tabKey;
+  return <TabIcon name={iconName} color={active ? colors.accent : colors.textDim} />;
+}
+
+function ManagedTabLabel({ label, tabKey }) {
+  const active = useLogicalTabKey() === tabKey;
+  return (
+    <Text style={{ fontSize: 9, letterSpacing: 1.4, textTransform: 'uppercase', marginTop: 3, color: active ? colors.accent : colors.textDim }}>
+      {label}
+    </Text>
+  );
 }
 
 function OnboardingGate() {
@@ -96,9 +126,27 @@ export default function Layout() {
           },
         })}
       >
-        <Tabs.Screen name="index" options={{ title: 'Practice', tabBarIcon: ({ color }) => <TabIcon name="flame-outline" color={color} /> }} />
-        <Tabs.Screen name="emotions" options={{ title: 'Emotions', tabBarIcon: ({ color }) => <TabIcon name="heart-outline" color={color} /> }} />
-        <Tabs.Screen name="more" options={{ title: 'More', tabBarIcon: ({ color }) => <TabIcon name="menu-outline" color={color} /> }} />
+        <Tabs.Screen
+          name="index"
+          options={{
+            tabBarIcon: () => <ManagedTabIcon iconName="flame-outline" tabKey="practice" />,
+            tabBarLabel: () => <ManagedTabLabel label="Practice" tabKey="practice" />,
+          }}
+        />
+        <Tabs.Screen
+          name="emotions"
+          options={{
+            tabBarIcon: () => <ManagedTabIcon iconName="heart-outline" tabKey="emotions" />,
+            tabBarLabel: () => <ManagedTabLabel label="Emotions" tabKey="emotions" />,
+          }}
+        />
+        <Tabs.Screen
+          name="more"
+          options={{
+            tabBarIcon: () => <ManagedTabIcon iconName="menu-outline" tabKey="more" />,
+            tabBarLabel: () => <ManagedTabLabel label="More" tabKey="more" />,
+          }}
+        />
         <Tabs.Screen name="journal" options={{ href: null }} />
         <Tabs.Screen name="read" options={{ href: null }} />
         <Tabs.Screen name="compass" options={{ href: null }} />

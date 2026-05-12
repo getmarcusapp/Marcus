@@ -4,7 +4,7 @@ import {
   StyleSheet, SafeAreaView, ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -17,7 +17,6 @@ import {
 export default function MeditateScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
   const player = useMeditationPlayer();
   const selected = player.currentMedId ? MEDITATIONS[player.currentMedId] : null;
   const isPlaying = player.isPlaying;
@@ -72,10 +71,7 @@ export default function MeditateScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity onPress={() => router.replace(fromPath)} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
-        <Text style={s.backArrow}>‹</Text>
-        <Text style={s.backLabel}>{fromLabel}</Text>
-      </TouchableOpacity>
+      <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
       <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 }}>
 
         <View style={[s.header, !showHeaderImage && s.headerCompact]}>
@@ -192,7 +188,7 @@ export default function MeditateScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.bgDeep },
   scroll: { flex: 1 },
 
   header: {
@@ -213,15 +209,6 @@ const s = StyleSheet.create({
   },
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   headerContent: { paddingHorizontal: spacing.lg, paddingTop: 52, paddingBottom: spacing.xl },
-  backRow: {
-    position: 'absolute', top: 12, left: 16, zIndex: 10,
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 8,
-  },
-  backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
-  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },

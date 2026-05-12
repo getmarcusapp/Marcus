@@ -4,18 +4,17 @@ import {
   StyleSheet, SafeAreaView, Share,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getReviews } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard } from '../components/ReviewShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { ScreenHeader } from '../components/ScreenHeader';
 
 export default function ReviewArchiveScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
-  const insets = useSafeAreaInsets();
   const [history, setHistory] = useState([]);
   const [filterRange, setFilterRange] = useState('all');
   const shareCardRef = useRef(null);
@@ -84,10 +83,7 @@ export default function ReviewArchiveScreen() {
         </View>
       )}
 
-      <TouchableOpacity onPress={() => router.replace('/review')} style={[s.backRow, { top: insets.top + 12 }]} activeOpacity={0.7}>
-        <Text style={s.backArrow}>‹</Text>
-        <Text style={s.backLabel}>Back</Text>
-      </TouchableOpacity>
+      <ScreenHeader fromPath="/review" fromLabel="Back" />
 
       <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
         <View style={s.hero}>
@@ -154,7 +150,7 @@ export default function ReviewArchiveScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.bgDeep },
   scroll: { flex: 1 },
   hero: {
     backgroundColor: colors.bgDeep,
@@ -163,15 +159,6 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
-  backRow: {
-    position: 'absolute', left: 16, zIndex: 10,
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 8,
-  },
-  backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
-  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5 },
   sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8 },

@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { saveCompass, setHasOnboarded } from '../store/db';
@@ -50,6 +51,7 @@ const DEFAULT_COMPASS = {
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const [compass, setCompass] = useState({ ...DEFAULT_COMPASS });
 
@@ -81,13 +83,16 @@ export default function OnboardingScreen() {
   return (
     <View style={{ flex: 1 }}>
       {step > 0 && (
-        <TouchableOpacity
-          onPress={() => setStep(step - 1)}
-          style={s.onboardingBack}
-          activeOpacity={0.7}
-        >
-          <Text style={s.onboardingBackText}>‹ Back</Text>
-        </TouchableOpacity>
+        <View style={[s.onboardingHeader, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
+          <TouchableOpacity
+            onPress={() => setStep(step - 1)}
+            style={s.onboardingBackBtn}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            activeOpacity={0.7}
+          >
+            <Text style={s.onboardingBackText}>{`‹  Back`}</Text>
+          </TouchableOpacity>
+        </View>
       )}
       {steps[step]}
     </View>
@@ -219,7 +224,7 @@ function PhilosophyStep({ onNext }) {
           {[
             { title: 'Stoic Compass', desc: 'Your personal North Star: why you practice, what you want to overcome, who you aspire to be.' },
             { title: 'Daily Reading', desc: 'A real Stoic quote chosen for you each day, drawn from the canon and grounded in your Compass.' },
-            { title: 'Guided Meditations', desc: 'Five Stoic meditations, less than five minutes each. Voiced. Surfaced contextually for the time of day.' },
+            { title: 'Guided Meditations', desc: 'Six Stoic meditations, less than five minutes each. Voiced. Surfaced contextually for the time of day.' },
             { title: 'Morning Journal', desc: 'Reflect on what is in your control, foresee what may come, and prepare for what the day requires.' },
             { title: 'Evening Journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
             { title: 'Emotion logger', desc: 'When strong emotions arise, log the trigger, examine your thinking, and choose your response.' },
@@ -548,7 +553,7 @@ function MeditationsStep({ onNext }) {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.medOnbHeroText}>
-            <Text style={s.previewEyebrow}>Five guided meditations</Text>
+            <Text style={s.previewEyebrow}>Six guided meditations</Text>
             <Text style={s.previewTitle}>{`Ancient attention\ntraining, voiced.`}</Text>
             <Text style={s.previewSub}>Less than 5 minutes each. Optional, but they deepen the practice.</Text>
           </View>
@@ -811,7 +816,7 @@ const s = StyleSheet.create({
   previewHero: {
     backgroundColor: colors.bgDeep,
     padding: 36,
-    paddingTop: 48,
+    paddingTop: 80,
     paddingBottom: 32,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
@@ -886,26 +891,33 @@ const s = StyleSheet.create({
     textAlign: 'center',
   },
 
-  onboardingBack: {
+  // Sticky header bar at the top of every onboarding step (except step 0).
+  // Matches the ScreenHeader/PracticeHeader chrome elsewhere in the app —
+  // bgDeep band, gold back text-link, paddingHorizontal 18 — so the back
+  // affordance reads as one design system everywhere.
+  onboardingHeader: {
     position: 'absolute',
-    top: 52,
-    left: 16,
+    top: 0, left: 0, right: 0,
     zIndex: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    borderRadius: 8,
+    backgroundColor: colors.bgDeep,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    paddingHorizontal: 18,
+    paddingBottom: 14,
   },
+  onboardingBackBtn: { paddingVertical: 4, paddingRight: 12, alignSelf: 'flex-start' },
   onboardingBackText: {
-    fontSize: 15,
+    fontSize: 13,
     color: colors.accent,
-    letterSpacing: 0.3,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    fontWeight: '500',
   },
   // Step screens
   stepHero: {
     backgroundColor: colors.bgDeep,
     paddingHorizontal: 28,
-    paddingTop: 52,
+    paddingTop: 84,
     paddingBottom: 32,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,

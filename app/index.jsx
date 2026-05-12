@@ -105,15 +105,13 @@ export default function PracticeScreen() {
 
   const today = todayDate;
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  // Show weekly review for 3 days: the review day + 2 days after
-  // Requires minimum 3 completed practice days before surfacing
+  // Weekly review is highlighted only on the user's chosen review day.
+  // The row remains tappable every day, so missed Sundays can still be
+  // caught up — they just no longer pretend to be Sunday.
+  // Requires minimum 3 completed practice days before surfacing.
   const dayOfWeek = today.getDay();
   const hasEnoughPractice = totalDays >= 3;
-  const isReviewDay = hasEnoughPractice && (
-    dayOfWeek === reviewDay ||
-    ((dayOfWeek - reviewDay + 7) % 7 === 1) ||
-    ((dayOfWeek - reviewDay + 7) % 7 === 2)
-  );
+  const isReviewDay = hasEnoughPractice && dayOfWeek === reviewDay;
 
   const quote = getDailyQuote(morningQuotes);
   const sealQuote = getDailyQuote(mementoMoriQuotes, 7);
@@ -453,20 +451,17 @@ export default function PracticeScreen() {
           </View>
 
           {(() => {
-            const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
             const hasEnough = totalDays >= 3;
             const sealed = reviewDone;
             const today = isReviewDay && !sealed;
-            const available = hasEnough && !today && !sealed;
             const locked = !hasEnough;
-            const reviewDayName = days[reviewDay] || 'Sunday';
             const sub = locked
               ? 'After 3 days of practice'
               : sealed
                 ? 'Sealed for this week'
                 : today
                   ? 'Seal the week'
-                  : `Available ${reviewDayName}`;
+                  : 'Look back at the week';
             const onPress = locked
               ? null
               : sealed
