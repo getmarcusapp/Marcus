@@ -15,7 +15,7 @@ const menuItems = [
     items: [
       { label: 'How Marcus works', sub: 'The practice explained', icon: 'help-circle-outline', route: '/howto' },
       { label: 'Further reading', sub: 'A short shelf of curated Stoic works', icon: 'library-outline', route: '/library' },
-      { label: 'The artwork', sub: 'Classical paintings used throughout the app', icon: 'images-outline', route: '/imagery' },
+      { label: 'Virtues & imagery', sub: 'The four Virtues and the art that holds them', icon: 'images-outline', route: '/imagery' },
       { label: 'Settings', sub: 'Notifications and preferences', icon: 'settings-outline', route: '/settings' },
     ],
   },
@@ -132,14 +132,6 @@ const s = StyleSheet.create({
   heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24 },
   heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase', marginTop: 8 },
   section: { paddingHorizontal: spacing.md, paddingTop: spacing.lg, paddingBottom: 36 },
-  sectionLabel: {
-    fontSize: font.labelSize,
-    letterSpacing: font.sectionTracking,
-    color: colors.accent,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-    paddingLeft: 4,
-  },
   card: {
     borderWidth: 0.5,
     borderColor: colors.border,

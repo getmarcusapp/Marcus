@@ -53,10 +53,30 @@ export const emotions = [
 // `virtues` array above carries the short hero copy; this map carries the
 // elaboration shown when the user taps "More".
 export const VIRTUE_DETAILS = {
-  wisdom: { definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly, not as you wish them to be, but as they are.', question: 'Am I perceiving this clearly or through bias, fear, or ego?' },
-  courage: { definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.', question: 'What fear is stopping me right now?' },
-  moderation: { definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation: the disciplined middle path.', question: 'Where am I in excess today?' },
-  justice: { definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.', question: 'Did I treat others with fairness today?' },
+  wisdom: {
+    definition: 'The Virtue of discernment and right judgment. Wisdom means seeing things clearly, not as you wish them to be, but as they are.',
+    question: 'Am I perceiving this clearly or through bias, fear, or ego?',
+    quote: 'Look beneath the surface; let not the several quality of a thing nor its worth escape thee.',
+    quoteAttr: 'Marcus Aurelius · Meditations VI.3',
+  },
+  courage: {
+    definition: 'The Virtue of strength and moral fortitude. Courage is doing the right thing even when it is hard.',
+    question: 'What fear is stopping me right now?',
+    quote: 'If it is not right, do not do it; if it is not true, do not say it.',
+    quoteAttr: 'Marcus Aurelius · Meditations XII.17',
+  },
+  moderation: {
+    definition: 'The Virtue of temperance and balance. Neither indulgence nor deprivation: the disciplined middle path.',
+    question: 'Where am I in excess today?',
+    quote: 'Confine yourself to the present.',
+    quoteAttr: 'Marcus Aurelius · Meditations VII.8',
+  },
+  justice: {
+    definition: 'The Virtue of fairness and right action toward others. Justice is about how you treat the people around you.',
+    question: 'Did I treat others with fairness today?',
+    quote: 'What is not good for the beehive cannot be good for the bees.',
+    quoteAttr: 'Marcus Aurelius · Meditations VI.54',
+  },
 };
 
 export const stoicReframes = {

@@ -7,7 +7,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { virtues } from '../constants/virtues';
+import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { MEDITATIONS_LIST } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
@@ -126,6 +126,28 @@ function GalleryEntry({ image, title, artist, work, why }) {
   );
 }
 
+function VirtueCard({ image, name, definition, quote, quoteAttr, artist, work, why }) {
+  return (
+    <View style={s.card}>
+      <View style={s.imageWrap}>
+        <Image source={image} style={s.image} resizeMode="cover" />
+      </View>
+      <View style={s.cardBody}>
+        <Text style={s.virtueName}>{name}</Text>
+        <Text style={s.virtueDef}>{definition}</Text>
+        <View style={s.virtueQuoteBox}>
+          <Text style={s.virtueQuote}>“{quote}”</Text>
+          <Text style={s.virtueQuoteAttr}>— {quoteAttr}</Text>
+        </View>
+        <Text style={s.virtueArtLabel}>On the artwork</Text>
+        <Text style={s.work}>{work}</Text>
+        <Text style={s.artist}>{artist}</Text>
+        <Text style={s.why}>{why}</Text>
+      </View>
+    </View>
+  );
+}
+
 function SectionHeader({ eyebrow, title, sub }) {
   return (
     <View style={s.sectionHeader}>
@@ -154,7 +176,7 @@ export default function ImageryScreen() {
 
         <View style={s.hero}>
           <Image
-            source={require('../assets/heroes/review.jpg')}
+            source={require('../assets/virtues/wisdom.jpg')}
             style={s.heroImage}
             resizeMode="cover"
           />
@@ -164,15 +186,38 @@ export default function ImageryScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
-            <Text style={s.eyebrow}>The artwork</Text>
-            <Text style={s.title}>The classical{'\n'}imagery in Marcus.</Text>
+            <Text style={s.eyebrow}>Virtues &amp; imagery</Text>
+            <Text style={s.title}>The four Virtues.</Text>
             <Text style={s.sub}>
-              Every painting and sculpture in the app, where it lives, and why it was chosen. All public-domain works from the Met, the Borghese, the Uffizi, the Capitoline Museums, and beyond.
+              Wisdom, Courage, Temperance, Justice — held as one. Plus the classical paintings used throughout the app, where they live, and why.
             </Text>
           </View>
         </View>
 
         <View style={s.body}>
+          <SectionHeader
+            eyebrow="The four Virtues"
+            title="Wisdom · Courage · Temperance · Justice"
+            sub="The Stoic does not pick one Virtue for the day. Wisdom without Justice is shallow. Courage without Temperance is recklessness. The four are inseparable."
+          />
+          {virtues.map(v => {
+            const note = VIRTUE_NOTES[v.id];
+            const detail = VIRTUE_DETAILS[v.id] || {};
+            return (
+              <VirtueCard
+                key={v.id}
+                image={v.image}
+                name={v.name}
+                definition={detail.definition}
+                quote={detail.quote}
+                quoteAttr={detail.quoteAttr}
+                artist={note.artist}
+                work={note.work}
+                why={note.why}
+              />
+            );
+          })}
+
           <SectionHeader
             eyebrow="Heroes"
             title="One painting per screen"
@@ -181,25 +226,6 @@ export default function ImageryScreen() {
           {HERO_ENTRIES.map((entry, idx) => (
             <GalleryEntry key={idx} {...entry} />
           ))}
-
-          <SectionHeader
-            eyebrow="The four Virtues"
-            title="One artwork per Virtue"
-            sub="Wisdom, Courage, Temperance, Justice. The unified frame of the Stoic life."
-          />
-          {virtues.map(v => {
-            const note = VIRTUE_NOTES[v.id];
-            return (
-              <GalleryEntry
-                key={v.id}
-                image={v.image}
-                title={v.name}
-                artist={note.artist}
-                work={note.work}
-                why={note.why}
-              />
-            );
-          })}
 
           <SectionHeader
             eyebrow="The five meditations"
@@ -278,6 +304,17 @@ const s = StyleSheet.create({
   work: { fontSize: 17, fontWeight: '400', color: colors.textPrimary, fontFamily: font.serif, marginBottom: 4, lineHeight: 24 },
   artist: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.5, marginBottom: 12, textTransform: 'uppercase' },
   why: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
+  virtueName: { fontSize: 22, fontWeight: '400', color: colors.textPrimary, fontFamily: font.serif, marginBottom: 8 },
+  virtueDef: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 16 },
+  virtueQuoteBox: {
+    borderLeftWidth: 1.5,
+    borderLeftColor: colors.accentDim,
+    paddingLeft: 14,
+    marginBottom: 18,
+  },
+  virtueQuote: { fontSize: 15, color: colors.textPrimary, fontFamily: font.serif, lineHeight: 24, fontStyle: 'italic', marginBottom: 6 },
+  virtueQuoteAttr: { fontSize: 11, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' },
+  virtueArtLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase', marginBottom: 8 },
 
   footerNote: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,

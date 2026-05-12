@@ -372,23 +372,13 @@ export default function EmotionsScreen() {
               <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
                 <Text style={s.accessoryDoneText}>Done</Text>
               </TouchableOpacity>
-              {selectedEmotion ? (
-                <TouchableOpacity
-                  onPress={() => { haptics.tap(); responseInputRef.current?.focus(); }}
-                  style={s.accessoryAction}
-                  activeOpacity={0.7}
-                >
-                  <Text style={s.accessoryActionText}>Next →</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={() => { Keyboard.dismiss(); handleLog(); }}
-                  style={s.accessoryAction}
-                  activeOpacity={0.7}
-                >
-                  <Text style={s.accessoryActionText}>Log this trigger →</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                onPress={() => { haptics.tap(); responseInputRef.current?.focus(); }}
+                style={s.accessoryAction}
+                activeOpacity={0.7}
+              >
+                <Text style={s.accessoryActionText}>Next →</Text>
+              </TouchableOpacity>
             </View>
           </InputAccessoryView>
           <InputAccessoryView nativeID="emoResponseAccessory">
@@ -481,6 +471,6 @@ const s = StyleSheet.create({
   },
   accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
   accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

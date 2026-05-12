@@ -450,10 +450,10 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
 
 function PracticePreviewStep({ onNext }) {
   const items = [
-    { title: 'Stoic Compass', sub: 'Your North Star · read daily', tag: 'NOW' },
-    { title: 'Daily Reading', sub: 'Personalized to your practice, fresh each day', tag: 'NOW' },
-    { title: 'Morning Journal', sub: 'Reflect and intend', tag: 'NOW' },
-    { title: 'Evening Journal', sub: 'Examine and release', tag: 'LATER' },
+    { title: 'Stoic Compass', sub: 'Your North Star · read daily', tag: 'NEXT' },
+    { title: 'Daily Reading', sub: 'Personalized to your practice, fresh each day' },
+    { title: 'Morning Journal', sub: 'Reflect and intend' },
+    { title: 'Evening Journal', sub: 'Examine and release' },
   ];
 
   const extras = [
@@ -480,9 +480,11 @@ function PracticePreviewStep({ onNext }) {
                   <Text style={s.previewItemTitle}>{item.title}</Text>
                   <Text style={s.previewItemSub}>{item.sub}</Text>
                 </View>
-                <View style={[s.previewTag, item.tag === 'LATER' && s.previewTagLater, item.tag !== 'LATER' && s.previewTagNow]}>
-                  <Text style={[s.previewTagText, item.tag !== 'LATER' && s.previewTagTextNow]}>{item.tag}</Text>
-                </View>
+                {item.tag && (
+                  <View style={[s.previewTag, s.previewTagNext]}>
+                    <Text style={[s.previewTagText, s.previewTagTextNext]}>{item.tag}</Text>
+                  </View>
+                )}
               </View>
             ))}
           </View>
@@ -845,10 +847,9 @@ const s = StyleSheet.create({
   previewItemTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
   previewItemSub: { fontSize: 13, color: colors.textMuted },
   previewTag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
-  previewTagNow: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  previewTagLater: { borderColor: 'transparent', backgroundColor: 'transparent' },
-  previewTagTextNow: { color: colors.accent, fontWeight: '500' },
+  previewTagNext: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   previewTagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
+  previewTagTextNext: { color: colors.accent, fontWeight: '500' },
   previewNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, backgroundColor: colors.bgDeep },
   previewNoteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
   extrasHeading: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 28, marginBottom: 12, paddingHorizontal: 4 },
@@ -1157,7 +1158,7 @@ const s = StyleSheet.create({
   },
   accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
   accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   skipLink: { paddingVertical: 20, alignItems: 'center' },
   skipLinkText: { fontSize: 15, color: colors.textDim },

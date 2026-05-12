@@ -5,7 +5,6 @@ import {
   Platform, Image, Share, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { useFocusEffect, useRouter, useLocalSearchParams } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import SkullLoader from '../components/SkullLoader';
@@ -35,7 +34,7 @@ Output this EXACT JSON format with no other text:
   "author": "the exact author from the candidate (verbatim)",
   "work": "the exact work from the candidate (verbatim)",
   "theme": "2-4 word Stoic theme",
-  "virtue": "Wisdom|Courage|Moderation|Justice",
+  "virtue": "Wisdom|Courage|Temperance|Justice",
   "reflection": "A 3-4 sentence reflection in second person, grounded in the user's Compass when it earns the connection."
 }
 
@@ -58,7 +57,6 @@ function findDuplicateQuote(quote, history) {
 export default function ReadScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
   const fromPath = params?.from || '/';
   const fromLabel = params?.fromLabel || 'Practice';
   const [reading, setReading] = useState(null);
@@ -472,18 +470,7 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  backRow: {
-    position: 'absolute', top: 12, left: 16, zIndex: 10,
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 8,
-  },
-  backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
-  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
-  sub: { fontSize: font.subSize, color: colors.textMuted },
   // "Past readings ›" link below the hero. Same architecture as
   // /journal-history and /emotions-history.
   pastReadingsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
@@ -556,6 +543,6 @@ const s = StyleSheet.create({
   },
   accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
   accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

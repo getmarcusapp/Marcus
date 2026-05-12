@@ -11,8 +11,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
-import { getTodayJournal, getStreak, getTodayReading, getCompassDone, persistCompassDone, clearCompassDone, getReviews } from '../store/db';
-import { refreshNotificationsForToday, onPracticeSealed, cancelJournalNotification } from '../notifications';
+import { getTodayJournal, getStreak, getTodayReading, getCompassDone, clearCompassDone, getReviews } from '../store/db';
+import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
 
@@ -377,7 +377,7 @@ export default function PracticeScreen() {
 
             <TouchableOpacity
               style={[s.routineRow, s.routineRowBorder, nextItem === 'compass' && s.routineRowNext]}
-              onPress={async () => { router.push('/compass?from=/&fromLabel=Practice'); setCompassDone(true); await persistCompassDone(); cancelJournalNotification('compass'); }}
+              onPress={() => router.push('/compass?from=/&fromLabel=Practice')}
               activeOpacity={0.7}
             >
               <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>

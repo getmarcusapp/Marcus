@@ -12,7 +12,8 @@ import { getReadingLog } from '../store/db';
 const virtueColor = {
   Wisdom: '#7a9aaa',
   Courage: '#aa8a6a',
-  Moderation: '#7a9a7a',
+  Temperance: '#7a9a7a',
+  Moderation: '#7a9a7a', // legacy: older entries stored "Moderation" before the rename
   Justice: '#9a8aaa',
 };
 

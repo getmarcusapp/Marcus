@@ -23,7 +23,7 @@ const sections = [
   },
   {
     title: 'The four Virtues',
-    content: 'Stoicism centers on four cardinal Virtues. They are not menu choices, and they are not separable. Wisdom without Justice is shallow. Courage without Moderation is recklessness. The Stoic does not pick one virtue for the day; the Stoic watches for all four in every situation.\n\nWisdom: Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage: Doing the right thing even when it is hard or costly.\n\nModeration: Neither too much nor too little. Temperance in all things.\n\nJustice: Acting rightly toward others. Community, fairness, duty.\n\nThe weekly review asks which Virtue you most embodied and which you fell short on. Over months, that answer becomes a mirror.',
+    content: 'Stoicism centers on four cardinal Virtues. They are not menu choices, and they are not separable. Wisdom without Justice is shallow. Courage without Temperance is recklessness. The Stoic does not pick one virtue for the day; the Stoic watches for all four in every situation.\n\nWisdom: Discernment and right judgment. Seeing clearly, not through bias or fear.\n\nCourage: Doing the right thing even when it is hard or costly.\n\nTemperance: Neither too much nor too little. The disciplined middle path.\n\nJustice: Acting rightly toward others. Community, fairness, duty.\n\nThe weekly review asks which Virtue you most embodied and which you fell short on. Over months, that answer becomes a mirror.',
   },
   {
     title: 'The emotion logger',

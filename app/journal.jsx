@@ -6,7 +6,6 @@ import {
   ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
@@ -62,9 +61,7 @@ const virtuePronunciations = {
 export default function JournalScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
-  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
-  const fromPractice = !!params?.type;
   const fromPath = params?.from || '/';
   const fromLabel = params?.fromLabel || 'Practice';
   const defaultType = params?.type || (new Date().getHours() < 13 ? 'morning' : 'evening');
@@ -373,23 +370,7 @@ const s = StyleSheet.create({
   },
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   headerContent: { padding: spacing.xl, paddingTop: 52 },
-  typeToggle: { flexDirection: 'row', gap: 8, marginBottom: 20 },
-  typeBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgCard },
-  typeBtnActive: { backgroundColor: colors.accentBg, borderColor: colors.accentDim },
-  typeBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.5 },
-  typeBtnTextActive: { color: colors.accent, fontWeight: '500' },
-  backRow: {
-    position: 'absolute', top: 12, left: 16, zIndex: 10,
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 8,
-  },
-  backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
-  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
-  sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
   // "Past entries ›" link below the hero. Replaced the Write/History
   // tab row — history now lives at /journal-history.
   pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
@@ -456,7 +437,7 @@ const s = StyleSheet.create({
   },
   accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
   accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   promptHeader: { marginBottom: 0 },
   hintBtn: { padding: 4 },

@@ -6,9 +6,9 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { getCompass, saveCompass, getRoles, saveRoles } from '../store/db';
+import { getCompass, saveCompass, getRoles, saveRoles, persistCompassDone, getCompassDone } from '../store/db';
+import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
@@ -75,8 +75,6 @@ function placeholderFor(name) {
 export default function CompassScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const fromPath = params?.from || '/';
-  const fromLabel = params?.fromLabel || 'Practice';
   // Allow callers to deep-link to the Roles tab via ?tab=roles
   // (used by the daily Role card on Practice).
   const initialTabIdx = params?.tab === 'roles' ? 3 : 0;
@@ -85,7 +83,6 @@ export default function CompassScreen() {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
-  const insets = useSafeAreaInsets();
   const commitMindfulSession = useMindfulSession();
   const playerInset = useMiniPlayerInset();
   // Roles tab state — list of {id, name, commitment}. editingRole is
@@ -98,15 +95,43 @@ export default function CompassScreen() {
   const roleNameInputRef = useRef(null);
   const roleCommitmentInputRef = useRef(null);
   const scrollRef = useRef(null);
+  // Ref so markCompassDone is no-op after the first call per visit, even
+  // before async persist completes. Reset on blur via useFocusEffect cleanup.
+  const compassMarkedRef = useRef(false);
 
   useEffect(() => {
     getCompass().then(setCompass);
     getRoles().then(setRoles);
   }, []);
 
+  async function markCompassDone() {
+    if (compassMarkedRef.current) return;
+    compassMarkedRef.current = true;
+    await persistCompassDone();
+    cancelJournalNotification('compass');
+  }
+
   useFocusEffect(useCallback(() => {
     setHintOpen(false);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
+
+    // Compass counts as "done" after genuine engagement — 5s on the
+    // screen — rather than the moment of navigation. If already done today,
+    // skip the timer; tab switches below also short-circuit.
+    let timer = null;
+    (async () => {
+      const alreadyDone = await getCompassDone();
+      if (alreadyDone) {
+        compassMarkedRef.current = true;
+        return;
+      }
+      timer = setTimeout(() => { markCompassDone(); }, 5000);
+    })();
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      compassMarkedRef.current = false;
+    };
   }, []));
 
   function startEditRole(role) {
@@ -213,7 +238,7 @@ export default function CompassScreen() {
             <TouchableOpacity
               key={t}
               style={[s.navPill, activeTab === i && s.navPillActive]}
-              onPress={() => { setActiveTab(i); setEditing(false); setHintOpen(false); }}
+              onPress={() => { setActiveTab(i); setEditing(false); setHintOpen(false); markCompassDone(); }}
             >
               <Text style={[s.navPillText, activeTab === i && s.navPillTextActive]}>{t}</Text>
             </TouchableOpacity>
@@ -470,35 +495,7 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  // Floating back button — absolutely positioned at the same top/left
-  // across every screen of the app so it lands at the same Y/X
-  // regardless of the hero's height or content. Dark pill so the gold
-  // reads cleanly over any bright spot in a hero painting.
-  backRow: {
-    position: 'absolute', top: 12, left: 16, zIndex: 10,
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
-  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
   title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
-  sub: { fontSize: font.subSize, color: colors.textMuted, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
-  nextRow: {
-    backgroundColor: colors.accentBg,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.accentDim,
-    padding: spacing.md,
-  },
-  nextBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    padding: 14, borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
-  },
-  nextBtnText: { fontSize: 14, color: colors.accent, fontWeight: '500' },
-  nextBtnChev: { fontSize: 20, color: colors.accent },
   navRow: {
     flexDirection: 'row',
     gap: 8,
@@ -604,6 +601,6 @@ const s = StyleSheet.create({
   },
   accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
   accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

@@ -207,6 +207,15 @@ export async function saveReadingInsight(insight) {
       { id: Date.now().toString(), date: today, reading: todayReading, insight },
       ...filtered,
     ]));
+    // Mirror the insight onto today's reading so the Reading screen shows
+    // it when the user returns later in the day. Generating a new reading
+    // overwrites reading_today entirely, which resets the field as expected.
+    if (todayReading) {
+      await AsyncStorage.setItem('reading_today', JSON.stringify({
+        ...todayReading,
+        insight,
+      }));
+    }
     return true;
   } catch (e) { return false; }
 }

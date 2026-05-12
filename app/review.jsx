@@ -5,8 +5,7 @@ import {
   KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image, Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveReview, getReviews, getJournals, getTriggers, getRoles } from '../store/db';
@@ -51,10 +50,6 @@ const reviewPrompts = [
 export default function ReviewScreen() {
   const playerInset = useMiniPlayerInset();
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
-  const fromPath = params?.from || '/';
-  const fromLabel = params?.fromLabel || 'Practice';
   const [answers, setAnswers] = useState({});
   const [bestVirtue, setBestVirtue] = useState(virtues[0].id);
   const [worstVirtue, setWorstVirtue] = useState(virtues[3].id);
@@ -372,7 +367,7 @@ export default function ReviewScreen() {
               <Text style={s.promptQ}>Which Virtue did I most embody this week, and which did I fall short on?</Text>
               {openHint === 'ledger' && (
                 <View style={s.hintBox}>
-                  <Text style={s.hintText}>The four Virtues are inseparable. Wisdom without Justice is shallow. Courage without Moderation is recklessness. This question is not which Virtue you remembered to do; it is a sober assessment of where the unified character was tested most, and where it held.</Text>
+                  <Text style={s.hintText}>The four Virtues are inseparable. Wisdom without Justice is shallow. Courage without Temperance is recklessness. This question is not which Virtue you remembered to do; it is a sober assessment of where the unified character was tested most, and where it held.</Text>
                 </View>
               )}
               <View style={s.virtueRow}>
@@ -547,18 +542,7 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  backRow: {
-    position: 'absolute', top: 12, left: 16, zIndex: 10,
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 8,
-  },
-  backArrow: { fontSize: 22, color: colors.accent, marginTop: -2 },
-  backLabel: { fontSize: 12, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8 },
-  sub: { fontSize: font.subSize, color: colors.textMuted },
   // "Past reviews ›" link below the hero. Replaced the This Week / Archive
   // tab row — archive now lives at /review-archive.
   pastReviewsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
@@ -587,7 +571,7 @@ const s = StyleSheet.create({
   },
   accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
   accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 6, paddingHorizontal: 8 },
+  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
