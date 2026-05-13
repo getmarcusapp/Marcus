@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Alert, Share, Linking, Switch,
@@ -42,11 +42,13 @@ export default function SettingsScreen() {
   const [authLabel, setAuthLabel] = useState('FaceID');
   const { lockEnabled } = useAppLock();
   const playerInset = useMiniPlayerInset();
+  const scrollRef = useRef(null);
 
   // Re-load on focus (not just mount) so the reminder summary refreshes
   // when the user returns from the Notifications subscreen — otherwise
   // toggling reminders there leaves the "X of 5 active" line stale.
   useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
     (async () => {
       const asked = await AsyncStorage.getItem('health_permission_asked');
       setHealthAsked(asked === 'true');
@@ -200,7 +202,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
-      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: playerInset }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Marcus</Text>
           <Text style={s.title}>Settings</Text>

@@ -13,8 +13,8 @@ import { MiniMeditationPlayer } from '../components/MiniMeditationPlayer';
 import { LockScreen } from '../components/LockScreen';
 import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
 
-function TabIcon({ name, color }) {
-  return <Ionicons name={name} size={22} color={color} />;
+function TabIcon({ name, color, size = 22 }) {
+  return <Ionicons name={name} size={size} color={color} />;
 }
 
 // Maps the current pathname to the logical tab a user is "in" so the
@@ -33,9 +33,9 @@ function useLogicalTabKey() {
   return 'more';
 }
 
-function ManagedTabIcon({ iconName, tabKey }) {
+function ManagedTabIcon({ iconName, tabKey, size }) {
   const active = useLogicalTabKey() === tabKey;
-  return <TabIcon name={iconName} color={active ? colors.accent : colors.textDim} />;
+  return <TabIcon name={iconName} size={size} color={active ? colors.accent : colors.textDim} />;
 }
 
 function ManagedTabLabel({ label, tabKey }) {
@@ -143,7 +143,9 @@ export default function Layout() {
         <Tabs.Screen
           name="more"
           options={{
-            tabBarIcon: () => <ManagedTabIcon iconName="menu-outline" tabKey="more" />,
+            // menu-outline is three thin horizontal bars and reads smaller than
+            // flame/heart at the same px size — bump it slightly for visual parity.
+            tabBarIcon: () => <ManagedTabIcon iconName="menu-outline" tabKey="more" size={26} />,
             tabBarLabel: () => <ManagedTabLabel label="More" tabKey="more" />,
           }}
         />

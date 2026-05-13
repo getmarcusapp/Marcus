@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
-import { getTodayJournal, getStreak, getTodayReading, getCompassDone, clearCompassDone, getReviews } from '../store/db';
+import { getTodayJournal, getStreak, getTodayReading, getCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
@@ -117,6 +117,8 @@ export default function PracticeScreen() {
   const sealQuote = getDailyQuote(mementoMoriQuotes, 7);
 
   useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    sealedScrollRef.current?.scrollTo({ y: 0, animated: false });
     async function load() {
       const now = new Date();
       setTodayDate(now);
@@ -147,12 +149,14 @@ export default function PracticeScreen() {
     load();
   }, []));
 
-  const totalItems = isReviewDay ? 5 : 4;
-  const completed = [compassDone, readingDone, morningDone, eveningDone, isReviewDay ? reviewDone : null]
+  // Daily practice is a fixed 4-step flow. Weekly Review is a separate
+  // cadence surfaced as its own tile and does not count toward daily progress.
+  const totalItems = 4;
+  const completed = [compassDone, readingDone, morningDone, eveningDone]
     .filter(v => v === true).length;
-  const allDone = completed >= 4 && (!isReviewDay || completed >= 5);
+  const allDone = completed >= 4;
   const morningComplete = !allDone && compassDone && readingDone && morningDone && !eveningDone;
-  const progress = Math.min(completed / (isReviewDay ? 5 : 4), 1);
+  const progress = Math.min(completed / 4, 1);
   const nextItem = !compassDone ? 'compass'
     : !readingDone ? 'reading'
     : !morningDone ? 'morning'
@@ -189,6 +193,7 @@ export default function PracticeScreen() {
   // any scroll offset from the in-progress state is retained, hiding the
   // skull / day count / sealed quote.
   const sealedScrollRef = useRef(null);
+  const scrollRef = useRef(null);
   useFocusEffect(useCallback(() => {
     if (!allDone) return;
     sealedScrollRef.current?.scrollTo({ y: 0, animated: false });
@@ -217,7 +222,7 @@ export default function PracticeScreen() {
         <ScrollView
           ref={sealedScrollRef}
           style={s.scroll}
-          showsVerticalScrollIndicator={true}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: playerInset }}
         >
 
@@ -312,8 +317,9 @@ export default function PracticeScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView
+        ref={scrollRef}
         style={s.scroll}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 
@@ -383,18 +389,11 @@ export default function PracticeScreen() {
                 <Text style={[s.routineTitle, compassDone && s.titleDone]}>Stoic Compass</Text>
                 <Text style={s.routineSub}>Your North Star · read daily</Text>
               </View>
-              <View style={s.tagRow}>
-                {compassDone && (
-                  <TouchableOpacity style={s.undoBtn} onPress={async () => { setCompassDone(false); await clearCompassDone(); }}>
-                    <Text style={s.undoBtnText}>Undo</Text>
-                  </TouchableOpacity>
-                )}
-                {nextItem === 'compass' && (
-                  <View style={[s.tag, s.tagNext]}>
-                    <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
-                  </View>
-                )}
-              </View>
+              {nextItem === 'compass' && (
+                <View style={[s.tag, s.tagNext]}>
+                  <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
+                </View>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -464,9 +463,7 @@ export default function PracticeScreen() {
                   : 'Look back at the week';
             const onPress = locked
               ? null
-              : sealed
-                ? () => router.push('/review-archive')
-                : () => router.push('/review?from=/&fromLabel=Practice');
+              : () => router.push('/review?from=/&fromLabel=Practice');
             return (
               <>
                 <View style={s.practiceHeader}>
@@ -651,9 +648,6 @@ const s = StyleSheet.create({
   titleDone: { color: colors.textDim, textDecorationLine: 'line-through' },
   titleLocked: { color: colors.textDim },
   routineSub: { fontSize: 12, color: colors.textMuted },
-  tagRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  undoBtn: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
-  undoBtnText: { fontSize: 11, color: colors.textMuted },
   tag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
   tagNext: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   tagAccent: { borderColor: colors.borderMid },

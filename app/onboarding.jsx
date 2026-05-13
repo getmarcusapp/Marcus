@@ -3,11 +3,12 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image, TextInput,
   KeyboardAvoidingView, Platform, Alert,
-  InputAccessoryView, Keyboard,
+  InputAccessoryView, Keyboard, useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { saveCompass, setHasOnboarded } from '../store/db';
@@ -101,7 +102,14 @@ export default function OnboardingScreen() {
 
 function WelcomeStep({ onNext }) {
   const router = useRouter();
+  const { height: screenHeight } = useWindowDimensions();
+  // iPhone SE (667), 8 (667), Mini (812) — below this, the full hero
+  // stack is too tall and the input slips below the absolute footer.
+  // Compact mode shrinks the skull/title and drops the decorative quote
+  // so the input lands above the fold on every screen size.
+  const isSmall = screenHeight < 750;
   const [name, setName] = useState('');
+  const [nameFocused, setNameFocused] = useState(false);
 
   async function handleNext() {
     const trimmed = name.trim();
@@ -150,53 +158,74 @@ function WelcomeStep({ onNext }) {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={s.safeTransparent}>
-        <KeyboardAvoidingView
+        <ScrollView
           style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={0}
+          contentContainerStyle={[s.welcomeBody, isSmall && s.welcomeBodySmall]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
+          bounces={false}
         >
-          <ScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={s.welcomeBody}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            bounces={false}
-          >
-            <Image source={require('../assets/skull.png')} style={s.welcomeSkull} resizeMode="contain" />
-            <Text style={s.welcomeTitle}>Marcus</Text>
-            <Text style={s.welcomeSub}>A Stoic practice app</Text>
-            <View style={s.welcomeDivider} />
-            <Text style={s.welcomeTagline}>
-              “The impediment to action advances action. What stands in the way becomes the way.”
-            </Text>
-            <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations V.20</Text>
+          <Image
+            source={require('../assets/skull.png')}
+            style={[s.welcomeSkull, isSmall && s.welcomeSkullSmall]}
+            resizeMode="contain"
+          />
+          <Text style={[s.welcomeTitle, isSmall && s.welcomeTitleSmall]}>Marcus</Text>
+          <Text style={[s.welcomeSub, isSmall && s.welcomeSubSmall]}>A Stoic practice app</Text>
+          {!isSmall && (
+            <>
+              <View style={s.welcomeDivider} />
+              <Text style={s.welcomeTagline}>
+                “The impediment to action advances action. What stands in the way becomes the way.”
+              </Text>
+              <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations V.20</Text>
+            </>
+          )}
 
-            <View style={s.welcomeNameWrap}>
-              <Text style={s.welcomeNameLabel}>Your name · optional</Text>
-              <TextInput
-                style={s.welcomeNameInput}
-                placeholder="What should we call you?"
-                placeholderTextColor={colors.textMuted}
-                value={name}
-                onChangeText={setName}
-                autoCapitalize="words"
-                autoCorrect={false}
-                maxLength={40}
-                returnKeyType="done"
-                onSubmitEditing={handleNext}
-              />
-            </View>
-          </ScrollView>
-          <View style={s.footer}>
-            <TouchableOpacity style={s.primaryBtn} onPress={handleNext} activeOpacity={0.8}>
-              <Text style={s.primaryBtnText}>Begin your practice</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleRestore} activeOpacity={0.7} style={s.welcomeRestore}>
-              <Text style={s.welcomeRestoreText}>I have a backup from another device</Text>
+          <View style={[s.welcomeNameWrap, isSmall && s.welcomeNameWrapSmall]}>
+            <Text style={s.welcomeNameLabel}>Your name · optional</Text>
+            <TextInput
+              style={[s.welcomeNameInput, nameFocused && s.welcomeNameInputFocused]}
+              placeholder="What should we call you?"
+              placeholderTextColor={colors.textDim}
+              value={name}
+              onChangeText={setName}
+              onFocus={() => setNameFocused(true)}
+              onBlur={() => setNameFocused(false)}
+              autoCapitalize="words"
+              autoCorrect={false}
+              maxLength={40}
+              keyboardAppearance="dark"
+              onSubmitEditing={handleNext}
+              inputAccessoryViewID={Platform.OS === 'ios' ? 'welcomeNameAccessory' : undefined}
+            />
+          </View>
+        </ScrollView>
+        <View style={s.footer}>
+          <TouchableOpacity style={s.primaryBtn} onPress={handleNext} activeOpacity={0.8}>
+            <Text style={s.primaryBtnText}>Continue</Text>
+            <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleRestore} activeOpacity={0.7} style={s.welcomeRestore}>
+            <Text style={s.welcomeRestoreText}>I have a backup from another device</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID="welcomeNameAccessory">
+          <View style={s.welcomeAccessoryBar}>
+            <TouchableOpacity
+              onPress={() => { Keyboard.dismiss(); handleNext(); }}
+              style={s.welcomeAccessoryBtn}
+              activeOpacity={0.8}
+            >
+              <Text style={s.welcomeAccessoryBtnText}>Next</Text>
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+        </InputAccessoryView>
+      )}
     </LinearGradient>
   );
 }
@@ -206,7 +235,7 @@ function PhilosophyStep({ onNext }) {
     <SafeAreaView style={s.safe}>
       <ScrollView
         style={s.scroll}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 140 }}
       >
         <View style={s.stepHero}>
@@ -242,7 +271,8 @@ function PhilosophyStep({ onNext }) {
       </ScrollView>
       <View style={s.footer}>
         <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText}>Continue →</Text>
+          <Text style={s.primaryBtnText}>Continue</Text>
+          <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -281,6 +311,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
   const [mode, setMode] = useState('summary');
   const [editIdx, setEditIdx] = useState(0);
   const [hintOpen, setHintOpen] = useState(false);
+  const [editFocused, setEditFocused] = useState(false);
   const editInputRef = useRef(null);
 
   // Re-focus the textarea each time the user advances to the next prompt.
@@ -318,7 +349,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
         >
           <ScrollView
             style={s.scroll}
-            showsVerticalScrollIndicator={true}
+            showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ paddingBottom: 140 }}
@@ -347,49 +378,44 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
                 )}
                 <TextInput
                   ref={editInputRef}
-                  style={s.compassInput}
+                  style={[s.compassInput, editFocused && s.compassInputFocused]}
                   multiline
                   value={compass[field.key]}
                   onChangeText={text => setCompass(prev => ({ ...prev, [field.key]: text }))}
+                  onFocus={() => setEditFocused(true)}
+                  onBlur={() => setEditFocused(false)}
                   placeholder={field.placeholder}
                   placeholderTextColor={colors.textDim}
                   scrollEnabled={false}
+                  keyboardAppearance="dark"
                   inputAccessoryViewID={Platform.OS === 'ios' ? 'compassEditAccessory' : undefined}
                 />
               </View>
 
-              <View style={s.compassDots}>
-                {COMPASS_FIELDS.map((_, i) => (
-                  <View key={i} style={[s.compassDot, i === editIdx && s.compassDotActive]} />
-                ))}
-              </View>
-
-              <TouchableOpacity onPress={() => setMode('summary')} style={s.compassExitLink} activeOpacity={0.7}>
-                <Text style={s.compassExitLinkText}>‹ Back to summary</Text>
-              </TouchableOpacity>
             </View>
           </ScrollView>
           <View style={s.footer}>
             <TouchableOpacity style={s.primaryBtn} onPress={advanceOrFinish} activeOpacity={0.8}>
               <Text style={s.primaryBtnText}>
-                {editIdx < COMPASS_FIELDS.length - 1 ? 'Save & next →' : 'Save & finish →'}
+                {editIdx < COMPASS_FIELDS.length - 1 ? 'Save & next' : 'Save & finish'}
               </Text>
+              <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
         {Platform.OS === 'ios' && (
           <InputAccessoryView nativeID="compassEditAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.editBtn} activeOpacity={0.8}>
+                <Text style={s.editBtnText}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => { Keyboard.dismiss(); advanceOrFinish(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                style={[s.editBtn, s.editBtnSave]}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>
-                  {editIdx < COMPASS_FIELDS.length - 1 ? 'Save & next →' : 'Save & finish →'}
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>
+                  {editIdx < COMPASS_FIELDS.length - 1 ? 'Save & next' : 'Save & finish'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -404,7 +430,7 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
     <SafeAreaView style={s.safe}>
       <ScrollView
         style={s.scroll}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 140 }}
       >
         <View style={s.stepHero}>
@@ -425,7 +451,10 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
             >
               <View style={s.compassPreviewHeader}>
                 <Text style={s.compassPreviewLabel}>{field.label}</Text>
-                <Text style={s.compassPreviewEdit}>✎ Edit</Text>
+                <View style={s.compassPreviewEdit}>
+                  <Text style={s.compassPreviewEditText}>EDIT</Text>
+                  <Ionicons name="create-outline" size={14} color={colors.accent} />
+                </View>
               </View>
               <Text style={s.compassPreviewText} numberOfLines={3}>
                 {compass[field.key] || field.placeholder}
@@ -438,15 +467,12 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
               Your Compass also has a Roles section for naming the relational positions you occupy: parent, partner, colleague, citizen. You can fill that in once your practice begins, in Compass · Roles.
             </Text>
           </View>
-
-          <TouchableOpacity onPress={startCustomize} style={s.skipLink}>
-            <Text style={s.skipLinkText}>Customize each one →</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
       <View style={s.footer}>
         <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText}>Use these to start →</Text>
+          <Text style={s.primaryBtnText}>Use these to start</Text>
+          <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -455,21 +481,21 @@ function CompassStep({ compass, setCompass, onNext, onSkip }) {
 
 function PracticePreviewStep({ onNext }) {
   const items = [
-    { title: 'Stoic Compass', sub: 'Your North Star · read daily', tag: 'NEXT' },
-    { title: 'Daily Reading', sub: 'Personalized to your practice, fresh each day' },
+    { title: 'Stoic Compass', sub: 'Your North Star · read daily' },
+    { title: 'Daily Reading', sub: 'Chosen for you, each day' },
     { title: 'Morning Journal', sub: 'Reflect and intend' },
     { title: 'Evening Journal', sub: 'Examine and release' },
   ];
 
   const extras = [
-    { title: 'Weekly Review', sub: 'Sunday reckoning · see the storm getting smaller across the week' },
-    { title: 'Emotion log', sub: 'Reframe what disturbs you, in the moment' },
-    { title: 'Optional FaceID lock', sub: 'Your practice stays private, even if your phone doesn’t' },
+    { title: 'Weekly Review', sub: 'Seal the week' },
+    { title: 'Emotion log', sub: 'Reframe in the moment' },
+    { title: 'Optional FaceID lock', sub: 'Your practice stays private' },
   ];
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 140 }}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         <View style={s.previewHero}>
           <Text style={s.previewEyebrow}>Your daily practice</Text>
           <Text style={s.previewTitle}>{`This is what\neach day looks like.`}</Text>
@@ -517,7 +543,8 @@ function PracticePreviewStep({ onNext }) {
 
       <View style={s.footer}>
         <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText}>Continue →</Text>
+          <Text style={s.primaryBtnText}>Continue</Text>
+          <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -540,7 +567,7 @@ function MeditationsStep({ onNext }) {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 140 }}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         <View style={s.medOnbHero}>
           <Image
             source={require('../assets/meditations/img/view-from-above.jpg')}
@@ -579,7 +606,11 @@ function MeditationsStep({ onNext }) {
                       {loading ? 'Loading…' : previewing ? 'Listening · 12-second excerpt' : m.subtitle}
                     </Text>
                   </View>
-                  <Text style={s.previewPlayIcon}>{previewing ? '◼' : '▶'}</Text>
+                  <Ionicons
+                    name={previewing ? 'stop-circle' : 'play-circle'}
+                    size={30}
+                    color={previewing ? colors.accent : colors.accentDim}
+                  />
                 </TouchableOpacity>
               );
             })}
@@ -595,7 +626,8 @@ function MeditationsStep({ onNext }) {
 
       <View style={s.footer}>
         <TouchableOpacity style={s.primaryBtn} onPress={handleAdvance} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText}>Continue →</Text>
+          <Text style={s.primaryBtnText}>Continue</Text>
+          <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -665,7 +697,7 @@ function RemindersStep({ onNext }) {
     <SafeAreaView style={s.safe}>
       <ScrollView
         style={s.scroll}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 180 }}
       >
         <View style={s.stepHero}>
@@ -692,11 +724,16 @@ function RemindersStep({ onNext }) {
                     <Text style={s.reminderName}>{r.name}</Text>
                     <TouchableOpacity
                       onPress={() => setEditingRow(isEditing ? null : r.name)}
-                      style={s.reminderEditBtn}
+                      style={s.compassPreviewEdit}
                       activeOpacity={0.7}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
-                      <Text style={s.reminderEditText}>{isEditing ? '✓ Done' : '✎ Edit'}</Text>
+                      <Text style={s.compassPreviewEditText}>{isEditing ? 'Done' : 'Edit'}</Text>
+                      <Ionicons
+                        name={isEditing ? 'checkmark' : 'create-outline'}
+                        size={14}
+                        color={colors.accent}
+                      />
                     </TouchableOpacity>
                   </View>
                   {isEditing && (
@@ -718,12 +755,12 @@ function RemindersStep({ onNext }) {
         </View>
       </ScrollView>
 
-      <View style={s.footer}>
-        <TouchableOpacity style={s.primaryBtn} onPress={handleEnable} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText}>Enable reminders</Text>
+      <View style={[s.footer, s.footerRow]}>
+        <TouchableOpacity style={[s.primaryBtn, s.primaryBtnHalf]} onPress={onNext} activeOpacity={0.8}>
+          <Text style={s.primaryBtnText}>Maybe later</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={s.skipLink} onPress={onNext} activeOpacity={0.7}>
-          <Text style={s.skipLinkText}>Maybe later</Text>
+        <TouchableOpacity style={[s.primaryBtn, s.primaryBtnHalf, s.primaryBtnFilled]} onPress={handleEnable} activeOpacity={0.8}>
+          <Text style={[s.primaryBtnText, s.primaryBtnFilledText]}>Set reminders</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -748,7 +785,12 @@ const s = StyleSheet.create({
     paddingTop: 32,
     paddingBottom: 200,
   },
+  welcomeBodySmall: {
+    paddingTop: 16,
+    paddingBottom: 180,
+  },
   welcomeSkull: { width: 180, height: 180, marginBottom: 32, opacity: 0.95 },
+  welcomeSkullSmall: { width: 110, height: 110, marginBottom: 16 },
   welcomeTitle: {
     fontSize: 64,
     fontWeight: '700',
@@ -757,6 +799,7 @@ const s = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'center',
   },
+  welcomeTitleSmall: { fontSize: 44, letterSpacing: -2, marginBottom: 6 },
   welcomeSub: {
     fontSize: 20,
     color: colors.textSecondary,
@@ -764,6 +807,7 @@ const s = StyleSheet.create({
     marginBottom: 36,
     textAlign: 'center',
   },
+  welcomeSubSmall: { fontSize: 17, marginBottom: 20 },
   welcomeDivider: {
     width: 40,
     height: 0.5,
@@ -791,6 +835,7 @@ const s = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
+  welcomeNameWrapSmall: { marginTop: 12 },
   welcomeNameLabel: {
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
@@ -798,17 +843,23 @@ const s = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 10,
   },
+  // Library-spec input states: non-active = darker stroke + grey text;
+  // active (focused) = brighter stroke + white text. Filled bg dropped
+  // along with the rest of the unified-near-black surfaces.
   welcomeNameInput: {
     width: '100%',
     borderWidth: 0.5,
-    borderColor: colors.accentDim,
+    borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: colors.accentBg,
     paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: colors.textPrimary,
+    color: colors.textMuted,
     textAlign: 'center',
+  },
+  welcomeNameInputFocused: {
+    borderColor: colors.borderBright,
+    color: colors.textPrimary,
   },
 
   // Ready
@@ -846,7 +897,6 @@ const s = StyleSheet.create({
   // each row reads as ordered (sequence) instead of as a checkbox to
   // complete.
   previewNum: { width: 28, fontSize: 12, color: colors.accent, letterSpacing: 1.5, fontWeight: '600', textAlign: 'center' },
-  previewPlayIcon: { fontSize: 13, color: colors.accentDim, marginLeft: 8, letterSpacing: 1 },
   previewHint: { fontSize: 12, color: colors.textMuted, fontStyle: 'italic', marginBottom: 12, paddingHorizontal: 4, letterSpacing: 0.3 },
   previewContent: { flex: 1 },
   previewItemTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
@@ -995,16 +1045,6 @@ const s = StyleSheet.create({
     fontWeight: '500',
     flex: 1,
   },
-  reminderEditBtn: {
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-  },
-  reminderEditText: {
-    fontSize: 12,
-    color: colors.accent,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
   reminderAdjuster: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1110,11 +1150,14 @@ const s = StyleSheet.create({
   },
   compassInput: {
     fontSize: 16,
-    color: colors.textSecondary,
+    color: colors.textMuted,
     lineHeight: 26,
     minHeight: 140,
     textAlignVertical: 'top',
     fontFamily: font.serif,
+  },
+  compassInputFocused: {
+    color: colors.textPrimary,
   },
   // Summary mode preview cards — show each default in a compact form
   // with a clear ✎ Edit affordance so users see the customization path
@@ -1139,10 +1182,25 @@ const s = StyleSheet.create({
     color: colors.textPrimary,
     letterSpacing: 0.2,
   },
+  // "EDIT ✎" chip per Valeriya's library — gold-outlined rounded
+  // rectangle (more square than pill) with the pencil-with-underline
+  // glyph (create-outline) rendered as an Ionicon for true baseline
+  // alignment with the text.
   compassPreviewEdit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: colors.accent,
+    borderRadius: radius.md,
+  },
+  compassPreviewEditText: {
     fontSize: 12,
+    fontWeight: '600',
     color: colors.accent,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     textTransform: 'uppercase',
   },
   compassPreviewText: {
@@ -1151,27 +1209,31 @@ const s = StyleSheet.create({
     lineHeight: 22,
     fontFamily: font.serif,
   },
-  // Edit-mode progress dots (1/3, 2/3, 3/3)
-  compassDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 18 },
-  compassDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.borderMid },
-  compassDotActive: { backgroundColor: colors.accent, transform: [{ scale: 1.4 }] },
-  // Exit link from edit mode back to the summary preview cards. Uses
-  // accent color + arrow so it reads clearly as a button rather than a
-  // stray sentence.
-  compassExitLink: { paddingVertical: 16, alignItems: 'center' },
-  compassExitLinkText: { fontSize: 14, color: colors.accent, letterSpacing: 0.5 },
-  // Keyboard accessory (iOS) — surfaces Save & next above the keyboard
-  // so the action isn't hidden behind it.
-  accessoryBar: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: colors.bgElevated,
-    borderTopWidth: 0.5, borderTopColor: colors.border,
-    paddingHorizontal: 16, paddingVertical: 8,
+  // Keyboard accessory bar — library H56 outlined + filled-gold pair
+  // (matches compass / journal / emotions / review / read accessory bars).
+  accessoryBarPair: {
+    flexDirection: 'row',
+    gap: 10,
+    backgroundColor: colors.bg,
+    borderTopWidth: 0.5,
+    borderTopColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
-  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
-  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  editBtn: {
+    flex: 1,
+    height: 56,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editBtnSave: { backgroundColor: colors.accent },
+  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnSaveText: { color: '#1a1a1a' },
   skipLink: { paddingVertical: 20, alignItems: 'center' },
   skipLinkText: { fontSize: 15, color: colors.textDim },
 
@@ -1188,18 +1250,69 @@ const s = StyleSheet.create({
     borderTopWidth: 0.5,
     borderTopColor: colors.border,
   },
+  // Side-by-side button pair variant — used on the Reminders step to put
+  // "Maybe later" (outlined) and "Set reminders" (filled) next to each other.
+  footerRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  // H80 outlined-gold secondary CTA per Valeriya's onboarding library —
+  // gold stroke + gold text on near-black bg. Used for the Continue
+  // progressions through onboarding; terminal actions (Enable reminders)
+  // get the filled variant below.
   primaryBtn: {
-    backgroundColor: colors.bgElevated,
+    backgroundColor: colors.bg,
     borderWidth: 0.5,
-    borderColor: colors.borderStrong,
+    borderColor: colors.accent,
     borderRadius: radius.md,
-    padding: 20,
+    height: 64,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  // Half-width variant for side-by-side button pairs (Reminders step).
+  primaryBtnHalf: {
+    flex: 1,
+    paddingHorizontal: 12,
   },
   primaryBtnText: {
     fontSize: 17,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: '500',
+    color: colors.accent,
+    letterSpacing: 0.3,
+  },
+  // Filled variant for terminal/commit actions in onboarding (e.g., Enable
+  // reminders). Filled accent bg + dark text — carries the most weight.
+  primaryBtnFilled: {
+    backgroundColor: colors.accent,
+    borderWidth: 0,
+  },
+  primaryBtnFilledText: {
+    color: '#1a1a1a',
+  },
+  // Keyboard-accessory "Next" button on the Welcome step. Filled-gold H56
+  // pill that docks above the keyboard while the name input has focus,
+  // so the user can advance without dismissing to reach the bottom CTA.
+  welcomeAccessoryBar: {
+    backgroundColor: colors.bg,
+    borderTopWidth: 0.5,
+    borderTopColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  welcomeAccessoryBtn: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.md,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  welcomeAccessoryBtnText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1a1a1a',
     letterSpacing: 0.3,
   },
 });

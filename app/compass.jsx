@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getCompass, saveCompass, getRoles, saveRoles, persistCompassDone, getCompassDone } from '../store/db';
 import { cancelJournalNotification } from '../notifications';
@@ -202,6 +203,12 @@ export default function CompassScreen() {
     setEditing(true);
   }
 
+  useEffect(() => {
+    if (!editing) return;
+    const t = setTimeout(() => editInputRef.current?.focus(), 80);
+    return () => clearTimeout(t);
+  }, [editing]);
+
   if (!compass) return <SafeAreaView style={s.safe} />;
 
   return (
@@ -210,7 +217,7 @@ export default function CompassScreen() {
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         automaticallyAdjustKeyboardInsets
@@ -224,8 +231,8 @@ export default function CompassScreen() {
             resizeMode="cover"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,0.95)']}
-            locations={[0, 0.3, 0.65, 1]}
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
+            locations={[0, 0.55, 0.8, 1]}
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
@@ -272,14 +279,6 @@ export default function CompassScreen() {
                   keyboardAppearance="dark"
                   inputAccessoryViewID={Platform.OS === 'ios' ? 'compassEditAccessory' : undefined}
                 />
-                <View style={s.editBtns}>
-                  <TouchableOpacity style={s.editBtn} onPress={() => setEditing(false)}>
-                    <Text style={s.editBtnText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[s.editBtn, s.editBtnSave]} onPress={handleSave}>
-                    <Text style={[s.editBtnText, { color: colors.textSecondary }]}>Save</Text>
-                  </TouchableOpacity>
-                </View>
               </View>
             ) : (
               <View>
@@ -304,8 +303,8 @@ export default function CompassScreen() {
             )
           ) : activeTab === 3 ? (
             <View>
-              <View style={s.hintRow}>
-                <Text style={s.hintLabel}>Roles</Text>
+              <View style={roles.length > 0 ? s.hintRow : s.hintRowRight}>
+                {roles.length > 0 && <Text style={s.hintLabel}>Your roles</Text>}
                 <TouchableOpacity style={s.hintBtn} onPress={() => setHintOpen(!hintOpen)} activeOpacity={0.7}>
                   <Text style={s.hintBtnText}>ⓘ</Text>
                 </TouchableOpacity>
@@ -318,7 +317,20 @@ export default function CompassScreen() {
 
               {editingRole ? (
                 <View>
-                  <Text style={s.roleEditLabel}>{editingRole === 'new' ? 'Add a role' : 'Edit role'}</Text>
+                  <View style={s.roleEditHeader}>
+                    <Text style={s.roleEditLabel}>{editingRole === 'new' ? 'Add a role' : 'Edit role'}</Text>
+                    {editingRole !== 'new' && (
+                      <TouchableOpacity
+                        onPress={() => handleDeleteRole(editingRole)}
+                        style={s.roleDeleteChip}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={s.roleDeleteChipText}>Delete</Text>
+                        <Ionicons name="trash-outline" size={14} color={colors.accent} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
                   <TextInput
                     ref={roleNameInputRef}
                     style={s.roleNameInput}
@@ -346,21 +358,6 @@ export default function CompassScreen() {
                     keyboardAppearance="dark"
                     inputAccessoryViewID={Platform.OS === 'ios' ? 'roleCommitmentAccessory' : undefined}
                   />
-                  <View style={s.editBtns}>
-                    <TouchableOpacity style={s.editBtn} onPress={cancelRoleEdit}>
-                      <Text style={s.editBtnText}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[s.editBtn, s.editBtnSave]} onPress={handleSaveRole}>
-                      <Text style={[s.editBtnText, { color: colors.textSecondary }]}>
-                        {editingRole === 'new' ? 'Add' : 'Save'}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  {editingRole !== 'new' && (
-                    <TouchableOpacity style={s.roleDeleteBtn} onPress={() => handleDeleteRole(editingRole)}>
-                      <Text style={s.roleDeleteText}>Remove this role</Text>
-                    </TouchableOpacity>
-                  )}
                 </View>
               ) : (
                 <View>
@@ -370,7 +367,6 @@ export default function CompassScreen() {
 
                   {roles.length > 0 && (
                     <>
-                      <Text style={s.roleSectionLabel}>Your roles</Text>
                       {roles.map(role => (
                         <TouchableOpacity
                           key={role.id}
@@ -433,44 +429,58 @@ export default function CompassScreen() {
       {Platform.OS === 'ios' && (
         <>
           <InputAccessoryView nativeID="compassEditAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity
+                style={s.editBtn}
+                onPress={() => { Keyboard.dismiss(); setEditing(false); }}
+                activeOpacity={0.8}
+              >
+                <Text style={s.editBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { Keyboard.dismiss(); handleSave(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>Save →</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>Save</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
           <InputAccessoryView nativeID="roleNameAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity
+                style={s.editBtn}
+                onPress={() => { Keyboard.dismiss(); cancelRoleEdit(); }}
+                activeOpacity={0.8}
+              >
+                <Text style={s.editBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { haptics.tap(); roleCommitmentInputRef.current?.focus(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>Next →</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>Next</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
           <InputAccessoryView nativeID="roleCommitmentAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity
+                style={s.editBtn}
+                onPress={() => { Keyboard.dismiss(); cancelRoleEdit(); }}
+                activeOpacity={0.8}
+              >
+                <Text style={s.editBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { Keyboard.dismiss(); handleSaveRole(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>{editingRole === 'new' ? 'Add →' : 'Save →'}</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>
+                  {editingRole === 'new' ? 'Add' : 'Save'}
+                </Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
@@ -495,7 +505,7 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   navRow: {
     flexDirection: 'row',
     gap: 8,
@@ -506,21 +516,20 @@ const s = StyleSheet.create({
   },
   navPill: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.pill,
-    borderWidth: 0.5,
-    borderColor: colors.border,
-    backgroundColor: 'transparent',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.bg,
   },
   navPillActive: {
-    backgroundColor: colors.accentBg,
-    borderColor: colors.accentDim,
+    backgroundColor: colors.accent,
   },
-  navPillText: { fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: colors.textDim },
-  navPillTextActive: { color: colors.accent, fontWeight: '600' },
+  navPillText: { fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: colors.accent, fontWeight: '500' },
+  navPillTextActive: { color: '#1a1a1a' },
   // Light reading/editing body
   body: { padding: spacing.md, paddingTop: spacing.lg, backgroundColor: colors.bgCard },
   textCard: {
@@ -528,29 +537,48 @@ const s = StyleSheet.create({
     padding: 22, marginBottom: 14, backgroundColor: colors.bgElevated,
   },
   bodyText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28 },
+  // Secondary button from Valeriya's library — outlined gold, dark bg,
+  // gold text. Matches the nav pill / Cancel pair tokens for consistency.
   editTrigger: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
-    padding: 16, alignItems: 'center', marginBottom: 28,
+    height: 56,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 28,
   },
-  editTriggerText: { fontSize: 13, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' },
+  editTriggerText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
   editInput: {
     borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.lg,
     padding: 18, fontSize: 16, color: colors.textPrimary, lineHeight: 26,
     minHeight: 240, textAlignVertical: 'top', marginBottom: 12,
     backgroundColor: colors.bgElevated,
   },
+  // Cancel / Save pair per Valeriya's library — H56 outlined-gold + filled-gold
+  // pair, more square than pill (radius.sm). Side-by-side via flex: 1 so the
+  // pair stays intact on small screens (labels are short, no min-width).
   editBtns: { flexDirection: 'row', gap: 10, marginBottom: 28 },
   editBtn: {
-    flex: 1, borderWidth: 0.5, borderColor: colors.border,
-    borderRadius: radius.md, padding: 16, alignItems: 'center',
+    flex: 1,
+    height: 56,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  editBtnSave: { borderColor: colors.borderMid, backgroundColor: colors.bgElevated },
-  editBtnText: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
+  editBtnSave: { backgroundColor: colors.accent },
+  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnSaveText: { color: '#1a1a1a' },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 14 },
 
   // Roles tab
   rolesEmpty: { fontSize: 14, color: colors.textMuted, lineHeight: 22, marginBottom: 18, fontStyle: 'italic' },
-  roleSectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
+  roleSectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 20 },
   roleSuggestRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   roleSuggestPill: {
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: 20,
@@ -571,7 +599,28 @@ const s = StyleSheet.create({
     padding: 14, alignItems: 'center', marginTop: 8, marginBottom: 28,
   },
   roleAddBtnText: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.5 },
-  roleEditLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 16, marginBottom: 12 },
+  roleEditLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
+  // Header row for the role-edit form: section label on the left, Delete
+  // chip on the right (only when editing an existing role). Keeps the
+  // delete affordance visible without scrolling past the keyboard.
+  roleEditHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  roleDeleteChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: radius.md,
+  },
+  roleDeleteChipText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   roleEditSub: { fontSize: 13, color: colors.textMuted, marginTop: 14, marginBottom: 8 },
   roleNameInput: {
     borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.lg,
@@ -584,10 +633,11 @@ const s = StyleSheet.create({
     minHeight: 120, textAlignVertical: 'top',
     backgroundColor: colors.bgElevated, marginBottom: 12,
   },
-  roleDeleteBtn: { padding: 14, alignItems: 'center', marginTop: 4 },
-  roleDeleteText: { fontSize: 12, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
   // Hint styles
   hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  // Right-aligned ⓘ-only row used on the Roles tab where the "Roles" label
+  // would duplicate the "Your roles" section header below.
+  hintRowRight: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 },
   hintLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
   hintBtn: { padding: 6 },
   hintBtnText: { fontSize: 20, color: colors.accent },
@@ -596,6 +646,16 @@ const s = StyleSheet.create({
   accessoryBar: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: colors.bgElevated,
+    borderTopWidth: 0.5, borderTopColor: colors.border,
+    paddingHorizontal: 16, paddingVertical: 8,
+  },
+  // Compass-edit accessory: Cancel + Save pair docked above the keyboard.
+  // Uses the same editBtn / editBtnSave library tokens as the in-screen
+  // pair would, with flex: 1 so each takes half the bar width.
+  accessoryBarPair: {
+    flexDirection: 'row',
+    gap: 10,
+    backgroundColor: colors.bg,
     borderTopWidth: 0.5, borderTopColor: colors.border,
     paddingHorizontal: 16, paddingVertical: 8,
   },

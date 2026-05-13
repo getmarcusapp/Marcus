@@ -5,7 +5,8 @@ import {
   KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image, Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveReview, getReviews, getJournals, getTriggers, getRoles } from '../store/db';
@@ -13,7 +14,7 @@ import * as haptics from '../lib/haptics';
 import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard } from '../components/ReviewShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
-import { PracticeHeader } from '../components/PracticeHeader';
+import { ScreenHeader } from '../components/ScreenHeader';
 
 const EMOTION_LABELS = {
   anger: 'Anger', anxiety: 'Anxiety', frustration: 'Frustration',
@@ -50,6 +51,9 @@ const reviewPrompts = [
 export default function ReviewScreen() {
   const playerInset = useMiniPlayerInset();
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const fromPath = params?.from || '/';
+  const fromLabel = params?.fromLabel || 'Practice';
   const [answers, setAnswers] = useState({});
   const [bestVirtue, setBestVirtue] = useState(virtues[0].id);
   const [worstVirtue, setWorstVirtue] = useState(virtues[3].id);
@@ -67,10 +71,12 @@ export default function ReviewScreen() {
 
   useFocusEffect(useCallback(() => {
     setOpenHint(null);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, []));
   const [history, setHistory] = useState([]);
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
   const shareCardRef = useRef(null);
+  const scrollRef = useRef(null);
   const [shareEntry, setShareEntry] = useState(null);
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
   const [dailyIntensity, setDailyIntensity] = useState([]);
@@ -187,7 +193,7 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <PracticeHeader current="review" />
+      <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
       {/* Off-screen share card. Re-renders when shareEntry changes. */}
       {shareEntry && (
         <View
@@ -209,8 +215,9 @@ export default function ReviewScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
+          ref={scrollRef}
           style={[s.scroll, { backgroundColor: colors.bgCard }]}
-          showsVerticalScrollIndicator={true}
+          showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
@@ -225,8 +232,8 @@ export default function ReviewScreen() {
             resizeMode="cover"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.7)']}
-            locations={[0, 0.55, 1]}
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
+            locations={[0, 0.55, 0.8, 1]}
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
@@ -240,9 +247,10 @@ export default function ReviewScreen() {
           <TouchableOpacity
             onPress={() => router.push('/review-archive')}
             style={s.pastReviewsBtn}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
-            <Text style={s.pastReviewsText}>Past reviews ›</Text>
+            <Text style={s.pastReviewsText}>Past reviews</Text>
+            <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
           </TouchableOpacity>
         </View>
 
@@ -407,8 +415,19 @@ export default function ReviewScreen() {
               <View style={s.promptCard}>
                 <View style={s.promptTopRow}>
                   <Text style={s.promptNum}>VI · Account</Text>
+                  <TouchableOpacity
+                    style={s.hintBtn}
+                    onPress={() => setOpenHint(openHint === 'account' ? null : 'account')}
+                  >
+                    <Text style={s.hintBtnText}>ⓘ</Text>
+                  </TouchableOpacity>
                 </View>
                 <Text style={s.promptQ}>Which role did I serve well this week? Which fell short?</Text>
+                {openHint === 'account' && (
+                  <View style={s.hintBox}>
+                    <Text style={s.hintText}>These are the roles you defined in your Compass — parent, friend, citizen, worker. Edit them there if they have shifted. Epictetus held that virtue is not abstract; it is paid out through the specific parts each person is called to play. The week is the natural unit to test how those parts were served. A sober accounting here, not a defense.</Text>
+                  </View>
+                )}
                 <View style={s.roleChipRow}>
                   {roles.map(r => (
                     <View key={r.id} style={s.roleChip}>
@@ -460,10 +479,10 @@ export default function ReviewScreen() {
               />
             </View>
 
-            <TouchableOpacity style={s.sealBtn} onPress={handleSave} activeOpacity={0.8}>
-              <Text style={s.sealBtnText}>Seal this week</Text>
-              <Text style={s.sealBtnSub}>Saved to your review archive</Text>
+            <TouchableOpacity style={[s.editBtn, s.editBtnSave, s.sealBtn]} onPress={handleSave} activeOpacity={0.8}>
+              <Text style={[s.editBtnText, s.editBtnSaveText]}>Seal this week</Text>
             </TouchableOpacity>
+            <Text style={s.sealBtnSub}>Saved to your review archive</Text>
 
           </View>
 
@@ -472,52 +491,52 @@ export default function ReviewScreen() {
       {Platform.OS === 'ios' && (
         <>
           <InputAccessoryView nativeID="reviewPromptAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
+                <Text style={s.editBtnText}>Done</Text>
               </TouchableOpacity>
               {openPrompt < reviewPrompts.length - 1 ? (
                 <TouchableOpacity
+                  style={[s.editBtn, s.editBtnSave]}
                   onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
-                  style={s.accessoryAction}
-                  activeOpacity={0.7}
+                  activeOpacity={0.8}
                 >
-                  <Text style={s.accessoryActionText}>Next prompt →</Text>
+                  <Text style={[s.editBtnText, s.editBtnSaveText]}>Next prompt</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryAction} activeOpacity={0.7}>
-                  <Text style={s.accessoryActionText}>Continue ↓</Text>
+                <TouchableOpacity style={[s.editBtn, s.editBtnSave]} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
+                  <Text style={[s.editBtnText, s.editBtnSaveText]}>Continue</Text>
                 </TouchableOpacity>
               )}
             </View>
           </InputAccessoryView>
           {/* VI · Account — auto-focus Commit, since there's still one prompt after */}
           <InputAccessoryView nativeID="reviewAccountAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
+                <Text style={s.editBtnText}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { haptics.tap(); intentionInputRef.current?.focus(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>Next prompt →</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>Next prompt</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
           {/* VII · Commit — final prompt; Seal triggers save */}
           <InputAccessoryView nativeID="reviewIntentionAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
+                <Text style={s.editBtnText}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { Keyboard.dismiss(); handleSave(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>Seal this week →</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>Seal this week</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
@@ -542,12 +561,21 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8 },
-  // "Past reviews ›" link below the hero. Replaced the This Week / Archive
-  // tab row — archive now lives at /review-archive.
-  pastReviewsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  pastReviewsBtn: { paddingHorizontal: 8, paddingVertical: 4 },
-  pastReviewsText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
+  // "Past reviews" link below the hero — uses Valeriya's library
+  // smaller-button outlined-gold token (matches Past entries / Past readings).
+  pastReviewsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  pastReviewsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: radius.md,
+  },
+  pastReviewsText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   body: { padding: spacing.md },
   // Prompts
   promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
@@ -559,20 +587,30 @@ const s = StyleSheet.create({
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
-  accessoryBar: {
+  // Library tokens for keyboard accessory bar — H56 outlined/filled pair.
+  accessoryBarPair: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.bgElevated,
+    gap: 10,
+    backgroundColor: colors.bg,
     borderTopWidth: 0.5,
     borderTopColor: colors.border,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
-  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  editBtn: {
+    flex: 1,
+    height: 56,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editBtnSave: { backgroundColor: colors.accent },
+  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnSaveText: { color: '#1a1a1a' },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
@@ -609,7 +647,8 @@ const s = StyleSheet.create({
   },
   roleChipText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   // Seal button
-  sealBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginBottom: 36 },
-  sealBtnText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase' },
-  sealBtnSub: { fontSize: 12, color: colors.textDim, marginTop: 5 },
+  // In-body primary CTA reuses library editBtn + editBtnSave; this override
+  // just adds spacing below the button before the caption.
+  sealBtn: { marginBottom: 12 },
+  sealBtnSub: { fontSize: 12, color: colors.textDim, textAlign: 'center', marginBottom: 36 },
 });

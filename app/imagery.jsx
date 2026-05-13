@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
@@ -169,11 +169,16 @@ export default function ImageryScreen() {
   const fromPath = params?.from || '/more';
   const fromLabel = params?.fromLabel || 'More';
   const playerInset = useMiniPlayerInset();
+  const scrollRef = useRef(null);
+
+  useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []));
 
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
-      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: playerInset }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: playerInset }}>
 
         <View style={s.hero}>
           <Image

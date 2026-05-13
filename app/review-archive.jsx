@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Share,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getReviews } from '../store/db';
 import * as haptics from '../lib/haptics';
@@ -19,6 +19,11 @@ export default function ReviewArchiveScreen() {
   const [filterRange, setFilterRange] = useState('all');
   const shareCardRef = useRef(null);
   const [shareEntry, setShareEntry] = useState(null);
+  const scrollRef = useRef(null);
+
+  useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []));
 
   useEffect(() => {
     getReviews().then(setHistory);
@@ -85,7 +90,7 @@ export default function ReviewArchiveScreen() {
 
       <ScreenHeader fromPath="/review" fromLabel="Back" />
 
-      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Weekly Review</Text>
           <Text style={s.title}>Your archive</Text>

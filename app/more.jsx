@@ -40,7 +40,7 @@ export default function MoreScreen() {
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 

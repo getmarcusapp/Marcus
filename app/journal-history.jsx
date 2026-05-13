@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
@@ -42,8 +43,10 @@ export default function JournalHistoryScreen() {
   const [filterMonth, setFilterMonth] = useState('all');
   const [sortMode, setSortMode] = useState('date');
   const [editingEntry, setEditingEntry] = useState(null);
+  const scrollRef = useRef(null);
 
   useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
     (async () => {
       const all = await getJournals();
       setHistory(all.filter(j => j.type === sessionType));
@@ -87,7 +90,7 @@ export default function JournalHistoryScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel="Back" />
-      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>{isMorning ? 'Morning Journal' : 'Evening Journal'}</Text>
           <Text style={s.title}>Past entries</Text>
@@ -201,6 +204,7 @@ export default function JournalHistoryScreen() {
                             onPress={() => setEditingEntry(entry)}
                             activeOpacity={0.7}
                           >
+                            <Ionicons name="create-outline" size={14} color={colors.accent} />
                             <Text style={s.editBtnText}>Edit</Text>
                           </TouchableOpacity>
                         </View>
@@ -264,8 +268,10 @@ const s = StyleSheet.create({
   histEntryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
   histEntryDate: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' },
   histEntryVirtue: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5, textTransform: 'capitalize', marginTop: 2 },
-  editBtn: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 4 },
-  editBtnText: { fontSize: 11, color: colors.textMuted, letterSpacing: 0.5, textTransform: 'uppercase' },
+  // Canonical EDIT chip — matches compass roleDeleteChip / compassPreviewEdit
+  // (gold border, gold text + create-outline glyph, radius.md).
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 8 },
+  editBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   histAnswerBlock: { marginTop: 8 },
   histPromptNum: { fontSize: 9, letterSpacing: 1.5, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
   histAnswer: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },

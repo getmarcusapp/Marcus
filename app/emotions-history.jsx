@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { emotions } from '../constants/virtues';
 import { EMOTION_COLORS, DISTORTIONS } from '../constants/emotionsData';
@@ -27,6 +28,7 @@ function groupByMonth(entries) {
 export default function EmotionsHistoryScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
+  const scrollRef = useRef(null);
 
   const [history, setHistory] = useState([]);
   const [searchQ, setSearchQ] = useState('');
@@ -37,6 +39,7 @@ export default function EmotionsHistoryScreen() {
 
   useFocusEffect(useCallback(() => {
     getTriggers().then(setHistory);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, []));
 
   async function handleEditSave(updated) {
@@ -68,7 +71,7 @@ export default function EmotionsHistoryScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath="/emotions" fromLabel="Back" />
-      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Emotional mastery</Text>
           <Text style={s.title}>Past triggers</Text>
@@ -246,6 +249,7 @@ export default function EmotionsHistoryScreen() {
                         <Text style={s.histResponse}>"{entry.chosenResponse}"</Text>
                       ) : null}
                       <TouchableOpacity style={s.histEditBtn} onPress={() => setEditingEntry({ ...entry })} activeOpacity={0.7}>
+                        <Ionicons name="create-outline" size={14} color={colors.accent} />
                         <Text style={s.histEditBtnText}>Edit entry</Text>
                       </TouchableOpacity>
                     </View>
@@ -311,8 +315,10 @@ const s = StyleSheet.create({
   histDistortionText: { fontSize: 11, textTransform: 'capitalize', letterSpacing: 0.3, fontWeight: '500' },
   histTrigger: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
   histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, lineHeight: 22 },
-  histEditBtn: { marginTop: 10, borderWidth: 0.5, borderColor: colors.border, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start' },
-  histEditBtnText: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
+  // Canonical EDIT chip — matches compass roleDeleteChip / journal-history editBtn
+  // (gold border, gold text + create-outline glyph, radius.md).
+  histEditBtn: { marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 8, alignSelf: 'flex-start' },
+  histEditBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   editCard: { borderWidth: 1, borderRadius: radius.lg, marginBottom: 12, marginHorizontal: 16, overflow: 'hidden' },
   editCardHeader: { padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   editCardTitle: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },

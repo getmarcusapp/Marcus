@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { emotions } from '../constants/virtues';
 import { EMOTION_COLORS, DISTORTIONS } from '../constants/emotionsData';
@@ -78,6 +79,20 @@ export default function EmotionsScreen() {
   const reactionInputRef = useRef(null);
   const responseInputRef = useRef(null);
   const scrollRef = useRef(null);
+  const distortionRef = useRef(null);
+
+  function scrollToDistortions() {
+    Keyboard.dismiss();
+    setTimeout(() => {
+      const scrollNode = scrollRef.current?.getScrollableNode?.() || scrollRef.current;
+      if (!scrollNode || !distortionRef.current) return;
+      distortionRef.current.measureLayout(
+        scrollNode,
+        (_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - 24), animated: true }),
+        () => {},
+      );
+    }, 150);
+  }
 
   // Auto-focus the trigger textarea when an emotion is selected — bypasses
   // the post-pick scroll-and-tap friction. iOS keyboard avoidance handles
@@ -142,7 +157,7 @@ export default function EmotionsScreen() {
           scrollIndicatorInsets={{ bottom: 36 }}
           contentContainerStyle={{ paddingBottom: playerInset }}
           style={[s.scroll, { backgroundColor: colors.bgCard }]}
-          showsVerticalScrollIndicator={true}
+          showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
         >
@@ -154,8 +169,8 @@ export default function EmotionsScreen() {
               resizeMode="cover"
             />
             <LinearGradient
-              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.7)']}
-              locations={[0, 0.55, 1]}
+              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
+              locations={[0, 0.55, 0.8, 1]}
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.heroContent}>
@@ -169,9 +184,10 @@ export default function EmotionsScreen() {
             <TouchableOpacity
               onPress={() => router.push('/emotions-history')}
               style={s.pastEntriesBtn}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <Text style={s.pastEntriesText}>Past triggers ›</Text>
+              <Text style={s.pastEntriesText}>Past triggers</Text>
+              <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
             </TouchableOpacity>
           </View>
 
@@ -296,8 +312,10 @@ export default function EmotionsScreen() {
 
               <View style={s.reframeDivider} />
 
-              <Text style={[s.fieldLabel, !selectedEmotion && s.fieldLabelMuted]}>What story are you telling yourself?</Text>
-              <Text style={s.distortionSub}>Select any patterns you notice in your thinking</Text>
+              <View ref={distortionRef} collapsable={false}>
+                <Text style={[s.fieldLabel, !selectedEmotion && s.fieldLabelMuted]}>What story are you telling yourself?</Text>
+                <Text style={s.distortionSub}>Select any patterns you notice in your thinking</Text>
+              </View>
               <View style={s.distortionGrid}>
                 {DISTORTIONS.map(d => {
                   const isSelected = selectedDistortions.includes(d.id);
@@ -343,10 +361,10 @@ export default function EmotionsScreen() {
               />
             </View>
 
-            <TouchableOpacity style={s.saveBtn} onPress={handleLog} activeOpacity={0.8}>
-              <Text style={s.saveBtnText}>Log this trigger</Text>
-              <Text style={s.saveBtnSub}>Saved privately · used in weekly review</Text>
+            <TouchableOpacity style={[s.editBtn, s.editBtnSave, s.saveBtn]} onPress={handleLog} activeOpacity={0.8}>
+              <Text style={[s.editBtnText, s.editBtnSaveText]}>Log this trigger</Text>
             </TouchableOpacity>
+            <Text style={s.saveBtnSub}>Saved privately · used in weekly review</Text>
 
           </View>
         </ScrollView>
@@ -354,44 +372,44 @@ export default function EmotionsScreen() {
       {Platform.OS === 'ios' && (
         <>
           <InputAccessoryView nativeID="emoTriggerAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
+                <Text style={s.editBtnText}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { haptics.tap(); reactionInputRef.current?.focus(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>Next →</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>Next</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
           <InputAccessoryView nativeID="emoReactionAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
+                <Text style={s.editBtnText}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => { haptics.tap(); responseInputRef.current?.focus(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                style={[s.editBtn, s.editBtnSave]}
+                onPress={() => { haptics.tap(); scrollToDistortions(); }}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>Next →</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>Pick patterns</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
           <InputAccessoryView nativeID="emoResponseAccessory">
-            <View style={s.accessoryBar}>
-              <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-                <Text style={s.accessoryDoneText}>Done</Text>
+            <View style={s.accessoryBarPair}>
+              <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
+                <Text style={s.editBtnText}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { Keyboard.dismiss(); handleLog(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>Log this trigger →</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>Log this trigger</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
@@ -419,9 +437,20 @@ const s = StyleSheet.create({
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, marginBottom: 6 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
-  pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  pastEntriesBtn: { paddingHorizontal: 8, paddingVertical: 4 },
-  pastEntriesText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
+  // "Past triggers" link below the hero — uses Valeriya's library
+  // smaller-button outlined-gold token (matches Past entries / Past readings / Past reviews).
+  pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  pastEntriesBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: radius.md,
+  },
+  pastEntriesText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   // Light body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
@@ -456,21 +485,32 @@ const s = StyleSheet.create({
   distortionPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, backgroundColor: colors.bgElevated },
   distortionLabel: { fontSize: 15, fontWeight: '500', color: colors.textPrimary, marginBottom: 4 },
   distortionQ: { fontSize: 13, color: colors.textMuted, lineHeight: 20 },
-  saveBtn: { borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgElevated, marginBottom: 36 },
-  saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
-  saveBtnSub: { fontSize: 12, color: colors.textMuted, marginTop: 5 },
-  accessoryBar: {
+  // In-body primary CTA reuses library editBtn + editBtnSave; this override
+  // just adds spacing below the button before the caption.
+  saveBtn: { marginBottom: 12 },
+  saveBtnSub: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: 36 },
+  // Library tokens for keyboard accessory bar — H56 outlined/filled pair.
+  accessoryBarPair: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.bgElevated,
+    gap: 10,
+    backgroundColor: colors.bg,
     borderTopWidth: 0.5,
     borderTopColor: colors.border,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
-  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  editBtn: {
+    flex: 1,
+    height: 56,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editBtnSave: { backgroundColor: colors.accent },
+  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnSaveText: { color: '#1a1a1a' },
 });

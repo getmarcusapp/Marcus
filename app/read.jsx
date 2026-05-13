@@ -302,7 +302,7 @@ Return only the JSON object.`;
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
@@ -317,8 +317,8 @@ Return only the JSON object.`;
               resizeMode="cover"
             />
             <LinearGradient
-              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.7)']}
-              locations={[0, 0.55, 1]}
+              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
+              locations={[0, 0.55, 0.8, 1]}
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.heroContent}>
@@ -333,9 +333,10 @@ Return only the JSON object.`;
             <TouchableOpacity
               onPress={() => router.push(`/read-archive?from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
               style={s.pastReadingsBtn}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <Text style={s.pastReadingsText}>Past readings ›</Text>
+              <Text style={s.pastReadingsText}>Past readings</Text>
+              <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
             </TouchableOpacity>
           </View>
 
@@ -404,27 +405,17 @@ Return only the JSON object.`;
                   />
                 </View>
 
-                {!insightSaved && (
-                  <TouchableOpacity
-                    style={s.saveBtn}
-                    onPress={handleSaveInsight}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={s.saveBtnText}>Save insight</Text>
-                  </TouchableOpacity>
-                )}
-
                 <TouchableOpacity
-                  style={s.regenBtn}
+                  style={s.readingBtn}
                   onPress={() => generateReading()}
                   activeOpacity={0.8}
                 >
-                  <Text style={s.regenBtnText}>Generate new reading</Text>
+                  <Text style={s.readingBtnText}>Generate new reading</Text>
                 </TouchableOpacity>
               </>
             ) : (
-              <TouchableOpacity style={s.generateBtn} onPress={() => generateReading()} activeOpacity={0.8}>
-                <Text style={s.generateBtnText}>Generate today's reading</Text>
+              <TouchableOpacity style={[s.readingBtn, s.readingBtnFilled]} onPress={() => generateReading()} activeOpacity={0.8}>
+                <Text style={[s.readingBtnText, s.readingBtnFilledText]}>Generate today's reading</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -432,17 +423,21 @@ Return only the JSON object.`;
       </ScrollView>
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="readingInsightAccessory">
-          <View style={s.accessoryBar}>
-            <TouchableOpacity onPress={() => Keyboard.dismiss()} style={s.accessoryDone} activeOpacity={0.7}>
-              <Text style={s.accessoryDoneText}>Done</Text>
+          <View style={s.accessoryBarPair}>
+            <TouchableOpacity
+              style={s.readingBtn}
+              onPress={() => Keyboard.dismiss()}
+              activeOpacity={0.8}
+            >
+              <Text style={s.readingBtnText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              style={[s.readingBtn, s.readingBtnFilled, !insight.trim() && { opacity: 0.4 }]}
               onPress={() => { Keyboard.dismiss(); handleSaveInsight(); }}
-              style={s.accessoryAction}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
               disabled={!insight.trim()}
             >
-              <Text style={[s.accessoryActionText, !insight.trim() && { opacity: 0.4 }]}>Save insight →</Text>
+              <Text style={[s.readingBtnText, s.readingBtnFilledText]}>Save insight</Text>
             </TouchableOpacity>
           </View>
         </InputAccessoryView>
@@ -470,12 +465,21 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
-  // "Past readings ›" link below the hero. Same architecture as
-  // /journal-history and /emotions-history.
-  pastReadingsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  pastReadingsBtn: { paddingHorizontal: 8, paddingVertical: 4 },
-  pastReadingsText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
+  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
+  // "Past readings" link below the hero — uses Valeriya's library
+  // smaller-button outlined-gold token (same as EDIT chips / nav pills).
+  pastReadingsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  pastReadingsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: radius.md,
+  },
+  pastReadingsText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   // Light reading body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   // Quote card stays dark — gravitas of the Stoic quote
@@ -498,7 +502,10 @@ const s = StyleSheet.create({
     padding: 22, marginBottom: 12, backgroundColor: colors.bgElevated,
   },
   reflectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 12 },
-  reflectionText: { fontSize: 16, color: colors.textSecondary, lineHeight: 28, fontFamily: font.serif },
+  // Body prose — matches compass.bodyText (Why / Overcome / Aspire sections).
+  // Quote text above stays serif because it is an ancient passage; the
+  // reflection is contemporary explanation and reads better sans-serif at length.
+  reflectionText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28 },
   // Insight — light writing surface
   insightCard: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
@@ -513,11 +520,31 @@ const s = StyleSheet.create({
   insightInputSaved: { color: colors.textSecondary, minHeight: 0 },
   insightLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   insightEditBtn: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
-  saveBtn: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
-    padding: 18, alignItems: 'center', backgroundColor: colors.bgElevated, marginBottom: 10,
+  // Reading action buttons — library H56 tokens. Outlined-gold default
+  // for the secondary action (New reading), filled-gold for the primary
+  // commit action (Save insight, Generate today's reading).
+  accessoryBarPair: {
+    flexDirection: 'row',
+    gap: 10,
+    backgroundColor: colors.bg,
+    borderTopWidth: 0.5, borderTopColor: colors.border,
+    paddingHorizontal: 16, paddingVertical: 8,
   },
-  saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
+  readingBtn: {
+    flex: 1,
+    height: 56,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  readingBtnFilled: { backgroundColor: colors.accent },
+  readingBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  readingBtnFilledText: { color: '#1a1a1a' },
   quoteShareIcon: {
     position: 'absolute', top: 12, right: 12, zIndex: 1,
     width: 36, height: 36, borderRadius: 18,
@@ -525,24 +552,4 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   quoteTextWithIcon: { paddingRight: 40 },
-  regenBtn: {
-    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
-    padding: 18, alignItems: 'center', backgroundColor: colors.accentBg, marginTop: 14, marginBottom: 60,
-  },
-  regenBtnText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
-  generateBtn: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
-    padding: 20, alignItems: 'center', backgroundColor: colors.bgElevated, marginTop: 8,
-  },
-  generateBtnText: { fontSize: 14, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
-  accessoryBar: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: colors.bgElevated,
-    borderTopWidth: 0.5, borderTopColor: colors.border,
-    paddingHorizontal: 16, paddingVertical: 8,
-  },
-  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
-  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

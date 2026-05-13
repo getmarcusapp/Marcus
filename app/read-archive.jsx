@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView,
@@ -41,9 +41,11 @@ export default function ReadArchiveScreen() {
   const [searchQ, setSearchQ] = useState('');
   const [filterAuthor, setFilterAuthor] = useState('all');
   const [filterMonth, setFilterMonth] = useState('all');
+  const scrollRef = useRef(null);
 
   useFocusEffect(useCallback(() => {
     getReadingLog().then(setLog);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, []));
 
   const authors = ['all', ...new Set(log.map(e => e.reading?.author).filter(Boolean))];
@@ -70,7 +72,7 @@ export default function ReadArchiveScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel="Back" />
-      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Daily Reading</Text>
           <Text style={s.title}>Past readings</Text>
@@ -194,7 +196,7 @@ const s = StyleSheet.create({
   body: { paddingTop: 4 },
   searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
   searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
-  filterRow: { paddingTop: 6, paddingBottom: 6 },
+  filterRow: { paddingTop: 6, paddingBottom: 18 },
   filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
   filterPillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
   filterPillText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
@@ -211,15 +213,15 @@ const s = StyleSheet.create({
     backgroundColor: colors.accentBg,
   },
   emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
-  monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  monthHeader: { paddingHorizontal: 16, paddingTop: 18, paddingBottom: 12, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
-  archiveRow: { padding: 20, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
+  archiveRow: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
   archiveTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   archiveDate: { fontSize: 14, color: colors.textPrimary, fontWeight: '500' },
   archiveVirtue: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
   archiveTheme: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3, marginBottom: 8, textTransform: 'uppercase' },
   archiveQuote: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif, lineHeight: 22, marginBottom: 10 },
-  archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.borderMid, paddingLeft: 12, marginTop: 4 },
+  archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.borderMid, paddingLeft: 12, marginTop: 8 },
   archiveInsightLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 },
   archiveInsight: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
 });

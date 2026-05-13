@@ -90,7 +90,7 @@ export default function LibraryScreen() {
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: playerInset }}
         stickyHeaderIndices={sortMode === 'section' && !searchQ.trim() ? [2] : []}
       >

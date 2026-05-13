@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { cancelAllNotifications } from '../notifications';
@@ -16,6 +16,11 @@ const NOTIF_SETTINGS_KEY = 'notification_settings';
 export default function DeveloperSettingsScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
+  const scrollRef = useRef(null);
+
+  useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []));
 
   async function handleResetOnboarding() {
     await AsyncStorage.removeItem('has_onboarded');
@@ -108,7 +113,7 @@ export default function DeveloperSettingsScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath="/settings" fromLabel="Settings" />
-      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: playerInset }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: playerInset }}>
         <View style={s.hero}>
           <Text style={s.eyebrow}>Developer</Text>
           <Text style={s.title}>Developer Tools</Text>

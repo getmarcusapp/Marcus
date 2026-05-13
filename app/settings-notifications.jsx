@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Switch, Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
@@ -72,6 +72,11 @@ export default function NotificationsSettingsScreen() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const scrollRef = useRef(null);
+
+  useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []));
 
   useEffect(() => {
     AsyncStorage.getItem(NOTIF_SETTINGS_KEY).then(raw => {
@@ -102,7 +107,7 @@ export default function NotificationsSettingsScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath="/settings" fromLabel="Settings" />
-      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: playerInset }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: playerInset }}>
 
         <View style={s.hero}>
           <Text style={s.eyebrow}>Notifications</Text>
@@ -359,9 +364,15 @@ const s = StyleSheet.create({
   dayBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
   dayBtnText: { fontSize: 11, color: colors.textDim },
   dayBtnTextActive: { color: colors.accent, fontWeight: '600' },
-  saveBtn: { borderWidth: 0.5, borderColor: colors.borderStrong, borderRadius: radius.md, padding: 18, alignItems: 'center', backgroundColor: colors.bgCard, marginTop: 24, marginBottom: 14 },
-  saveBtnDone: { backgroundColor: colors.accentBg, borderColor: colors.accent },
-  saveBtnText: { fontSize: 14, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
+  // Library H56 filled-gold primary CTA (matches editBtn + editBtnSave pattern
+  // used app-wide). saveBtnDone is a saved-confirmation variant (outlined gold).
+  saveBtn: {
+    height: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.accent,
+    borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center',
+    marginTop: 24, marginBottom: 14,
+  },
+  saveBtnDone: { backgroundColor: colors.bg },
+  saveBtnText: { fontSize: 14, fontWeight: '500', color: '#1a1a1a', letterSpacing: 0.3 },
   saveBtnTextDone: { color: colors.accent },
   notifNote: { padding: 16, backgroundColor: colors.bgCard, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, marginBottom: 24 },
   notifNoteTitle: { fontSize: 12, fontWeight: '600', color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },

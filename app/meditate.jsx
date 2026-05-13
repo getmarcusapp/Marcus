@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
   StyleSheet, SafeAreaView, ActivityIndicator, Image,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -18,7 +18,19 @@ export default function MeditateScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const player = useMeditationPlayer();
-  const selected = player.currentMedId ? MEDITATIONS[player.currentMedId] : null;
+  const scrollRef = useRef(null);
+
+  useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []));
+  // Player state survives across screens, which means a meditation played
+  // earlier in the day stays "selected" even after it finishes. When the user
+  // taps "All meditations" from Practice expecting to see today's contextual
+  // pick, we suppress that stale selection unless they're actually mid-track.
+  const playerSelected = player.currentMedId ? MEDITATIONS[player.currentMedId] : null;
+  const isPlayerActive = player.isPlaying || player.isLoading || player.position > 0;
+  const arrivedFresh = !params?.id;
+  const selected = (arrivedFresh && !isPlayerActive) ? null : playerSelected;
   const isPlaying = player.isPlaying;
   const isLoading = player.isLoading;
   const position = player.position;
@@ -72,15 +84,15 @@ export default function MeditateScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
-      <ScrollView style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 36 }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 }}>
 
         <View style={[s.header, !showHeaderImage && s.headerCompact]}>
           {showHeaderImage && (
             <>
               <Image source={contextualMed.image} style={s.headerImage} resizeMode="cover" />
               <LinearGradient
-                colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.78)']}
-                locations={[0, 0.55, 1]}
+                colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
+                locations={[0, 0.55, 0.8, 1]}
                 style={StyleSheet.absoluteFillObject}
               />
             </>
@@ -152,7 +164,10 @@ export default function MeditateScreen() {
         <View style={s.list}>
           <Text style={s.sectionLabel}>All meditations</Text>
           {MEDITATIONS_LIST.map(med => {
-            const isActive = selected?.id === med.id;
+            // When nothing is loaded in the player, highlight today's contextual
+            // so the list matches the hero image and the Practice tile pick.
+            const highlightId = selected?.id || contextualMed.id;
+            const isActive = highlightId === med.id;
             return (
               <TouchableOpacity
                 key={med.id}

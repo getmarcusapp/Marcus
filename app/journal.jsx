@@ -82,6 +82,7 @@ export default function JournalScreen() {
   const [openPrompt, setOpenPrompt] = useState(-1);
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     if (openPrompt < 0) return;
@@ -113,6 +114,7 @@ export default function JournalScreen() {
     load();
     // Reset scaffolding state on focus — info bubbles are help, not user input.
     setOpenHint(null);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [sessionType]));
 
   const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, prompts.length);
@@ -142,10 +144,11 @@ export default function JournalScreen() {
     <SafeAreaView style={s.safe}>
       <PracticeHeader current={isMorning ? 'morning' : 'evening'} />
       <ScrollView
+        ref={scrollRef}
         scrollIndicatorInsets={{ bottom: 36 }}
         contentContainerStyle={{ paddingBottom: playerInset }}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
@@ -159,8 +162,8 @@ export default function JournalScreen() {
               resizeMode="cover"
             />
             <LinearGradient
-              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.8)']}
-              locations={[0, 0.45, 0.75, 1]}
+              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
+              locations={[0, 0.55, 0.8, 1]}
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.headerContent}>
@@ -175,9 +178,10 @@ export default function JournalScreen() {
             <TouchableOpacity
               onPress={() => router.push(`/journal-history?type=${sessionType}&from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
               style={s.pastEntriesBtn}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <Text style={s.pastEntriesText}>Past entries ›</Text>
+              <Text style={s.pastEntriesText}>Past entries</Text>
+              <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
             </TouchableOpacity>
           </View>
 
@@ -312,40 +316,40 @@ export default function JournalScreen() {
                   </TouchableOpacity>
                 ))}
 
-                <TouchableOpacity style={s.saveBtn} onPress={handleSave} activeOpacity={0.8}>
-                  <Text style={s.saveBtnText}>
+                <TouchableOpacity style={[s.editBtn, s.editBtnSave, s.saveBtn]} onPress={handleSave} activeOpacity={0.8}>
+                  <Text style={[s.editBtnText, s.editBtnSaveText]}>
                     {alreadySaved ? 'Update journal' : `Complete ${isMorning ? 'morning' : 'evening'} journal`}
                   </Text>
-                  <Text style={s.saveBtnSub}>{answeredCount} of {prompts.length} prompts answered</Text>
                 </TouchableOpacity>
+                <Text style={s.saveBtnSub}>{answeredCount} of {prompts.length} prompts answered</Text>
               </View>
       </ScrollView>
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="journalAccessory">
-          <View style={s.accessoryBar}>
+          <View style={s.accessoryBarPair}>
             <TouchableOpacity
+              style={s.editBtn}
               onPress={() => Keyboard.dismiss()}
-              style={s.accessoryDone}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <Text style={s.accessoryDoneText}>Done</Text>
+              <Text style={s.editBtnText}>Done</Text>
             </TouchableOpacity>
             {openPrompt < prompts.length - 1 ? (
               <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>Next prompt →</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>Next prompt</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { Keyboard.dismiss(); handleSave(); }}
-                style={s.accessoryAction}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={s.accessoryActionText}>
-                  {alreadySaved ? 'Update journal →' : 'Complete journal →'}
+                <Text style={[s.editBtnText, s.editBtnSaveText]}>
+                  {alreadySaved ? 'Update journal' : 'Complete journal'}
                 </Text>
               </TouchableOpacity>
             )}
@@ -371,11 +375,20 @@ const s = StyleSheet.create({
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   headerContent: { padding: spacing.xl, paddingTop: 52 },
   title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
-  // "Past entries ›" link below the hero. Replaced the Write/History
-  // tab row — history now lives at /journal-history.
-  pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  pastEntriesBtn: { paddingHorizontal: 8, paddingVertical: 4 },
-  pastEntriesText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
+  // "Past entries" link below the hero — uses Valeriya's library
+  // smaller-button outlined-gold token (same as Past readings).
+  pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  pastEntriesBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: radius.md,
+  },
+  pastEntriesText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   mementoStrip: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
@@ -425,20 +438,32 @@ const s = StyleSheet.create({
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
-  accessoryBar: {
+  // Library tokens for keyboard accessory bar — H56 outlined/filled pair
+  // (matches Compass / Reading / Onboarding). Done left = outlined gold,
+  // action right = filled gold.
+  accessoryBarPair: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.bgElevated,
+    gap: 10,
+    backgroundColor: colors.bg,
     borderTopWidth: 0.5,
     borderTopColor: colors.border,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
-  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  editBtn: {
+    flex: 1,
+    height: 56,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editBtnSave: { backgroundColor: colors.accent },
+  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnSaveText: { color: '#1a1a1a' },
   promptHeader: { marginBottom: 0 },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
@@ -454,10 +479,8 @@ const s = StyleSheet.create({
   hintTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
   hintSource: { fontSize: 12, color: colors.textDim, fontStyle: 'italic', letterSpacing: 0.3 },
   hintDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 12, marginBottom: 12 },
-  saveBtn: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
-    padding: 18, alignItems: 'center', backgroundColor: colors.bgElevated, marginBottom: 36,
-  },
-  saveBtnText: { fontSize: 13, fontWeight: '500', color: colors.textPrimary, letterSpacing: 1, textTransform: 'uppercase' },
-  saveBtnSub: { fontSize: 12, color: colors.textMuted, marginTop: 5 },
+  // In-body primary CTA reuses the library editBtn + editBtnSave H56 filled-gold
+  // pair; this override just adds bottom spacing below the button.
+  saveBtn: { marginBottom: 12 },
+  saveBtnSub: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: 36 },
 });
