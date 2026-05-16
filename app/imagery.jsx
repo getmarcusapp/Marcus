@@ -4,7 +4,6 @@ import {
   StyleSheet, SafeAreaView, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues, VIRTUE_DETAILS } from '../constants/virtues';
 import { MEDITATIONS_LIST } from '../lib/meditationPlayer';
@@ -181,19 +180,9 @@ export default function ImageryScreen() {
       <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: playerInset }}>
 
         <View style={s.hero}>
-          <Image
-            source={require('../assets/virtues/wisdom.jpg')}
-            style={s.heroImage}
-            resizeMode="cover"
-          />
-          <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.92)']}
-            locations={[0, 0.5, 1]}
-            style={StyleSheet.absoluteFillObject}
-          />
           <View style={s.heroContent}>
             <Text style={s.eyebrow}>Virtues &amp; imagery</Text>
-            <Text style={s.title}>The four Virtues.</Text>
+            <Text style={s.title}>The four Virtues</Text>
             <Text style={s.sub}>
               Wisdom, Courage, Temperance, Justice — held as one. Plus the classical paintings used throughout the app, where they live, and why.
             </Text>
@@ -268,16 +257,14 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bgDeep },
   scroll: { flex: 1 },
 
+  // Text-only hero — the page is about all four virtues equally, so leading
+  // with any single virtue's image creates visual duplication with the
+  // virtue card below. Dropped the image; clean dark canvas instead.
   hero: {
     backgroundColor: colors.bgDeep,
-    minHeight: 320,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
-    position: 'relative',
-    overflow: 'hidden',
-    justifyContent: 'flex-end',
   },
-  heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10, lineHeight: 38 },

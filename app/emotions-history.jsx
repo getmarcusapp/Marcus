@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
+  Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +11,7 @@ import { emotions } from '../constants/virtues';
 import { EMOTION_COLORS, DISTORTIONS } from '../constants/emotionsData';
 import { getTriggers, updateTriggerEntry } from '../store/db';
 import * as haptics from '../lib/haptics';
+import { useEntitlement } from '../lib/useEntitlement';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 
@@ -27,6 +29,7 @@ function groupByMonth(entries) {
 
 export default function EmotionsHistoryScreen() {
   const router = useRouter();
+  const { hasAccess } = useEntitlement();
   const playerInset = useMiniPlayerInset();
   const scrollRef = useRef(null);
 
@@ -71,7 +74,15 @@ export default function EmotionsHistoryScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath="/emotions" fromLabel="Back" />
-      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
+      <ScrollView
+        ref={scrollRef}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 36 + playerInset }}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+      >
         <View style={s.hero}>
           <Text style={s.eyebrow}>Emotional mastery</Text>
           <Text style={s.title}>Past triggers</Text>
@@ -146,13 +157,20 @@ export default function EmotionsHistoryScreen() {
                       <View key={entry.id} style={[s.editCard, { borderColor: ec.border }]}>
                         <View style={[s.editCardHeader, { backgroundColor: ec.bg }]}>
                           <Text style={[s.editCardTitle, { color: ec.text }]}>Editing · {entry.emotion}</Text>
-                          <Text style={s.editCardDate}>{new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
+                          <TouchableOpacity
+                            onPress={() => { Keyboard.dismiss(); handleEditSave(editingEntry); }}
+                            activeOpacity={0.7}
+                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                          >
+                            <Text style={[s.editCardDone, { color: ec.text }]}>Done</Text>
+                          </TouchableOpacity>
                         </View>
                         <View style={s.editCardBody}>
                           <Text style={s.editFieldLabel}>What triggered it?</Text>
                           <TextInput
                             style={s.editFieldInput}
                             multiline
+                            inputAccessoryViewID={Platform.OS === 'ios' ? 'emoHistEditAccessory' : undefined}
                             value={editingEntry.trigger}
                             onChangeText={text => setEditingEntry(prev => ({ ...prev, trigger: text }))}
                             placeholderTextColor={colors.textDim}
@@ -163,6 +181,7 @@ export default function EmotionsHistoryScreen() {
                           <TextInput
                             style={s.editFieldInput}
                             multiline
+                            inputAccessoryViewID={Platform.OS === 'ios' ? 'emoHistEditAccessory' : undefined}
                             value={editingEntry.reaction || ''}
                             onChangeText={text => setEditingEntry(prev => ({ ...prev, reaction: text }))}
                             placeholderTextColor={colors.textDim}
@@ -175,6 +194,7 @@ export default function EmotionsHistoryScreen() {
                           <TextInput
                             style={s.editFieldInput}
                             multiline
+                            inputAccessoryViewID={Platform.OS === 'ios' ? 'emoHistEditAccessory' : undefined}
                             value={editingEntry.chosenResponse || ''}
                             onChangeText={text => setEditingEntry(prev => ({ ...prev, chosenResponse: text }))}
                             placeholderTextColor={colors.textDim}
@@ -207,14 +227,6 @@ export default function EmotionsHistoryScreen() {
                             })}
                           </View>
                         </View>
-                        <View style={s.editBtnRow}>
-                          <TouchableOpacity style={s.editCancelBtn} onPress={() => setEditingEntry(null)} activeOpacity={0.7}>
-                            <Text style={s.editCancelBtnText}>Cancel</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity style={[s.editSaveBtn, { borderColor: ec.border, backgroundColor: ec.bg }]} onPress={() => handleEditSave(editingEntry)} activeOpacity={0.8}>
-                            <Text style={[s.editSaveBtnText, { color: ec.text }]}>Save changes</Text>
-                          </TouchableOpacity>
-                        </View>
                       </View>
                     );
                   }
@@ -222,17 +234,18 @@ export default function EmotionsHistoryScreen() {
                   return (
                     <View key={entry.id} style={s.histRow}>
                       <View style={s.histTop}>
-                        <View style={[s.histBadge, { backgroundColor: ec.bg, borderColor: ec.border }]}>
-                          <Text style={[s.histEmotion, { color: ec.text }]}>{entry.emotion}</Text>
-                        </View>
-                        <View style={s.histTopRight}>
-                          {entry.timing && (
-                            <Text style={s.histTiming}>{entry.timing === 'now' ? 'In the moment' : 'After the fact'}</Text>
-                          )}
+                        <View>
                           <Text style={s.histDate}>
-                            {new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                          </Text>
+                          <Text style={[s.histEmotionLine, { color: ec.text }]}>
+                            {entry.emotion}{entry.timing ? ` · ${entry.timing === 'now' ? 'In the moment' : 'After the fact'}` : ''}
                           </Text>
                         </View>
+                        <TouchableOpacity style={s.histEditBtn} onPress={() => hasAccess ? setEditingEntry({ ...entry }) : router.push('/paywall')} activeOpacity={0.7}>
+                          <Ionicons name="create-outline" size={12} color={colors.accent} />
+                          <Text style={s.histEditBtnText}>Edit</Text>
+                        </TouchableOpacity>
                       </View>
                       <Text style={s.histIntensity}>Intensity {entry.intensity}/10</Text>
                       {entry.distortions && entry.distortions.length > 0 && (
@@ -248,10 +261,6 @@ export default function EmotionsHistoryScreen() {
                       {entry.chosenResponse ? (
                         <Text style={s.histResponse}>"{entry.chosenResponse}"</Text>
                       ) : null}
-                      <TouchableOpacity style={s.histEditBtn} onPress={() => setEditingEntry({ ...entry })} activeOpacity={0.7}>
-                        <Ionicons name="create-outline" size={14} color={colors.accent} />
-                        <Text style={s.histEditBtnText}>Edit entry</Text>
-                      </TouchableOpacity>
                     </View>
                   );
                 })}
@@ -260,6 +269,22 @@ export default function EmotionsHistoryScreen() {
           )}
         </View>
       </ScrollView>
+      {Platform.OS === 'ios' && editingEntry && (
+        <InputAccessoryView nativeID="emoHistEditAccessory">
+          <View style={s.accessoryBarPair}>
+            <TouchableOpacity onPress={() => { Keyboard.dismiss(); setEditingEntry(null); }} style={s.editBtn} activeOpacity={0.8}>
+              <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => { Keyboard.dismiss(); handleEditSave(editingEntry); }}
+              style={[s.editBtn, s.editBtnSave]}
+              activeOpacity={0.8}
+            >
+              <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save changes</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      )}
     </SafeAreaView>
   );
 }
@@ -302,13 +327,12 @@ const s = StyleSheet.create({
   emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   monthHeader: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
+  // Past-entry row layout mirrors journal-history: date + emotion subtitle on
+  // the left, library EDIT chip on the right (top-aligned), content below.
   histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
-  histTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
-  histTopRight: { alignItems: 'flex-end', gap: 3 },
-  histBadge: { borderWidth: 0.5, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
-  histEmotion: { fontSize: 13, fontWeight: '600', textTransform: 'capitalize' },
-  histTiming: { fontSize: 10, color: colors.textDim, letterSpacing: 0.5 },
-  histDate: { fontSize: 12, color: colors.textDim },
+  histTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
+  histDate: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' },
+  histEmotionLine: { fontSize: 11, letterSpacing: 0.5, textTransform: 'capitalize', marginTop: 2 },
   histIntensity: { fontSize: 12, color: colors.textMuted, marginBottom: 6 },
   histDistortions: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
   histDistortionTag: { borderWidth: 0.5, borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
@@ -316,22 +340,36 @@ const s = StyleSheet.create({
   histTrigger: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
   histResponse: { fontSize: 14, color: colors.textMuted, marginTop: 8, lineHeight: 22 },
   // Canonical EDIT chip — matches compass roleDeleteChip / journal-history editBtn
-  // (gold border, gold text + create-outline glyph, radius.md).
-  histEditBtn: { marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 8, alignSelf: 'flex-start' },
+  // (gold border, gold text + create-outline glyph).
+  histEditBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: colors.accent, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5 },
   histEditBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   editCard: { borderWidth: 1, borderRadius: radius.lg, marginBottom: 12, marginHorizontal: 16, overflow: 'hidden' },
   editCardHeader: { padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   editCardTitle: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
   editCardDate: { fontSize: 12, color: colors.textDim },
-  editCardBody: { padding: 16, backgroundColor: colors.bgElevated },
+  // Header "Done" tap — saves + closes when keyboard is down (e.g. user
+  // only tweaked distortion pills). Keyboard-up exits go through the
+  // accessory bar's Cancel/Save changes pair below.
+  editCardDone: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
+  editCardBody: { padding: 16, backgroundColor: colors.inputBg },
   editFieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase', marginBottom: 10 },
-  editFieldInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top', paddingBottom: 16, marginBottom: 4 },
+  editFieldInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top', paddingBottom: 60, marginBottom: 4 },
   editDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
-  editBtnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgCard },
-  editCancelBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 13, alignItems: 'center' },
-  editCancelBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
-  editSaveBtn: { flex: 2, borderWidth: 1, borderRadius: radius.md, padding: 13, alignItems: 'center' },
-  editSaveBtnText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
+  // Library accessory bar — H44 outlined + filled-gold pair (matches the
+  // pattern used in compass / journal / emotions / review / read).
+  accessoryBarPair: {
+    flexDirection: 'row', gap: 10, backgroundColor: colors.bg,
+    borderTopWidth: 0.5, borderTopColor: colors.border,
+    paddingHorizontal: 16, paddingVertical: 8,
+  },
+  editBtn: {
+    flex: 1, height: 44, borderWidth: 1, borderColor: colors.accent,
+    backgroundColor: colors.bg, borderRadius: radius.md,
+    paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center',
+  },
+  editBtnSave: { backgroundColor: colors.accent },
+  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnSaveText: { color: '#1a1a1a' },
   distortionGrid: { gap: 10, marginBottom: 16 },
   distortionPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, backgroundColor: colors.bgElevated },
   distortionLabel: { fontSize: 15, fontWeight: '500', color: colors.textPrimary, marginBottom: 4 },

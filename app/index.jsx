@@ -15,20 +15,10 @@ import { getTodayJournal, getStreak, getTodayReading, getCompassDone, getReviews
 import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
+import { useEntitlement } from '../lib/useEntitlement';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
-
-// Module-level flag — resets on cold start, so the greeting plays once
-// per app launch rather than every navigation back to home.
-let hasShownGreetingThisSession = false;
-
-function getTimeOfDayLabel() {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return 'Morning';
-  if (hour >= 12 && hour < 17) return 'Afternoon';
-  return 'Evening';
-}
 
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
@@ -60,9 +50,6 @@ export default function PracticeScreen() {
   const [reviewDay, setReviewDay] = useState(0);
   const [reviewDone, setReviewDone] = useState(false);
   const [totalDays, setTotalDays] = useState(0);
-  const [userName, setUserName] = useState(null);
-  const [eyebrowPhase, setEyebrowPhase] = useState(hasShownGreetingThisSession ? 'memento' : 'greeting');
-  const eyebrowOpacity = useRef(new Animated.Value(1)).current;
 
   // Inline meditation player — backed by a module-level singleton in
   // lib/meditationPlayer.js so audio survives navigation between tabs.
@@ -76,32 +63,12 @@ export default function PracticeScreen() {
   const medProgress = medDuration > 0 ? medPosition / medDuration : 0;
   const medHasLoaded = medDuration > 0;
 
+  const { hasAccess, trialDaysLeft } = useEntitlement();
   function toggleMedPlay() {
+    if (!hasAccess) { router.push('/paywall'); return; }
     haptics.tap();
     toggleMeditation(todayMed);
   }
-
-  useEffect(() => {
-    AsyncStorage.getItem('user_name').then(name => setUserName(name?.trim() || null));
-  }, []);
-
-  useEffect(() => {
-    if (hasShownGreetingThisSession || eyebrowPhase !== 'greeting') return;
-    // Hold the personal greeting long enough to actually register (≈3.5s)
-    // before crossfading to "Memento mori". 1.8s read as too quick —
-    // the moment was over before users noticed it.
-    const t = setTimeout(() => {
-      Animated.timing(eyebrowOpacity, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => {
-        hasShownGreetingThisSession = true;
-        setEyebrowPhase('memento');
-        Animated.timing(eyebrowOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-      });
-    }, 3500);
-    return () => clearTimeout(t);
-  }, [eyebrowPhase]);
-
-  const greetingText = userName ? `${getTimeOfDayLabel()}, ${userName}.` : `${getTimeOfDayLabel()}.`;
-  const eyebrowText = eyebrowPhase === 'greeting' ? greetingText : 'Memento mori';
 
   const today = todayDate;
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -181,9 +148,10 @@ export default function PracticeScreen() {
     })();
   }, [allDone]);
 
-  // Sealed-state reveal animation
-  const sealedFades = useRef([0, 0, 0, 0].map(() => new Animated.Value(0))).current;
-  const sealedSlides = useRef([0, 0, 0, 0].map(() => new Animated.Value(20))).current;
+  // Sealed-state reveal animation — 5 staggered slots:
+  // hero, quote card, rest-of-day card, daily tiles + weekly review, meditation.
+  const sealedFades = useRef([0, 0, 0, 0, 0].map(() => new Animated.Value(0))).current;
+  const sealedSlides = useRef([0, 0, 0, 0, 0].map(() => new Animated.Value(20))).current;
   // Streak number gets its own spring entrance — pops into view after the
   // hero stagger so the day count earns a moment.
   const streakScale = useRef(new Animated.Value(0.7)).current;
@@ -215,6 +183,133 @@ export default function PracticeScreen() {
     }, 380);
   }, [allDone]));
   const sealedAnimStyle = (i) => ({ opacity: sealedFades[i], transform: [{ translateY: sealedSlides[i] }] });
+
+  // Daily practice tiles — shared between the in-progress and sealed views so
+  // a user who has sealed the day can still tap back into their journals,
+  // reading, compass, and the archives those screens link to.
+  const dailyTiles = (
+    <View style={s.routineCard}>
+      <TouchableOpacity
+        style={[s.routineRow, s.routineRowBorder, nextItem === 'compass' && s.routineRowNext]}
+        onPress={() => router.push('/compass?from=/&fromLabel=Practice')}
+        activeOpacity={0.7}
+      >
+        <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
+        <View style={s.routineContent}>
+          <Text style={[s.routineTitle, compassDone && s.titleDone]}>Stoic Compass</Text>
+          <Text style={s.routineSub}>Your North Star · read daily</Text>
+        </View>
+        {nextItem === 'compass' && (
+          <View style={[s.tag, s.tagNext]}>
+            <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[s.routineRow, s.routineRowBorder, nextItem === 'reading' && s.routineRowNext]}
+        onPress={() => router.push('/read?from=/&fromLabel=Practice')}
+        activeOpacity={0.7}
+      >
+        <View style={[s.dot, readingDone && s.dotDone]}>{readingDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
+        <View style={s.routineContent}>
+          <Text style={[s.routineTitle, readingDone && s.titleDone]}>Daily Reading</Text>
+          <Text style={s.routineSub}>Ancient wisdom for this day</Text>
+        </View>
+        {nextItem === 'reading' && (
+          <View style={[s.tag, s.tagNext]}>
+            <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[s.routineRow, s.routineRowBorder, nextItem === 'morning' && s.routineRowNext]}
+        onPress={() => router.push({ pathname: '/journal', params: { type: 'morning' } })}
+        activeOpacity={0.7}
+      >
+        <View style={[s.dot, morningDone && s.dotDone]}>{morningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
+        <View style={s.routineContent}>
+          <Text style={[s.routineTitle, morningDone && s.titleDone]}>Morning Journal</Text>
+          <Text style={s.routineSub}>Reflect and intend</Text>
+        </View>
+        {nextItem === 'morning' && (
+          <View style={[s.tag, s.tagNext]}>
+            <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[s.routineRow, nextItem === 'evening' && s.routineRowNext]}
+        onPress={() => router.push({ pathname: '/journal', params: { type: 'evening' } })}
+        activeOpacity={0.7}
+      >
+        <View style={[s.dot, eveningDone && s.dotDone]}>{eveningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
+        <View style={s.routineContent}>
+          <Text style={[s.routineTitle, eveningDone && s.titleDone]}>Evening Journal</Text>
+          <Text style={s.routineSub}>Examine and release</Text>
+        </View>
+        {nextItem === 'evening' && (
+          <View style={[s.tag, s.tagNext]}>
+            <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+
+  const weeklyTileBlock = (() => {
+    const hasEnough = totalDays >= 3;
+    const sealed = reviewDone;
+    const today = isReviewDay && !sealed;
+    const locked = !hasEnough;
+    const sub = locked
+      ? 'After 3 days of practice'
+      : sealed
+        ? 'Sealed for this week'
+        : today
+          ? 'Seal the week'
+          : 'Look back at the week';
+    const onPress = locked
+      ? null
+      : () => router.push('/review?from=/&fromLabel=Practice');
+    return (
+      <>
+        <View style={s.practiceHeader}>
+          <Text style={s.secLabel}>Weekly</Text>
+        </View>
+        <View style={s.routineCard}>
+          <TouchableOpacity
+            style={[s.routineRow, today && s.routineRowNext]}
+            onPress={onPress}
+            disabled={locked}
+            activeOpacity={0.7}
+          >
+            <View style={[s.dot, sealed && s.dotDone]}>
+              {sealed && <Ionicons name="checkmark" size={13} color={colors.bg} />}
+            </View>
+            <View style={s.routineContent}>
+              <Text style={[s.routineTitle, locked && s.titleLocked, sealed && s.titleDone]}>
+                Weekly review
+              </Text>
+              <Text style={s.routineSub}>{sub}</Text>
+            </View>
+            {locked && (
+              <View style={[s.tag, s.tagAccent]}>
+                <Text style={[s.tagText, s.tagTextAccent]}>{totalDays}/3</Text>
+              </View>
+            )}
+            {today && (
+              <View style={[s.tag, s.tagAccent]}>
+                <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </>
+    );
+  })();
 
   if (allDone) {
     return (
@@ -257,11 +352,19 @@ export default function PracticeScreen() {
           </Animated.View>
 
           <Animated.View style={[s.sealedRestCard, sealedAnimStyle(2)]}>
-            <Text style={s.sealedRestTitle}>The rest of the day is yours.</Text>
+            <Text style={s.sealedRestTitle}>The rest of the day is yours</Text>
             <Text style={s.sealedRestSub}>You have done what was required. Now live what you practiced.</Text>
           </Animated.View>
 
+          {/* Practice tiles remain reachable after sealing so users can review
+              today's journals, reading, compass — and so the Weekly Review tile
+              is still surfaced when today is also review day. */}
           <Animated.View style={[s.body, sealedAnimStyle(3)]}>
+            {dailyTiles}
+            {weeklyTileBlock}
+          </Animated.View>
+
+          <Animated.View style={[s.body, sealedAnimStyle(4)]}>
             <TouchableOpacity
               style={s.medCard}
               onPress={toggleMedPlay}
@@ -335,7 +438,7 @@ export default function PracticeScreen() {
             style={[s.skullIcon, tiltTransform]}
             resizeMode="contain"
           />
-          <Animated.Text style={[s.eyebrow, { opacity: eyebrowOpacity }]}>{eyebrowText}</Animated.Text>
+          <Text style={s.eyebrow}>Memento mori</Text>
           <Text style={s.heroDate}>{dateStr}</Text>
           <Text style={s.heroSub}>
             {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
@@ -350,7 +453,7 @@ export default function PracticeScreen() {
         {streak.totalDays === 0 && completed === 0 && !morningComplete && (
           <View style={s.welcomeCard}>
             <Text style={s.welcomeEyebrow}>Welcome</Text>
-            <Text style={s.welcomeTitle}>Your practice begins today.</Text>
+            <Text style={s.welcomeTitle}>Your practice begins today</Text>
             <Text style={s.welcomeText}>
               Four steps below. Take them as the day allows. There is no streak to defend yet — only the practice.
             </Text>
@@ -366,6 +469,20 @@ export default function PracticeScreen() {
 
         <View style={s.body}>
 
+          {trialDaysLeft !== null && (
+            <TouchableOpacity
+              style={s.trialBanner}
+              onPress={() => router.push('/paywall')}
+              activeOpacity={0.7}
+            >
+              <Text style={s.trialBannerText}>
+                {trialDaysLeft === 0
+                  ? 'Free trial ends today · Manage subscription'
+                  : `Free trial · ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`}
+              </Text>
+            </TouchableOpacity>
+          )}
+
           <View style={s.practiceHeader}>
             <Text style={s.secLabel}>Today's practice</Text>
             <Text style={s.practiceCount}>{completed} of {totalItems}</Text>
@@ -377,129 +494,9 @@ export default function PracticeScreen() {
 
 
 
-          <View style={s.routineCard}>
+          {dailyTiles}
 
-            <TouchableOpacity
-              style={[s.routineRow, s.routineRowBorder, nextItem === 'compass' && s.routineRowNext]}
-              onPress={() => router.push('/compass?from=/&fromLabel=Practice')}
-              activeOpacity={0.7}
-            >
-              <View style={[s.dot, compassDone && s.dotDone]}>{compassDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
-              <View style={s.routineContent}>
-                <Text style={[s.routineTitle, compassDone && s.titleDone]}>Stoic Compass</Text>
-                <Text style={s.routineSub}>Your North Star · read daily</Text>
-              </View>
-              {nextItem === 'compass' && (
-                <View style={[s.tag, s.tagNext]}>
-                  <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[s.routineRow, s.routineRowBorder, nextItem === 'reading' && s.routineRowNext]}
-              onPress={() => router.push('/read?from=/&fromLabel=Practice')}
-              activeOpacity={0.7}
-            >
-              <View style={[s.dot, readingDone && s.dotDone]}>{readingDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
-              <View style={s.routineContent}>
-                <Text style={[s.routineTitle, readingDone && s.titleDone]}>Daily Reading</Text>
-                <Text style={s.routineSub}>Ancient wisdom for this day</Text>
-              </View>
-              {nextItem === 'reading' && (
-                <View style={[s.tag, s.tagNext]}>
-                  <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[s.routineRow, s.routineRowBorder, nextItem === 'morning' && s.routineRowNext]}
-              onPress={() => router.push({ pathname: '/journal', params: { type: 'morning' } })}
-              activeOpacity={0.7}
-            >
-              <View style={[s.dot, morningDone && s.dotDone]}>{morningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
-              <View style={s.routineContent}>
-                <Text style={[s.routineTitle, morningDone && s.titleDone]}>Morning Journal</Text>
-                <Text style={s.routineSub}>Reflect and intend</Text>
-              </View>
-              {nextItem === 'morning' && (
-                <View style={[s.tag, s.tagNext]}>
-                  <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[s.routineRow, nextItem === 'evening' && s.routineRowNext]}
-              onPress={() => router.push({ pathname: '/journal', params: { type: 'evening' } })}
-              activeOpacity={0.7}
-            >
-              <View style={[s.dot, eveningDone && s.dotDone]}>{eveningDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}</View>
-              <View style={s.routineContent}>
-                <Text style={[s.routineTitle, eveningDone && s.titleDone]}>Evening Journal</Text>
-                <Text style={s.routineSub}>Examine and release</Text>
-              </View>
-              {nextItem === 'evening' && (
-                <View style={[s.tag, s.tagNext]}>
-                  <Text style={[s.tagText, s.tagTextNext]}>NEXT</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-          </View>
-
-          {(() => {
-            const hasEnough = totalDays >= 3;
-            const sealed = reviewDone;
-            const today = isReviewDay && !sealed;
-            const locked = !hasEnough;
-            const sub = locked
-              ? 'After 3 days of practice'
-              : sealed
-                ? 'Sealed for this week'
-                : today
-                  ? 'Seal the week'
-                  : 'Look back at the week';
-            const onPress = locked
-              ? null
-              : () => router.push('/review?from=/&fromLabel=Practice');
-            return (
-              <>
-                <View style={s.practiceHeader}>
-                  <Text style={s.secLabel}>Weekly</Text>
-                </View>
-                <View style={s.routineCard}>
-                  <TouchableOpacity
-                    style={[s.routineRow, today && s.routineRowNext]}
-                    onPress={onPress}
-                    disabled={locked}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[s.dot, sealed && s.dotDone]}>
-                      {sealed && <Ionicons name="checkmark" size={13} color={colors.bg} />}
-                    </View>
-                    <View style={s.routineContent}>
-                      <Text style={[s.routineTitle, locked && s.titleLocked, sealed && s.titleDone]}>
-                        Weekly review
-                      </Text>
-                      <Text style={s.routineSub}>{sub}</Text>
-                    </View>
-                    {locked && (
-                      <View style={[s.tag, s.tagAccent]}>
-                        <Text style={[s.tagText, s.tagTextAccent]}>{totalDays}/3</Text>
-                      </View>
-                    )}
-                    {today && (
-                      <View style={[s.tag, s.tagAccent]}>
-                        <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </>
-            );
-          })()}
+          {weeklyTileBlock}
 
           <TouchableOpacity
             style={s.medCard}
@@ -623,6 +620,15 @@ const s = StyleSheet.create({
 
   // Light body zone
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
+  // Small banner shown only when the user is in an active 7-day free
+  // trial. Tappable so the user can review their subscription state.
+  trialBanner: {
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    backgroundColor: colors.accentBg,
+    paddingVertical: 10, paddingHorizontal: 14,
+    marginBottom: 12, alignItems: 'center',
+  },
+  trialBannerText: { fontSize: 12, color: colors.accent, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: '500' },
   practiceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 8, marginBottom: 10 },
   practiceCount: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accentDim, textTransform: 'uppercase' },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },

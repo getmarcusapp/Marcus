@@ -9,6 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
 import { JournalEntryEditor } from '../components/JournalEntryEditor';
+import { useEntitlement } from '../lib/useEntitlement';
 import { getJournals, updateJournalEntry } from '../store/db';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -28,6 +29,7 @@ function groupByMonth(entries) {
 
 export default function JournalHistoryScreen() {
   const router = useRouter();
+  const { hasAccess } = useEntitlement();
   const playerInset = useMiniPlayerInset();
   const params = useLocalSearchParams();
   // ?type=morning|evening sets which set of entries to show; defaults
@@ -90,7 +92,15 @@ export default function JournalHistoryScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel="Back" />
-      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
+      <ScrollView
+        ref={scrollRef}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 36 + playerInset }}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+      >
         <View style={s.hero}>
           <Text style={s.eyebrow}>{isMorning ? 'Morning Journal' : 'Evening Journal'}</Text>
           <Text style={s.title}>Past entries</Text>
@@ -201,10 +211,10 @@ export default function JournalHistoryScreen() {
                           </View>
                           <TouchableOpacity
                             style={s.editBtn}
-                            onPress={() => setEditingEntry(entry)}
+                            onPress={() => hasAccess ? setEditingEntry(entry) : router.push('/paywall')}
                             activeOpacity={0.7}
                           >
-                            <Ionicons name="create-outline" size={14} color={colors.accent} />
+                            <Ionicons name="create-outline" size={12} color={colors.accent} />
                             <Text style={s.editBtnText}>Edit</Text>
                           </TouchableOpacity>
                         </View>
@@ -270,7 +280,7 @@ const s = StyleSheet.create({
   histEntryVirtue: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5, textTransform: 'capitalize', marginTop: 2 },
   // Canonical EDIT chip — matches compass roleDeleteChip / compassPreviewEdit
   // (gold border, gold text + create-outline glyph, radius.md).
-  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 8 },
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: colors.accent, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5 },
   editBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   histAnswerBlock: { marginTop: 8 },
   histPromptNum: { fontSize: 9, letterSpacing: 1.5, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },

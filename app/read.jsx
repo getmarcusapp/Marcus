@@ -9,10 +9,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import SkullLoader from '../components/SkullLoader';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { getTodayReading, saveTodayReading, saveReadingInsight, getReadingHistory, getCompass } from '../store/db';
+import {
+  getTodayReading, saveTodayReading, saveReadingInsight,
+  getReadingHistory, getCompass,
+  getReadingCounts, incrementReadingCount,
+  READING_DAY_CAP, READING_MONTH_CAP,
+} from '../store/db';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
+import { useEntitlement } from '../lib/useEntitlement';
 import { captureRef } from 'react-native-view-shot';
 import { ReadingShareCard } from '../components/ReadingShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
@@ -65,6 +71,14 @@ export default function ReadScreen() {
   const [loadingPhase, setLoadingPhase] = useState(0);
   const [insightSaved, setInsightSaved] = useState(false);
   const [sourceHintOpen, setSourceHintOpen] = useState(false);
+  // Per Valeriya's library, insight card switches stroke + text color on focus.
+  const [insightFocused, setInsightFocused] = useState(false);
+  const { hasAccess } = useEntitlement();
+  // Reusable gate — locked actions push to paywall instead of executing.
+  function requireAccess(action) {
+    if (hasAccess) { action(); return; }
+    router.push('/paywall');
+  }
   const shareCardRef = useRef(null);
   const scrollRef = useRef(null);
   const commitMindfulSession = useMindfulSession();
@@ -80,7 +94,12 @@ export default function ReadScreen() {
           setInsightSaved(true);
         }
       } else {
-        // Auto-generate on first load of the day
+        // Auto-generate one reading per day for every user — free or paid.
+        // This is the deliberate trial-preview behavior: free users get a
+        // personalized reading shaped by their Compass to demonstrate the
+        // value, but can't write/save insights or regenerate (those gate
+        // on hasAccess via requireAccess). Daily cap is enforced by
+        // getTodayReading caching the day's result.
         generateReading();
       }
     }
@@ -91,6 +110,24 @@ export default function ReadScreen() {
   }, []));
 
   async function generateReading() {
+    // Rate limit: protect AI cost per user. Cap enforces a reasonable
+    // ceiling for normal use (most users generate ≤2/day) while catching
+    // abuse before unit economics go negative.
+    const counts = await getReadingCounts();
+    if (counts.dayCount >= READING_DAY_CAP) {
+      Alert.alert(
+        '',
+        `You've generated ${READING_DAY_CAP} readings today. The daily limit resets at midnight — try again tomorrow.`,
+      );
+      return;
+    }
+    if (counts.monthCount >= READING_MONTH_CAP) {
+      Alert.alert(
+        '',
+        `You've reached this month's reading limit (${READING_MONTH_CAP}). It resets on the 1st.`,
+      );
+      return;
+    }
     setLoading(true);
     setLoadingPhase(0);
     const phaseTimer = setTimeout(() => setLoadingPhase(1), 4000);
@@ -208,6 +245,9 @@ Return only the JSON object.`;
       }
 
       await saveTodayReading(result);
+      // Only count successful generations against the rate limit. Failed
+      // API calls don't deduct from the user's budget.
+      await incrementReadingCount();
       cancelJournalNotification('reading');
       setReading(result);
       setInsight('');
@@ -379,7 +419,11 @@ Return only the JSON object.`;
                   <Text style={s.reflectionText}>{reading.reflection}</Text>
                 </View>
 
-                <View style={s.insightCard}>
+                <TouchableOpacity
+                  style={[s.insightCard, insightFocused && s.insightCardActive]}
+                  activeOpacity={hasAccess ? 1 : 0.85}
+                  onPress={hasAccess ? undefined : () => router.push('/paywall')}
+                >
                   <View style={s.insightLabelRow}>
                     <Text style={s.insightLabel}>Your insight</Text>
                     {insightSaved && (
@@ -392,36 +436,38 @@ Return only the JSON object.`;
                     <Text style={s.insightSub}>What does this mean for you today?</Text>
                   )}
                   <TextInput
-                    style={[s.insightInput, insightSaved && s.insightInputSaved]}
+                    style={[s.insightInput, insightSaved && s.insightInputSaved, !insightFocused && !insightSaved && s.insightInputDim]}
                     multiline
-                    placeholder="Write your reaction, insight, or intention..."
+                    placeholder={hasAccess ? "Write your reaction, insight, or intention..." : "Start your 7-day free trial to write an insight"}
                     placeholderTextColor={colors.textDim}
                     value={insight}
                     onChangeText={text => setInsight(text)}
+                    onFocus={() => setInsightFocused(true)}
+                    onBlur={() => setInsightFocused(false)}
                     scrollEnabled={false}
-                    editable={!insightSaved}
+                    editable={!insightSaved && hasAccess}
                     keyboardAppearance="dark"
                     inputAccessoryViewID={Platform.OS === 'ios' ? 'readingInsightAccessory' : undefined}
                   />
-                </View>
+                </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={s.readingBtn}
-                  onPress={() => generateReading()}
+                  style={[s.readingBtn, s.readingBtnBody]}
+                  onPress={() => requireAccess(() => generateReading())}
                   activeOpacity={0.8}
                 >
-                  <Text style={s.readingBtnText}>Generate new reading</Text>
+                  <Text style={s.readingBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Generate new reading</Text>
                 </TouchableOpacity>
               </>
             ) : (
-              <TouchableOpacity style={[s.readingBtn, s.readingBtnFilled]} onPress={() => generateReading()} activeOpacity={0.8}>
-                <Text style={[s.readingBtnText, s.readingBtnFilledText]}>Generate today's reading</Text>
+              <TouchableOpacity style={[s.readingBtn, s.readingBtnBody, s.readingBtnFilled]} onPress={() => requireAccess(() => generateReading())} activeOpacity={0.8}>
+                <Text style={[s.readingBtnText, s.readingBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Generate today's reading</Text>
               </TouchableOpacity>
             )}
           </View>
 
       </ScrollView>
-      {Platform.OS === 'ios' && (
+      {Platform.OS === 'ios' && hasAccess && (
         <InputAccessoryView nativeID="readingInsightAccessory">
           <View style={s.accessoryBarPair}>
             <TouchableOpacity
@@ -429,7 +475,7 @@ Return only the JSON object.`;
               onPress={() => Keyboard.dismiss()}
               activeOpacity={0.8}
             >
-              <Text style={s.readingBtnText}>Cancel</Text>
+              <Text style={s.readingBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.readingBtn, s.readingBtnFilled, !insight.trim() && { opacity: 0.4 }]}
@@ -437,7 +483,7 @@ Return only the JSON object.`;
               activeOpacity={0.8}
               disabled={!insight.trim()}
             >
-              <Text style={[s.readingBtnText, s.readingBtnFilledText]}>Save insight</Text>
+              <Text style={[s.readingBtnText, s.readingBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save insight</Text>
             </TouchableOpacity>
           </View>
         </InputAccessoryView>
@@ -506,17 +552,21 @@ const s = StyleSheet.create({
   // Quote text above stays serif because it is an ancient passage; the
   // reflection is contemporary explanation and reads better sans-serif at length.
   reflectionText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28 },
-  // Insight — light writing surface
+  // Input field treatment per Valeriya's library: subtle elevation above
+  // screen bg, stroke shifts non-active (#474747) → active (#878787),
+  // typed text dims (grey) when non-active / brightens (white) when active.
   insightCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
-    padding: 20, marginBottom: 12, backgroundColor: colors.bgElevated,
+    borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg,
+    padding: 20, marginBottom: 12, backgroundColor: colors.inputBg,
   },
+  insightCardActive: { borderColor: colors.inputBorderActive },
   insightLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 4 },
   insightSub: { fontSize: 13, color: colors.textDim, marginBottom: 14 },
   insightInput: {
     fontSize: 16, color: colors.textPrimary, lineHeight: 26,
-    minHeight: 120, textAlignVertical: 'top', paddingBottom: 16,
+    minHeight: 120, textAlignVertical: 'top', paddingBottom: 60,
   },
+  insightInputDim: { color: colors.textMuted },
   insightInputSaved: { color: colors.textSecondary, minHeight: 0 },
   insightLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   insightEditBtn: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
@@ -530,9 +580,11 @@ const s = StyleSheet.create({
     borderTopWidth: 0.5, borderTopColor: colors.border,
     paddingHorizontal: 16, paddingVertical: 8,
   },
+  // H44 keyboard accessory per library. In-body usages override with
+  // readingBtnBody to bring back to H56 no-keyboard primary.
   readingBtn: {
     flex: 1,
-    height: 56,
+    height: 44,
     borderWidth: 1,
     borderColor: colors.accent,
     backgroundColor: colors.bg,
@@ -542,6 +594,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 8,
   },
+  readingBtnBody: { height: 56 },
   readingBtnFilled: { backgroundColor: colors.accent },
   readingBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
   readingBtnFilledText: { color: '#1a1a1a' },

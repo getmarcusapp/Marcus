@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, Image, ActivityIndicator, Alert, ScrollView,
+  SafeAreaView, Image, ActivityIndicator, Alert, ScrollView, Linking,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getOfferings, purchasePackage, restorePurchases } from '../store/purchases';
+import { useEntitlement } from '../lib/useEntitlement';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
@@ -20,6 +21,19 @@ export default function PaywallScreen() {
   const postPaywallRoute = params?.from === 'onboarding' ? '/ready' : '/';
   const [offerings, setOfferings] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Surface current trial state so a user who's already trialing sees
+  // their countdown here instead of being re-pitched on subscribing.
+  // alreadySubscribed = real RevenueCat trial or paid. Excludes dev/beta
+  // overrides so testers still see the purchase flow when they hit the
+  // paywall during onboarding.
+  const { trialDaysLeft, subscriptionPeriod } = useEntitlement();
+  const alreadySubscribed = subscriptionPeriod === 'TRIAL' || subscriptionPeriod === 'NORMAL';
+
+  function openSubscriptionSettings() {
+    // iOS deep link to the user's App Store subscriptions page — the
+    // only legitimate place to cancel or change plans per Apple guidelines.
+    Linking.openURL('https://apps.apple.com/account/subscriptions');
+  }
   const [purchasing, setPurchasing] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState('annual'); // default annual
 
@@ -64,7 +78,11 @@ export default function PaywallScreen() {
     setPurchasing(false);
 
     if (result.success) {
-      await AsyncStorage.setItem('has_premium', 'true');
+      // Don't write has_premium here — RevenueCat is the source of truth
+      // for real subscriptions, and writing it would short-circuit the
+      // trial-state detection (the user would never see "X days left").
+      // The dev/beta override in _layout.jsx still sets has_premium=true
+      // at launch for unsigned builds.
       router.replace(postPaywallRoute);
     } else if (!result.userCancelled) {
       Alert.alert('', 'Something went wrong. Please try again or restore your purchases.');
@@ -77,7 +95,8 @@ export default function PaywallScreen() {
     setPurchasing(false);
 
     if (result.isActive) {
-      await AsyncStorage.setItem('has_premium', 'true');
+      // Same reasoning as handlePurchase — let RevenueCat drive entitlement
+      // state so trial / paid distinctions remain accurate.
       Alert.alert('', 'Purchase restored.', [
         { text: 'Continue', onPress: () => router.replace(postPaywallRoute) }
       ]);
@@ -110,8 +129,18 @@ export default function PaywallScreen() {
             resizeMode="contain"
           />
           <Text style={s.eyebrow}>Marcus Premium</Text>
-          <Text style={s.title}>Become someone{'\n'}you respect.</Text>
+          <Text style={s.title}>Become someone{'\n'}you respect</Text>
           <Text style={s.sub}>A complete daily Stoic practice.{'\n'}7 days free, then 16¢ a day.</Text>
+          {trialDaysLeft !== null && (
+            <View style={s.trialStatusPill}>
+              <Text style={s.trialStatusText}>
+                {trialDaysLeft === 0
+                  ? 'Your free trial ends today'
+                  : `You're on day ${8 - trialDaysLeft} of 7 · ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`}
+              </Text>
+              <Text style={s.trialStatusSub}>Manage your subscription in iOS Settings.</Text>
+            </View>
+          )}
         </LinearGradient>
 
         {/* Feature list */}
@@ -130,6 +159,19 @@ export default function PaywallScreen() {
           ))}
         </View>
 
+        {/* Purchase flow — hidden for users who already have access (trial
+            or paid). They see a Manage Subscription button instead. */}
+        {alreadySubscribed ? (
+          <>
+            <TouchableOpacity style={s.cta} onPress={openSubscriptionSettings} activeOpacity={0.85}>
+              <Text style={s.ctaText}>Manage subscription</Text>
+            </TouchableOpacity>
+            <Text style={s.ctaNote}>
+              Opens iOS Settings. Cancel anytime before your trial ends to avoid charges.
+            </Text>
+          </>
+        ) : (
+        <>
         {/* Plan selector */}
         {loading ? (
           <ActivityIndicator color={colors.accent} style={{ marginVertical: 32 }} />
@@ -195,10 +237,24 @@ export default function PaywallScreen() {
         <Text style={s.ctaNote}>
           Free for 7 days · then 16¢/day annual or $7.99/mo · Cancel anytime
         </Text>
+        </>
+        )}
 
         {/* Restore */}
         <TouchableOpacity style={s.restoreBtn} onPress={handleRestore} activeOpacity={0.7}>
           <Text style={s.restoreText}>Restore purchases</Text>
+        </TouchableOpacity>
+
+        {/* Decline / exit path — copy depends on whether the user already
+            has access. Subscribed/trialing users see "Done" so they can
+            return to the app; new users see "Continue without trial" so
+            they can decline the trial and enter in read-only mode. */}
+        <TouchableOpacity
+          style={s.skipBtn}
+          onPress={() => (alreadySubscribed && router.canGoBack() ? router.back() : router.replace(postPaywallRoute))}
+          activeOpacity={0.7}
+        >
+          <Text style={s.skipBtnText}>{alreadySubscribed ? 'Done' : 'Continue without trial'}</Text>
         </TouchableOpacity>
 
         <Text style={s.legal}>
@@ -228,6 +284,17 @@ const s = StyleSheet.create({
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12 },
   title: { fontSize: 44, fontWeight: '700', color: '#FFFFFF', letterSpacing: -1.5, textAlign: 'center', marginBottom: 14, lineHeight: 52 },
   sub: { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
+  // Active-trial banner inside the hero — shown only when the visiting
+  // user is currently in a 7-day trial, so we don't re-pitch them.
+  trialStatusPill: {
+    marginTop: 20,
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    backgroundColor: colors.accentBg,
+    paddingVertical: 12, paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  trialStatusText: { fontSize: 13, color: colors.accent, letterSpacing: 0.4, fontWeight: '600' },
+  trialStatusSub: { fontSize: 12, color: colors.textMuted, marginTop: 4, textAlign: 'center' },
 
   features: {
     padding: spacing.xl,
@@ -268,20 +335,24 @@ const s = StyleSheet.create({
   planNote: { fontSize: 13, color: colors.textDim, marginTop: 4 },
   planNoteSelected: { color: colors.accentDim },
 
+  // H56 per library — matches onboarding primaryBtn and keyboard accessory.
   cta: {
     marginHorizontal: spacing.md,
     marginTop: 8,
     backgroundColor: colors.accent,
     borderRadius: radius.md,
-    padding: 18,
+    height: 56,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   ctaDisabled: { opacity: 0.6 },
-  ctaText: { fontSize: 16, fontWeight: '700', color: '#000', letterSpacing: 0.3 },
+  ctaText: { fontSize: 15, fontWeight: '700', color: '#000', letterSpacing: 0.3 },
   ctaNote: { fontSize: 12, color: colors.textDim, textAlign: 'center', marginTop: 10, marginHorizontal: spacing.md },
 
   restoreBtn: { alignItems: 'center', padding: 16, marginTop: 4 },
   restoreText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.3 },
+  skipBtn: { alignItems: 'center', padding: 12, marginTop: 0 },
+  skipBtnText: { fontSize: 13, color: colors.textDim, letterSpacing: 0.3 },
 
   legal: {
     fontSize: 12, color: colors.textDim, textAlign: 'center',

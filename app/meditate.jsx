@@ -13,6 +13,7 @@ import {
   useMeditationPlayer, play, toggle as togglePlayer, seek as seekPlayer,
   formatMedTime,
 } from '../lib/meditationPlayer';
+import { useEntitlement } from '../lib/useEntitlement';
 
 export default function MeditateScreen() {
   const router = useRouter();
@@ -47,13 +48,19 @@ export default function MeditateScreen() {
     play(med);
   }, [params?.id]);
 
+  const { hasAccess } = useEntitlement();
+  function requireAccess(action) {
+    if (hasAccess) { action(); return; }
+    router.push('/paywall');
+  }
+
   function selectMeditation(med) {
-    play(med);
+    requireAccess(() => play(med));
   }
 
   function togglePlay() {
     if (!selected) return;
-    togglePlayer(selected);
+    requireAccess(() => togglePlayer(selected));
   }
 
   function seek(direction) {
@@ -99,7 +106,7 @@ export default function MeditateScreen() {
           )}
           <View style={s.headerContent}>
             <Text style={s.eyebrow}>Meditations</Text>
-            <Text style={s.title}>Stoic practice.</Text>
+            <Text style={s.title}>Stoic practice</Text>
             <Text style={s.sub}>Ancient attention training for the modern day.</Text>
           </View>
         </View>
@@ -162,7 +169,6 @@ export default function MeditateScreen() {
 
         {/* Meditation list */}
         <View style={s.list}>
-          <Text style={s.sectionLabel}>All meditations</Text>
           {MEDITATIONS_LIST.map(med => {
             // When nothing is loaded in the player, highlight today's contextual
             // so the list matches the hero image and the Practice tile pick.

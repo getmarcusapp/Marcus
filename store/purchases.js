@@ -24,6 +24,10 @@ export async function getSubscriptionStatus() {
       expirationDate: entitlement?.expirationDate || null,
       productIdentifier: entitlement?.productIdentifier || null,
       willRenew: entitlement?.willRenew || false,
+      // RevenueCat periodType: 'TRIAL' | 'INTRO' | 'NORMAL'. We surface
+      // this so the UI can show a "Day N of trial" indicator while a
+      // free trial is active.
+      periodType: entitlement?.periodType || null,
     };
   } catch (e) {
     console.log('getSubscriptionStatus error:', e);

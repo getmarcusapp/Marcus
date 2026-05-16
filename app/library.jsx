@@ -60,29 +60,51 @@ export default function LibraryScreen() {
   const playerInset = useMiniPlayerInset();
   const [searchQ, setSearchQ] = useState('');
   const [sortMode, setSortMode] = useState('section'); // 'section' | 'title'
-  const [sectionY, setSectionY] = useState({});
+  // null = show all sections; otherwise narrow to one section.key
+  const [sectionFilter, setSectionFilter] = useState(null);
 
-  // Apply search filter, then either keep section grouping or flatten
-  // alphabetically. Search matches title, author, translator, and the
-  // "why" body so users can find books by description, not just title.
+  // Apply search + optional section filter. Search matches title, author,
+  // translator, and the "why" body so users can find books by description,
+  // not just title.
   const filteredBooks = useMemo(() => {
     const q = searchQ.trim().toLowerCase();
-    if (!q) return READING_LIST;
     return READING_LIST.filter(b => {
+      if (sectionFilter && b.section !== sectionFilter) return false;
+      if (!q) return true;
       const hay = [b.title, b.author, b.translator || '', b.why].join(' ').toLowerCase();
       return hay.includes(q);
     });
+  }, [searchQ, sectionFilter]);
+
+  // Per-section counts respect the search query but ignore the active
+  // section filter — so each chip shows how many books exist in that
+  // section after search, regardless of which is selected.
+  const sectionCounts = useMemo(() => {
+    const q = searchQ.trim().toLowerCase();
+    const counts = {};
+    for (const section of SECTIONS) {
+      counts[section.key] = READING_LIST.filter(b => {
+        if (b.section !== section.key) return false;
+        if (!q) return true;
+        const hay = [b.title, b.author, b.translator || '', b.why].join(' ').toLowerCase();
+        return hay.includes(q);
+      }).length;
+    }
+    return counts;
+  }, [searchQ]);
+
+  const totalForSearch = useMemo(() => {
+    const q = searchQ.trim().toLowerCase();
+    if (!q) return READING_LIST.length;
+    return READING_LIST.filter(b => {
+      const hay = [b.title, b.author, b.translator || '', b.why].join(' ').toLowerCase();
+      return hay.includes(q);
+    }).length;
   }, [searchQ]);
 
   const flatSorted = useMemo(() => {
     return [...filteredBooks].sort((a, b) => a.title.localeCompare(b.title));
   }, [filteredBooks]);
-
-  function scrollToSection(key) {
-    const y = sectionY[key];
-    if (y == null || !scrollRef.current) return;
-    scrollRef.current.scrollTo({ y: y - STICKY_NAV_HEIGHT, animated: true });
-  }
 
   return (
     <SafeAreaView style={s.safe}>
@@ -108,7 +130,7 @@ export default function LibraryScreen() {
           />
           <View style={s.heroContent}>
             <Text style={s.eyebrow}>Further reading</Text>
-            <Text style={s.heroTitle}>The works behind{'\n'}the practice.</Text>
+            <Text style={s.heroTitle}>The works behind{'\n'}the practice</Text>
             <Text style={s.heroSub}>
               A short shelf, hand-curated. Primary sources, modern interpreters, and a few voices from outside the Greco-Roman tradition the Stoics would have recognized.
             </Text>
@@ -147,26 +169,38 @@ export default function LibraryScreen() {
           </View>
         </View>
 
-        {/* Sticky section chips — only when grouped by section + no search */}
+        {/* Sticky filter pills — "All" plus a chip per section. Tapping
+            narrows the body to that section; tapping again clears. */}
         <View style={s.chipsWrap}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
           >
+            <TouchableOpacity
+              style={[s.chip, !sectionFilter && s.chipActive]}
+              onPress={() => setSectionFilter(null)}
+              activeOpacity={0.7}
+            >
+              <Text style={[s.chipText, !sectionFilter && s.chipTextActive]}>
+                All
+                <Text style={[s.chipCount, !sectionFilter && s.chipCountActive]}> · {totalForSearch}</Text>
+              </Text>
+            </TouchableOpacity>
             {SECTIONS.map(section => {
-              const count = filteredBooks.filter(b => b.section === section.key).length;
+              const count = sectionCounts[section.key];
+              const active = sectionFilter === section.key;
               return (
                 <TouchableOpacity
                   key={section.key}
-                  style={s.chip}
-                  onPress={() => scrollToSection(section.key)}
+                  style={[s.chip, active && s.chipActive]}
+                  onPress={() => setSectionFilter(active ? null : section.key)}
                   activeOpacity={0.7}
                   disabled={count === 0}
                 >
-                  <Text style={[s.chipText, count === 0 && s.chipTextDim]}>
+                  <Text style={[s.chipText, active && s.chipTextActive, count === 0 && s.chipTextDim]}>
                     {section.short}
-                    <Text style={s.chipCount}> · {count}</Text>
+                    <Text style={[s.chipCount, active && s.chipCountActive]}> · {count}</Text>
                   </Text>
                 </TouchableOpacity>
               );
@@ -191,17 +225,11 @@ export default function LibraryScreen() {
         ) : (
           <View style={s.body}>
             {SECTIONS.map(section => {
+              if (sectionFilter && section.key !== sectionFilter) return null;
               const books = filteredBooks.filter(b => b.section === section.key);
               if (!books.length) return null;
               return (
-                <View
-                  key={section.key}
-                  style={s.sectionWrap}
-                  onLayout={e => {
-                    const y = e.nativeEvent.layout.y;
-                    setSectionY(prev => (prev[section.key] === y ? prev : { ...prev, [section.key]: y }));
-                  }}
-                >
+                <View key={section.key} style={s.sectionWrap}>
                   <Text style={s.sectionLabel}>{section.key}</Text>
                   <Text style={s.sectionSub}>{section.sub}</Text>
                   {books.map(b => <BookCard key={b.id} book={b} />)}
@@ -276,9 +304,14 @@ const s = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 6,
     backgroundColor: colors.bgCard,
   },
+  // Active filter pill — gold border + tinted bg + gold text (matches the
+  // archive filter pill pattern in read-archive / emotions-history).
+  chipActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
   chipText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.3, fontWeight: '500' },
+  chipTextActive: { color: colors.accent },
   chipTextDim: { color: colors.textDim },
   chipCount: { fontSize: 12, color: colors.textDim, fontWeight: '400' },
+  chipCountActive: { color: colors.accentDim },
 
   body: { padding: spacing.md, paddingTop: spacing.lg },
 

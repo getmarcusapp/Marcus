@@ -227,6 +227,67 @@ export async function getReadingLog() {
   } catch (e) { return []; }
 }
 
+// Reading generation rate limits. Caps AI cost exposure per paid user so
+// subscription unit economics stay positive even for power users / abuse.
+// Day cap protects against burst generation; month cap against sustained
+// heavy use. Adjust constants based on cost data over time.
+export const READING_DAY_CAP = 5;
+export const READING_MONTH_CAP = 100;
+
+function readingDayKey(d = new Date()) {
+  return `reading_count_${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function readingMonthKey(d = new Date()) {
+  return `reading_count_month_${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export async function getReadingCounts() {
+  try {
+    const dayRaw = await AsyncStorage.getItem(readingDayKey());
+    const monthRaw = await AsyncStorage.getItem(readingMonthKey());
+    return {
+      dayCount: dayRaw ? parseInt(dayRaw, 10) : 0,
+      monthCount: monthRaw ? parseInt(monthRaw, 10) : 0,
+    };
+  } catch (e) {
+    return { dayCount: 0, monthCount: 0 };
+  }
+}
+
+export async function incrementReadingCount() {
+  try {
+    const { dayCount, monthCount } = await getReadingCounts();
+    const nextDay = dayCount + 1;
+    const nextMonth = monthCount + 1;
+    await AsyncStorage.setItem(readingDayKey(), String(nextDay));
+    await AsyncStorage.setItem(readingMonthKey(), String(nextMonth));
+    return { dayCount: nextDay, monthCount: nextMonth };
+  } catch (e) {
+    return { dayCount: 0, monthCount: 0 };
+  }
+}
+
+export async function updateReadingInsight(id, insight) {
+  try {
+    const all = await getReadingLog();
+    const updated = all.map(e => (e.id === id ? { ...e, insight } : e));
+    await AsyncStorage.setItem('reading_log', JSON.stringify(updated));
+    // If the edited entry is today's reading, mirror the change onto
+    // reading_today so the live Reading screen reflects the revision.
+    const today = new Date().toDateString();
+    const edited = updated.find(e => e.id === id);
+    if (edited?.date === today) {
+      const todayRaw = await AsyncStorage.getItem('reading_today');
+      if (todayRaw) {
+        const todayReading = JSON.parse(todayRaw);
+        await AsyncStorage.setItem('reading_today', JSON.stringify({ ...todayReading, insight }));
+      }
+    }
+    return true;
+  } catch (e) { return false; }
+}
+
 export async function getCompassDone() {
   try {
     const raw = await AsyncStorage.getItem('compass_done');
@@ -309,6 +370,24 @@ export async function setHasOnboarded() {
   } catch (e) { return false; }
 }
 
+// Compass intro flag — gates the first-visit walkthrough on /compass.
+// Returns null when never set so the caller can distinguish "explicitly
+// false" from "no value yet" for migration purposes.
+export async function getHasSeenCompassIntro() {
+  try {
+    const raw = await AsyncStorage.getItem('has_seen_compass_intro');
+    if (raw === null) return null;
+    return raw === 'true';
+  } catch (e) { return null; }
+}
+
+export async function setHasSeenCompassIntro(value) {
+  try {
+    await AsyncStorage.setItem('has_seen_compass_intro', value ? 'true' : 'false');
+    return true;
+  } catch (e) { return false; }
+}
+
 export async function updateJournalEntry(updated) {
   try {
     const all = await getJournals();
@@ -323,6 +402,15 @@ export async function updateTriggerEntry(updated) {
     const all = await getTriggers();
     const filtered = all.filter(t => t.id !== updated.id);
     await AsyncStorage.setItem(KEYS.TRIGGERS, JSON.stringify([updated, ...filtered]));
+    return true;
+  } catch (e) { return false; }
+}
+
+export async function updateReview(updated) {
+  try {
+    const all = await getReviews();
+    const filtered = all.filter(r => r.id !== updated.id);
+    await AsyncStorage.setItem(KEYS.REVIEWS, JSON.stringify([updated, ...filtered]));
     return true;
   } catch (e) { return false; }
 }

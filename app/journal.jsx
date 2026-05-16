@@ -20,6 +20,8 @@ import * as haptics from '../lib/haptics';
 import * as health from '../lib/health';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMindfulSession } from '../lib/useMindfulSession';
+import { useKeyboardVisible } from '../lib/useKeyboardVisible';
+import { useEntitlement } from '../lib/useEntitlement';
 
 async function maybeAskHealthPermission() {
   const asked = await AsyncStorage.getItem('health_permission_asked');
@@ -68,6 +70,12 @@ export default function JournalScreen() {
   const [sessionType, setSessionType] = useState(defaultType);
   const isMorning = sessionType !== 'evening';
   const commitMindfulSession = useMindfulSession();
+  const keyboardUp = useKeyboardVisible();
+  const { hasAccess } = useEntitlement();
+  function requireAccess(action) {
+    if (hasAccess) { action(); return; }
+    router.push('/paywall');
+  }
   const journalMedPlayer = useMeditationPlayer();
 
   // Sync sessionType when navigating here explicitly from practice with a type param
@@ -86,9 +94,17 @@ export default function JournalScreen() {
 
   useEffect(() => {
     if (openPrompt < 0) return;
+    // Focus the input shortly after the card expands. iOS handles the
+    // scroll-into-view automatically via automaticallyAdjustKeyboardInsets;
+    // breathing room above the keyboard comes from paddingBottom inside the
+    // TextInput rather than us fighting iOS's scroll position.
+    // Skip the focus attempt entirely when locked — the input is
+    // editable={false} but iOS partially registers the focus and leaves
+    // the InputAccessoryView floating above the tab bar.
+    if (!hasAccess) return;
     const t = setTimeout(() => promptInputRefs.current[openPrompt]?.focus(), 200);
     return () => clearTimeout(t);
-  }, [openPrompt]);
+  }, [openPrompt, hasAccess]);
   const [alreadySaved, setAlreadySaved] = useState(false);
 
   useEffect(() => {
@@ -118,8 +134,14 @@ export default function JournalScreen() {
   }, [sessionType]));
 
   const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, prompts.length);
+  // Gate completion on at least one prompt having content. An empty
+  // "completion" defeats the purpose of journaling and pollutes the
+  // archive with no-op entries. The caption swaps to a prompt asking
+  // the user to answer at least one when the button is disabled.
+  const canSave = answeredCount > 0;
 
   async function handleSave() {
+    if (!canSave) return;
     const entry = {
       id: Date.now().toString(),
       type: isMorning ? 'morning' : 'evening',
@@ -303,10 +325,11 @@ export default function JournalScreen() {
                           ref={el => { promptInputRefs.current[idx] = el; }}
                           style={s.promptInput}
                           multiline
-                          placeholder="Write here. No judgment, only honesty..."
+                          placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
                           placeholderTextColor={colors.textDim}
                           value={answers[idx] || ''}
                           onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
+                          editable={hasAccess}
                           scrollEnabled={false}
                           keyboardAppearance="dark"
                           inputAccessoryViewID={Platform.OS === 'ios' ? 'journalAccessory' : undefined}
@@ -316,23 +339,44 @@ export default function JournalScreen() {
                   </TouchableOpacity>
                 ))}
 
-                <TouchableOpacity style={[s.editBtn, s.editBtnSave, s.saveBtn]} onPress={handleSave} activeOpacity={0.8}>
-                  <Text style={[s.editBtnText, s.editBtnSaveText]}>
-                    {alreadySaved ? 'Update journal' : `Complete ${isMorning ? 'morning' : 'evening'} journal`}
-                  </Text>
-                </TouchableOpacity>
-                <Text style={s.saveBtnSub}>{answeredCount} of {prompts.length} prompts answered</Text>
+                {!keyboardUp && (
+                  <>
+                    <TouchableOpacity
+                      style={[s.editBtn, s.editBtnSave, s.saveBtn, !canSave && s.saveBtnDisabled]}
+                      onPress={() => requireAccess(handleSave)}
+                      activeOpacity={0.8}
+                      disabled={!canSave}
+                    >
+                      <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                        {alreadySaved ? 'Update journal' : `Complete ${isMorning ? 'morning' : 'evening'} journal`}
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={s.saveBtnSub}>
+                      {canSave ? `${answeredCount} of ${prompts.length} prompts answered` : 'Answer at least one prompt to complete'}
+                    </Text>
+                  </>
+                )}
               </View>
       </ScrollView>
-      {Platform.OS === 'ios' && (
+      {Platform.OS === 'ios' && hasAccess && (
         <InputAccessoryView nativeID="journalAccessory">
           <View style={s.accessoryBarPair}>
             <TouchableOpacity
               style={s.editBtn}
-              onPress={() => Keyboard.dismiss()}
+              onPress={() => {
+                haptics.tap();
+                if (openPrompt > 0) {
+                  // Go to previous prompt; keyboard stays up, previous input focuses.
+                  setOpenPrompt(openPrompt - 1);
+                } else {
+                  // On first prompt — collapse to browsing state.
+                  setOpenPrompt(-1);
+                  Keyboard.dismiss();
+                }
+              }}
               activeOpacity={0.8}
             >
-              <Text style={s.editBtnText}>Done</Text>
+              <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
             </TouchableOpacity>
             {openPrompt < prompts.length - 1 ? (
               <TouchableOpacity
@@ -340,15 +384,16 @@ export default function JournalScreen() {
                 onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
                 activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>Next prompt</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next prompt</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                style={[s.editBtn, s.editBtnSave]}
-                onPress={() => { Keyboard.dismiss(); handleSave(); }}
+                style={[s.editBtn, s.editBtnSave, !canSave && s.saveBtnDisabled]}
+                onPress={() => { Keyboard.dismiss(); requireAccess(handleSave); }}
                 activeOpacity={0.8}
+                disabled={!canSave}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
                   {alreadySaved ? 'Update journal' : 'Complete journal'}
                 </Text>
               </TouchableOpacity>
@@ -429,13 +474,16 @@ const s = StyleSheet.create({
   listenProgressFill: { backgroundColor: colors.accent, borderRadius: 1 },
   listenTimeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   listenTimeText: { fontSize: 10, color: colors.textDim, letterSpacing: 0.3 },
-  promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
-  promptCardOpen: { borderColor: colors.borderMid },
+  // Input field treatment per Valeriya's library: subtle elevation above
+  // screen bg, with stroke shifting between non-active (#474747) and
+  // active (#878787) focus states.
+  promptCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
+  promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
-  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
+  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top', paddingBottom: 60 },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair
@@ -450,9 +498,11 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
+  // H44 keyboard accessory per Valeriya's library converted for iPhone scale.
+  // The in-body primary CTA below overrides height to 56 (H80 medium → 56).
   editBtn: {
     flex: 1,
-    height: 56,
+    height: 44,
     borderWidth: 1,
     borderColor: colors.accent,
     backgroundColor: colors.bg,
@@ -481,6 +531,9 @@ const s = StyleSheet.create({
   hintDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 12, marginBottom: 12 },
   // In-body primary CTA reuses the library editBtn + editBtnSave H56 filled-gold
   // pair; this override just adds bottom spacing below the button.
-  saveBtn: { marginBottom: 12 },
+  // In-body primary CTA — H56 override (no-keyboard primary per library).
+  saveBtn: { height: 56, marginBottom: 12 },
+  // Disabled state — gated on at least one prompt having content.
+  saveBtnDisabled: { opacity: 0.4 },
   saveBtnSub: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: 36 },
 });

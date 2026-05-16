@@ -4,7 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, AppState } from 'react-native';
 import { colors } from '../constants/theme';
-import { hasOnboarded } from '../store/db';
+import { hasOnboarded, getHasSeenCompassIntro, setHasSeenCompassIntro } from '../store/db';
 import { initializePurchases } from '../store/purchases';
 import { scheduleReengagementNotifications, scheduleAllNotifications } from '../notifications';
 import * as health from '../lib/health';
@@ -41,7 +41,12 @@ function ManagedTabIcon({ iconName, tabKey, size }) {
 function ManagedTabLabel({ label, tabKey }) {
   const active = useLogicalTabKey() === tabKey;
   return (
-    <Text style={{ fontSize: 9, letterSpacing: 1.4, textTransform: 'uppercase', marginTop: 3, color: active ? colors.accent : colors.textDim }}>
+    <Text
+      style={{ fontSize: 9, letterSpacing: 1.4, textTransform: 'uppercase', marginTop: 3, color: active ? colors.accent : colors.textDim }}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.8}
+    >
       {label}
     </Text>
   );
@@ -56,6 +61,14 @@ function OnboardingGate() {
       const onboarded = await hasOnboarded();
       if (!onboarded) {
         router.replace('/onboarding');
+        return;
+      }
+      // Migration: existing onboarded users went through the old Compass
+      // step during onboarding, so they shouldn't see the new in-app
+      // intro. Mark as seen if the flag has never been set.
+      const introSeen = await getHasSeenCompassIntro();
+      if (introSeen === null) {
+        await setHasSeenCompassIntro(true);
       }
     }
     check();
@@ -108,7 +121,11 @@ export default function Layout() {
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarStyle: route.name === 'onboarding' ? { display: 'none' } : {
+          // Hide tab bar on onboarding + paywall so users can't trivially
+          // bypass the subscription gate by tapping a tab. Paywall is the
+          // single entry point to the app for non-trialing, non-paying
+          // users.
+          tabBarStyle: (route.name === 'onboarding' || route.name === 'paywall') ? { display: 'none' } : {
             backgroundColor: '#080808',
             borderTopColor: colors.border,
             borderTopWidth: 0.5,

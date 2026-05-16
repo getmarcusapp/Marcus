@@ -15,6 +15,15 @@ export const colors = {
   borderStrong: '#363636',
   borderBright: '#444444',
 
+  // Input field tokens per Valeriya's library — applied to every text input
+  // surface (journal/review prompt cards, emotions fieldCards, compass edit
+  // inputs, read insight card, onboarding compass input). The bg sits one
+  // step above the screen black so the field has subtle elevation; strokes
+  // shift between non-active and active focus states.
+  inputBg: '#1A1A1A',
+  inputBorder: '#474747',
+  inputBorderActive: '#878787',
+
   textPrimary: '#F0F0F0',
   textSecondary: '#C8C8C8',
   textMuted: '#A0A0A0',

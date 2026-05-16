@@ -39,7 +39,7 @@ export function PracticeHeader({ current }) {
         >
           <Text style={[s.arrowText, !prevStep && s.arrowTextDisabled]}>‹</Text>
         </TouchableOpacity>
-        <Text style={s.titleText} numberOfLines={1}>
+        <Text style={s.titleText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
           {currentStep.roman} · {currentStep.title}
         </Text>
         <TouchableOpacity

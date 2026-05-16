@@ -20,4 +20,6 @@ export const DISTORTIONS = [
   { id: 'filtering', label: 'Filtering', q: 'Am I ignoring the good and fixating on the bad?' },
   { id: 'emotional_reasoning', label: 'Emotional reasoning', q: 'Am I treating a feeling as proof that something is true?' },
   { id: 'should_statements', label: 'Should statements', q: 'Am I imposing rigid rules on myself or others?' },
+  { id: 'all_or_nothing', label: 'All-or-nothing thinking', q: 'Am I seeing this as all-or-nothing, with no middle ground?' },
+  { id: 'labeling', label: 'Labeling', q: 'Am I reducing myself or someone else to a fixed label?' },
 ];

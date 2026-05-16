@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image, Share,
+  Platform, InputAccessoryView, Keyboard, Image, Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +11,8 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveReview, getReviews, getJournals, getTriggers, getRoles } from '../store/db';
 import * as haptics from '../lib/haptics';
+import { useKeyboardVisible } from '../lib/useKeyboardVisible';
+import { useEntitlement } from '../lib/useEntitlement';
 import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard } from '../components/ReviewShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
@@ -62,9 +64,19 @@ export default function ReviewScreen() {
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
   const intentionInputRef = useRef(null);
+  const accountInputRef = useRef(null);
+  const keyboardUp = useKeyboardVisible();
+  const { hasAccess } = useEntitlement();
+  function requireAccess(action) {
+    if (hasAccess) { action(); return; }
+    router.push('/paywall');
+  }
 
   useEffect(() => {
     if (openPrompt < 0) return;
+    // iOS handles scroll-into-view via automaticallyAdjustKeyboardInsets;
+    // breathing room above the keyboard comes from paddingBottom inside the
+    // TextInput rather than fighting iOS's scroll.
     const t = setTimeout(() => promptInputRefs.current[openPrompt]?.focus(), 200);
     return () => clearTimeout(t);
   }, [openPrompt]);
@@ -143,7 +155,14 @@ export default function ReviewScreen() {
     load();
   }, []);
 
+  // Gate sealing on at least one prompt answer OR an intention. Virtue picks
+  // alone aren't enough — the textual reflection is what makes a sealed
+  // week meaningful.
+  const canSeal = Object.values(answers).some(v => v && v.trim().length > 0)
+    || (intention || '').trim().length > 0;
+
   async function handleSave() {
+    if (!canSeal) return;
     const entry = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
@@ -154,10 +173,10 @@ export default function ReviewScreen() {
     haptics.success();
     const updated = await getReviews();
     setHistory(updated);
-    Alert.alert('Week sealed.', 'Saved to your review archive.', [
-      { text: 'Share', onPress: () => shareReviewEntry(entry) },
-      { text: 'View archive', onPress: () => router.push('/review-archive') },
-    ]);
+    // Return to Practice — the Weekly Review tile renders in its sealed
+    // state there, which is the in-context acknowledgment. Share lives on
+    // every review-archive entry for users who want it later.
+    router.replace('/');
   }
 
   async function shareReviewEntry(entry) {
@@ -209,11 +228,6 @@ export default function ReviewScreen() {
           />
         </View>
       )}
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.bg }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-      >
         <ScrollView
           ref={scrollRef}
           style={[s.scroll, { backgroundColor: colors.bgCard }]}
@@ -347,10 +361,11 @@ export default function ReviewScreen() {
                       ref={el => { promptInputRefs.current[idx] = el; }}
                       style={s.promptInput}
                       multiline
-                      placeholder="Write here. No judgment, only honesty..."
+                      placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
                       placeholderTextColor={colors.textDim}
                       value={answers[p.key] || ''}
                       onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
+                      editable={hasAccess}
                       scrollEnabled={false}
                       keyboardAppearance="dark"
                       inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewPromptAccessory' : undefined}
@@ -436,12 +451,14 @@ export default function ReviewScreen() {
                   ))}
                 </View>
                 <TextInput
+                  ref={accountInputRef}
                   style={s.intentionInput}
                   multiline
-                  placeholder="Be specific. Name names, name moments..."
+                  placeholder={hasAccess ? "Be specific. Name names, name moments..." : "Start your 7-day free trial to write."}
                   placeholderTextColor={colors.textDim}
                   value={answers.roles || ''}
                   onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
+                  editable={hasAccess}
                   scrollEnabled={false}
                   inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewAccountAccessory' : undefined}
                 />
@@ -470,30 +487,53 @@ export default function ReviewScreen() {
                 ref={intentionInputRef}
                 style={s.intentionInput}
                 multiline
-                placeholder="Write it as a commitment, not a wish..."
+                placeholder={hasAccess ? "Write it as a commitment, not a wish..." : "Start your 7-day free trial to write."}
                 placeholderTextColor={colors.textDim}
                 value={intention}
                 onChangeText={setIntention}
+                editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewIntentionAccessory' : undefined}
               />
             </View>
 
-            <TouchableOpacity style={[s.editBtn, s.editBtnSave, s.sealBtn]} onPress={handleSave} activeOpacity={0.8}>
-              <Text style={[s.editBtnText, s.editBtnSaveText]}>Seal this week</Text>
-            </TouchableOpacity>
-            <Text style={s.sealBtnSub}>Saved to your review archive</Text>
+            {!keyboardUp && (
+              <>
+                <TouchableOpacity
+                  style={[s.editBtn, s.editBtnSave, s.sealBtn, !canSeal && s.sealBtnDisabled]}
+                  onPress={() => requireAccess(handleSave)}
+                  activeOpacity={0.8}
+                  disabled={!canSeal}
+                >
+                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Seal this week</Text>
+                </TouchableOpacity>
+                <Text style={s.sealBtnSub}>
+                  {canSeal ? 'Saved to your review archive' : 'Answer at least one prompt to seal'}
+                </Text>
+              </>
+            )}
 
           </View>
 
         </ScrollView>
-      </KeyboardAvoidingView>
-      {Platform.OS === 'ios' && (
+      {Platform.OS === 'ios' && hasAccess && (
         <>
           <InputAccessoryView nativeID="reviewPromptAccessory">
             <View style={s.accessoryBarPair}>
-              <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
-                <Text style={s.editBtnText}>Done</Text>
+              <TouchableOpacity
+                style={s.editBtn}
+                onPress={() => {
+                  haptics.tap();
+                  if (openPrompt > 0) {
+                    setOpenPrompt(openPrompt - 1);
+                  } else {
+                    setOpenPrompt(-1);
+                    Keyboard.dismiss();
+                  }
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
               </TouchableOpacity>
               {openPrompt < reviewPrompts.length - 1 ? (
                 <TouchableOpacity
@@ -501,11 +541,11 @@ export default function ReviewScreen() {
                   onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
                   activeOpacity={0.8}
                 >
-                  <Text style={[s.editBtnText, s.editBtnSaveText]}>Next prompt</Text>
+                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next prompt</Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={[s.editBtn, s.editBtnSave]} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
-                  <Text style={[s.editBtnText, s.editBtnSaveText]}>Continue</Text>
+                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -513,30 +553,51 @@ export default function ReviewScreen() {
           {/* VI · Account — auto-focus Commit, since there's still one prompt after */}
           <InputAccessoryView nativeID="reviewAccountAccessory">
             <View style={s.accessoryBarPair}>
-              <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
-                <Text style={s.editBtnText}>Done</Text>
+              <TouchableOpacity
+                style={s.editBtn}
+                onPress={() => {
+                  haptics.tap();
+                  // Back from Account → return to last reflection prompt (V · Ledger).
+                  setOpenPrompt(reviewPrompts.length - 1);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { haptics.tap(); intentionInputRef.current?.focus(); }}
                 activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>Next prompt</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next prompt</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
           {/* VII · Commit — final prompt; Seal triggers save */}
           <InputAccessoryView nativeID="reviewIntentionAccessory">
             <View style={s.accessoryBarPair}>
-              <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
-                <Text style={s.editBtnText}>Done</Text>
-              </TouchableOpacity>
               <TouchableOpacity
-                style={[s.editBtn, s.editBtnSave]}
-                onPress={() => { Keyboard.dismiss(); handleSave(); }}
+                style={s.editBtn}
+                onPress={() => {
+                  haptics.tap();
+                  // Back from Commit → return to Account if roles exist, else last prompt.
+                  if (roles.length > 0) {
+                    accountInputRef.current?.focus();
+                  } else {
+                    setOpenPrompt(reviewPrompts.length - 1);
+                  }
+                }}
                 activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>Seal this week</Text>
+                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.editBtn, s.editBtnSave, !canSeal && s.sealBtnDisabled]}
+                onPress={() => { Keyboard.dismiss(); requireAccess(handleSave); }}
+                activeOpacity={0.8}
+                disabled={!canSeal}
+              >
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Seal this week</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
@@ -578,13 +639,16 @@ const s = StyleSheet.create({
   pastReviewsText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   body: { padding: spacing.md },
   // Prompts
-  promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
-  promptCardOpen: { borderColor: colors.borderMid },
+  // Input field treatment per Valeriya's library: subtle elevation above
+  // screen bg, with stroke shifting between non-active (#474747) and
+  // active (#878787) focus states.
+  promptCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
+  promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
-  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top' },
+  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top', paddingBottom: 60 },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair.
@@ -597,9 +661,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
+  // H44 keyboard accessory per library. In-body sealBtn overrides to 56.
   editBtn: {
     flex: 1,
-    height: 56,
+    height: 44,
     borderWidth: 1,
     borderColor: colors.accent,
     backgroundColor: colors.bg,
@@ -636,7 +701,7 @@ const s = StyleSheet.create({
   vpBtnText: { fontSize: 15, color: colors.textDim },
   // Intention
   intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
-  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top', marginTop: 12 },
+  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top', marginTop: 12, paddingBottom: 60 },
   // Role chip strip shown above the VI · Account textarea to remind the
   // user which roles are in scope while reflecting on the week. Warm
   // accent tint so they read against the dark prompt card.
@@ -649,6 +714,9 @@ const s = StyleSheet.create({
   // Seal button
   // In-body primary CTA reuses library editBtn + editBtnSave; this override
   // just adds spacing below the button before the caption.
-  sealBtn: { marginBottom: 12 },
+  // In-body primary CTA — H56 override (no-keyboard primary per library).
+  sealBtn: { height: 56, marginBottom: 12 },
+  // Disabled state — gated on at least one prompt OR intention having content.
+  sealBtnDisabled: { opacity: 0.4 },
   sealBtnSub: { fontSize: 12, color: colors.textDim, textAlign: 'center', marginBottom: 36 },
 });

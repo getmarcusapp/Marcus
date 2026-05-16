@@ -8,6 +8,7 @@ import { getStreak } from '../store/db';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { useEntitlement } from '../lib/useEntitlement';
 
 const menuItems = [
   {
@@ -26,6 +27,17 @@ export default function MoreScreen() {
   const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
   const playerInset = useMiniPlayerInset();
   const scrollRef = useRef(null);
+  const { hasAccess, trialDaysLeft } = useEntitlement();
+
+  // Subscription row copy varies by state so the user always knows where
+  // they stand. Hidden while entitlement is still loading.
+  const subSub = trialDaysLeft !== null
+    ? (trialDaysLeft === 0
+        ? 'Free trial ends today'
+        : `${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left in free trial`)
+    : hasAccess
+      ? 'Active · manage in iOS Settings'
+      : 'Start your 7-day free trial';
 
   useEffect(() => {
     getStreak().then(s => setStreak(s || { current: 0, longest: 0, totalDays: 0 }));
@@ -67,6 +79,27 @@ export default function MoreScreen() {
             <Text style={s.statLabel}>Active days</Text>
           </View>
         </View>
+
+        {hasAccess !== null && (
+          <View style={[s.section, { paddingBottom: 0 }]}>
+            <View style={s.card}>
+              <TouchableOpacity
+                style={s.row}
+                onPress={() => router.push('/paywall')}
+                activeOpacity={0.7}
+              >
+                <View style={s.iconWrap}>
+                  <Ionicons name="diamond-outline" size={20} color={colors.accent} />
+                </View>
+                <View style={s.rowContent}>
+                  <Text style={s.rowLabel}>Subscription</Text>
+                  <Text style={s.rowSub}>{subSub}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textDim} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {menuItems.map(section => (
           <View key={section.section} style={s.section}>

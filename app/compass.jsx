@@ -8,12 +8,15 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { getCompass, saveCompass, getRoles, saveRoles, persistCompassDone, getCompassDone } from '../store/db';
+import { getCompass, saveCompass, getRoles, saveRoles, persistCompassDone, getCompassDone, getHasSeenCompassIntro, setHasSeenCompassIntro } from '../store/db';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
+import { useEntitlement } from '../lib/useEntitlement';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { PracticeHeader } from '../components/PracticeHeader';
+import { CompassIntro } from '../components/CompassIntro';
+import { DEFAULT_COMPASS } from '../constants/compassFields';
 
 const COMPASS_HINTS = {
   why: {
@@ -75,6 +78,11 @@ function placeholderFor(name) {
 
 export default function CompassScreen() {
   const router = useRouter();
+  const { hasAccess } = useEntitlement();
+  function requireAccess(action) {
+    if (hasAccess) { action(); return; }
+    router.push('/paywall');
+  }
   const params = useLocalSearchParams();
   // Allow callers to deep-link to the Roles tab via ?tab=roles
   // (used by the daily Role card on Practice).
@@ -84,6 +92,9 @@ export default function CompassScreen() {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [hintOpen, setHintOpen] = useState(false);
+  // Per Valeriya's library, the input field switches stroke + body text color
+  // based on focus (non-active = darker/grey, active = brighter/white).
+  const [focusedField, setFocusedField] = useState(null);
   const commitMindfulSession = useMindfulSession();
   const playerInset = useMiniPlayerInset();
   // Roles tab state — list of {id, name, commitment}. editingRole is
@@ -99,11 +110,24 @@ export default function CompassScreen() {
   // Ref so markCompassDone is no-op after the first call per visit, even
   // before async persist completes. Reset on blur via useFocusEffect cleanup.
   const compassMarkedRef = useRef(false);
+  // First-visit walkthrough state. `null` while loading so we don't flash
+  // the live UI before the intro decision is made. Migration in _layout
+  // marks existing onboarded users as already seen.
+  const [introSeen, setIntroSeen] = useState(null);
 
   useEffect(() => {
-    getCompass().then(setCompass);
+    getCompass().then(c => setCompass(c || { ...DEFAULT_COMPASS }));
     getRoles().then(setRoles);
+    getHasSeenCompassIntro().then(v => setIntroSeen(v === true));
   }, []);
+
+  async function dismissIntro() {
+    // Persist whatever the user has (defaults or their edits) and mark
+    // the intro as seen so it never re-renders.
+    if (compass) await saveCompass(compass);
+    await setHasSeenCompassIntro(true);
+    setIntroSeen(true);
+  }
 
   async function markCompassDone() {
     if (compassMarkedRef.current) return;
@@ -209,7 +233,17 @@ export default function CompassScreen() {
     return () => clearTimeout(t);
   }, [editing]);
 
-  if (!compass) return <SafeAreaView style={s.safe} />;
+  if (!compass || introSeen === null) return <SafeAreaView style={s.safe} />;
+
+  if (!introSeen) {
+    return (
+      <CompassIntro
+        compass={compass}
+        setCompass={setCompass}
+        onDismiss={dismissIntro}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={s.safe}>
@@ -247,7 +281,14 @@ export default function CompassScreen() {
               style={[s.navPill, activeTab === i && s.navPillActive]}
               onPress={() => { setActiveTab(i); setEditing(false); setHintOpen(false); markCompassDone(); }}
             >
-              <Text style={[s.navPillText, activeTab === i && s.navPillTextActive]}>{t}</Text>
+              <Text
+                style={[s.navPillText, activeTab === i && s.navPillTextActive]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}
+              >
+                {t}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -269,10 +310,12 @@ export default function CompassScreen() {
                 )}
                 <TextInput
                   ref={editInputRef}
-                  style={s.editInput}
+                  style={[s.editInput, focusedField !== 'edit' && s.editInputDim]}
                   multiline
                   value={draft}
                   onChangeText={setDraft}
+                  onFocus={() => setFocusedField('edit')}
+                  onBlur={() => setFocusedField(null)}
                   placeholder={COMPASS_HINTS[tabKeys[activeTab]]?.placeholder || ''}
                   placeholderTextColor={colors.textDim}
                   scrollEnabled={false}
@@ -296,7 +339,7 @@ export default function CompassScreen() {
                 <View style={s.textCard}>
                   <Text style={s.bodyText}>{compass[tabKeys[activeTab]]}</Text>
                 </View>
-                <TouchableOpacity style={s.editTrigger} onPress={startEdit}>
+                <TouchableOpacity style={s.editTrigger} onPress={() => requireAccess(startEdit)}>
                   <Text style={s.editTriggerText}>Edit this section</Text>
                 </TouchableOpacity>
               </View>
@@ -327,15 +370,17 @@ export default function CompassScreen() {
                         activeOpacity={0.7}
                       >
                         <Text style={s.roleDeleteChipText}>Delete</Text>
-                        <Ionicons name="trash-outline" size={14} color={colors.accent} />
+                        <Ionicons name="trash-outline" size={12} color={colors.accent} />
                       </TouchableOpacity>
                     )}
                   </View>
                   <TextInput
                     ref={roleNameInputRef}
-                    style={s.roleNameInput}
+                    style={[s.roleNameInput, focusedField !== 'roleName' && s.roleNameInputDim]}
                     value={roleNameDraft}
                     onChangeText={setRoleNameDraft}
+                    onFocus={() => setFocusedField('roleName')}
+                    onBlur={() => setFocusedField(null)}
                     placeholder="Name (e.g. Parent, Citizen)"
                     placeholderTextColor={colors.textDim}
                     autoCapitalize="words"
@@ -346,10 +391,12 @@ export default function CompassScreen() {
                   <Text style={s.roleEditSub}>What does this role ask of you? (Optional, one line.)</Text>
                   <TextInput
                     ref={roleCommitmentInputRef}
-                    style={s.roleCommitmentInput}
+                    style={[s.roleCommitmentInput, focusedField !== 'roleCommitment' && s.roleCommitmentInputDim]}
                     multiline
                     value={roleCommitmentDraft}
                     onChangeText={setRoleCommitmentDraft}
+                    onFocus={() => setFocusedField('roleCommitment')}
+                    onBlur={() => setFocusedField(null)}
                     placeholder={placeholderFor(roleNameDraft)
                       ? `e.g. ${placeholderFor(roleNameDraft)}`
                       : DEFAULT_ROLE_PLACEHOLDER}
@@ -371,7 +418,7 @@ export default function CompassScreen() {
                         <TouchableOpacity
                           key={role.id}
                           style={s.roleCard}
-                          onPress={() => startEditRole(role)}
+                          onPress={() => requireAccess(() => startEditRole(role))}
                           activeOpacity={0.75}
                         >
                           <View style={{ flex: 1 }}>
@@ -416,7 +463,7 @@ export default function CompassScreen() {
                     );
                   })()}
 
-                  <TouchableOpacity style={s.roleAddBtn} onPress={() => startNewRole()} activeOpacity={0.7}>
+                  <TouchableOpacity style={s.roleAddBtn} onPress={() => requireAccess(() => startNewRole())} activeOpacity={0.7}>
                     <Text style={s.roleAddBtnText}>+ Add a custom role</Text>
                   </TouchableOpacity>
                 </View>
@@ -426,7 +473,7 @@ export default function CompassScreen() {
         </View>
 
       </ScrollView>
-      {Platform.OS === 'ios' && (
+      {Platform.OS === 'ios' && hasAccess && (
         <>
           <InputAccessoryView nativeID="compassEditAccessory">
             <View style={s.accessoryBarPair}>
@@ -435,14 +482,14 @@ export default function CompassScreen() {
                 onPress={() => { Keyboard.dismiss(); setEditing(false); }}
                 activeOpacity={0.8}
               >
-                <Text style={s.editBtnText}>Cancel</Text>
+                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { Keyboard.dismiss(); handleSave(); }}
                 activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>Save</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
@@ -453,14 +500,14 @@ export default function CompassScreen() {
                 onPress={() => { Keyboard.dismiss(); cancelRoleEdit(); }}
                 activeOpacity={0.8}
               >
-                <Text style={s.editBtnText}>Cancel</Text>
+                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { haptics.tap(); roleCommitmentInputRef.current?.focus(); }}
                 activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>Next</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
@@ -471,14 +518,14 @@ export default function CompassScreen() {
                 onPress={() => { Keyboard.dismiss(); cancelRoleEdit(); }}
                 activeOpacity={0.8}
               >
-                <Text style={s.editBtnText}>Cancel</Text>
+                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { Keyboard.dismiss(); handleSaveRole(); }}
                 activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
                   {editingRole === 'new' ? 'Add' : 'Save'}
                 </Text>
               </TouchableOpacity>
@@ -528,7 +575,7 @@ const s = StyleSheet.create({
   navPillActive: {
     backgroundColor: colors.accent,
   },
-  navPillText: { fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: colors.accent, fontWeight: '500' },
+  navPillText: { fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', color: colors.accent, fontWeight: '500' },
   navPillTextActive: { color: '#1a1a1a' },
   // Light reading/editing body
   body: { padding: spacing.md, paddingTop: spacing.lg, backgroundColor: colors.bgCard },
@@ -550,19 +597,26 @@ const s = StyleSheet.create({
     marginBottom: 28,
   },
   editTriggerText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  // Input field treatment per Valeriya's library: subtle elevation above
+  // screen bg, stroke shifts non-active (#474747) → active (#878787),
+  // body text dims (grey) when non-active / brightens (white) when active.
   editInput: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.lg,
-    padding: 18, fontSize: 16, color: colors.textPrimary, lineHeight: 26,
+    borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.lg,
+    padding: 18, paddingBottom: 60,
+    fontSize: 16, color: colors.textPrimary, lineHeight: 26,
     minHeight: 240, textAlignVertical: 'top', marginBottom: 12,
-    backgroundColor: colors.bgElevated,
+    backgroundColor: colors.inputBg,
   },
+  editInputDim: { borderColor: colors.inputBorder, color: colors.textMuted },
   // Cancel / Save pair per Valeriya's library — H56 outlined-gold + filled-gold
   // pair, more square than pill (radius.sm). Side-by-side via flex: 1 so the
   // pair stays intact on small screens (labels are short, no min-width).
   editBtns: { flexDirection: 'row', gap: 10, marginBottom: 28 },
+  // H44 keyboard accessory per Valeriya's library converted for iPhone scale
+  // (her Figma H56 / 1.5 ≈ 37, rounded up to Apple's 44pt touch minimum).
   editBtn: {
     flex: 1,
-    height: 56,
+    height: 44,
     borderWidth: 1,
     borderColor: colors.accent,
     backgroundColor: colors.bg,
@@ -613,26 +667,30 @@ const s = StyleSheet.create({
   roleDeleteChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderWidth: 1,
     borderColor: colors.accent,
-    borderRadius: radius.md,
+    borderRadius: 6,
   },
-  roleDeleteChipText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  roleDeleteChipText: { fontSize: 10, fontWeight: '600', color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase' },
   roleEditSub: { fontSize: 13, color: colors.textMuted, marginTop: 14, marginBottom: 8 },
   roleNameInput: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.lg,
-    padding: 18, fontSize: 16, color: colors.textPrimary, lineHeight: 26,
-    backgroundColor: colors.bgElevated,
+    borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.lg,
+    padding: 18, paddingBottom: 60,
+    fontSize: 16, color: colors.textPrimary, lineHeight: 26,
+    backgroundColor: colors.inputBg,
   },
+  roleNameInputDim: { borderColor: colors.inputBorder, color: colors.textMuted },
   roleCommitmentInput: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.lg,
-    padding: 18, fontSize: 16, color: colors.textPrimary, lineHeight: 26,
+    borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.lg,
+    padding: 18, paddingBottom: 60,
+    fontSize: 16, color: colors.textPrimary, lineHeight: 26,
     minHeight: 120, textAlignVertical: 'top',
-    backgroundColor: colors.bgElevated, marginBottom: 12,
+    backgroundColor: colors.inputBg, marginBottom: 12,
   },
+  roleCommitmentInputDim: { borderColor: colors.inputBorder, color: colors.textMuted },
   // Hint styles
   hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   // Right-aligned ⓘ-only row used on the Roles tab where the "Roles" label

@@ -27,7 +27,7 @@ export default function ReadyScreen() {
         <View style={s.body}>
           <Image source={require('../assets/skull.png')} style={s.skull} resizeMode="contain" />
           <Text style={s.eyebrow}>Memento mori</Text>
-          <Text style={s.title}>Your practice{'\n'}begins now.</Text>
+          <Text style={s.title}>Your practice{'\n'}begins now</Text>
           <Text style={s.date}>{dateStr}</Text>
           <Text style={s.streak}>Day 1</Text>
         </View>
@@ -89,14 +89,16 @@ const s = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
+  // H56 per library — matches onboarding primaryBtn + paywall cta.
   primaryBtn: {
     backgroundColor: colors.accent,
     borderRadius: radius.md,
-    padding: 18,
+    height: 56,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   primaryBtnText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     color: '#000',
     letterSpacing: 0.3,

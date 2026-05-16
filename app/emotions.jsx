@@ -13,6 +13,8 @@ import { EMOTION_COLORS, DISTORTIONS } from '../constants/emotionsData';
 import { saveTrigger } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
+import { useKeyboardVisible } from '../lib/useKeyboardVisible';
+import { useEntitlement } from '../lib/useEntitlement';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 
 // Situation-agnostic reframes
@@ -74,19 +76,31 @@ export default function EmotionsScreen() {
   const [chosenResponse, setChosenResponse] = useState('');
   const [selectedDistortions, setSelectedDistortions] = useState([]);
   const [hintOpen, setHintOpen] = useState(false);
+  // Tracks which input field is currently focused so the wrapping fieldCard
+  // can switch between non-active (darker stroke) and active (brighter stroke).
+  const [focusedField, setFocusedField] = useState(null);
   const commitMindfulSession = useMindfulSession();
+  const keyboardUp = useKeyboardVisible();
+  const { hasAccess } = useEntitlement();
+  function requireAccess(action) {
+    if (hasAccess) { action(); return; }
+    router.push('/paywall');
+  }
   const triggerInputRef = useRef(null);
   const reactionInputRef = useRef(null);
   const responseInputRef = useRef(null);
   const scrollRef = useRef(null);
-  const distortionRef = useRef(null);
+  // Anchors the "III · Reframe" stage label so tapping "Pick patterns" from
+  // the Reaction accessory scrolls to just above it (not deeper into the
+  // reframe card itself).
+  const reframeRef = useRef(null);
 
-  function scrollToDistortions() {
+  function scrollToReframe() {
     Keyboard.dismiss();
     setTimeout(() => {
       const scrollNode = scrollRef.current?.getScrollableNode?.() || scrollRef.current;
-      if (!scrollNode || !distortionRef.current) return;
-      distortionRef.current.measureLayout(
+      if (!scrollNode || !reframeRef.current) return;
+      reframeRef.current.measureLayout(
         scrollNode,
         (_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - 24), animated: true }),
         () => {},
@@ -116,10 +130,7 @@ export default function EmotionsScreen() {
   }
 
   async function handleLog() {
-    if (!selectedEmotion || !trigger.trim()) {
-      Alert.alert('', 'Select an emotion and describe the trigger.');
-      return;
-    }
+    if (!selectedEmotion) return;
     const entry = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
@@ -262,37 +273,45 @@ export default function EmotionsScreen() {
               <IntensitySlider value={intensity} onChange={setIntensity} />
             </View>
 
-            <View style={s.fieldCard}>
+            <View style={[s.fieldCard, focusedField === 'trigger' && s.fieldCardActive]}>
               <Text style={s.fieldLabel}>What triggered it?</Text>
               <TextInput
                 ref={triggerInputRef}
-                style={s.fieldInput}
+                style={[s.fieldInput, focusedField !== 'trigger' && s.fieldInputDim]}
                 multiline
                 placeholder="Describe the situation..."
                 placeholderTextColor={colors.textDim}
                 value={trigger}
                 onChangeText={setTrigger}
+                onFocus={() => setFocusedField('trigger')}
+                onBlur={() => setFocusedField(null)}
+                editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoTriggerAccessory' : undefined}
               />
             </View>
 
-            <View style={s.fieldCard}>
+            <View style={[s.fieldCard, focusedField === 'reaction' && s.fieldCardActive]}>
               <Text style={s.fieldLabel}>My automatic reaction</Text>
               <TextInput
                 ref={reactionInputRef}
-                style={s.fieldInput}
+                style={[s.fieldInput, focusedField !== 'reaction' && s.fieldInputDim]}
                 multiline
                 placeholder="What did you want to do or say?"
                 placeholderTextColor={colors.textDim}
                 value={reaction}
                 onChangeText={setReaction}
+                onFocus={() => setFocusedField('reaction')}
+                onBlur={() => setFocusedField(null)}
+                editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoReactionAccessory' : undefined}
               />
             </View>
 
-            <Text style={s.stageLabel}>III · Reframe</Text>
+            <View ref={reframeRef} collapsable={false}>
+              <Text style={s.stageLabel}>III · Reframe</Text>
+            </View>
             <View
               style={[
                 s.reframeCard,
@@ -312,7 +331,7 @@ export default function EmotionsScreen() {
 
               <View style={s.reframeDivider} />
 
-              <View ref={distortionRef} collapsable={false}>
+              <View collapsable={false}>
                 <Text style={[s.fieldLabel, !selectedEmotion && s.fieldLabelMuted]}>What story are you telling yourself?</Text>
                 <Text style={s.distortionSub}>Select any patterns you notice in your thinking</Text>
               </View>
@@ -348,7 +367,7 @@ export default function EmotionsScreen() {
               </Text>
               <TextInput
                 ref={responseInputRef}
-                style={s.fieldInput}
+                style={[s.fieldInput, focusedField !== 'response' && s.fieldInputDim]}
                 multiline
                 placeholder={timing === 'now'
                   ? "What is your chosen response going forward?"
@@ -356,60 +375,75 @@ export default function EmotionsScreen() {
                 placeholderTextColor={colors.textDim}
                 value={chosenResponse}
                 onChangeText={setChosenResponse}
+                onFocus={() => setFocusedField('response')}
+                onBlur={() => setFocusedField(null)}
+                editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}
               />
             </View>
 
-            <TouchableOpacity style={[s.editBtn, s.editBtnSave, s.saveBtn]} onPress={handleLog} activeOpacity={0.8}>
-              <Text style={[s.editBtnText, s.editBtnSaveText]}>Log this trigger</Text>
-            </TouchableOpacity>
-            <Text style={s.saveBtnSub}>Saved privately · used in weekly review</Text>
+            {!keyboardUp && (
+              <>
+                <TouchableOpacity
+                  style={[s.editBtn, s.editBtnSave, s.saveBtn, !selectedEmotion && s.saveBtnDisabled]}
+                  onPress={() => requireAccess(handleLog)}
+                  activeOpacity={0.8}
+                  disabled={!selectedEmotion}
+                >
+                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Log this trigger</Text>
+                </TouchableOpacity>
+                <Text style={s.saveBtnSub}>
+                  {selectedEmotion ? 'Saved privately · used in weekly review' : 'Select an emotion above to log this trigger'}
+                </Text>
+              </>
+            )}
 
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      {Platform.OS === 'ios' && (
+      {Platform.OS === 'ios' && hasAccess && (
         <>
           <InputAccessoryView nativeID="emoTriggerAccessory">
             <View style={s.accessoryBarPair}>
               <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
-                <Text style={s.editBtnText}>Done</Text>
+                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.editBtn, s.editBtnSave]}
                 onPress={() => { haptics.tap(); reactionInputRef.current?.focus(); }}
                 activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>Next</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
           <InputAccessoryView nativeID="emoReactionAccessory">
             <View style={s.accessoryBarPair}>
               <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
-                <Text style={s.editBtnText}>Done</Text>
+                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.editBtn, s.editBtnSave]}
-                onPress={() => { haptics.tap(); scrollToDistortions(); }}
+                onPress={() => { haptics.tap(); scrollToReframe(); }}
                 activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>Pick patterns</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Pick patterns</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
           <InputAccessoryView nativeID="emoResponseAccessory">
             <View style={s.accessoryBarPair}>
               <TouchableOpacity style={s.editBtn} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
-                <Text style={s.editBtnText}>Done</Text>
+                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[s.editBtn, s.editBtnSave]}
-                onPress={() => { Keyboard.dismiss(); handleLog(); }}
+                style={[s.editBtn, s.editBtnSave, !selectedEmotion && s.saveBtnDisabled]}
+                onPress={() => { Keyboard.dismiss(); requireAccess(handleLog); }}
                 activeOpacity={0.8}
+                disabled={!selectedEmotion}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]}>Log this trigger</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Log this trigger</Text>
               </TouchableOpacity>
             </View>
           </InputAccessoryView>
@@ -471,9 +505,15 @@ const s = StyleSheet.create({
   ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 18, alignItems: 'center', backgroundColor: colors.bgElevated, overflow: 'hidden' },
   eAccent: { position: 'absolute', top: 0, left: 0, right: 0, height: 3 },
   ePillName: { fontSize: 13, color: colors.textSecondary, fontWeight: '400' },
-  fieldCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.bgElevated },
+  // Input field treatment per Valeriya's library: subtle elevation above
+  // screen bg, with stroke shifting between non-active (#474747) and
+  // active (#878787) focus states.
+  fieldCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
+  fieldCardActive: { borderColor: colors.inputBorderActive },
   fieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 12 },
-  fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 25, minHeight: 64, textAlignVertical: 'top', paddingBottom: 16 },
+  fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 25, minHeight: 64, textAlignVertical: 'top', paddingBottom: 60 },
+  // Non-focused state: dim the typed text per Valeriya's library (grey body text).
+  fieldInputDim: { color: colors.textMuted },
   reframeCard: { borderWidth: 1, borderRadius: radius.lg, padding: 26, marginBottom: 12, backgroundColor: colors.bgCard },
   reframeEyebrow: { fontSize: font.microSize, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12, fontWeight: '600' },
   reframeText: { fontSize: 16, color: colors.textSecondary, fontFamily: font.serif, lineHeight: 26, marginBottom: 16 },
@@ -487,7 +527,11 @@ const s = StyleSheet.create({
   distortionQ: { fontSize: 13, color: colors.textMuted, lineHeight: 20 },
   // In-body primary CTA reuses library editBtn + editBtnSave; this override
   // just adds spacing below the button before the caption.
-  saveBtn: { marginBottom: 12 },
+  // In-body primary CTA — H56 override (no-keyboard primary per library).
+  saveBtn: { height: 56, marginBottom: 12 },
+  // Disabled state — gated on selectedEmotion. Emotion must be picked
+  // before a trigger can be logged; everything else stays optional.
+  saveBtnDisabled: { opacity: 0.4 },
   saveBtnSub: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: 36 },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair.
   accessoryBarPair: {
@@ -499,9 +543,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
+  // H44 keyboard accessory per library. In-body saveBtn overrides to 56.
   editBtn: {
     flex: 1,
-    height: 56,
+    height: 44,
     borderWidth: 1,
     borderColor: colors.accent,
     backgroundColor: colors.bg,

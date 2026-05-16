@@ -4,22 +4,34 @@ import {
   StyleSheet, SafeAreaView, Share,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { getReviews } from '../store/db';
+import { getReviews, updateReview } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard } from '../components/ReviewShareCard';
+import { ReviewEntryEditor } from '../components/ReviewEntryEditor';
+import { useEntitlement } from '../lib/useEntitlement';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 
 export default function ReviewArchiveScreen() {
   const router = useRouter();
+  const { hasAccess } = useEntitlement();
   const playerInset = useMiniPlayerInset();
   const [history, setHistory] = useState([]);
   const [filterRange, setFilterRange] = useState('all');
+  const [editingEntry, setEditingEntry] = useState(null);
   const shareCardRef = useRef(null);
   const [shareEntry, setShareEntry] = useState(null);
   const scrollRef = useRef(null);
+
+  async function handleEditSave(updated) {
+    await updateReview(updated);
+    const refreshed = await getReviews();
+    setHistory(refreshed);
+    setEditingEntry(null);
+  }
 
   useFocusEffect(useCallback(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
@@ -90,7 +102,15 @@ export default function ReviewArchiveScreen() {
 
       <ScreenHeader fromPath="/review" fromLabel="Back" />
 
-      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
+      <ScrollView
+        ref={scrollRef}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 36 + playerInset }}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+      >
         <View style={s.hero}>
           <Text style={s.eyebrow}>Weekly Review</Text>
           <Text style={s.title}>Your archive</Text>
@@ -128,26 +148,48 @@ export default function ReviewArchiveScreen() {
             </Text>
           </View>
         ) : (
-          filteredHistory.map(entry => (
-            <View key={entry.id} style={s.histRow}>
-              <View style={s.histTop}>
-                <Text style={s.histDate}>Week of {entry.weekOf}</Text>
-                <Text style={s.histStreak}>{entry.stats?.journaled || 0}/7 days</Text>
+          filteredHistory.map(entry => {
+            if (editingEntry?.id === entry.id) {
+              return (
+                <ReviewEntryEditor
+                  key={entry.id}
+                  entry={editingEntry}
+                  onSave={handleEditSave}
+                  onCancel={() => setEditingEntry(null)}
+                />
+              );
+            }
+            return (
+              <View key={entry.id} style={s.histRow}>
+                <View style={s.histTop}>
+                  <View>
+                    <Text style={s.histDate}>Week of {entry.weekOf}</Text>
+                    <Text style={s.histStreak}>{entry.stats?.journaled || 0}/7 days</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={s.editBtn}
+                    onPress={() => hasAccess ? setEditingEntry({ ...entry }) : router.push('/paywall')}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="create-outline" size={12} color={colors.accent} />
+                    <Text style={s.editBtnText}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+                {entry.bestVirtue && <Text style={s.histBest}>{entry.bestVirtue} · most embodied</Text>}
+                {entry.worstVirtue && <Text style={s.histWorst}>{entry.worstVirtue} · least embodied</Text>}
+                {entry.answers?.wentWell && (
+                  <Text style={s.histPreview}>"{entry.answers.wentWell.slice(0, 140)}..."</Text>
+                )}
+                <TouchableOpacity
+                  style={s.histShareBtn}
+                  onPress={() => shareReviewEntry(entry)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={s.histShareText}>Share →</Text>
+                </TouchableOpacity>
               </View>
-              {entry.bestVirtue && <Text style={s.histBest}>{entry.bestVirtue} · most embodied</Text>}
-              {entry.worstVirtue && <Text style={s.histWorst}>{entry.worstVirtue} · least embodied</Text>}
-              {entry.answers?.wentWell && (
-                <Text style={s.histPreview}>"{entry.answers.wentWell.slice(0, 140)}..."</Text>
-              )}
-              <TouchableOpacity
-                style={s.histShareBtn}
-                onPress={() => shareReviewEntry(entry)}
-                activeOpacity={0.7}
-              >
-                <Text style={s.histShareText}>Share →</Text>
-              </TouchableOpacity>
-            </View>
-          ))
+            );
+          })
         )}
       </ScrollView>
     </SafeAreaView>
@@ -180,9 +222,14 @@ const s = StyleSheet.create({
   emptyCta: { marginTop: 28, borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, paddingVertical: 14, paddingHorizontal: 22, backgroundColor: colors.accentBg },
   emptyCtaText: { fontSize: 13, color: colors.accent, letterSpacing: 0.5, textTransform: 'uppercase' },
   histRow: { padding: 18, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  histTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  histDate: { fontSize: 17, fontWeight: '600', color: colors.textSecondary },
-  histStreak: { fontSize: 13, color: colors.textDim },
+  // Layout mirrors journal-history: date stack on left, library EDIT chip on
+  // right (top-aligned).
+  histTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
+  histDate: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' },
+  histStreak: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5, marginTop: 2 },
+  // Canonical EDIT chip — matches compass / journal-history / emotions-history.
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: colors.accent, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5 },
+  editBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   histBest: { fontSize: 14, color: colors.virtueGood, marginBottom: 4 },
   histWorst: { fontSize: 14, color: colors.virtueBad, marginBottom: 4 },
   histPreview: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic', marginTop: 6, lineHeight: 22 },

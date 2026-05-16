@@ -2,12 +2,15 @@ import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView,
+  Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { colors, radius, spacing, font } from '../constants/theme';
-import { getReadingLog } from '../store/db';
+import { getReadingLog, updateReadingInsight } from '../store/db';
+import { useEntitlement } from '../lib/useEntitlement';
 
 const virtueColor = {
   Wisdom: '#7a9aaa',
@@ -31,6 +34,7 @@ function groupByMonth(entries) {
 
 export default function ReadArchiveScreen() {
   const router = useRouter();
+  const { hasAccess } = useEntitlement();
   const playerInset = useMiniPlayerInset();
   const params = useLocalSearchParams();
   const fromPath = params?.from
@@ -41,7 +45,18 @@ export default function ReadArchiveScreen() {
   const [searchQ, setSearchQ] = useState('');
   const [filterAuthor, setFilterAuthor] = useState('all');
   const [filterMonth, setFilterMonth] = useState('all');
+  const [editingId, setEditingId] = useState(null);
+  const [editDraft, setEditDraft] = useState('');
   const scrollRef = useRef(null);
+
+  async function handleEditSave() {
+    if (!editingId) return;
+    await updateReadingInsight(editingId, editDraft);
+    const refreshed = await getReadingLog();
+    setLog(refreshed);
+    setEditingId(null);
+    setEditDraft('');
+  }
 
   useFocusEffect(useCallback(() => {
     getReadingLog().then(setLog);
@@ -72,7 +87,15 @@ export default function ReadArchiveScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel="Back" />
-      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 + playerInset }}>
+      <ScrollView
+        ref={scrollRef}
+        style={[s.scroll, { backgroundColor: colors.bgCard }]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 36 + playerInset }}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+      >
         <View style={s.hero}>
           <Text style={s.eyebrow}>Daily Reading</Text>
           <Text style={s.title}>Past readings</Text>
@@ -147,14 +170,28 @@ export default function ReadArchiveScreen() {
                 <View style={s.monthHeader}>
                   <Text style={s.monthHeaderText}>{group.label}</Text>
                 </View>
-                {group.entries.map(entry => (
+                {group.entries.map(entry => {
+                  const isEditing = editingId === entry.id;
+                  return (
                   <View key={entry.id} style={s.archiveRow}>
                     <View style={s.archiveTop}>
-                      <Text style={s.archiveDate}>{entry.date}</Text>
-                      {entry.reading?.virtue && (
-                        <Text style={[s.archiveVirtue, { color: virtueColor[entry.reading.virtue] || colors.textDim }]}>
-                          {entry.reading.virtue}
-                        </Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.archiveDate}>{entry.date}</Text>
+                        {entry.reading?.virtue && (
+                          <Text style={[s.archiveVirtue, { color: virtueColor[entry.reading.virtue] || colors.textDim, marginTop: 2 }]}>
+                            {entry.reading.virtue}
+                          </Text>
+                        )}
+                      </View>
+                      {!isEditing && (
+                        <TouchableOpacity
+                          style={s.editBtn}
+                          onPress={() => hasAccess ? (setEditingId(entry.id), setEditDraft(entry.insight || '')) : router.push('/paywall')}
+                          activeOpacity={0.7}
+                        >
+                          <Ionicons name="create-outline" size={12} color={colors.accent} />
+                          <Text style={s.editBtnText}>Edit</Text>
+                        </TouchableOpacity>
                       )}
                     </View>
                     {entry.reading?.theme && (
@@ -163,19 +200,55 @@ export default function ReadArchiveScreen() {
                     {entry.reading?.quote && (
                       <Text style={s.archiveQuote}>"{entry.reading.quote.slice(0, 100)}..."</Text>
                     )}
-                    {entry.insight && (
+                    {isEditing ? (
+                      <View style={s.archiveInsightBlock}>
+                        <Text style={s.archiveInsightLabel}>Your insight</Text>
+                        <TextInput
+                          style={s.archiveInsightInput}
+                          multiline
+                          value={editDraft}
+                          onChangeText={setEditDraft}
+                          placeholder="Write your reflection..."
+                          placeholderTextColor={colors.textDim}
+                          scrollEnabled={false}
+                          autoFocus
+                          inputAccessoryViewID={Platform.OS === 'ios' ? 'readArchiveInsightAccessory' : undefined}
+                        />
+                      </View>
+                    ) : entry.insight && (
                       <View style={s.archiveInsightBlock}>
                         <Text style={s.archiveInsightLabel}>Your insight</Text>
                         <Text style={s.archiveInsight}>{entry.insight}</Text>
                       </View>
                     )}
                   </View>
-                ))}
+                  );
+                })}
               </View>
             ))
           )}
         </View>
       </ScrollView>
+      {Platform.OS === 'ios' && editingId && (
+        <InputAccessoryView nativeID="readArchiveInsightAccessory">
+          <View style={s.accessoryBarPair}>
+            <TouchableOpacity
+              style={s.editBtnAccessory}
+              onPress={() => { Keyboard.dismiss(); setEditingId(null); setEditDraft(''); }}
+              activeOpacity={0.8}
+            >
+              <Text style={s.editBtnAccessoryText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[s.editBtnAccessory, s.editBtnAccessorySave]}
+              onPress={() => { Keyboard.dismiss(); handleEditSave(); }}
+              activeOpacity={0.8}
+            >
+              <Text style={[s.editBtnAccessoryText, s.editBtnAccessorySaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      )}
     </SafeAreaView>
   );
 }
@@ -224,4 +297,23 @@ const s = StyleSheet.create({
   archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.borderMid, paddingLeft: 12, marginTop: 8 },
   archiveInsightLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 },
   archiveInsight: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
+  archiveInsightInput: { fontSize: 14, color: colors.textPrimary, lineHeight: 22, minHeight: 60, textAlignVertical: 'top', paddingBottom: 60 },
+  // Library EDIT chip — matches journal-history / emotions-history / review-archive.
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: colors.accent, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5 },
+  editBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
+  // Library keyboard accessory bar — H44 outlined + filled-gold pair used
+  // when editing a past insight (matches compass / journal / emotions / review).
+  accessoryBarPair: {
+    flexDirection: 'row', gap: 10, backgroundColor: colors.bg,
+    borderTopWidth: 0.5, borderTopColor: colors.border,
+    paddingHorizontal: 16, paddingVertical: 8,
+  },
+  editBtnAccessory: {
+    flex: 1, height: 44, borderWidth: 1, borderColor: colors.accent,
+    backgroundColor: colors.bg, borderRadius: radius.md,
+    paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center',
+  },
+  editBtnAccessorySave: { backgroundColor: colors.accent },
+  editBtnAccessoryText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnAccessorySaveText: { color: '#1a1a1a' },
 });
