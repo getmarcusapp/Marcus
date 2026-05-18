@@ -507,9 +507,19 @@
   .virtue-card {
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px;
     background: var(--bg-card);
+    overflow: hidden;
   }
+
+  .virtue-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .virtue-body { padding: 18px 20px 20px; }
 
   .virtue-name {
     font-size: 18px;
@@ -517,7 +527,6 @@
     color: var(--text-primary);
     margin-bottom: 4px;
   }
-
 
   .virtue-desc {
     font-size: 14px;
@@ -1120,9 +1129,8 @@
   <p class="pain-eyebrow">The real problem</p>
   <h2 class="pain-title">You've succeeded at everything.<br>So why don't you <em>respect yourself?</em></h2>
   <div class="pain-body">
-    <p>You hit the goals. You're productive on paper. You've read the books, tried the apps, built the routines. You can recite the frameworks.</p>
-    <p>And yet, in the quiet moments when no one is watching, you still feel the gap. The distance between the person you perform and the person you actually are.</p>
-    <p>That gap has a name. The Stoics called it the distance between <em>who you are</em> and <em>who you admire</em>. Two thousand years later, nothing has changed. Except now we have apps that make the gap worse.</p>
+    <p>You hit the goals. Read the books. Built the routines. And still, in the quiet moments when no one is watching, the gap is there — between the person you perform and the person you actually are.</p>
+    <p>The Stoics named it two thousand years ago: the distance between <em>who you are</em> and <em>who you admire</em>. The gap hasn't changed. The apps that promised to close it just made the noise louder.</p>
   </div>
 </section>
 
@@ -1137,7 +1145,7 @@
         <span class="agitation-num">01</span>
         <div>
           <p class="agitation-item-title">They treat you like a machine</p>
-          <p class="agitation-item-body">Habit trackers optimize for the checkmark, not the character. When you break a streak (because life happened) you feel shame instead of growth. You abandon the habit entirely, proving the motivation was never rooted in who you are. It was rooted in a number.</p>
+          <p class="agitation-item-body">Habit trackers optimize for the checkmark, not the character. Break a streak — because life happened — and you feel shame instead of growth. Then you abandon the habit, proving the motivation was rooted in a number, not in who you are.</p>
         </div>
       </div>
 
@@ -1161,7 +1169,7 @@
         <span class="agitation-num">04</span>
         <div>
           <p class="agitation-item-title">Self-help taught you to feel good, not be good</p>
-          <p class="agitation-item-body">Affirmations. Gratitude journals. "You are enough." The implicit promise is that if you feel good enough about who you currently are, the gap will stop hurting. The Stoics took the opposite position. Self-respect is not given. It is earned.</p>
+          <p class="agitation-item-body">Affirmations. Gratitude journals. "You are enough." The implicit promise: feel good enough about who you are, and the gap stops hurting. The Stoics held the opposite. Self-respect is not given. It is earned.</p>
         </div>
       </div>
 
@@ -1185,7 +1193,7 @@
   </div>
 
   <div class="mechanism-body">
-    <p>This is the practice Marcus is built on. Not habit tracking. Not gamification. Not badges. A daily system of honest self-examination, rooted in the four cardinal Virtues that Stoic philosophy identified as the only reliable path to a life you can respect.</p>
+    <p>This is the practice Marcus is built on. Not habit tracking. Not gamification. A daily system of honest self-examination, rooted in the four Virtues Stoic philosophy identified as the only reliable path to a life you can respect.</p>
     <p>Two thousand years without becoming irrelevant is not a coincidence. It's evidence.</p>
   </div>
 </section>
@@ -1313,20 +1321,32 @@
     <p class="philosophy-body">The Stoics identified four Virtues as the complete map of a good human life. Not goals. Not achievements. Ways of being. You either embody them in each moment, or you don't. They are not separable, and they are not menu choices: Wisdom without Justice is shallow, Courage without Temperance is recklessness. Marcus is built around all four, all of the time.</p>
     <div class="virtues">
       <div class="virtue-card">
-        <p class="virtue-name">Wisdom</p>
-        <p class="virtue-desc">Discernment and right judgment. Seeing clearly: not as you wish things to be, but as they are.</p>
+        <img class="virtue-img" src="virtues/wisdom.jpg" alt="Wisdom" loading="lazy" />
+        <div class="virtue-body">
+          <p class="virtue-name">Wisdom</p>
+          <p class="virtue-desc">Discernment and right judgment. Seeing clearly: not as you wish things to be, but as they are.</p>
+        </div>
       </div>
       <div class="virtue-card">
-        <p class="virtue-name">Courage</p>
-        <p class="virtue-desc">Doing the right thing even when it is hard or costly. Not the absence of fear: its mastery.</p>
+        <img class="virtue-img" src="virtues/courage.jpg" alt="Courage" loading="lazy" />
+        <div class="virtue-body">
+          <p class="virtue-name">Courage</p>
+          <p class="virtue-desc">Doing the right thing even when it is hard or costly. Not the absence of fear: its mastery.</p>
+        </div>
       </div>
       <div class="virtue-card">
-        <p class="virtue-name">Temperance</p>
-        <p class="virtue-desc">Neither too much nor too little of anything. Self-mastery and the disciplined middle path.</p>
+        <img class="virtue-img" src="virtues/moderation.jpg" alt="Temperance" loading="lazy" />
+        <div class="virtue-body">
+          <p class="virtue-name">Temperance</p>
+          <p class="virtue-desc">Neither too much nor too little of anything. Self-mastery and the disciplined middle path.</p>
+        </div>
       </div>
       <div class="virtue-card">
-        <p class="virtue-name">Justice</p>
-        <p class="virtue-desc">Acting rightly toward others. Community, fairness, duty: the social dimension of Virtue.</p>
+        <img class="virtue-img" src="virtues/justice.jpg" alt="Justice" loading="lazy" />
+        <div class="virtue-body">
+          <p class="virtue-name">Justice</p>
+          <p class="virtue-desc">Acting rightly toward others. Community, fairness, duty: the social dimension of Virtue.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -1477,8 +1497,7 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
   <img src="skull.png" alt="" style="width:120px;height:120px;object-fit:contain;opacity:0.9;margin-bottom:40px;filter:drop-shadow(0 0 40px rgba(200,169,122,0.15));" />
   <h2 class="memento-title">You could leave life right now.<br>Let that determine what you do.</h2>
   <div class="memento-body">
-    <p>This is not motivational. This is the oldest philosophical technique for focusing a human mind on what actually matters.</p>
-    <p>Marcus Aurelius wrote it to himself. Not as despair, but as clarification. If today were your last, would you spend it the way you're planning to? If not, what is stopping you from living better, starting now?</p>
+    <p>Not motivational. The oldest philosophical technique for focusing a mind on what actually matters. Marcus Aurelius wrote it to himself — not as despair, but as clarification. If today were your last, would you spend it the way you're planning to?</p>
     <p>The practice doesn't take hours. It takes honesty.</p>
   </div>
 </section>
