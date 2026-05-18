@@ -266,15 +266,15 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10, lineHeight: 38 },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  title: { fontSize: font.heroSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 10, lineHeight: 38 },
   sub: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
 
   body: { padding: spacing.md, paddingTop: spacing.lg },
 
   sectionHeader: { paddingHorizontal: 6, paddingTop: 12, paddingBottom: 18, marginTop: 18 },
-  sectionEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  sectionTitle: { fontSize: 22, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
+  sectionEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  sectionTitle: { fontSize: 22, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.3, marginBottom: 6 },
   sectionSub: { fontSize: 14, color: colors.textMuted, lineHeight: 21 },
 
   card: {
@@ -284,9 +284,9 @@ const s = StyleSheet.create({
   imageWrap: { width: '100%', height: 180, backgroundColor: '#000', overflow: 'hidden' },
   image: { width: '100%', height: '100%' },
   cardBody: { padding: 18 },
-  cardEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 6 },
+  cardEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   work: { fontSize: 17, fontWeight: '400', color: colors.textPrimary, fontFamily: font.serif, marginBottom: 4, lineHeight: 24 },
-  artist: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.5, marginBottom: 12, textTransform: 'uppercase' },
+  artist: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.5, marginBottom: 12, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   why: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
   virtueName: { fontSize: 22, fontWeight: '400', color: colors.textPrimary, fontFamily: font.serif, marginBottom: 8 },
   virtueDef: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 16 },
@@ -297,8 +297,8 @@ const s = StyleSheet.create({
     marginBottom: 18,
   },
   virtueQuote: { fontSize: 15, color: colors.textPrimary, fontFamily: font.serif, lineHeight: 24, fontStyle: 'italic', marginBottom: 6 },
-  virtueQuoteAttr: { fontSize: 11, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' },
-  virtueArtLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, textTransform: 'uppercase', marginBottom: 8 },
+  virtueQuoteAttr: { fontSize: 11, color: colors.textMuted, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  virtueArtLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
 
   footerNote: {
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,

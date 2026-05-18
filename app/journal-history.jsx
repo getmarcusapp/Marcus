@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  View, Text, ScrollView, TextInput,
+  View, Text, ScrollView, TextInput, Image,
   TouchableOpacity, StyleSheet, SafeAreaView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
@@ -13,6 +13,7 @@ import { useEntitlement } from '../lib/useEntitlement';
 import { getJournals, updateJournalEntry } from '../store/db';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { GoldSecondary } from '../components/GoldButton';
 
 // Group entries by month for chronological browsing
 function groupByMonth(entries) {
@@ -178,8 +179,15 @@ export default function JournalHistoryScreen() {
             </View>
           ) : filteredHistory.length === 0 ? (
             <View style={s.empty}>
-              <Text style={s.emptyIcon}>{isMorning ? '☼' : '☽'}</Text>
-              <Text style={s.emptyTitle}>Your {isMorning ? 'mornings' : 'evenings'} are not yet written.</Text>
+              <Image
+                source={isMorning
+                  ? require('../assets/heroes/journal-morning.jpg')
+                  : require('../assets/heroes/journal-evening.jpg')}
+                style={s.emptyImage}
+                resizeMode="cover"
+              />
+              <Text style={s.emptyEyebrow}>{isMorning ? 'Morning practice' : 'Evening reckoning'}</Text>
+              <Text style={s.emptyTitle}>Your {isMorning ? 'mornings' : 'evenings'} are not yet written</Text>
               <Text style={s.emptyText}>
                 {isMorning
                   ? 'Four prompts each morning — what is in your control, where courage is required, what you are postponing, what difficulty might arise. Begin one when you are ready.'
@@ -209,14 +217,16 @@ export default function JournalHistoryScreen() {
                               <Text style={s.histEntryVirtue}>{entry.virtue}</Text>
                             )}
                           </View>
-                          <TouchableOpacity
+                          <GoldSecondary
                             style={s.editBtn}
                             onPress={() => hasAccess ? setEditingEntry(entry) : router.push('/paywall')}
-                            activeOpacity={0.7}
+                            contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                            borderWidth={0.5}
+                            flatStroke
                           >
                             <Ionicons name="create-outline" size={12} color={colors.accent} />
                             <Text style={s.editBtnText}>Edit</Text>
-                          </TouchableOpacity>
+                          </GoldSecondary>
                         </View>
                         {Object.entries(entry.answers || {}).map(([idx, answer]) => {
                           if (!answer || !answer.trim()) return null;
@@ -251,8 +261,8 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36 },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36 },
   sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8 },
   body: { paddingTop: 4 },
   searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
@@ -261,28 +271,29 @@ const s = StyleSheet.create({
   filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
   filterPillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
   filterPillText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
-  filterPillTextActive: { color: colors.accent, fontWeight: '500' },
+  filterPillTextActive: { color: colors.accent, fontFamily: font.bodyMedium },
   sortRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 6, paddingBottom: 8 },
   sortBtn: { paddingVertical: 4 },
   sortBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
   filterCount: { fontSize: 12, color: colors.textDim },
-  empty: { padding: 40, alignItems: 'center' },
-  emptyIcon: { fontSize: 36, color: colors.accentDim, marginBottom: 18 },
-  emptyTitle: { fontSize: 18, color: colors.textSecondary, fontFamily: font.serif, marginBottom: 12, textAlign: 'center' },
+  empty: { padding: 40, paddingTop: 56, alignItems: 'center' },
+  emptyImage: { width: 180, height: 108, borderRadius: 12, marginBottom: 24 },
+  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
+  emptyTitle: { fontSize: 26, color: colors.textPrimary, fontFamily: font.display, letterSpacing: -0.5, lineHeight: 32, marginBottom: 14, textAlign: 'center' },
   emptyText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center', marginBottom: 22 },
   emptyCta: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, paddingVertical: 12, paddingHorizontal: 22, backgroundColor: colors.accentBg },
-  emptyCtaText: { fontSize: 13, color: colors.accent, letterSpacing: 0.5, textTransform: 'uppercase' },
+  emptyCtaText: { fontSize: 13, color: colors.accent, letterSpacing: 0.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   monthHeader: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
-  monthHeaderText: { fontSize: 11, letterSpacing: 1.5, color: colors.accent, textTransform: 'uppercase', fontWeight: '600' },
+  monthHeaderText: { fontSize: 11, letterSpacing: 1.5, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', fontWeight: '600' },
   histEntry: { borderTopWidth: 0.5, borderTopColor: colors.border, padding: 16, backgroundColor: colors.bgCard },
   histEntryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
-  histEntryDate: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' },
+  histEntryDate: { fontSize: 13, color: colors.textSecondary, fontFamily: font.bodyMedium },
   histEntryVirtue: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5, textTransform: 'capitalize', marginTop: 2 },
   // Canonical EDIT chip — matches compass roleDeleteChip / compassPreviewEdit
   // (gold border, gold text + create-outline glyph, radius.md).
-  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: colors.accent, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5 },
+  editBtn: { borderRadius: 4, paddingHorizontal: 10, paddingVertical: 5 },
   editBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   histAnswerBlock: { marginTop: 8 },
-  histPromptNum: { fontSize: 9, letterSpacing: 1.5, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+  histPromptNum: { fontSize: 9, letterSpacing: 1.5, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   histAnswer: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
 });

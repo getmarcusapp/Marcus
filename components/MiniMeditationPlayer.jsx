@@ -8,7 +8,7 @@ import {
   MEDITATIONS, useMeditationPlayer,
   toggle, seek, unload, formatMedTime,
 } from '../lib/meditationPlayer';
-import { colors, radius } from '../constants/theme';
+import { colors, radius, font } from '../constants/theme';
 
 const TAB_BAR_HEIGHT = 84;
 
@@ -129,7 +129,7 @@ const s = StyleSheet.create({
     gap: 8,
   },
   titleArea: { flex: 1 },
-  title: { fontSize: 13, color: colors.textPrimary, fontWeight: '500' },
+  title: { fontSize: 13, color: colors.textPrimary, fontFamily: font.bodyMedium },
   time: { fontSize: 11, color: colors.textDim, marginTop: 2, letterSpacing: 0.3 },
   controls: { flexDirection: 'row', alignItems: 'center' },
   // 44pt tap targets per Apple HIG; consistent square buttons so spacing

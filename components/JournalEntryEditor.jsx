@@ -4,6 +4,7 @@ import {
   Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { colors, radius, font } from '../constants/theme';
+import { GoldPrimary, GoldSecondary } from './GoldButton';
 import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
 
 // Inline editor for editing a saved journal entry. Used from the
@@ -80,34 +81,31 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
       ))}
 
       <View style={s.btnRow}>
-        <TouchableOpacity style={s.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
+        <GoldSecondary style={s.cancelBtn} onPress={onCancel}>
           <Text style={s.cancelBtnText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </GoldSecondary>
+        <GoldPrimary
           style={s.saveBtn}
           onPress={() => onSave({ ...entry, answers })}
-          activeOpacity={0.8}
         >
           <Text style={s.saveBtnText}>Save changes</Text>
-        </TouchableOpacity>
+        </GoldPrimary>
       </View>
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="journalArchiveEditAccessory">
           <View style={s.accessoryBarPair}>
-            <TouchableOpacity
+            <GoldSecondary
               style={s.accessoryBtn}
               onPress={() => { Keyboard.dismiss(); onCancel(); }}
-              activeOpacity={0.8}
             >
               <Text style={s.accessoryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[s.accessoryBtn, s.accessoryBtnSave]}
+            </GoldSecondary>
+            <GoldPrimary
+              style={s.accessoryBtn}
               onPress={() => { Keyboard.dismiss(); onSave({ ...entry, answers }); }}
-              activeOpacity={0.8}
             >
               <Text style={[s.accessoryBtnText, s.accessoryBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save changes</Text>
-            </TouchableOpacity>
+            </GoldPrimary>
           </View>
         </InputAccessoryView>
       )}
@@ -118,19 +116,19 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
 const s = StyleSheet.create({
   container: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg, overflow: 'hidden', marginBottom: 12 },
   header: { backgroundColor: colors.accentBg, padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, textTransform: 'uppercase', letterSpacing: 0.8 },
+  headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', letterSpacing: 0.8 },
   headerDate: { fontSize: 13, color: colors.accentDim },
   virtueSection: { padding: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  sectionLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 10 },
+  sectionLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10 },
   virtuePills: { flexDirection: 'row', gap: 6 },
   vpill: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center' },
   vpillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  vpillName: { fontSize: 11, fontWeight: '500', color: colors.textDim },
+  vpillName: { fontSize: 11, fontFamily: font.bodyMedium, color: colors.textDim },
   vpillNameActive: { color: colors.accent },
   promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, padding: 14, backgroundColor: colors.bgCard },
   promptCardOpen: { backgroundColor: colors.bgElevated },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 6 },
+  promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontFamily: font.serif },
   promptSub: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: 6, lineHeight: 20 },
   promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 },
@@ -139,16 +137,16 @@ const s = StyleSheet.create({
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 12, padding: 12, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
   hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
-  hintTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+  hintTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   hintSource: { fontSize: 12, color: colors.textDim, fontStyle: 'italic', letterSpacing: 0.3 },
   hintDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 12, marginBottom: 12 },
   btnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
   // Library H56 outlined + filled-gold pair (matches editBtn / editBtnSave used
   // app-wide in compass / journal / emotions / review / read).
-  cancelBtn: { flex: 1, height: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.bg, borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
-  cancelBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  cancelBtn: { flex: 1, height: 56, borderRadius: radius.md, paddingHorizontal: 16 },
+  cancelBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   saveBtn: { flex: 1, height: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
-  saveBtnText: { fontSize: 14, fontWeight: '500', color: '#1a1a1a', letterSpacing: 0.3 },
+  saveBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: '#1a1a1a', letterSpacing: 0.3 },
   // Library accessory bar — H44 outlined + filled-gold pair so Save/Cancel
   // remain reachable above the keyboard while editing prompts.
   accessoryBarPair: {
@@ -157,11 +155,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8,
   },
   accessoryBtn: {
-    flex: 1, height: 44, borderWidth: 1, borderColor: colors.accent,
-    backgroundColor: colors.bg, borderRadius: radius.md,
-    paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center',
+    flex: 1, height: 44, borderRadius: radius.md,
+    paddingHorizontal: 16,
   },
   accessoryBtnSave: { backgroundColor: colors.accent },
-  accessoryBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  accessoryBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   accessoryBtnSaveText: { color: '#1a1a1a' },
 });

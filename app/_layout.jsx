@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Tabs, useRouter, useSegments, usePathname } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, AppState } from 'react-native';
-import { colors } from '../constants/theme';
+import { View, Text, AppState, Platform } from 'react-native';
+import { colors, font } from '../constants/theme';
 import { hasOnboarded, getHasSeenCompassIntro, setHasSeenCompassIntro } from '../store/db';
 import { initializePurchases } from '../store/purchases';
 import { scheduleReengagementNotifications, scheduleAllNotifications } from '../notifications';
@@ -12,6 +12,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MiniMeditationPlayer } from '../components/MiniMeditationPlayer';
 import { LockScreen } from '../components/LockScreen';
 import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
+import { useFonts, Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
+import { Cormorant_400Regular, Cormorant_500Medium, Cormorant_700Bold } from '@expo-google-fonts/cormorant';
 
 function TabIcon({ name, color, size = 22 }) {
   return <Ionicons name={name} size={size} color={color} />;
@@ -42,7 +44,7 @@ function ManagedTabLabel({ label, tabKey }) {
   const active = useLogicalTabKey() === tabKey;
   return (
     <Text
-      style={{ fontSize: 9, letterSpacing: 1.4, textTransform: 'uppercase', marginTop: 3, color: active ? colors.accent : colors.textDim }}
+      style={{ fontSize: 9, letterSpacing: 1.4, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 3, color: active ? colors.accent : colors.textDim }}
       numberOfLines={1}
       adjustsFontSizeToFit
       minimumFontScale={0.8}
@@ -79,6 +81,31 @@ function OnboardingGate() {
 
 export default function Layout() {
   const { isLocked } = useAppLock();
+  // Block first paint until brand fonts are loaded so headlines, body,
+  // and the Marcus wordmark all land with the right typography on cold
+  // start. Didot is iOS-system, no load needed.
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Cormorant_400Regular,
+    Cormorant_500Medium,
+    Cormorant_700Bold,
+  });
+
+  // Set Inter Regular as the default for any <Text> that doesn't set
+  // its own fontFamily. Runs after fonts load to avoid pointing at a
+  // not-yet-registered font name. Side-effect outside render to avoid
+  // the React-warning that bit us last time.
+  useEffect(() => {
+    if (!fontsLoaded) return;
+    if (Text.defaultProps?._marcusBrandFontApplied) return;
+    Text.defaultProps = Text.defaultProps || {};
+    const prior = Text.defaultProps.style;
+    Text.defaultProps.style = prior
+      ? [prior, { fontFamily: 'Inter_400Regular' }]
+      : { fontFamily: 'Inter_400Regular' };
+    Text.defaultProps._marcusBrandFontApplied = true;
+  }, [fontsLoaded]);
 
   useEffect(() => {
     // Boot the app lock first so the lock screen can show immediately on
@@ -115,6 +142,8 @@ export default function Layout() {
     return () => sub.remove();
   }, []);
 
+  if (!fontsLoaded) return null;
+
   return (
     <SafeAreaProvider>
       <OnboardingGate />
@@ -126,7 +155,7 @@ export default function Layout() {
           // single entry point to the app for non-trialing, non-paying
           // users.
           tabBarStyle: (route.name === 'onboarding' || route.name === 'paywall') ? { display: 'none' } : {
-            backgroundColor: '#080808',
+            backgroundColor: '#0d0a08',
             borderTopColor: colors.border,
             borderTopWidth: 0.5,
             height: 84,
@@ -138,7 +167,7 @@ export default function Layout() {
           tabBarLabelStyle: {
             fontSize: 9,
             letterSpacing: 1.4,
-            textTransform: 'uppercase',
+            fontFamily: font.bodyMedium, textTransform: 'uppercase',
             marginTop: 3,
           },
         })}

@@ -71,9 +71,8 @@ const s = StyleSheet.create({
     fontSize: 28,
     letterSpacing: 6,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 56,
-    fontWeight: '500',
   },
   quote: {
     fontSize: 56,
@@ -92,7 +91,7 @@ const s = StyleSheet.create({
     fontSize: 24,
     letterSpacing: 4,
     color: colors.accent,
-    fontWeight: '600',
+    fontFamily: font.bodyMedium,
     marginBottom: 6,
   },
   work: {
@@ -113,7 +112,7 @@ const s = StyleSheet.create({
     fontSize: 28,
     letterSpacing: 12,
     color: colors.textPrimary,
-    fontWeight: '300',
+    fontFamily: font.wordmark,
     marginBottom: 8,
   },
   tagline: {

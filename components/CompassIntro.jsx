@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, font } from '../constants/theme';
+import { GoldPrimary, GoldSecondary } from './GoldButton';
 import { COMPASS_FIELDS } from '../constants/compassFields';
 
 // First-visit walkthrough for the Compass screen. Lifts the experience that
@@ -107,29 +108,28 @@ export function CompassIntro({ compass, setCompass, onDismiss }) {
             </View>
           </ScrollView>
           <View style={s.footer}>
-            <TouchableOpacity style={s.primaryBtn} onPress={advanceOrFinish} activeOpacity={0.8}>
-              <Text style={s.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+            <GoldPrimary style={s.primaryBtn} onPress={advanceOrFinish}>
+              <Text style={[s.primaryBtnText, { color: '#1a1a1a' }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
                 {editIdx < COMPASS_FIELDS.length - 1 ? 'Next' : 'Save'}
               </Text>
-              <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
-            </TouchableOpacity>
+              <Ionicons name="arrow-forward" size={18} color="#1a1a1a" style={{ marginTop: 2 }} />
+            </GoldPrimary>
           </View>
         </KeyboardAvoidingView>
         {Platform.OS === 'ios' && (
           <InputAccessoryView nativeID="compassIntroAccessory">
             <View style={s.accessoryBarPair}>
-              <TouchableOpacity onPress={() => { Keyboard.dismiss(); goBack(); }} style={s.editBtn} activeOpacity={0.8}>
+              <GoldSecondary onPress={() => { Keyboard.dismiss(); goBack(); }} style={s.editBtn}>
                 <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </GoldSecondary>
+              <GoldPrimary
                 onPress={() => { Keyboard.dismiss(); advanceOrFinish(); }}
-                style={[s.editBtn, s.editBtnSave]}
-                activeOpacity={0.8}
+                style={s.editBtn}
               >
                 <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
                   {editIdx < COMPASS_FIELDS.length - 1 ? 'Next' : 'Save'}
                 </Text>
-              </TouchableOpacity>
+              </GoldPrimary>
             </View>
           </InputAccessoryView>
         )}
@@ -164,8 +164,8 @@ export function CompassIntro({ compass, setCompass, onDismiss }) {
               <View style={s.compassPreviewHeader}>
                 <Text style={s.compassPreviewLabel}>{field.label}</Text>
                 <View style={s.compassPreviewEdit}>
-                  <Text style={s.compassPreviewEditText}>EDIT</Text>
                   <Ionicons name="create-outline" size={12} color={colors.accent} />
+                  <Text style={s.compassPreviewEditText}>Edit</Text>
                 </View>
               </View>
               <Text style={s.compassPreviewText} numberOfLines={3}>
@@ -182,10 +182,10 @@ export function CompassIntro({ compass, setCompass, onDismiss }) {
         </View>
       </ScrollView>
       <View style={s.footer}>
-        <TouchableOpacity style={s.primaryBtn} onPress={onDismiss} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Use these to start</Text>
-          <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
-        </TouchableOpacity>
+        <GoldPrimary style={s.primaryBtn} onPress={onDismiss}>
+          <Text style={[s.primaryBtnText, { color: '#1a1a1a' }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Use these to start</Text>
+          <Ionicons name="arrow-forward" size={18} color="#1a1a1a" style={{ marginTop: 2 }} />
+        </GoldPrimary>
       </View>
     </SafeAreaView>
   );
@@ -206,12 +206,12 @@ const s = StyleSheet.create({
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 12,
   },
   stepTitle: {
     fontSize: 44,
-    fontWeight: '700',
+    fontFamily: font.display,
     color: '#FFFFFF',
     letterSpacing: -1.5,
     lineHeight: 52,
@@ -238,9 +238,9 @@ const s = StyleSheet.create({
     borderColor: colors.inputBorderActive,
   },
   compassInput: {
-    fontSize: 16,
+    fontSize: 18,
     color: colors.textMuted,
-    lineHeight: 26,
+    lineHeight: 28,
     minHeight: 140,
     textAlignVertical: 'top',
     fontFamily: font.serif,
@@ -265,7 +265,7 @@ const s = StyleSheet.create({
   },
   compassPreviewLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: font.bodyMedium,
     color: colors.textPrimary,
     letterSpacing: 0.2,
   },
@@ -275,21 +275,21 @@ const s = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: colors.accent,
     borderRadius: 6,
   },
+  // Matches the canonical archive EDIT chip — icon left, "Edit" right in
+  // title case (per Valeriya: the archive form is the one to align to).
   compassPreviewEditText: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 12,
     color: colors.accent,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   compassPreviewText: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.textMuted,
-    lineHeight: 22,
+    lineHeight: 24,
     fontFamily: font.serif,
   },
   compassFooterNote: {
@@ -332,7 +332,7 @@ const s = StyleSheet.create({
   },
   primaryBtnText: {
     fontSize: 15,
-    fontWeight: '500',
+    fontFamily: font.bodyMedium,
     color: colors.accent,
     letterSpacing: 0.3,
   },
@@ -349,15 +349,10 @@ const s = StyleSheet.create({
   editBtn: {
     flex: 1,
     height: 44,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.bg,
     borderRadius: radius.md,
     paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   editBtnSave: { backgroundColor: colors.accent },
-  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   editBtnSaveText: { color: '#1a1a1a' },
 });

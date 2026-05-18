@@ -6,9 +6,12 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getStreak } from '../store/db';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { useEntitlement } from '../lib/useEntitlement';
+
+const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 const menuItems = [
   {
@@ -56,12 +59,18 @@ export default function MoreScreen() {
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 
-        <View style={s.hero}>
+        <LinearGradient
+          colors={HERO_GRADIENT}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={s.hero}
+        >
           <Text style={s.title}>Marcus</Text>
           <Text style={s.sub}>A Stoic practice app</Text>
-          <Text style={s.heroQuote}>"Waste no more time arguing about what a good man should be. Be one."</Text>
+          <Text style={s.heroQuote}>"The impediment to action advances action. What stands in the way becomes the way."</Text>
           <Text style={s.heroAttr}>Marcus Aurelius</Text>
-        </View>
+        </LinearGradient>
 
         <View style={s.statsCard}>
           <View style={s.statItem}>
@@ -140,13 +149,12 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
   hero: {
-    backgroundColor: colors.bgDeep,
     padding: spacing.xl,
     paddingTop: 48,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
-  title: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -1.5, marginBottom: 8 },
+  title: { fontSize: font.heroSize, fontFamily: font.wordmark, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8 },
   sub: { fontSize: 18, color: colors.textSecondary, fontFamily: font.serif, marginBottom: 20 },
   statsCard: {
     flexDirection: 'row',
@@ -160,10 +168,10 @@ const s = StyleSheet.create({
   },
   statItem: { flex: 1, alignItems: 'center', paddingVertical: 16 },
   statNum: { fontSize: 26, fontWeight: '600', color: colors.textSecondary, marginBottom: 4 },
-  statLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
+  statLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   statDivider: { width: 0.5, backgroundColor: colors.border },
   heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24 },
-  heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase', marginTop: 8 },
+  heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 8 },
   section: { paddingHorizontal: spacing.md, paddingTop: spacing.lg, paddingBottom: 36 },
   card: {
     borderWidth: 0.5,
@@ -179,11 +187,11 @@ const s = StyleSheet.create({
     backgroundColor: colors.bgElevated, alignItems: 'center', justifyContent: 'center',
   },
   rowContent: { flex: 1 },
-  rowLabel: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
+  rowLabel: { fontSize: 16, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 2 },
   rowSub: { fontSize: 13, color: colors.textDim },
   footerQuote: {
     fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif,
     textAlign: 'center', lineHeight: 22, marginBottom: 8,
   },
-  footerAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
+  footerAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
 });

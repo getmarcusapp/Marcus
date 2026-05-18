@@ -98,16 +98,15 @@ export default function MeditateScreen() {
             <>
               <Image source={contextualMed.image} style={s.headerImage} resizeMode="cover" />
               <LinearGradient
-                colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
-                locations={[0, 0.55, 0.8, 1]}
+                colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.75)', 'rgba(0,0,0,0.95)']}
+                locations={[0, 0.4, 0.75, 1]}
                 style={StyleSheet.absoluteFillObject}
               />
             </>
           )}
           <View style={s.headerContent}>
-            <Text style={s.eyebrow}>Meditations</Text>
-            <Text style={s.title}>Stoic practice</Text>
-            <Text style={s.sub}>Ancient attention training for the modern day.</Text>
+            <Text style={s.eyebrow}>Six guided meditations</Text>
+            <Text style={s.title}>{`Ancient attention\ntraining`}</Text>
           </View>
         </View>
 
@@ -229,9 +228,9 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  headerContent: { paddingHorizontal: spacing.lg, paddingTop: 52, paddingBottom: spacing.xl },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 },
+  headerContent: { paddingHorizontal: 28, paddingTop: 48, paddingBottom: 32 },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, textShadowColor: 'rgba(0,0,0,0.85)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
+  title: { fontSize: 44, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1.5, lineHeight: 52, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
 
   player: {
@@ -247,7 +246,7 @@ const s = StyleSheet.create({
   playerHeroImg: { width: '100%', height: '100%' },
   playerHeroText: { position: 'absolute', left: spacing.lg, right: spacing.lg, bottom: 14 },
   playerBody: { padding: spacing.lg },
-  playerSubtitle: { fontSize: font.labelSize, color: colors.accent, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 },
+  playerSubtitle: { fontSize: font.labelSize, color: colors.accent, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   playerTitle: { fontSize: 22, fontWeight: '600', color: colors.textPrimary },
   playerDesc: { fontSize: 14, color: colors.textMuted, lineHeight: 20, marginBottom: spacing.lg },
 
@@ -275,7 +274,7 @@ const s = StyleSheet.create({
   skipBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 
   list: { paddingHorizontal: spacing.lg },
-  sectionLabel: { fontSize: font.labelSize, color: colors.textDim, letterSpacing: 2, textTransform: 'uppercase', marginBottom: spacing.md },
+  sectionLabel: { fontSize: font.labelSize, color: colors.textDim, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: spacing.md },
 
   medCard: {
     flexDirection: 'row',
@@ -299,7 +298,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   medText: { flex: 1 },
-  medTitle: { fontSize: 15, fontWeight: '500', color: colors.textSecondary, marginBottom: 3 },
+  medTitle: { fontSize: 15, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 3 },
   medTitleActive: { color: colors.textPrimary },
   medMeta: { fontSize: 12, color: colors.textDim },
 });

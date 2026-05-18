@@ -18,7 +18,7 @@ import * as haptics from '../lib/haptics';
 import { useEntitlement } from '../lib/useEntitlement';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
-const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
+const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
@@ -453,7 +453,7 @@ export default function PracticeScreen() {
         {streak.totalDays === 0 && completed === 0 && !morningComplete && (
           <View style={s.welcomeCard}>
             <Text style={s.welcomeEyebrow}>Welcome</Text>
-            <Text style={s.welcomeTitle}>Your practice begins today</Text>
+            <Text style={s.welcomeTitle}>Start with one.</Text>
             <Text style={s.welcomeText}>
               Four steps below. Take them as the day allows. There is no streak to defend yet — only the practice.
             </Text>
@@ -565,8 +565,8 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   skullIcon: { width: 180, height: 180, marginBottom: 20, opacity: 0.9 },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
-  heroDate: { fontSize: font.heroSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -1, marginBottom: 8, textAlign: 'center' },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
+  heroDate: { fontSize: font.heroSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
   heroSub: { fontSize: font.subSize, color: colors.textMuted, textAlign: 'center' },
 
   // Sealed hero
@@ -580,9 +580,9 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   skullIconSealed: { width: 180, height: 180, marginBottom: 24, opacity: 1 },
-  sealedEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
-  sealedDate: { fontSize: font.titleSize, fontWeight: '600', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
-  sealedStreak: { fontSize: 48, fontWeight: '700', color: colors.accent, letterSpacing: -1, textAlign: 'center' },
+  sealedEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
+  sealedDate: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
+  sealedStreak: { fontSize: 48, fontFamily: font.display, color: colors.accent, letterSpacing: -0.5, textAlign: 'center' },
 
   // Sealed quote
   sealedCard: {
@@ -628,10 +628,10 @@ const s = StyleSheet.create({
     paddingVertical: 10, paddingHorizontal: 14,
     marginBottom: 12, alignItems: 'center',
   },
-  trialBannerText: { fontSize: 12, color: colors.accent, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: '500' },
+  trialBannerText: { fontSize: 12, color: colors.accent, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: font.bodyMedium },
   practiceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 8, marginBottom: 10 },
-  practiceCount: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accentDim, textTransform: 'uppercase' },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
+  practiceCount: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accentDim, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   progressBar: { height: 1, backgroundColor: colors.border, borderRadius: 1, marginBottom: 8, overflow: 'hidden', flexDirection: 'row' },
   progressFill: { backgroundColor: colors.textPrimary, borderRadius: 1 },
 
@@ -657,8 +657,8 @@ const s = StyleSheet.create({
   tag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
   tagNext: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
   tagAccent: { borderColor: colors.borderMid },
-  tagText: { fontSize: 10, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' },
-  tagTextNext: { color: colors.accent, fontWeight: '500' },
+  tagText: { fontSize: 10, color: colors.textMuted, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  tagTextNext: { color: colors.accent, fontFamily: font.bodyMedium },
   tagTextAccent: { color: colors.textMuted },
 
   morningCompleteCard: {
@@ -668,7 +668,7 @@ const s = StyleSheet.create({
     padding: spacing.xl,
     paddingVertical: 18,
   },
-  morningCompleteEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 6 },
+  morningCompleteEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   morningCompleteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
 
   // Day-1 welcome — shows on the very first practice screen view, before
@@ -681,7 +681,7 @@ const s = StyleSheet.create({
     padding: spacing.xl,
     paddingVertical: 22,
   },
-  welcomeEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
+  welcomeEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
   welcomeTitle: { fontSize: 20, color: colors.textPrimary, fontFamily: font.serif, marginBottom: 10 },
   welcomeText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
 
@@ -713,8 +713,8 @@ const s = StyleSheet.create({
   },
   medBody: { padding: 22, paddingTop: 18 },
   medTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
-  medEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase' },
-  medSubtitle: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 6 },
+  medEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  medSubtitle: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   medTitle: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
   medDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 14 },
   medMeta: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
@@ -730,5 +730,5 @@ const s = StyleSheet.create({
   medTimeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   medTimeText: { fontSize: 11, color: colors.textDim, letterSpacing: 0.3 },
   medAllBtn: { alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 12, marginBottom: 20 },
-  medAllText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  medAllText: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
 });

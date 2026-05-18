@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, font } from '../constants/theme';
+import { GoldPrimary } from '../components/GoldButton';
 
-const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
+const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 // Post-paywall confirmation screen. Sits between the paywall and the
 // Practice tab so the "your practice begins now" moment lands after the
@@ -32,13 +33,12 @@ export default function ReadyScreen() {
           <Text style={s.streak}>Day 1</Text>
         </View>
         <View style={s.footer}>
-          <TouchableOpacity
+          <GoldPrimary
             style={s.primaryBtn}
             onPress={() => router.replace('/')}
-            activeOpacity={0.8}
           >
             <Text style={s.primaryBtnText}>Go to Practice →</Text>
-          </TouchableOpacity>
+          </GoldPrimary>
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -59,13 +59,13 @@ const s = StyleSheet.create({
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 14,
     textAlign: 'center',
   },
   title: {
     fontSize: 44,
-    fontWeight: '700',
+    fontFamily: font.display,
     color: '#FFFFFF',
     letterSpacing: -1.5,
     marginBottom: 16,
@@ -91,11 +91,8 @@ const s = StyleSheet.create({
   },
   // H56 per library — matches onboarding primaryBtn + paywall cta.
   primaryBtn: {
-    backgroundColor: colors.accent,
     borderRadius: radius.md,
     height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   primaryBtnText: {
     fontSize: 15,

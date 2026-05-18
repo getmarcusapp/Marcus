@@ -265,8 +265,8 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  heroTitle: { fontSize: font.heroSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 12, lineHeight: 38 },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  heroTitle: { fontSize: font.heroSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.8, marginBottom: 12, lineHeight: 38 },
   heroSub: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
 
   // Search + sort
@@ -288,7 +288,7 @@ const s = StyleSheet.create({
   },
   sortBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
   sortBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
-  sortBtnTextActive: { color: colors.accent, fontWeight: '500' },
+  sortBtnTextActive: { color: colors.accent, fontFamily: font.bodyMedium },
   resultCount: { fontSize: 12, color: colors.textDim, marginLeft: 'auto' },
 
   // Sticky section chips
@@ -307,7 +307,7 @@ const s = StyleSheet.create({
   // Active filter pill — gold border + tinted bg + gold text (matches the
   // archive filter pill pattern in read-archive / emotions-history).
   chipActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  chipText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.3, fontWeight: '500' },
+  chipText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.3, fontFamily: font.bodyMedium },
   chipTextActive: { color: colors.accent },
   chipTextDim: { color: colors.textDim },
   chipCount: { fontSize: 12, color: colors.textDim, fontWeight: '400' },
@@ -316,7 +316,7 @@ const s = StyleSheet.create({
   body: { padding: spacing.md, paddingTop: spacing.lg },
 
   sectionWrap: { marginBottom: 28, marginTop: 18 },
-  sectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 6, paddingHorizontal: 4 },
+  sectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6, paddingHorizontal: 4 },
   sectionSub: { fontSize: 14, color: colors.textMuted, lineHeight: 22, marginBottom: 14, paddingHorizontal: 4 },
 
   card: {
@@ -325,7 +325,7 @@ const s = StyleSheet.create({
   },
   title: { fontSize: 19, color: colors.textPrimary, fontFamily: font.serif, marginBottom: 4, lineHeight: 26 },
   byline: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', marginBottom: 12 },
-  author: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase', marginRight: 4 },
+  author: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginRight: 4 },
   translator: { fontSize: 12, color: colors.textDim, fontStyle: 'italic' },
   why: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 16 },
 
@@ -335,11 +335,11 @@ const s = StyleSheet.create({
     paddingVertical: 10, paddingHorizontal: 14,
     backgroundColor: colors.accentBg,
   },
-  primaryLinkText: { fontSize: 12, color: colors.accent, fontWeight: '500', letterSpacing: 0.8, textTransform: 'uppercase' },
+  primaryLinkText: { fontSize: 12, color: colors.accent, fontFamily: font.bodyMedium, letterSpacing: 0.8, textTransform: 'uppercase' },
   secondaryLink: {
     paddingVertical: 10, paddingHorizontal: 4,
   },
-  secondaryLinkText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.5, textTransform: 'uppercase' },
+  secondaryLinkText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
 
   empty: { padding: 40, alignItems: 'center' },
   emptyTitle: { fontSize: 18, color: colors.textSecondary, fontFamily: font.serif, marginBottom: 12, textAlign: 'center' },

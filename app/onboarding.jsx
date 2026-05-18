@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { saveCompass, setHasOnboarded, setHasSeenCompassIntro } from '../store/db';
 import { DEFAULT_COMPASS } from '../constants/compassFields';
+import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
 import { MEDITATIONS_LIST, playPreview, stopPreview, useMeditationPlayer } from '../lib/meditationPlayer';
 import { pickAndImportBackup } from '../lib/backup';
@@ -38,7 +39,7 @@ const DEFAULT_NOTIF_SETTINGS = {
   reviewDay: 0,
 };
 
-const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
+const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 // Roman numerals used as left-side row markers in PracticePreview and
 // MeditationsStep. They convey order/sequence rather than completion,
@@ -166,18 +167,18 @@ function WelcomeStep({ onNext }) {
             <>
               <View style={s.welcomeDivider} />
               <Text style={s.welcomeTagline}>
-                “The impediment to action advances action. What stands in the way becomes the way.”
+                “Waste no more time arguing about what a good man should be. Be one.”
               </Text>
-              <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations V.20</Text>
+              <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations X.16</Text>
             </>
           )}
 
         </ScrollView>
         <View style={s.footer}>
-          <TouchableOpacity style={s.primaryBtn} onPress={handleNext} activeOpacity={0.8}>
-            <Text style={s.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
-            <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
-          </TouchableOpacity>
+          <GoldPrimary style={s.primaryBtn} onPress={handleNext}>
+            <Text style={[s.primaryBtnText, s.primaryBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
+            <Ionicons name="arrow-forward" size={18} color="#1a1a1a" style={{ marginTop: 2 }} />
+          </GoldPrimary>
           <TouchableOpacity onPress={handleRestore} activeOpacity={0.7} style={s.welcomeRestore}>
             <Text style={s.welcomeRestoreText}>I have a backup from another device</Text>
           </TouchableOpacity>
@@ -196,8 +197,16 @@ function PhilosophyStep({ onNext }) {
         contentContainerStyle={{ paddingBottom: 140 }}
       >
         <View style={s.stepHero}>
-          <Text style={s.stepEyebrow}>What is Marcus?</Text>
-          <Text style={s.stepTitle}>A daily Stoic{'\n'}practice</Text>
+          <Image source={require('../assets/heroes/compass.jpg')} style={s.stepHeroImg} resizeMode="cover" />
+          <LinearGradient
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.75)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.4, 0.75, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={s.stepHeroText}>
+            <Text style={s.stepEyebrow}>What is Marcus?</Text>
+            <Text style={s.stepTitle}>A daily Stoic{'\n'}practice</Text>
+          </View>
         </View>
 
         <View style={s.stepBody}>
@@ -227,10 +236,10 @@ function PhilosophyStep({ onNext }) {
         </View>
       </ScrollView>
       <View style={s.footer}>
-        <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
-          <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
-        </TouchableOpacity>
+        <GoldPrimary style={s.primaryBtn} onPress={onNext}>
+          <Text style={[s.primaryBtnText, s.primaryBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
+          <Ionicons name="arrow-forward" size={18} color="#1a1a1a" style={{ marginTop: 2 }} />
+        </GoldPrimary>
       </View>
     </SafeAreaView>
   );
@@ -246,6 +255,7 @@ function PracticePreviewStep({ onNext }) {
   ];
 
   const extras = [
+    { title: 'Guided meditations', sub: 'Voiced, contextual, optional' },
     { title: 'Weekly Review', sub: 'Seal the week' },
     { title: 'Emotion log', sub: 'Reframe in the moment' },
     { title: 'Optional FaceID lock', sub: 'Your practice stays private' },
@@ -254,10 +264,18 @@ function PracticePreviewStep({ onNext }) {
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
-        <View style={s.previewHero}>
-          <Text style={s.previewEyebrow}>Your daily practice</Text>
-          <Text style={s.previewTitle}>{`This is what\neach day looks like`}</Text>
-          <Text style={s.previewSub}>Four elements. Executed with intention.</Text>
+        <View style={s.stepHero}>
+          <Image source={require('../assets/heroes/journal-morning.jpg')} style={s.stepHeroImg} resizeMode="cover" />
+          <LinearGradient
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.75)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.4, 0.75, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={s.stepHeroText}>
+            <Text style={s.stepEyebrow}>Your daily practice</Text>
+            <Text style={s.stepTitle}>The shape{'\n'}of your day</Text>
+            <Text style={s.stepSub}>Four elements. Executed with intention.</Text>
+          </View>
         </View>
 
         <View style={s.previewBody}>
@@ -300,10 +318,10 @@ function PracticePreviewStep({ onNext }) {
       </ScrollView>
 
       <View style={s.footer}>
-        <TouchableOpacity style={s.primaryBtn} onPress={onNext} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
-          <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
-        </TouchableOpacity>
+        <GoldPrimary style={s.primaryBtn} onPress={onNext}>
+          <Text style={[s.primaryBtnText, s.primaryBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
+          <Ionicons name="arrow-forward" size={18} color="#1a1a1a" style={{ marginTop: 2 }} />
+        </GoldPrimary>
       </View>
     </SafeAreaView>
   );
@@ -333,20 +351,18 @@ function MeditationsStep({ onNext }) {
             resizeMode="cover"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.95)']}
-            locations={[0, 0.55, 1]}
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.75)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.4, 0.75, 1]}
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.medOnbHeroText}>
             <Text style={s.previewEyebrow}>Six guided meditations</Text>
-            <Text style={s.previewTitle}>{`Ancient attention\ntraining, voiced`}</Text>
-            <Text style={s.previewSub}>Less than 5 minutes each. Optional, but they deepen the practice.</Text>
+            <Text style={s.previewTitle}>{`Ancient attention\ntraining`}</Text>
           </View>
         </View>
 
         <View style={s.previewBody}>
-          <Text style={s.previewHint}>Tap any to hear a 12-second excerpt.</Text>
-          <View style={s.previewCard}>
+          <View>
             {MEDITATIONS_LIST.map((m, idx) => {
               const previewing = previewMedId === m.id;
               const loading = previewing && isLoading;
@@ -355,38 +371,38 @@ function MeditationsStep({ onNext }) {
                   key={m.id}
                   activeOpacity={0.7}
                   onPress={() => previewing ? stopPreview() : playPreview(m)}
-                  style={[s.previewRow, idx < MEDITATIONS_LIST.length - 1 && s.previewRowBorder]}
+                  style={[s.medOnbCard, idx < MEDITATIONS_LIST.length - 1 && s.medOnbCardBorder]}
                 >
-                  <Text style={[s.previewNum, previewing && { color: colors.accent }]}>{ROMAN[idx]}</Text>
-                  <View style={s.previewContent}>
-                    <Text style={[s.previewItemTitle, previewing && { color: colors.accent }]}>{m.title}</Text>
-                    <Text style={s.previewItemSub}>
-                      {loading ? 'Loading…' : previewing ? 'Listening · 12-second excerpt' : m.subtitle}
-                    </Text>
+                  <View style={s.medOnbLeft}>
+                    <View style={s.medOnbThumb}>
+                      <Image source={m.image} style={s.medOnbThumbImg} resizeMode="cover" />
+                      <View style={s.medOnbThumbOverlay}>
+                        <Ionicons
+                          name={previewing ? 'stop-circle' : 'play-circle'}
+                          size={30}
+                          color={previewing ? colors.accent : '#fff'}
+                        />
+                      </View>
+                    </View>
+                    <View style={s.medOnbText}>
+                      <Text style={[s.medOnbTitle, previewing && { color: colors.accent }]}>{m.title}</Text>
+                      <Text style={s.medOnbMeta}>
+                        {loading ? 'Loading…' : previewing ? 'Listening · 12-second excerpt' : m.subtitle}
+                      </Text>
+                    </View>
                   </View>
-                  <Ionicons
-                    name={previewing ? 'stop-circle' : 'play-circle'}
-                    size={30}
-                    color={previewing ? colors.accent : colors.accentDim}
-                  />
                 </TouchableOpacity>
               );
             })}
-          </View>
-
-          <View style={s.previewNote}>
-            <Text style={s.previewNoteText}>
-              The practice card surfaces the right one for the time of day. Listen on the way to work, before journaling, or anytime you need to return to yourself.
-            </Text>
           </View>
         </View>
       </ScrollView>
 
       <View style={s.footer}>
-        <TouchableOpacity style={s.primaryBtn} onPress={handleAdvance} activeOpacity={0.8}>
-          <Text style={s.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
-          <Ionicons name="arrow-forward" size={18} color={colors.accent} style={{ marginTop: 2 }} />
-        </TouchableOpacity>
+        <GoldPrimary style={s.primaryBtn} onPress={handleAdvance}>
+          <Text style={[s.primaryBtnText, s.primaryBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
+          <Ionicons name="arrow-forward" size={18} color="#1a1a1a" style={{ marginTop: 2 }} />
+        </GoldPrimary>
       </View>
     </SafeAreaView>
   );
@@ -459,8 +475,16 @@ function RemindersStep({ onNext }) {
         contentContainerStyle={{ paddingBottom: 180 }}
       >
         <View style={s.stepHero}>
-          <Text style={s.stepEyebrow}>Stay anchored</Text>
-          <Text style={s.stepTitle}>A few gentle{'\n'}reminders</Text>
+          <Image source={require('../assets/meditations/img/evening-examination.jpg')} style={s.stepHeroImg} resizeMode="cover" />
+          <LinearGradient
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.75)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.4, 0.75, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={s.stepHeroText}>
+            <Text style={s.stepEyebrow}>Stay anchored</Text>
+            <Text style={s.stepTitle}>A few gentle{'\n'}reminders</Text>
+          </View>
         </View>
 
         <View style={s.stepBody}>
@@ -480,19 +504,21 @@ function RemindersStep({ onNext }) {
                   <View style={s.reminderRowTop}>
                     <Text style={s.reminderTime}>{formatReminderTime(hour, minute, weekday)}</Text>
                     <Text style={s.reminderName}>{r.name}</Text>
-                    <TouchableOpacity
+                    <GoldSecondary
                       onPress={() => setEditingRow(isEditing ? null : r.name)}
                       style={s.compassPreviewEdit}
-                      activeOpacity={0.7}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                      borderWidth={0.5}
+                      flatStroke
                     >
-                      <Text style={s.compassPreviewEditText}>{isEditing ? 'Done' : 'Edit'}</Text>
                       <Ionicons
-                        name={isEditing ? 'checkmark' : 'create-outline'}
+                        name={isEditing ? 'checkmark-outline' : 'create-outline'}
                         size={12}
                         color={colors.accent}
                       />
-                    </TouchableOpacity>
+                      <Text style={s.compassPreviewEditText}>{isEditing ? 'Done' : 'Edit'}</Text>
+                    </GoldSecondary>
                   </View>
                   {isEditing && (
                     <ReminderTimeAdjuster
@@ -514,12 +540,12 @@ function RemindersStep({ onNext }) {
       </ScrollView>
 
       <View style={[s.footer, s.footerRow]}>
-        <TouchableOpacity style={[s.primaryBtn, s.primaryBtnHalf]} onPress={onNext} activeOpacity={0.8}>
+        <GoldSecondary style={[s.primaryBtn, s.primaryBtnHalf]} onPress={onNext}>
           <Text style={s.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Maybe later</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[s.primaryBtn, s.primaryBtnHalf, s.primaryBtnFilled]} onPress={handleEnable} activeOpacity={0.8}>
+        </GoldSecondary>
+        <GoldPrimary style={[s.primaryBtn, s.primaryBtnHalf]} onPress={handleEnable}>
           <Text style={[s.primaryBtnText, s.primaryBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Set reminders</Text>
-        </TouchableOpacity>
+        </GoldPrimary>
       </View>
     </SafeAreaView>
   );
@@ -551,13 +577,13 @@ const s = StyleSheet.create({
   welcomeSkullSmall: { width: 110, height: 110, marginBottom: 16 },
   welcomeTitle: {
     fontSize: 64,
-    fontWeight: '700',
+    fontFamily: font.wordmark,
     color: '#FFFFFF',
-    letterSpacing: -3,
+    letterSpacing: -1,
     marginBottom: 10,
     textAlign: 'center',
   },
-  welcomeTitleSmall: { fontSize: 44, letterSpacing: -2, marginBottom: 6 },
+  welcomeTitleSmall: { fontSize: 44, letterSpacing: -0.5, marginBottom: 6 },
   welcomeSub: {
     fontSize: 20,
     color: colors.textSecondary,
@@ -573,11 +599,11 @@ const s = StyleSheet.create({
     marginBottom: 28,
   },
   welcomeTagline: {
-    fontSize: 17,
+    fontSize: 20,
     color: colors.textMuted,
     fontFamily: font.serif,
     textAlign: 'center',
-    lineHeight: 28,
+    lineHeight: 30,
     marginBottom: 12,
   },
   welcomeAttr: {
@@ -598,7 +624,7 @@ const s = StyleSheet.create({
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 10,
   },
   // Library-spec input states: non-active = darker stroke + grey text;
@@ -643,10 +669,9 @@ const s = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   medOnbHeroImg: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  medOnbHeroText: { padding: 36, paddingTop: 48, paddingBottom: 32, alignItems: 'center' },
-  previewEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' },
-  previewTitle: { fontSize: 44, fontWeight: '700', color: '#FFFFFF', letterSpacing: -1.5, marginBottom: 14, textAlign: 'center', lineHeight: 52 },
-  previewSub: { fontSize: 17, color: colors.textMuted, textAlign: 'center', lineHeight: 26 },
+  medOnbHeroText: { padding: 28, paddingTop: 48, paddingBottom: 32 },
+  previewEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, textShadowColor: 'rgba(0,0,0,0.85)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
+  previewTitle: { fontSize: 44, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1.5, lineHeight: 52, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   previewBody: { padding: 20 },
   previewCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, overflow: 'hidden', marginBottom: 16 },
   previewRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
@@ -656,29 +681,41 @@ const s = StyleSheet.create({
   // complete.
   previewNum: { width: 28, fontSize: 12, color: colors.accent, letterSpacing: 1.5, fontWeight: '600', textAlign: 'center' },
   previewHint: { fontSize: 12, color: colors.textMuted, fontStyle: 'italic', marginBottom: 12, paddingHorizontal: 4, letterSpacing: 0.3 },
+  // Meditation card pattern — mirrors the in-app /meditate list so the
+  // onboarding preview shows the actual product design (painting thumbnail
+  // + title + meta) instead of a generic numbered list.
+  medOnbCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 },
+  medOnbCardBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  medOnbLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, flex: 1 },
+  medOnbThumb: { width: 64, height: 64, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000', position: 'relative' },
+  medOnbThumbImg: { width: '100%', height: '100%' },
+  medOnbThumbOverlay: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.4)' },
+  medOnbText: { flex: 1 },
+  medOnbTitle: { fontSize: 15, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 3 },
+  medOnbMeta: { fontSize: 12, color: colors.textDim },
   previewContent: { flex: 1 },
-  previewItemTitle: { fontSize: 16, fontWeight: '500', color: colors.textSecondary, marginBottom: 2 },
+  previewItemTitle: { fontSize: 16, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 2 },
   previewItemSub: { fontSize: 13, color: colors.textMuted },
   previewTag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
   previewTagNext: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  previewTagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, textTransform: 'uppercase' },
-  previewTagTextNext: { color: colors.accent, fontWeight: '500' },
+  previewTagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  previewTagTextNext: { color: colors.accent, fontFamily: font.bodyMedium },
   previewNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, backgroundColor: colors.bgDeep },
   previewNoteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
-  extrasHeading: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginTop: 28, marginBottom: 12, paddingHorizontal: 4 },
+  extrasHeading: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 28, marginBottom: 12, paddingHorizontal: 4 },
 
   readySkull: { width: 180, height: 180, marginBottom: 28, opacity: 1 },
   readyEyebrow: {
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 14,
     textAlign: 'center',
   },
   readyTitle: {
     fontSize: 44,
-    fontWeight: '700',
+    fontFamily: font.display,
     color: '#FFFFFF',
     letterSpacing: -1.5,
     marginBottom: 16,
@@ -718,37 +755,54 @@ const s = StyleSheet.create({
     fontSize: 13,
     color: colors.accent,
     letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    fontWeight: '500',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
+    fontFamily: font.bodyMedium,
   },
-  // Step screens
+  // Step screens — image-hero pattern: full-bleed painting underneath,
+  // text aligned to bottom-left, dark gradient overlay for legibility.
+  // Mirrors the meditations step and in-app /meditate header. Padding is
+  // on the inner `stepHeroText` wrapper, not the container — otherwise
+  // iOS clips the absolutely-positioned painting to the content box and
+  // a black gutter appears on the right.
   stepHero: {
     backgroundColor: colors.bgDeep,
-    paddingHorizontal: 28,
-    paddingTop: 84,
-    paddingBottom: 32,
+    minHeight: 320,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
+  stepHeroImg: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  stepHeroText: { paddingHorizontal: 28, paddingTop: 48, paddingBottom: 32 },
   stepEyebrow: {
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 12,
+    textShadowColor: 'rgba(0,0,0,0.85)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
   },
   stepTitle: {
     fontSize: 44,
-    fontWeight: '700',
+    fontFamily: font.display,
     color: '#FFFFFF',
     letterSpacing: -1.5,
     lineHeight: 52,
     marginBottom: 14,
+    textShadowColor: 'rgba(0,0,0,0.7)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
   },
   stepSub: {
     fontSize: 17,
     color: colors.textMuted,
     lineHeight: 26,
+    textShadowColor: 'rgba(0,0,0,0.7)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
   },
   stepBody: {
     paddingHorizontal: 24,
@@ -767,7 +821,7 @@ const s = StyleSheet.create({
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 20,
   },
   reminderList: {
@@ -800,7 +854,7 @@ const s = StyleSheet.create({
   reminderName: {
     fontSize: 15,
     color: colors.textSecondary,
-    fontWeight: '500',
+    fontFamily: font.bodyMedium,
     flex: 1,
   },
   reminderAdjuster: {
@@ -951,21 +1005,20 @@ const s = StyleSheet.create({
   // glyph (create-outline) rendered as an Ionicon for true baseline
   // alignment with the text.
   compassPreviewEdit: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    borderRadius: 6,
+    borderRadius: 4,
+    // Pin width so Edit ↔ Done states render at the same chip size
+    // (D + o glyphs in "Done" are wider than E + i in "Edit", which
+    // would otherwise grow the chip when entering edit mode).
+    minWidth: 64,
   },
+  // Matches the canonical archive EDIT chip — icon left, "Edit" right in
+  // title case (per Valeriya: the archive form is the one to align to).
   compassPreviewEditText: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 12,
     color: colors.accent,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   compassPreviewText: {
     fontSize: 14,
@@ -987,16 +1040,11 @@ const s = StyleSheet.create({
   editBtn: {
     flex: 1,
     height: 44,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.bg,
     borderRadius: radius.md,
     paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   editBtnSave: { backgroundColor: colors.accent },
-  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   editBtnSaveText: { color: '#1a1a1a' },
   skipLink: { paddingVertical: 20, alignItems: 'center' },
   skipLinkText: { fontSize: 15, color: colors.textDim },
@@ -1029,14 +1077,8 @@ const s = StyleSheet.create({
   // Matches the keyboard accessory editBtn so the whole app converges on
   // one primary-button size on iPhone width.
   primaryBtn: {
-    backgroundColor: colors.bg,
-    borderWidth: 0.5,
-    borderColor: colors.accent,
     borderRadius: radius.md,
     height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: 24,
     gap: 8,
   },
@@ -1047,7 +1089,7 @@ const s = StyleSheet.create({
   },
   primaryBtnText: {
     fontSize: 15,
-    fontWeight: '500',
+    fontFamily: font.bodyMedium,
     color: colors.accent,
     letterSpacing: 0.3,
   },
@@ -1079,7 +1121,7 @@ const s = StyleSheet.create({
   },
   welcomeAccessoryBtnText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: font.bodyMedium,
     color: '#1a1a1a',
     letterSpacing: 0.3,
   },

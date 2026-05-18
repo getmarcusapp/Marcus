@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import {
-  View, Text, ScrollView, TextInput,
+  View, Text, ScrollView, TextInput, Image,
   TouchableOpacity, StyleSheet, SafeAreaView,
   Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
@@ -11,6 +11,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getReadingLog, updateReadingInsight } from '../store/db';
 import { useEntitlement } from '../lib/useEntitlement';
+import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 
 const virtueColor = {
   Wisdom: '#7a9aaa',
@@ -158,8 +159,9 @@ export default function ReadArchiveScreen() {
             </View>
           ) : filteredLog.length === 0 ? (
             <View style={s.empty}>
+              <Image source={require('../assets/heroes/read.jpg')} style={s.emptyImage} resizeMode="cover" />
               <Text style={s.emptyEyebrow}>Ancient wisdom for this day</Text>
-              <Text style={s.emptyTitle}>Your archive is empty.</Text>
+              <Text style={s.emptyTitle}>Your archive is empty</Text>
               <Text style={s.emptyText}>
                 Each day, a fresh reading: a real Stoic passage chosen for you, with space to write your own insight before the day begins. Save the first, and the days accumulate here.
               </Text>
@@ -184,14 +186,16 @@ export default function ReadArchiveScreen() {
                         )}
                       </View>
                       {!isEditing && (
-                        <TouchableOpacity
+                        <GoldSecondary
                           style={s.editBtn}
                           onPress={() => hasAccess ? (setEditingId(entry.id), setEditDraft(entry.insight || '')) : router.push('/paywall')}
-                          activeOpacity={0.7}
+                          contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                          borderWidth={0.5}
+                          flatStroke
                         >
                           <Ionicons name="create-outline" size={12} color={colors.accent} />
                           <Text style={s.editBtnText}>Edit</Text>
-                        </TouchableOpacity>
+                        </GoldSecondary>
                       )}
                     </View>
                     {entry.reading?.theme && (
@@ -232,20 +236,18 @@ export default function ReadArchiveScreen() {
       {Platform.OS === 'ios' && editingId && (
         <InputAccessoryView nativeID="readArchiveInsightAccessory">
           <View style={s.accessoryBarPair}>
-            <TouchableOpacity
+            <GoldSecondary
               style={s.editBtnAccessory}
               onPress={() => { Keyboard.dismiss(); setEditingId(null); setEditDraft(''); }}
-              activeOpacity={0.8}
             >
               <Text style={s.editBtnAccessoryText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[s.editBtnAccessory, s.editBtnAccessorySave]}
+            </GoldSecondary>
+            <GoldPrimary
+              style={s.editBtnAccessory}
               onPress={() => { Keyboard.dismiss(); handleEditSave(); }}
-              activeOpacity={0.8}
             >
               <Text style={[s.editBtnAccessoryText, s.editBtnAccessorySaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save</Text>
-            </TouchableOpacity>
+            </GoldPrimary>
           </View>
         </InputAccessoryView>
       )}
@@ -263,8 +265,8 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 8 },
-  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36 },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36 },
   sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8 },
   body: { paddingTop: 4 },
   searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
@@ -273,11 +275,12 @@ const s = StyleSheet.create({
   filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
   filterPillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
   filterPillText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
-  filterPillTextActive: { color: colors.accent, fontWeight: '500' },
+  filterPillTextActive: { color: colors.accent, fontFamily: font.bodyMedium },
   filterCount: { fontSize: 12, color: colors.textDim },
   empty: { padding: 40, paddingTop: 56, alignItems: 'center' },
-  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
-  emptyTitle: { fontSize: 18, fontWeight: '400', color: colors.textPrimary, marginBottom: 12, textAlign: 'center', fontFamily: font.serif },
+  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
+  emptyImage: { width: 180, height: 108, borderRadius: 12, marginBottom: 24 },
+  emptyTitle: { fontSize: 26, color: colors.textPrimary, marginBottom: 14, textAlign: 'center', fontFamily: font.display, letterSpacing: -0.5, lineHeight: 32 },
   emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
   emptyCta: {
     marginTop: 28,
@@ -285,21 +288,21 @@ const s = StyleSheet.create({
     paddingVertical: 14, paddingHorizontal: 22,
     backgroundColor: colors.accentBg,
   },
-  emptyCtaText: { fontSize: 13, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  emptyCtaText: { fontSize: 13, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   monthHeader: { paddingHorizontal: 16, paddingTop: 18, paddingBottom: 12, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
+  monthHeaderText: { fontSize: 11, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   archiveRow: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
   archiveTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  archiveDate: { fontSize: 14, color: colors.textPrimary, fontWeight: '500' },
+  archiveDate: { fontSize: 14, color: colors.textPrimary, fontFamily: font.bodyMedium },
   archiveVirtue: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
-  archiveTheme: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3, marginBottom: 8, textTransform: 'uppercase' },
+  archiveTheme: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3, marginBottom: 8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   archiveQuote: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif, lineHeight: 22, marginBottom: 10 },
   archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.borderMid, paddingLeft: 12, marginTop: 8 },
-  archiveInsightLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 },
+  archiveInsightLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   archiveInsight: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
   archiveInsightInput: { fontSize: 14, color: colors.textPrimary, lineHeight: 22, minHeight: 60, textAlignVertical: 'top', paddingBottom: 60 },
   // Library EDIT chip — matches journal-history / emotions-history / review-archive.
-  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: colors.accent, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5 },
+  editBtn: { borderRadius: 4, paddingHorizontal: 10, paddingVertical: 5 },
   editBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   // Library keyboard accessory bar — H44 outlined + filled-gold pair used
   // when editing a past insight (matches compass / journal / emotions / review).
@@ -309,11 +312,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8,
   },
   editBtnAccessory: {
-    flex: 1, height: 44, borderWidth: 1, borderColor: colors.accent,
-    backgroundColor: colors.bg, borderRadius: radius.md,
-    paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center',
+    flex: 1, height: 44, borderRadius: radius.md,
+    paddingHorizontal: 16,
   },
   editBtnAccessorySave: { backgroundColor: colors.accent },
-  editBtnAccessoryText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnAccessoryText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   editBtnAccessorySaveText: { color: '#1a1a1a' },
 });

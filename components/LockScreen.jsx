@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { authenticate } from '../lib/appLock';
 import { colors, radius, spacing, font } from '../constants/theme';
 
-const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
+const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 export function LockScreen() {
   const [authing, setAuthing] = useState(false);
@@ -78,7 +78,7 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent', justifyContent: 'space-between' },
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl },
   skull: { width: 160, height: 160, marginBottom: 32, opacity: 0.95 },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 14 },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 14 },
   title: { fontSize: 44, fontWeight: '300', color: colors.textPrimary, letterSpacing: -1, marginBottom: 18, fontFamily: font.serif },
   sub: { fontSize: 16, color: colors.textMuted, textAlign: 'center', lineHeight: 26, fontFamily: font.serif },
   footer: { padding: spacing.xl, paddingBottom: 36 },
@@ -86,5 +86,5 @@ const s = StyleSheet.create({
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
     paddingVertical: 18, alignItems: 'center', backgroundColor: colors.accentBg,
   },
-  unlockBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  unlockBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

@@ -4,6 +4,7 @@ import {
   Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { colors, radius, font } from '../constants/theme';
+import { GoldPrimary, GoldSecondary } from './GoldButton';
 
 // Inline editor for a saved weekly review entry. Mirrors JournalEntryEditor:
 // expandable prompt cards with the stored answers pre-populated, plus the
@@ -107,34 +108,31 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
       </TouchableOpacity>
 
       <View style={s.btnRow}>
-        <TouchableOpacity style={s.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
+        <GoldSecondary style={s.cancelBtn} onPress={onCancel}>
           <Text style={s.cancelBtnText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </GoldSecondary>
+        <GoldPrimary
           style={s.saveBtn}
           onPress={() => onSave({ ...entry, answers, intention })}
-          activeOpacity={0.8}
         >
           <Text style={s.saveBtnText}>Save changes</Text>
-        </TouchableOpacity>
+        </GoldPrimary>
       </View>
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="reviewArchiveEditAccessory">
           <View style={s.accessoryBarPair}>
-            <TouchableOpacity
+            <GoldSecondary
               style={s.accessoryBtn}
               onPress={() => { Keyboard.dismiss(); onCancel(); }}
-              activeOpacity={0.8}
             >
               <Text style={s.accessoryBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[s.accessoryBtn, s.accessoryBtnSave]}
+            </GoldSecondary>
+            <GoldPrimary
+              style={s.accessoryBtn}
               onPress={() => { Keyboard.dismiss(); onSave({ ...entry, answers, intention }); }}
-              activeOpacity={0.8}
             >
               <Text style={[s.accessoryBtnText, s.accessoryBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save changes</Text>
-            </TouchableOpacity>
+            </GoldPrimary>
           </View>
         </InputAccessoryView>
       )}
@@ -145,19 +143,19 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
 const s = StyleSheet.create({
   container: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg, overflow: 'hidden', marginBottom: 12 },
   header: { backgroundColor: colors.accentBg, padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, textTransform: 'uppercase', letterSpacing: 0.8 },
+  headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', letterSpacing: 0.8 },
   headerDate: { fontSize: 13, color: colors.accentDim },
   promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, padding: 14, backgroundColor: colors.bgCard },
   promptCardOpen: { backgroundColor: colors.bgElevated },
-  promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 6 },
+  promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontFamily: font.serif },
   promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 },
   promptInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 80, textAlignVertical: 'top', paddingBottom: 60 },
   btnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
-  cancelBtn: { flex: 1, height: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.bg, borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
-  cancelBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  cancelBtn: { flex: 1, height: 56, borderRadius: radius.md, paddingHorizontal: 16 },
+  cancelBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   saveBtn: { flex: 1, height: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
-  saveBtnText: { fontSize: 14, fontWeight: '500', color: '#1a1a1a', letterSpacing: 0.3 },
+  saveBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: '#1a1a1a', letterSpacing: 0.3 },
   // Library accessory bar — H44 outlined + filled-gold pair so Save/Cancel
   // are reachable above the keyboard when editing fields inside this editor.
   accessoryBarPair: {
@@ -166,11 +164,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8,
   },
   accessoryBtn: {
-    flex: 1, height: 44, borderWidth: 1, borderColor: colors.accent,
-    backgroundColor: colors.bg, borderRadius: radius.md,
-    paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center',
+    flex: 1, height: 44, borderRadius: radius.md,
+    paddingHorizontal: 16,
   },
   accessoryBtnSave: { backgroundColor: colors.accent },
-  accessoryBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  accessoryBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   accessoryBtnSaveText: { color: '#1a1a1a' },
 });

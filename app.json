@@ -22,7 +22,9 @@
         "NSHealthUpdateUsageDescription": "Marcus syncs your daily Stoic practice as Mindful Minutes so your reflection time is counted alongside meditation and breathwork.",
         "NSFaceIDUsageDescription": "Marcus uses FaceID to keep your journal entries, reflections, and emotion logs private when others have access to your device.",
         "NSMotionUsageDescription": "Marcus uses motion data to subtly animate the skull on the practice screen, so it appears to follow you as you tilt your phone.",
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": [
+          "audio"
+        ]
       },
       "entitlements": {
         "com.apple.developer.in-app-payments": [],
@@ -39,7 +41,8 @@
           "color": "#0a0a0a",
           "defaultChannel": "default"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "router": {},

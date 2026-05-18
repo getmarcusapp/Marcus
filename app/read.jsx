@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import SkullLoader from '../components/SkullLoader';
 import { colors, radius, spacing, font } from '../constants/theme';
+import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import {
   getTodayReading, saveTodayReading, saveReadingInsight,
   getReadingHistory, getCompass,
@@ -370,14 +371,14 @@ Return only the JSON object.`;
           </View>
 
           <View style={s.pastReadingsRow}>
-            <TouchableOpacity
+            <GoldSecondary
               onPress={() => router.push(`/read-archive?from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
               style={s.pastReadingsBtn}
-              activeOpacity={0.8}
+              contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
             >
               <Text style={s.pastReadingsText}>Past readings</Text>
               <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
-            </TouchableOpacity>
+            </GoldSecondary>
           </View>
 
           <View style={s.body}>
@@ -451,40 +452,37 @@ Return only the JSON object.`;
                   />
                 </TouchableOpacity>
 
-                <TouchableOpacity
+                <GoldSecondary
                   style={[s.readingBtn, s.readingBtnBody]}
                   onPress={() => requireAccess(() => generateReading())}
-                  activeOpacity={0.8}
                 >
                   <Text style={s.readingBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Generate new reading</Text>
-                </TouchableOpacity>
+                </GoldSecondary>
               </>
             ) : (
-              <TouchableOpacity style={[s.readingBtn, s.readingBtnBody, s.readingBtnFilled]} onPress={() => requireAccess(() => generateReading())} activeOpacity={0.8}>
+              <GoldPrimary style={[s.readingBtn, s.readingBtnBody]} onPress={() => requireAccess(() => generateReading())}>
                 <Text style={[s.readingBtnText, s.readingBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Generate today's reading</Text>
-              </TouchableOpacity>
+              </GoldPrimary>
             )}
           </View>
 
       </ScrollView>
-      {Platform.OS === 'ios' && hasAccess && (
+      {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="readingInsightAccessory">
           <View style={s.accessoryBarPair}>
-            <TouchableOpacity
+            <GoldSecondary
               style={s.readingBtn}
               onPress={() => Keyboard.dismiss()}
-              activeOpacity={0.8}
             >
               <Text style={s.readingBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[s.readingBtn, s.readingBtnFilled, !insight.trim() && { opacity: 0.4 }]}
+            </GoldSecondary>
+            <GoldPrimary
+              style={[s.readingBtn, !insight.trim() && { opacity: 0.4 }]}
               onPress={() => { Keyboard.dismiss(); handleSaveInsight(); }}
-              activeOpacity={0.8}
               disabled={!insight.trim()}
             >
-              <Text style={[s.readingBtnText, s.readingBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save insight</Text>
-            </TouchableOpacity>
+              <Text style={[s.readingBtnText, s.readingBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save</Text>
+            </GoldPrimary>
           </View>
         </InputAccessoryView>
       )}
@@ -511,21 +509,16 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
+  title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   // "Past readings" link below the hero — uses Valeriya's library
   // smaller-button outlined-gold token (same as EDIT chips / nav pills).
   pastReadingsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   pastReadingsBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: colors.accent,
     borderRadius: radius.md,
   },
-  pastReadingsText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  pastReadingsText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Light reading body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   // Quote card stays dark — gravitas of the Stoic quote
@@ -536,7 +529,7 @@ const s = StyleSheet.create({
   quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontFamily: font.serif },
   quoteRule: { height: 0.5, backgroundColor: colors.border, marginVertical: 16 },
   quoteAuthorRow: { flexDirection: 'row', alignItems: 'flex-start' },
-  quoteAuthor: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
+  quoteAuthor: { fontSize: 14, color: colors.textSecondary, fontFamily: font.bodyMedium },
   quoteWork: { fontSize: 12, color: colors.textDim, marginTop: 3 },
   sourceHintBtn: { paddingLeft: 12, paddingTop: 2 },
   sourceHintBtnText: { fontSize: 16, color: colors.accent },
@@ -547,7 +540,7 @@ const s = StyleSheet.create({
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
     padding: 22, marginBottom: 12, backgroundColor: colors.bgElevated,
   },
-  reflectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 12 },
+  reflectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12 },
   // Body prose — matches compass.bodyText (Why / Overcome / Aspire sections).
   // Quote text above stays serif because it is an ancient passage; the
   // reflection is contemporary explanation and reads better sans-serif at length.
@@ -560,7 +553,7 @@ const s = StyleSheet.create({
     padding: 20, marginBottom: 12, backgroundColor: colors.inputBg,
   },
   insightCardActive: { borderColor: colors.inputBorderActive },
-  insightLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, textTransform: 'uppercase', marginBottom: 4 },
+  insightLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   insightSub: { fontSize: 13, color: colors.textDim, marginBottom: 14 },
   insightInput: {
     fontSize: 16, color: colors.textPrimary, lineHeight: 26,
@@ -585,18 +578,13 @@ const s = StyleSheet.create({
   readingBtn: {
     flex: 1,
     height: 44,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.bg,
     borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: 16,
     marginTop: 8,
   },
   readingBtnBody: { height: 56 },
   readingBtnFilled: { backgroundColor: colors.accent },
-  readingBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  readingBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   readingBtnFilledText: { color: '#1a1a1a' },
   quoteShareIcon: {
     position: 'absolute', top: 12, right: 12, zIndex: 1,

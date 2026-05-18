@@ -3,7 +3,8 @@ import {
   View, Text, TouchableOpacity, StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors } from '../constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, font } from '../constants/theme';
 
 // The daily practice is always 4 steps. Weekly Review is a separate flow
 // reached from the Practice screen tile and does not appear here.
@@ -37,7 +38,7 @@ export function PracticeHeader({ current }) {
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           activeOpacity={0.7}
         >
-          <Text style={[s.arrowText, !prevStep && s.arrowTextDisabled]}>‹</Text>
+          <Ionicons name="chevron-back" size={22} color={prevStep ? colors.accent : colors.textDim} />
         </TouchableOpacity>
         <Text style={s.titleText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
           {currentStep.roman} · {currentStep.title}
@@ -49,7 +50,7 @@ export function PracticeHeader({ current }) {
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           activeOpacity={0.7}
         >
-          <Text style={[s.arrowText, !nextStep && s.arrowTextDisabled]}>›</Text>
+          <Ionicons name="chevron-forward" size={22} color={nextStep ? colors.accent : colors.textDim} />
         </TouchableOpacity>
       </View>
 
@@ -93,15 +94,13 @@ const s = StyleSheet.create({
   },
   arrowBtn: { paddingVertical: 4, paddingHorizontal: 8, minWidth: 24 },
   arrowBtnDisabled: { opacity: 0.25 },
-  arrowText: { fontSize: 28, color: colors.accent, lineHeight: 30, fontWeight: '300' },
-  arrowTextDisabled: { color: colors.textDim },
   titleText: {
     flex: 1,
     textAlign: 'center',
     fontSize: 15,
     color: colors.textPrimary,
     letterSpacing: 0.5,
-    fontWeight: '500',
+    fontFamily: font.bodyMedium,
   },
   segmentsRow: {
     flexDirection: 'row',

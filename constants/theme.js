@@ -10,7 +10,7 @@ export const colors = {
   bgCard: '#0a0a0a',
   bgElevated: '#0a0a0a',
 
-  border: '#1e1e1e',
+  border: '#252525',
   borderMid: '#2a2a2a',
   borderStrong: '#363636',
   borderBright: '#444444',
@@ -20,7 +20,7 @@ export const colors = {
   // inputs, read insight card, onboarding compass input). The bg sits one
   // step above the screen black so the field has subtle elevation; strokes
   // shift between non-active and active focus states.
-  inputBg: '#1A1A1A',
+  inputBg: '#121212',
   inputBorder: '#474747',
   inputBorderActive: '#878787',
 
@@ -30,8 +30,8 @@ export const colors = {
   textDim: '#707070',
   textGhost: '#2a2a2a',
 
-  accent: '#C8A97A',
-  accentDim: '#8a7254',
+  accent: '#FFCE82',
+  accentDim: '#B38B5B',
   accentBg: '#1a1610',
 
   // ── Light zones (cards, writing surfaces, checklists) ──
@@ -61,7 +61,19 @@ export const font = {
   labelSize: 11,
   microSize: 10,
   sectionTracking: 1.8,
-  serif: 'Georgia',
+  // Brand typography per Valeriya's strategy doc.
+  // - display (Didot): marquee headlines — iOS-system, no load needed.
+  // - body / bodyMedium (Inter): UI text + buttons + section labels.
+  // - wordmark (Cormorant Medium): "Marcus" brand name on welcome screen.
+  // - serif (Cormorant Regular): in-app quote / philosophical voice.
+  //   Cormorant is brand-consistent with the wordmark (same family) but
+  //   engineered for text sizes, so quote bodies stay legible — unlike
+  //   Didot, which is a display serif and gets heavy at 15-19pt.
+  display: 'Didot',
+  body: 'Inter_400Regular',
+  bodyMedium: 'Inter_500Medium',
+  wordmark: 'Cormorant_700Bold',
+  serif: 'Cormorant_400Regular',
 };
 
 export const radius = {

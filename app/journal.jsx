@@ -12,8 +12,9 @@ import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMed
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { PracticeHeader } from '../components/PracticeHeader';
 import { colors, radius, spacing, font } from '../constants/theme';
+import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 
-const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
+const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 import { saveJournal, getTodayJournal, incrementStreak } from '../store/db';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
@@ -197,14 +198,14 @@ export default function JournalScreen() {
           </View>
 
           <View style={s.pastEntriesRow}>
-            <TouchableOpacity
+            <GoldSecondary
               onPress={() => router.push(`/journal-history?type=${sessionType}&from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
               style={s.pastEntriesBtn}
-              activeOpacity={0.8}
+              contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
             >
               <Text style={s.pastEntriesText}>Past entries</Text>
               <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
-            </TouchableOpacity>
+            </GoldSecondary>
           </View>
 
           <LinearGradient
@@ -341,16 +342,15 @@ export default function JournalScreen() {
 
                 {!keyboardUp && (
                   <>
-                    <TouchableOpacity
-                      style={[s.editBtn, s.editBtnSave, s.saveBtn, !canSave && s.saveBtnDisabled]}
+                    <GoldPrimary
+                      style={[s.editBtn, s.saveBtn, !canSave && s.saveBtnDisabled]}
                       onPress={() => requireAccess(handleSave)}
-                      activeOpacity={0.8}
                       disabled={!canSave}
                     >
                       <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
                         {alreadySaved ? 'Update journal' : `Complete ${isMorning ? 'morning' : 'evening'} journal`}
                       </Text>
-                    </TouchableOpacity>
+                    </GoldPrimary>
                     <Text style={s.saveBtnSub}>
                       {canSave ? `${answeredCount} of ${prompts.length} prompts answered` : 'Answer at least one prompt to complete'}
                     </Text>
@@ -358,10 +358,10 @@ export default function JournalScreen() {
                 )}
               </View>
       </ScrollView>
-      {Platform.OS === 'ios' && hasAccess && (
+      {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="journalAccessory">
           <View style={s.accessoryBarPair}>
-            <TouchableOpacity
+            <GoldSecondary
               style={s.editBtn}
               onPress={() => {
                 haptics.tap();
@@ -374,29 +374,26 @@ export default function JournalScreen() {
                   Keyboard.dismiss();
                 }
               }}
-              activeOpacity={0.8}
             >
               <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
-            </TouchableOpacity>
+            </GoldSecondary>
             {openPrompt < prompts.length - 1 ? (
-              <TouchableOpacity
-                style={[s.editBtn, s.editBtnSave]}
+              <GoldPrimary
+                style={s.editBtn}
                 onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
-                activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next prompt</Text>
-              </TouchableOpacity>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next</Text>
+              </GoldPrimary>
             ) : (
-              <TouchableOpacity
-                style={[s.editBtn, s.editBtnSave, !canSave && s.saveBtnDisabled]}
+              <GoldPrimary
+                style={[s.editBtn, !canSave && s.saveBtnDisabled]}
                 onPress={() => { Keyboard.dismiss(); requireAccess(handleSave); }}
-                activeOpacity={0.8}
                 disabled={!canSave}
               >
                 <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-                  {alreadySaved ? 'Update journal' : 'Complete journal'}
+                  {alreadySaved ? 'Update' : 'Complete'}
                 </Text>
-              </TouchableOpacity>
+              </GoldPrimary>
             )}
           </View>
         </InputAccessoryView>
@@ -419,21 +416,16 @@ const s = StyleSheet.create({
   },
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   headerContent: { padding: spacing.xl, paddingTop: 52 },
-  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
+  title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   // "Past entries" link below the hero — uses Valeriya's library
   // smaller-button outlined-gold token (same as Past readings).
   pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   pastEntriesBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: colors.accent,
     borderRadius: radius.md,
   },
-  pastEntriesText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  pastEntriesText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   mementoStrip: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
@@ -441,12 +433,12 @@ const s = StyleSheet.create({
     padding: spacing.xl,
     paddingVertical: 20,
   },
-  mementoText: { fontSize: 17, color: colors.textPrimary, lineHeight: 28, fontFamily: font.serif },
-  mementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, textTransform: 'uppercase' },
+  mementoText: { fontSize: 19, color: colors.textPrimary, lineHeight: 30, fontFamily: font.serif },
+  mementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
 
   // Light writing surface
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
-  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
+  secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
   listenCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg,
@@ -464,7 +456,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.35)',
   },
   listenContent: { flex: 1 },
-  listenEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+  listenEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   listenTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 },
   listenDesc: { fontSize: 12, color: colors.textMuted, lineHeight: 18 },
   listenProgressBar: {
@@ -480,12 +472,12 @@ const s = StyleSheet.create({
   promptCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
   promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
+  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top', paddingBottom: 60 },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
-  nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair
   // (matches Compass / Reading / Onboarding). Done left = outlined gold,
   // action right = filled gold.
@@ -503,16 +495,11 @@ const s = StyleSheet.create({
   editBtn: {
     flex: 1,
     height: 44,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.bg,
     borderRadius: radius.md,
     paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   editBtnSave: { backgroundColor: colors.accent },
-  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   editBtnSaveText: { color: '#1a1a1a' },
   promptHeader: { marginBottom: 0 },
   hintBtn: { padding: 4 },
@@ -526,7 +513,7 @@ const s = StyleSheet.create({
   // Header treatment inside the hintBox when prompt.info is present:
   // small uppercase title in accent, dim source citation below, then a
   // hairline divider before the body paragraphs.
-  hintTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+  hintTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   hintSource: { fontSize: 12, color: colors.textDim, fontStyle: 'italic', letterSpacing: 0.3 },
   hintDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 12, marginBottom: 12 },
   // In-body primary CTA reuses the library editBtn + editBtnSave H56 filled-gold

@@ -96,9 +96,8 @@ const s = StyleSheet.create({
     fontSize: 30,
     letterSpacing: 6,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 36,
-    fontWeight: '500',
   },
   weekTitle: {
     fontSize: 96,
@@ -126,9 +125,8 @@ const s = StyleSheet.create({
     fontSize: 22,
     letterSpacing: 4,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 14,
-    fontWeight: '500',
   },
   virtueName: {
     fontSize: 64,
@@ -141,9 +139,8 @@ const s = StyleSheet.create({
     fontSize: 22,
     letterSpacing: 4,
     color: colors.accent,
-    textTransform: 'uppercase',
+    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     marginBottom: 18,
-    fontWeight: '500',
   },
   intentionText: {
     fontSize: 36,
@@ -164,7 +161,7 @@ const s = StyleSheet.create({
     fontSize: 28,
     letterSpacing: 12,
     color: colors.textPrimary,
-    fontWeight: '300',
+    fontFamily: font.wordmark,
     marginBottom: 8,
   },
   tagline: {

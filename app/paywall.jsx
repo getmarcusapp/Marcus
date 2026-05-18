@@ -8,9 +8,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getOfferings, purchasePackage, restorePurchases } from '../store/purchases';
 import { useEntitlement } from '../lib/useEntitlement';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { GoldPrimary } from '../components/GoldButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const HERO_GRADIENT = ['#4a3a26', '#1a1410', '#000000'];
+const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 export default function PaywallScreen() {
   const router = useRouter();
@@ -111,8 +113,20 @@ export default function PaywallScreen() {
   const annualPrice = annualPkg?.product?.priceString || '$59.99';
   const monthlyPrice = monthlyPkg?.product?.priceString || '$7.99';
 
+  // Top back chrome — shown whenever the paywall was reached from inside
+  // the app (More · Subscription, requireAccess gates, etc.) so the user
+  // is never stranded. Suppressed during onboarding, where the flow's
+  // own "Continue without trial" path drives the exit.
+  const showTopBack = params?.from !== 'onboarding';
+
   return (
     <SafeAreaView style={s.safe}>
+      {showTopBack && (
+        <ScreenHeader
+          fromLabel="Back"
+          onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+        />
+      )}
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* Hero */}
@@ -163,9 +177,9 @@ export default function PaywallScreen() {
             or paid). They see a Manage Subscription button instead. */}
         {alreadySubscribed ? (
           <>
-            <TouchableOpacity style={s.cta} onPress={openSubscriptionSettings} activeOpacity={0.85}>
+            <GoldPrimary style={s.cta} onPress={openSubscriptionSettings}>
               <Text style={s.ctaText}>Manage subscription</Text>
-            </TouchableOpacity>
+            </GoldPrimary>
             <Text style={s.ctaNote}>
               Opens iOS Settings. Cancel anytime before your trial ends to avoid charges.
             </Text>
@@ -221,10 +235,9 @@ export default function PaywallScreen() {
         )}
 
         {/* CTA */}
-        <TouchableOpacity
-          style={[s.cta, purchasing && s.ctaDisabled]}
+        <GoldPrimary
+          style={s.cta}
           onPress={handlePurchase}
-          activeOpacity={0.85}
           disabled={purchasing}
         >
           {purchasing ? (
@@ -232,7 +245,7 @@ export default function PaywallScreen() {
           ) : (
             <Text style={s.ctaText}>Start 7-day free trial →</Text>
           )}
-        </TouchableOpacity>
+        </GoldPrimary>
 
         <Text style={s.ctaNote}>
           Free for 7 days · then 16¢/day annual or $7.99/mo · Cancel anytime
@@ -281,8 +294,8 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   skull: { width: 80, height: 80, marginBottom: 20, opacity: 0.9 },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', marginBottom: 12 },
-  title: { fontSize: 44, fontWeight: '700', color: '#FFFFFF', letterSpacing: -1.5, textAlign: 'center', marginBottom: 14, lineHeight: 52 },
+  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12 },
+  title: { fontSize: 44, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1.5, textAlign: 'center', marginBottom: 14, lineHeight: 52 },
   sub: { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
   // Active-trial banner inside the hero — shown only when the visiting
   // user is currently in a 7-day trial, so we don't re-pitch them.
@@ -327,9 +340,9 @@ const s = StyleSheet.create({
   planTop: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8, marginTop: 8 },
   planRadio: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: colors.borderMid },
   planRadioSelected: { borderColor: colors.accent, backgroundColor: colors.accent },
-  planName: { fontSize: 16, fontWeight: '500', color: colors.textMuted },
+  planName: { fontSize: 16, fontFamily: font.bodyMedium, color: colors.textMuted },
   planNameSelected: { color: colors.textPrimary },
-  planPrice: { fontSize: 28, fontWeight: '300', color: colors.textMuted, letterSpacing: -0.5 },
+  planPrice: { fontSize: 28, fontFamily: font.display, color: colors.textMuted, letterSpacing: -0.5 },
   planPriceSelected: { color: colors.accent },
   planPeriod: { fontSize: 14, fontWeight: '400' },
   planNote: { fontSize: 13, color: colors.textDim, marginTop: 4 },
@@ -339,11 +352,7 @@ const s = StyleSheet.create({
   cta: {
     marginHorizontal: spacing.md,
     marginTop: 8,
-    backgroundColor: colors.accent,
-    borderRadius: radius.md,
     height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   ctaDisabled: { opacity: 0.6 },
   ctaText: { fontSize: 15, fontWeight: '700', color: '#000', letterSpacing: 0.3 },

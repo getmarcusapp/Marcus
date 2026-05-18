@@ -13,6 +13,7 @@ import { saveReview, getReviews, getJournals, getTriggers, getRoles } from '../s
 import * as haptics from '../lib/haptics';
 import { useKeyboardVisible } from '../lib/useKeyboardVisible';
 import { useEntitlement } from '../lib/useEntitlement';
+import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard } from '../components/ReviewShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
@@ -258,14 +259,14 @@ export default function ReviewScreen() {
         </View>
 
         <View style={s.pastReviewsRow}>
-          <TouchableOpacity
+          <GoldSecondary
             onPress={() => router.push('/review-archive')}
             style={s.pastReviewsBtn}
-            activeOpacity={0.8}
+            contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
           >
             <Text style={s.pastReviewsText}>Past reviews</Text>
             <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
-          </TouchableOpacity>
+          </GoldSecondary>
         </View>
 
         <View style={s.body}>
@@ -499,14 +500,13 @@ export default function ReviewScreen() {
 
             {!keyboardUp && (
               <>
-                <TouchableOpacity
-                  style={[s.editBtn, s.editBtnSave, s.sealBtn, !canSeal && s.sealBtnDisabled]}
+                <GoldPrimary
+                  style={[s.editBtn, s.sealBtn, !canSeal && s.sealBtnDisabled]}
                   onPress={() => requireAccess(handleSave)}
-                  activeOpacity={0.8}
                   disabled={!canSeal}
                 >
                   <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Seal this week</Text>
-                </TouchableOpacity>
+                </GoldPrimary>
                 <Text style={s.sealBtnSub}>
                   {canSeal ? 'Saved to your review archive' : 'Answer at least one prompt to seal'}
                 </Text>
@@ -516,11 +516,11 @@ export default function ReviewScreen() {
           </View>
 
         </ScrollView>
-      {Platform.OS === 'ios' && hasAccess && (
+      {Platform.OS === 'ios' && (
         <>
           <InputAccessoryView nativeID="reviewPromptAccessory">
             <View style={s.accessoryBarPair}>
-              <TouchableOpacity
+              <GoldSecondary
                 style={s.editBtn}
                 onPress={() => {
                   haptics.tap();
@@ -531,52 +531,48 @@ export default function ReviewScreen() {
                     Keyboard.dismiss();
                   }
                 }}
-                activeOpacity={0.8}
               >
                 <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
-              </TouchableOpacity>
+              </GoldSecondary>
               {openPrompt < reviewPrompts.length - 1 ? (
-                <TouchableOpacity
-                  style={[s.editBtn, s.editBtnSave]}
+                <GoldPrimary
+                  style={s.editBtn}
                   onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
-                  activeOpacity={0.8}
                 >
-                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next prompt</Text>
-                </TouchableOpacity>
+                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next</Text>
+                </GoldPrimary>
               ) : (
-                <TouchableOpacity style={[s.editBtn, s.editBtnSave]} onPress={() => Keyboard.dismiss()} activeOpacity={0.8}>
+                <GoldPrimary style={s.editBtn} onPress={() => Keyboard.dismiss()}>
                   <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
-                </TouchableOpacity>
+                </GoldPrimary>
               )}
             </View>
           </InputAccessoryView>
           {/* VI · Account — auto-focus Commit, since there's still one prompt after */}
           <InputAccessoryView nativeID="reviewAccountAccessory">
             <View style={s.accessoryBarPair}>
-              <TouchableOpacity
+              <GoldSecondary
                 style={s.editBtn}
                 onPress={() => {
                   haptics.tap();
                   // Back from Account → return to last reflection prompt (V · Ledger).
                   setOpenPrompt(reviewPrompts.length - 1);
                 }}
-                activeOpacity={0.8}
               >
                 <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[s.editBtn, s.editBtnSave]}
+              </GoldSecondary>
+              <GoldPrimary
+                style={s.editBtn}
                 onPress={() => { haptics.tap(); intentionInputRef.current?.focus(); }}
-                activeOpacity={0.8}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next prompt</Text>
-              </TouchableOpacity>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next</Text>
+              </GoldPrimary>
             </View>
           </InputAccessoryView>
           {/* VII · Commit — final prompt; Seal triggers save */}
           <InputAccessoryView nativeID="reviewIntentionAccessory">
             <View style={s.accessoryBarPair}>
-              <TouchableOpacity
+              <GoldSecondary
                 style={s.editBtn}
                 onPress={() => {
                   haptics.tap();
@@ -587,18 +583,16 @@ export default function ReviewScreen() {
                     setOpenPrompt(reviewPrompts.length - 1);
                   }
                 }}
-                activeOpacity={0.8}
               >
                 <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[s.editBtn, s.editBtnSave, !canSeal && s.sealBtnDisabled]}
+              </GoldSecondary>
+              <GoldPrimary
+                style={[s.editBtn, !canSeal && s.sealBtnDisabled]}
                 onPress={() => { Keyboard.dismiss(); requireAccess(handleSave); }}
-                activeOpacity={0.8}
                 disabled={!canSeal}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Seal this week</Text>
-              </TouchableOpacity>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Complete</Text>
+              </GoldPrimary>
             </View>
           </InputAccessoryView>
         </>
@@ -622,21 +616,16 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
-  title: { fontSize: font.titleSize, fontWeight: '300', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
+  title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   // "Past reviews" link below the hero — uses Valeriya's library
   // smaller-button outlined-gold token (matches Past entries / Past readings).
   pastReviewsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   pastReviewsBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: colors.accent,
     borderRadius: radius.md,
   },
-  pastReviewsText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  pastReviewsText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   body: { padding: spacing.md },
   // Prompts
   // Input field treatment per Valeriya's library: subtle elevation above
@@ -645,12 +634,12 @@ const s = StyleSheet.create({
   promptCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
   promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, textTransform: 'uppercase' },
+  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top', paddingBottom: 60 },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
-  nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
+  nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair.
   accessoryBarPair: {
     flexDirection: 'row',
@@ -665,16 +654,11 @@ const s = StyleSheet.create({
   editBtn: {
     flex: 1,
     height: 44,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.bg,
     borderRadius: radius.md,
     paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   editBtnSave: { backgroundColor: colors.accent },
-  editBtnText: { fontSize: 14, fontWeight: '500', color: colors.accent, letterSpacing: 0.3 },
+  editBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   editBtnSaveText: { color: '#1a1a1a' },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
@@ -694,9 +678,9 @@ const s = StyleSheet.create({
   sparkDayToday: { color: colors.accent, fontWeight: '600' },
   // Virtue ledger (inside promptCard)
   virtueRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' },
-  vpLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, textTransform: 'uppercase', padding: 12, paddingHorizontal: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  vpBtn: { padding: 13, paddingHorizontal: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.md, overflow: 'hidden' },
+  vpLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', padding: 12, paddingHorizontal: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.inputBorder },
+  vpBtn: { padding: 13, paddingHorizontal: 14, borderBottomWidth: 0.5, borderBottomColor: colors.inputBorder },
   vpBtnActive: { backgroundColor: colors.bgElevated },
   vpBtnText: { fontSize: 15, color: colors.textDim },
   // Intention
