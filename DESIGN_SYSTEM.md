@@ -49,17 +49,27 @@ Applied on Practice / Ready / Paywall / Journal / Onboarding-Welcome / More hero
 
 ### Typography
 
-Three families. Each owns a distinct role.
+#### Brand fonts (three families)
 
-| Token | Value | Role |
+| Family | Source | Weights used | Role in the app |
+|---|---|---|---|
+| **Didot** | iOS / macOS system (no load required) | Regular | Marquee headlines, screen titles, declarative type |
+| **Inter** | Google Fonts (`@expo-google-fonts/inter`) | Regular (400), Medium (500) | All body copy, buttons, eyebrows, UI labels |
+| **Cormorant** | Google Fonts (`@expo-google-fonts/cormorant`) | Regular (400), Bold (700) | "Marcus" wordmark + literary quotes |
+
+Inter and Cormorant are both free for commercial use via Google Fonts (Open Font License). Didot ships with iOS / macOS — Figma users will see it natively under macOS; for Figma on web, install [Didot from Linotype](https://www.fonts.com/font/linotype/linotype-didot) or use the system "Didot" if it's available.
+
+#### Token map (technical reference)
+
+| Token | Resolves to | Use |
 |---|---|---|
-| `font.display` | `'Didot'` | Marquee headlines, screen titles, declarative type. iOS-system; no external load. |
-| `font.body` | `'Inter_400Regular'` | All body copy, default text. Loaded via `@expo-google-fonts/inter`. |
-| `font.bodyMedium` | `'Inter_500Medium'` | Buttons, eyebrows, uppercase labels, anything that wants weight without becoming a headline. |
+| `font.display` | `'Didot'` | Marquee headlines, screen titles |
+| `font.body` | `'Inter_400Regular'` | All body copy, default text |
+| `font.bodyMedium` | `'Inter_500Medium'` | Buttons, eyebrows, uppercase labels |
 | `font.wordmark` | `'Cormorant_700Bold'` | The "Marcus" wordmark on Welcome + More tab. Nowhere else. |
-| `font.serif` | `'Cormorant_400Regular'` | Quotes, philosophical passages, the literary voice. |
+| `font.serif` | `'Cormorant_400Regular'` | Quotes, philosophical passages, the literary voice |
 
-**Size tokens (kept for legacy / non-screen-title uses):**
+#### Size tokens (kept for legacy / non-screen-title uses)
 
 | Token | Size |
 |---|---|
