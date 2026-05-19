@@ -1,8 +1,9 @@
 # Marcus — Design System Reference
 
-A working reference for the app's look-and-feel: tokens, typography, buttons, input fields, cards, heroes, and the conversion notes between Valeriya's Figma library and iOS.
+A working reference for the app's look-and-feel after the Valeriya brand pass: tokens, typography, the GoldButton system, page heroes, input fields, cards, empty states, and the Figma → iOS conversion notes.
 
 Source of truth for tokens: `constants/theme.js`.
+Source of truth for the gradient-button system: `components/GoldButton.jsx`.
 
 ---
 
@@ -10,71 +11,83 @@ Source of truth for tokens: `constants/theme.js`.
 
 ### Colors
 
-**Backgrounds (unified near-black canvas per Valeriya):**
+**Backgrounds** (unified near-black canvas per Valeriya):
 - `bg` / `bgDeep` / `bgCard` / `bgElevated` — all `#0a0a0a`. Token names kept distinct so per-surface tweaks remain possible.
 
-**Borders (dark-to-light scale, used for hierarchy without fills):**
-- `border` — `#1e1e1e`
+**Borders** (subtle hierarchy without competing fills):
+- `border` — `#252525` (bumped from `#1e1e1e` so card edges read in bright light)
 - `borderMid` — `#2a2a2a`
 - `borderStrong` — `#363636`
 - `borderBright` — `#444444`
 
-**Input fields (per Valeriya's library — slight elevation + bright stroke):**
-- `inputBg` — `#1A1A1A` (one step above screen `#0a0a0a`)
+**Input fields:**
+- `inputBg` — `#121212` (one step above screen black, subtle elevation)
 - `inputBorder` — `#474747` (non-active stroke)
-- `inputBorderActive` — `#878787` (active / focused stroke)
+- `inputBorderActive` — `#878787` (focused stroke)
 
 **Text:**
-- `textPrimary` — `#F0F0F0` (active body / hero)
-- `textSecondary` — `#C8C8C8` (body / typed answers when stored)
-- `textMuted` — `#A0A0A0` (non-focused input text, sub-labels)
-- `textDim` — `#707070` (eyebrows, placeholders, micro labels)
-- `textGhost` — `#2a2a2a` (rarely used)
+- `textPrimary` — `#F0F0F0`
+- `textSecondary` — `#C8C8C8`
+- `textMuted` — `#A0A0A0`
+- `textDim` — `#707070`
+- `textGhost` — `#2a2a2a`
 
-**Accent (Stoic gold):**
-- `accent` — `#C8A97A` (primary action, links, key affordances)
-- `accentDim` — `#8a7254` (subtle accent)
-- `accentBg` — `#1a1610` (tinted backgrounds for accent surfaces)
+**Accent (the brand gold):**
+- `accent` — `#FFCE82` (Valeriya's strategy-doc gold; bright, warm, luminous)
+- `accentDim` — `#B38B5B`
+- `accentBg` — `#1a1610` (tinted bg for accent surfaces)
 
-**Light zone (cards / writing surfaces with light fill, used sparingly):**
-- `lightBg` `#F7F5F2`, `lightBg2` `#EFECEA`, `lightBg3` `#E8E5E1`
-- `lightWhite` `#FFFFFF`
-- `lightBorder` `#DDDAD6`, `lightBorder2` `#CCCAC6`
-- `lightText` `#1A1A1A`, `lightText2` `#3A3A3A`
-- `lightMuted` `#6A6A6A`, `lightDim` `#9A9A9A`
+**Hero gradient** (warm ember, declared per-file as `HERO_GRADIENT`):
+```
+['#3D2D12', '#150E08', '#000000']  with locations [0, 0.6, 1]
+```
+Applied on Practice / Ready / Paywall / Journal / Onboarding-Welcome / More heroes via `expo-linear-gradient`. The top stop is a gold-leaning amber (not red-brown), so it harmonizes with the brighter accent rather than competing.
 
 **Semantic:**
 - `virtueGood` `#6a9a6a`, `virtueBad` `#9a6a4a`
 - `successBg` `#0a140a`, `successBorder` `#3a5a3a`
 
-### Typography (`font`)
+### Typography
 
-| Token | Size | Use |
+Three families. Each owns a distinct role.
+
+| Token | Value | Role |
 |---|---|---|
-| `heroSize` | 36 | Largest heroes (rare; titles are typically `titleSize`) |
-| `titleSize` | 28 | Page hero titles (compass, journal, emotions, review, read, meditate) |
-| `bodySize` | 17 | Body prose (compass body, reflection text in read.jsx) |
-| `subSize` | 15 | Sub-titles, hero captions |
-| `labelSize` | 11 | Section eyebrows, labels |
-| `microSize` | 10 | Tiniest tracked uppercase labels |
-| `sectionTracking` | 1.8 | Letter-spacing for uppercase section labels |
-| `serif` | `Georgia` | Serif family for quotes + Stoic body passages |
+| `font.display` | `'Didot'` | Marquee headlines, screen titles, declarative type. iOS-system; no external load. |
+| `font.body` | `'Inter_400Regular'` | All body copy, default text. Loaded via `@expo-google-fonts/inter`. |
+| `font.bodyMedium` | `'Inter_500Medium'` | Buttons, eyebrows, uppercase labels, anything that wants weight without becoming a headline. |
+| `font.wordmark` | `'Cormorant_700Bold'` | The "Marcus" wordmark on Welcome + More tab. Nowhere else. |
+| `font.serif` | `'Cormorant_400Regular'` | Quotes, philosophical passages, the literary voice. |
+
+**Size tokens (kept for legacy / non-screen-title uses):**
+
+| Token | Size |
+|---|---|
+| `heroSize` | 36 |
+| `titleSize` | 28 |
+| `bodySize` | 17 |
+| `subSize` | 15 |
+| `labelSize` | 11 |
+| `microSize` | 10 |
+| `sectionTracking` | 1.8 |
+
+**Font loading.** `app/_layout.jsx` runs `useFonts({ Inter_400Regular, Inter_500Medium, Cormorant_400Regular, Cormorant_500Medium, Cormorant_700Bold })` and blocks first paint until fonts resolve. After load, `Text.defaultProps.style` is set to `{ fontFamily: 'Inter_400Regular' }` so any `<Text>` without an explicit `fontFamily` inherits Inter Regular.
 
 ### Radii
 
 | Token | Value | Use |
 |---|---|---|
-| `radius.sm` | 8 | Small accents (vpills, distortion subtleties) |
-| `radius.md` | 12 | H56 primary buttons, input fields, navPills |
-| `radius.lg` | 16 | Cards (prompt cards, fieldCards, reframeCard, insightCard) |
+| `radius.sm` | 8 | Small accents |
+| `radius.md` | 12 | H56 primary buttons, input fields, nav pills |
+| `radius.lg` | 16 | Prompt cards, field cards, intention cards |
 | `radius.xl` | 20 | Reserved |
-| `radius.pill` | 100 | Old pill buttons (mostly retired) |
+| `radius.pill` | 100 | Reserved (no current usage) |
 
-Hand-tuned radii outside the token set (intentional, distinct affordances):
-- **EDIT chips** — `6` (square button look)
-- **NEXT/TODAY tags** — `5` (very square)
-- **Role suggestion pills** — `20` (full pill)
+**Hand-tuned radii outside the token set** (intentional, distinct affordances):
+- **EDIT chips / Delete chip** — `4` (small inline chips)
+- **NEXT / TODAY tags** — `5`
 - **Filter pills** (archives) — `18`
+- **Role suggestion pills** — `20`
 
 ### Spacing
 
@@ -91,224 +104,210 @@ Hand-tuned radii outside the token set (intentional, distinct affordances):
 
 ## 2. Typography hierarchy
 
-**Hero title** (page heroes): `fontSize: titleSize (28)`, `fontWeight: '300'`, `color: textPrimary`, `letterSpacing: -0.5`, `lineHeight: 36`, with subtle `textShadowColor: 'rgba(0,0,0,0.7)'` for legibility over images.
+The single most important rule: **three fonts, three lanes, never cross-applied**.
 
-**Eyebrow** (uppercase tag above title): `fontSize: labelSize (11)`, `letterSpacing: sectionTracking (1.8)`, `color: accent`, `textTransform: 'uppercase'`, `marginBottom: 8`.
+| Lane | Font | Used on |
+|---|---|---|
+| Marquee | Didot | 44pt onboarding step titles, paywall hero, ready screen, meditate header, practice-tab date (`heroDate`), sealed-state streak, paywall plan prices, empty-state titles |
+| Voice | Cormorant | "Marcus" wordmark (Welcome + More) at Cormorant Bold 700; all italic quote bodies + pulled quotes + sealed-state quote in Cormorant Regular 400 |
+| Utility | Inter | All body paragraphs (`Text.defaultProps` default), all button labels (Medium), all eyebrows / uppercase section labels (Medium), all tab labels (Medium) |
 
-**Sub** (caption under hero): `fontSize: subSize (15)`, `color: textMuted`.
+**Marquee tracking:** Didot has wider proportions than system sans. Relaxed letter-spacing on titles — `-0.5` rather than the `-1.5` that worked for system sans. Same logic for Cormorant Bold on the wordmark (`-1` at 64pt, `-0.5` at 44pt). When changing title sizes, re-tune tracking.
 
-**Section label** (e.g., `III · Reframe`): `fontSize: 11`, `letterSpacing: 3`, `color: accentDim`, `textTransform: 'uppercase'`, `marginTop: 36`, `marginBottom: 14`.
+**Hero title shadow.** Titles overlaying images carry `textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8` for legibility against bright painting areas. Eyebrows get a stronger shadow (`rgba(0,0,0,0.85)`, radius 6).
 
-**Body prose** (compass body, reading reflection): `fontSize: 17`, `color: textSecondary`, `lineHeight: 28`. Sans-serif. Serif reserved for ancient quotes only.
-
-**Quotes / Stoic passages**: `fontFamily: font.serif (Georgia)`, `fontSize: 19`, `color: textPrimary`, `lineHeight: 32`.
-
-**Hero headlines never end with a period.** Removed app-wide.
+**Hero titles never end with a period.** Applied across all `title` / `stepTitle` / `previewTitle` sites.
 
 ---
 
-## 3. Buttons
+## 3. Gold button system
 
-**Two-tier system on iPhone**, derived from Valeriya's Figma library scaled by 1/1.5 (her artboard is 591pt wide vs iPhone's ~393pt). See [Figma → iOS conversion](#7-figma--ios-conversion).
+All gold buttons in the app are now driven by **two shared components** in `components/GoldButton.jsx`. Stops the previous drift where every screen redeclared its own outlined/filled-gold variants.
 
-### H56 — primary, no-keyboard
+### `<GoldPrimary>` — gradient fill + procedural noise
 
-Used for hero CTAs, in-body primary actions, onboarding `Continue`-style buttons.
+Filled primary CTA. Vertical metallic gold gradient with a procedural noise overlay rendered via SVG `<feTurbulence>` for per-pixel grain.
 
-**Filled-gold variant** (primary commit action):
-- `height: 56`
-- `borderRadius: radius.md (12)`
-- `backgroundColor: accent`
-- `text: #1a1a1a` (dark on gold), `fontSize: 14–15`, `fontWeight: '500'`, `letterSpacing: 0.3`
-- `paddingHorizontal: 16`, `alignItems / justifyContent: center`
+Props:
+- `onPress`, `disabled`, `style`, `children`, `activeOpacity`, `hitSlop`, `borderRadius`
 
-**Outlined-gold variant** (secondary):
-- Same dimensions
-- `backgroundColor: bg`
-- `borderWidth: 1`, `borderColor: accent`
-- `text: accent`
+Gradient stops (in `GoldButton.jsx`):
+```
+['#D9A868', '#FFCE82', '#D9A868']  with locations [0, 0.5, 1]
+```
+Symmetric metallic sheen — edges drop to a slightly toned-down gold, midpoint matches `accent`. Original Figma had a `#806338` shadow stop at 76% but in practice it rendered as a horizontal "black bar"; dropped.
 
-**Files using H56 in-body / hero:**
-- `journal.jsx` (Complete morning journal)
-- `emotions.jsx` (Log this trigger)
-- `review.jsx` (Seal this week)
-- `read.jsx` (Generate new reading)
-- `settings-notifications.jsx` (Save & schedule notifications)
-- `onboarding.jsx` (Continue, Use these to start, Set reminders, Maybe later)
-- `paywall.jsx` (Start 7-day free trial)
-- `ready.jsx` primary CTA
-- `JournalEntryEditor` Cancel/Save pair
+Noise overlay: brown `#473513` at 25% alpha, generated by `<feTurbulence baseFrequency="0.9" numOctaves="1" stitchTiles="stitch">` color-matrixed to brown with alpha tied to luminance. Renders at the device's pixel density, no PNG asset.
 
-### H44 — keyboard accessory
+**Used on every filled-gold primary CTA across the app** (Start trial, Manage subscription, Continue, Set reminders, Go to Practice, Save, Complete, Seal this week, Generate today's reading, Save insight, Save changes, Log this trigger, Pick patterns, accessory `Save` / `Next` / `Complete` buttons).
 
-Used in every `InputAccessoryView` keyboard bar. Apple's 44pt touch target minimum, rounded up from Valeriya's H56 ÷ 1.5 = 37pt.
+### `<GoldSecondary>` — gradient stroke + masked gradient text
 
-- `flex: 1`, `height: 44`
-- Same outlined/filled variants as H56
-- Side-by-side in pairs (Cancel + Save, Done + Next prompt, etc.) inside `accessoryBarPair` container:
-  - `flexDirection: 'row'`, `gap: 10`
-  - `paddingHorizontal: 16`, `paddingVertical: 8`
-  - `backgroundColor: bg`, `borderTopWidth: 0.5`, `borderTopColor: border`
+Outlined / secondary button. Gradient renders as a thin stroke ring (via outer `<GoldGradient>` + inset bg-colored layer that leaves a `borderWidth` ring visible). Text and icons get the same gradient via `<MaskedView>` + `<LinearGradient>`.
 
-All accessory bar text has `numberOfLines={1}`, `adjustsFontSizeToFit`, `minimumFontScale={0.8}` for small-screen safety.
+Props (same as `GoldPrimary`) plus:
+- `borderWidth` — defaults to 1. Lighter `0.5` on small chips.
+- `bgColor` — surface the chip sits on (defaults to `colors.bg`). Pass `colors.bgCard` etc. when the parent card has a different bg so the inset blends.
+- `flatStroke` — boolean. When `true`, draws a solid `colors.accent` border instead of the gradient stroke. The metallic gradient looks muddy on chips < ~22pt tall (the dark stop compresses into a sharp band), so small chips opt out of the gradient stroke and keep flat-gold borders. Text/icon still get masked-gradient.
+- `contentStyle` — flex layout (gap / padding / direction) for the inner content. Pass this rather than `style` for spacing between icon + text — `style` applies to the outer `TouchableOpacity`, which doesn't propagate flex layout to absolute-positioned children.
 
-### EDIT chip — small inline affordance
+**Used on every outlined-gold secondary across the app** (Past entries / readings / reviews / triggers pills, archive EDIT chips, compass Delete chip, onboarding reminder Edit/Done chip, accessory `Back` / `Cancel` / `Done` buttons, in-body `Cancel` in JournalEntryEditor + ReviewEntryEditor, the "Generate new reading" outlined H56, the "Maybe later" onboarding button).
 
-Used wherever a small "edit" or "delete" affordance is needed inline.
+### Native dependencies the button system requires
 
-- `flexDirection: 'row'`, `alignItems: 'center'`, `gap: 4`
-- `borderWidth: 1`, `borderColor: accent`
-- `borderRadius: 6` (square button look, distinct from tags + buttons)
-- `paddingHorizontal: 10`, `paddingVertical: 5`
-- Label: `fontSize: 10–12`, `color: accent`, `letterSpacing: 0.3`
-- Glyph: Ionicons `create-outline` / `trash-outline` / `checkmark` at `size: 12`
+- `expo-linear-gradient` — gradient renderer (already in deps before this work).
+- `react-native-svg` — procedural noise via `<feTurbulence>`.
+- `@react-native-masked-view/masked-view` — gradient text + icon for `GoldSecondary`.
 
-**Locations:**
-- `onboarding.jsx` — `compassPreviewEdit` (compass preview + reminder rows)
-- `compass.jsx` — `roleDeleteChip`
-- `journal-history.jsx` — `editBtn`
-- `emotions-history.jsx` — `histEditBtn`
+`GoldButton.jsx` runtime-detects whether the native modules are registered (`NativeModules` / `UIManager.getViewManagerConfig`) and falls back gracefully so a JS-only reload before the dev client is rebuilt won't crash the bundle.
 
-### Tab pills (compass Why/Overcome/Aspire/Roles)
+### H44 vs H56 sizes
 
-- `flex: 1`, `paddingVertical: 10`, `paddingHorizontal: 8`
-- `borderWidth: 1`, `borderColor: accent`, `borderRadius: radius.md (12)`
-- Active: `backgroundColor: accent`, text turns `#1a1a1a`
-- Inactive: `backgroundColor: bg`, text `accent`
-- Label: `fontSize: 11`, `letterSpacing: 0.5`, `textTransform: 'uppercase'`
-- Text uses `numberOfLines={1} + adjustsFontSizeToFit` so long labels (OVERCOME) fit on small screens
+Two-tier system on iPhone, derived from Valeriya's Figma library scaled by 1/1.5 (her artboard is 591pt wide vs iPhone's ~393pt).
 
-### NEXT / TODAY tags
+| Valeriya's label | Figma px | iOS pt | Used for |
+|---|---|---|---|
+| H56 small | 56 | **44** (Apple touch minimum) | Keyboard accessory pairs |
+| H80 medium | 80 | **56** | All primary CTAs (hero + in-body) |
 
-Small uppercase status tags inside practice tiles.
+Use `<GoldPrimary style={{ height: 56 }}>` for in-body primary actions. For keyboard accessories, wrap pairs in an `accessoryBarPair` view:
 
-- `borderWidth: 0.5`, `borderColor: border`
-- `borderRadius: 5` (very square)
-- `paddingHorizontal: 10`, `paddingVertical: 4`
-- Text: `fontSize: 10`, `color: accent`, `letterSpacing: 1.4`, `textTransform: 'uppercase'`
+```js
+accessoryBarPair: {
+  flexDirection: 'row', gap: 10, backgroundColor: bg,
+  borderTopWidth: 0.5, borderTopColor: border,
+  paddingHorizontal: 16, paddingVertical: 8,
+}
+```
+
+Then `<GoldSecondary>` + `<GoldPrimary>` side-by-side, each `flex: 1, height: 44`.
+
+### Button text
+
+All button text uses `font.bodyMedium` (Inter Medium 500) with `letterSpacing: 0.3`. Filled-button text is dark (`#1a1a1a`) to read on the gold gradient; outlined-button text is `colors.accent` (gets replaced by the masked gradient at render time when `<MaskedView>` is available).
+
+All accessory-bar text has `numberOfLines={1}`, `adjustsFontSizeToFit`, `minimumFontScale={0.8}` for small-screen safety.
 
 ---
 
 ## 4. Input fields
 
-All input fields share a **two-state visual pattern** per Valeriya's library:
+Two-state visual pattern:
 
 | State | Stroke | Body text |
 |---|---|---|
-| **Non-active** | `inputBorder` (`#474747`) | `textMuted` (grey) |
-| **Active** (focused) | `inputBorderActive` (`#878787`) | `textPrimary` (white) |
+| Non-active | `inputBorder` `#474747` | `textMuted` |
+| Active (focused) | `inputBorderActive` `#878787` | `textPrimary` |
 
-**Background:** `inputBg` (`#1A1A1A`) — one step above screen black for subtle elevation. The outline carries hierarchy; the bg gives a hint of layering without competing fills.
+**Background:** `inputBg` `#121212` — one step above screen black for subtle elevation. The outline carries hierarchy; the bg gives a hint of layering without competing fills.
 
 **Label / question text** stays white (`textPrimary`) in both states.
 
-**Implementations:**
-- `journal.jsx` / `review.jsx` — prompt cards use the existing `openPrompt` state to indicate active
-- `emotions.jsx` — `focusedField` state tracks which field is active (trigger / reaction / response)
-- `compass.jsx` — `focusedField` tracks which input is active (edit / roleName / roleCommitment)
-- `read.jsx` — `insightFocused` for the insight card
-- `onboarding.jsx` — `compassInput` toggles `compassInputFocused` overlay
+**Body text inside text inputs:** Inter Regular default.
 
 ---
 
 ## 5. Cards
 
 ### Practice tile (routine row)
-
-The numbered daily/weekly tiles on the Practice screen.
-
-- Wrapped in `routineCard` container (`borderWidth: 0.5`, `borderColor: border`, `borderRadius: radius.lg`)
-- Each row: `flexDirection: 'row'`, gap between dot / content / tag
-- Status dot: 18pt circle, `bgCard` border or filled `accent` when done with checkmark glyph
-- Title: `fontSize: 17`, `fontWeight: '500'`, `color: textPrimary`
+Numbered daily / weekly tiles on the Practice screen.
+- `routineCard` container: `borderWidth: 0.5`, `borderColor: border`, `borderRadius: radius.lg`
+- Row: flex-row, dot + content + tag
+- Status dot: 18pt circle, filled `accent` with checkmark when done
+- Title: `fontSize: 17`, `fontFamily: font.bodyMedium`
 - Sub: `fontSize: 13`, `color: textMuted`
 - Done state: title turns `textMuted`, no NEXT tag
 
 ### Prompt card (journal, review)
-
-- `borderWidth: 0.5`, `borderColor: border` (non-active) / `borderBright` (active)
+- `borderWidth: 0.5`, `borderColor: inputBorder` (non-active) / `inputBorderActive` (active)
 - `borderRadius: radius.lg`
 - `padding: 20`, `marginBottom: 10`
-- `backgroundColor: bg` (matches screen — outline-only treatment)
+- `backgroundColor: inputBg`
 
 ### Field card (emotions)
-
-Same shape as prompt card, used for trigger / reaction / response inputs. Active variant brightens the stroke.
+Same shape as prompt card. Active variant brightens the stroke.
 
 ### Reframe card (emotions, dynamic emotion color)
+Takes on the selected emotion's palette (border + tint + text). Distortion grid renders inside.
 
-Inside the III · Reframe section, this card takes on the selected emotion's color (border + tint) and contains the reframe text + distortion grid + response input.
-
-### Archive entry row (journal-history, emotions-history)
-
+### Archive entry row (journal-history, emotions-history, read-archive, review-archive)
 - `padding: 18`, `borderBottomWidth: 0.5`, `borderBottomColor: border`
 - `backgroundColor: bgCard`
-- Top row: date + emotion/virtue subtitle on left, EDIT chip top-right
-- Identical geometry across journal-history and emotions-history
+- Top row: date + emotion / virtue subtitle on left, `<GoldSecondary flatStroke>` EDIT chip top-right
 
 ---
 
 ## 6. Page heroes
 
-Each main screen has a hero image header with a title at the bottom.
+Every main screen has a hero image header with title overlaid at the bottom-left.
 
 **Container:**
-- `minHeight: 280`
+- `minHeight: 280` (260 on some surfaces)
 - `borderBottomWidth: 0.5`, `borderBottomColor: border`
 - `overflow: 'hidden'`, `justifyContent: 'flex-end'`
 
 **Image:** `StyleSheet.absoluteFillObject`, `resizeMode: 'cover'`.
 
-**Gradient scrim** (compressed to bottom — top 55% transparent):
+**Gradient scrim** (uniform across heroes — stronger than the original to handle bright paintings like Wisdom):
 
 ```js
 <LinearGradient
-  colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
-  locations={[0, 0.55, 0.8, 1]}
+  colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.75)', 'rgba(0,0,0,0.95)']}
+  locations={[0, 0.4, 0.75, 1]}
   style={StyleSheet.absoluteFillObject}
 />
 ```
 
-Applied uniformly across compass, journal, review, read, emotions, meditate page heroes.
+**Hero text:** padded `28h / 48t / 32b`, eyebrow + title + optional sub, all left-aligned with text-shadow for image legibility (see §2).
 
-**Hero content:** `padding: spacing.xl`, `paddingTop: 52`, with title at bottom (or eyebrow + title + sub stacked).
-
----
-
-## 7. Figma → iOS conversion
-
-Valeriya's Figma artboard is **591pt wide** vs iPhone's typical ~393pt. To preserve her visual proportions on iPhone, divide Figma values by **1.5**.
-
-| Valeriya's label | Figma px | iOS target | Used for |
-|---|---|---|---|
-| H56 small | 56 | **44** (Apple touch minimum) | Keyboard accessory pairs |
-| H80 medium | 80 | **56** | All primary CTAs (hero + in-body) |
-
-For details on why: she designs on a 1.5x artboard. Same logic applies to any future spec values from her library — divide by 1.5 to get the iOS-pt value.
+**Important layout note:** padding lives on an inner `stepHeroText` / `medOnbHeroText` wrapper, **not** on the hero container. When the container has horizontal padding, iOS clips absolutely-positioned children (the painting) to the content box, producing a black gutter on the right.
 
 ---
 
-## 8. Special components
+## 7. Onboarding
 
-### `PracticeHeader` (components/PracticeHeader.jsx)
+Six-step flow, every step art-directed. No more text-on-black screens.
 
-Sticky header on the daily practice flow screens (compass, reading, journal). Always 4 segments (I–IV) — Weekly Review is a separate flow with its own chrome.
+| Step | Treatment |
+|---|---|
+| 1. Welcome | Warm-ember gradient bg + skull + "Marcus" wordmark (Cormorant Bold 64pt, tracking `-1`) + welcome quote ("Be one.") + GoldPrimary "Continue" |
+| 2. Philosophy ("A daily Stoic practice") | `compass.jpg` painting hero |
+| 3. Practice preview ("The shape of your day") | `journal-morning.jpg` painting hero + 4 daily steps + "Also in your kit" (Guided meditations, Weekly Review, Emotion log, FaceID lock) |
+| 4. Meditations ("Ancient attention training") | `view-from-above.jpg` painting hero + 6 meditation cards with painting thumbnails + audio previews |
+| 5. Reminders ("A few gentle reminders") | `evening-examination.jpg` painting hero + editable notification rows |
+| 6. Paywall | Warm-ember gradient + skull + plan selector. Top-back chrome via `<ScreenHeader>` when entered from inside the app; absent during onboarding. |
 
-- Title row: ‹ arrow + Roman + current title + › arrow
-- Segments row below: 4 hairlines, lit/dim based on position
+After paywall purchase → `ReadyScreen` ("Your practice begins now") → Practice.
 
-### `ScreenHeader` (components/ScreenHeader.jsx)
+### Compass intro
 
-Used on all non-practice-flow screens (settings, archives, weekly review). Renders a `‹ Back` text-link in a thin top bar.
+When a user first taps the Compass tab (no `has_seen_compass_intro` flag), `<CompassIntro>` shows: three preview cards with `<GoldSecondary>` Edit chips, "Use these to start" CTA. On dismiss, route returns to Practice (`router.replace('/')`) instead of dropping on the live Compass screen — avoids the redundancy of showing the same content twice.
 
-### Tab bar (`_layout.jsx`)
+---
+
+## 8. Empty states
+
+All four archives (read-archive, journal-history, review-archive, emotions-history) share the same structure for first-time / no-data state:
+
+- 180×108 painting thumbnail at top (rounded 12pt), each pulling its in-app hero (`read.jpg` / `journal-morning|evening.jpg` / `review.jpg` / `emotions.jpg`)
+- Eyebrow in Inter Medium uppercase
+- Title in Didot 26pt with `letterSpacing: -0.5, lineHeight: 32`
+- Body copy in Inter Regular (default)
+- Optional CTA below
+
+Transient empty states ("Nothing matches your filter") are plain text, no painting — they're temporary, not first-impressions.
+
+---
+
+## 9. Tab bar
 
 Three logical tabs: Practice · Emotions · More.
 
 - `height: 84`, `paddingBottom: 24`, `paddingTop: 10`
-- `backgroundColor: '#080808'`, `borderTopColor: border`
-- Icons: Ionicons `flame-outline` / `heart-outline` / `menu-outline` (menu is `size: 26`; the others are `size: 22` — menu's three thin bars read smaller at the same size)
-- Labels: `fontSize: 9`, `letterSpacing: 1.4`, `textTransform: 'uppercase'`, `marginTop: 3`
+- `backgroundColor: '#0d0a08'` (warm-tinted black to match the hero gradient world)
+- `borderTopColor: border`
+- Icons: `flame-outline` / `heart-outline` / `menu-outline` (menu is `size: 26`; the others are `size: 22`)
+- Labels: `fontSize: 9`, `letterSpacing: 1.4`, `fontFamily: font.bodyMedium`, `textTransform: 'uppercase'`
 - Active = `accent`, inactive = `textDim`
 
 ### Logical tab highlighting
@@ -317,28 +316,58 @@ Three logical tabs: Practice · Emotions · More.
 
 ---
 
-## 9. Conventions
+## 10. Chrome components
 
-- **No periods on hero headlines** — Valeriya's rule, applied across all `title` / `stepTitle` / `previewTitle` / `heroTitle` / `sealedRestTitle` sites.
-- **Avoid em-dashes** — prefer commas / colons / periods in body copy.
-- **Scroll-to-top on focus** — every screen resets to top via `useFocusEffect` on tab/route re-entry.
-- **No iOS scroll indicators** — `showsVerticalScrollIndicator={false}` everywhere.
-- **Touch target floor** — 44pt minimum (per Apple HIG); buttons round up if math says lower.
+### `<PracticeHeader>`
+Sticky header on the daily practice flow screens (compass, reading, journal). Title row: real Ionicons `chevron-back` + Roman + current title + `chevron-forward` (typographic glyphs replaced with icons in the brand pass — `›` at `fontWeight: 300` was under-weighted). Segments row below: 4 hairlines, lit/dim based on position.
+
+### `<ScreenHeader>`
+Used on all non-practice-flow screens (settings, archives, weekly review, paywall when entered from inside the app). Renders a `‹ Back` text-link in a thin top bar.
 
 ---
 
-## 10. File map
+## 11. Conventions
 
-Where each layer lives:
+- **Three fonts, three lanes.** Didot for marquee, Inter for utility, Cormorant for voice. If you find yourself reaching for a fourth, the system is breaking.
+- **No periods on hero headlines.** Applied across all `title` / `stepTitle` / `previewTitle` sites.
+- **Avoid em-dashes in user-facing copy** unless they earn it (per user feedback).
+- **Scroll-to-top on focus** — every screen resets to top via `useFocusEffect` on tab/route re-entry.
+- **No iOS scroll indicators** — `showsVerticalScrollIndicator={false}` everywhere.
+- **Touch target floor** — 44pt minimum (Apple HIG); buttons round up if math says lower.
+- **Hero gradients fade fast.** Top 40% transparent, last 25% near-black, so titles always sit on enough dark to read.
+
+---
+
+## 12. File map
 
 | Concern | File |
 |---|---|
 | Color / font / radius / spacing tokens | `constants/theme.js` |
+| Font loading + Text default | `app/_layout.jsx` |
+| Gold button system | `components/GoldButton.jsx` |
 | Tab nav + logical tab highlighting | `app/_layout.jsx` |
 | Practice flow chrome | `components/PracticeHeader.jsx` |
 | Non-practice screen chrome | `components/ScreenHeader.jsx` |
 | Shared journal editor | `components/JournalEntryEditor.jsx` |
+| Shared review editor | `components/ReviewEntryEditor.jsx` |
+| Compass first-visit walkthrough | `components/CompassIntro.jsx` |
 | Mini meditation player | `components/MiniMeditationPlayer.jsx` |
+| Share cards (TestFlight share images) | `components/ReadingShareCard.jsx`, `components/ReviewShareCard.jsx` |
 | Per-screen styles | inline `StyleSheet.create(...)` at the bottom of each `app/*.jsx` |
 
-Per-screen `StyleSheet` blocks are the operational layer — most visual changes happen there. The theme tokens are the canon.
+Per-screen `StyleSheet` blocks are the operational layer — most visual changes happen there. The theme tokens + GoldButton component are the canon.
+
+---
+
+## 13. Native dependencies the system relies on
+
+| Dep | Used for |
+|---|---|
+| `expo-linear-gradient` | All hero gradients + GoldButton gradient stops |
+| `react-native-svg` | Procedural noise on GoldPrimary via `<feTurbulence>` |
+| `@react-native-masked-view/masked-view` | GoldSecondary gradient text + icon |
+| `@expo-google-fonts/inter` | `Inter_400Regular` + `Inter_500Medium` |
+| `@expo-google-fonts/cormorant` | `Cormorant_400Regular` + `Cormorant_500Medium` + `Cormorant_700Bold` |
+| `expo-font` | Font loading helper |
+
+Didot is iOS/macOS-system. No load needed.
