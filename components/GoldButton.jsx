@@ -1,7 +1,15 @@
 import React from 'react';
-import { TouchableOpacity, View, StyleSheet, NativeModules, UIManager, Platform } from 'react-native';
+import { TouchableOpacity, View, Image, StyleSheet, NativeModules, UIManager, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius } from '../constants/theme';
+
+// Valeriya's pre-composed button background. PNG exported at 4x for retina;
+// 2068×336 source resolves to ~517×84 at 1x, well above any button rendered
+// in the app. Stretches to fit the button bounds at runtime (vertical sheen
+// stays vertical; noise is invisible to horizontal distortion). Retired the
+// procedural SVG <feTurbulence> noise + LinearGradient stops in favor of
+// this single asset so the rendered look matches Figma exactly.
+const BUTTON_BG = require('../assets/button-bg.png');
 
 // Detect whether a native module is registered in the running binary. We
 // use this to short-circuit the SVG / MaskedView features before the
@@ -86,9 +94,10 @@ function NoiseLayer({ style }) {
   );
 }
 
-// Solid gradient fill with a noise overlay. Children render on top (text,
-// icon, etc.) and are responsible for their own foreground color — use
-// colors.bgDeep / '#1a1a1a' for legibility on the gold.
+// Filled gold button — Valeriya's button-bg.png stretched to fill,
+// borderRadius clipping via overflow:'hidden' on the outer TouchableOpacity.
+// Children render on top of the background; they're responsible for their
+// own foreground color — use colors.bgDeep / '#1a1a1a' for legibility.
 export function GoldPrimary({
   onPress,
   disabled,
@@ -98,11 +107,6 @@ export function GoldPrimary({
   hitSlop,
   borderRadius = radius.md,
 }) {
-  // overflow:'hidden' on the outer TouchableOpacity handles corner
-  // rounding so the inner gradient + noise layers don't carry their own
-  // borderRadius (iOS mis-renders rounded image layers). Children render
-  // alongside the gradient/noise; consumer-supplied padding/gap on `style`
-  // flow directly so layout matches the prior TouchableOpacity API.
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -111,8 +115,11 @@ export function GoldPrimary({
       hitSlop={hitSlop}
       style={[s.base, { borderRadius }, style, disabled && s.disabled]}
     >
-      <GoldGradient style={StyleSheet.absoluteFill} />
-      <NoiseLayer style={[StyleSheet.absoluteFill, { opacity: NOISE_OPACITY }]} />
+      <Image
+        source={BUTTON_BG}
+        resizeMode="stretch"
+        style={StyleSheet.absoluteFill}
+      />
       {children}
     </TouchableOpacity>
   );
