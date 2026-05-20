@@ -154,7 +154,7 @@ export default function Layout() {
           // bypass the subscription gate by tapping a tab. Paywall is the
           // single entry point to the app for non-trialing, non-paying
           // users.
-          tabBarStyle: (route.name === 'onboarding' || route.name === 'paywall') ? { display: 'none' } : {
+          tabBarStyle: (route.name === 'onboarding' || route.name === 'paywall' || route.name === 'ready') ? { display: 'none' } : {
             backgroundColor: '#0d0a08',
             borderTopColor: colors.border,
             borderTopWidth: 0.5,
