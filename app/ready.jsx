@@ -1,11 +1,9 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, font } from '../constants/theme';
 import { GoldPrimary } from '../components/GoldButton';
-
-const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
+import { VideoBackground } from '../components/VideoBackground';
 
 // Post-paywall confirmation screen. Sits between the paywall and the
 // Practice tab so the "your practice begins now" moment lands after the
@@ -17,13 +15,7 @@ export default function ReadyScreen() {
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    <LinearGradient
-      colors={HERO_GRADIENT}
-      locations={[0, 0.6, 1]}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <VideoBackground>
       <SafeAreaView style={s.safe}>
         <View style={s.body}>
           <Image source={require('../assets/skull.png')} style={s.skull} resizeMode="contain" />
@@ -41,7 +33,7 @@ export default function ReadyScreen() {
           </GoldPrimary>
         </View>
       </SafeAreaView>
-    </LinearGradient>
+    </VideoBackground>
   );
 }
 

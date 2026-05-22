@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image,
+  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image, ImageBackground,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,7 +16,9 @@ import { useMindfulSession } from '../lib/useMindfulSession';
 import { useKeyboardVisible } from '../lib/useKeyboardVisible';
 import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
+import { HeroOverlayChip } from '../components/HeroOverlayChip';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+
 
 // Situation-agnostic reframes
 const stoicReframesUpdated = {
@@ -187,67 +189,76 @@ export default function EmotionsScreen() {
             />
             <View style={s.heroContent}>
               <Text style={s.eyebrow}>Emotional mastery</Text>
-              <Text style={s.title}>Log a trigger</Text>
-              <Text style={s.sub}>Between stimulus and response{'\n'}there is a space. This is that space.</Text>
+              <View style={s.heroTitleRow}>
+                <Text style={[s.title, { flex: 1 }]}>Log a trigger</Text>
+                <HeroOverlayChip onPress={() => router.push('/emotions-history')}>
+                  Past triggers
+                </HeroOverlayChip>
+              </View>
             </View>
           </View>
 
-          <View style={s.pastEntriesRow}>
-            <GoldSecondary
-              onPress={() => router.push('/emotions-history')}
-              style={s.pastEntriesBtn}
-              contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-            >
-              <Text style={s.pastEntriesText}>Past triggers</Text>
-              <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
-            </GoldSecondary>
-          </View>
+          <ImageBackground
+            source={require('../assets/bg.png')}
+            style={s.mementoStrip}
+            resizeMode="cover"
+          >
+            <Text style={s.mementoText}>
+              "Men are disturbed not by the things which happen, but by the opinions about the things."
+            </Text>
+            <Text style={s.mementoSub}>
+              Epictetus · Enchiridion 5
+            </Text>
+          </ImageBackground>
 
           <View style={s.body}>
 
             <Text style={[s.stageLabel, { marginTop: 16 }]}>I · Context</Text>
-            <Text style={s.secLabel}>When did this happen?</Text>
-            <View style={s.timingRow}>
-              <TouchableOpacity
-                style={[s.timingBtn, timing === 'now' && s.timingBtnActive]}
-                onPress={() => setTiming('now')}
-                activeOpacity={0.7}
-              >
-                <Text style={[s.timingBtnText, timing === 'now' && s.timingBtnTextActive]}>
-                  Happening now
-                </Text>
-                <Text style={[s.timingBtnSub, timing === 'now' && s.timingBtnSubActive]}>
-                  How will I respond?
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[s.timingBtn, timing === 'past' && s.timingBtnActive]}
-                onPress={() => setTiming('past')}
-                activeOpacity={0.7}
-              >
-                <Text style={[s.timingBtnText, timing === 'past' && s.timingBtnTextActive]}>
-                  Already happened
-                </Text>
-                <Text style={[s.timingBtnSub, timing === 'past' && s.timingBtnSubActive]}>
-                  How should I have responded?
-                </Text>
-              </TouchableOpacity>
+            <View style={[s.fieldCard, s.fieldCardActive]}>
+              <Text style={[s.secQuestion, { marginTop: 0 }]}>When did this happen?</Text>
+              <View style={s.timingRow}>
+                <TouchableOpacity
+                  style={[s.timingBtn, timing === 'now' && s.timingBtnActive]}
+                  onPress={() => setTiming('now')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[s.timingBtnText, timing === 'now' && s.timingBtnTextActive]}>
+                    Happening now
+                  </Text>
+                  <Text style={[s.timingBtnSub, timing === 'now' && s.timingBtnSubActive]}>
+                    How will I respond?
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[s.timingBtn, timing === 'past' && s.timingBtnActive]}
+                  onPress={() => setTiming('past')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[s.timingBtnText, timing === 'past' && s.timingBtnTextActive]}>
+                    Already happened
+                  </Text>
+                  <Text style={[s.timingBtnSub, timing === 'past' && s.timingBtnSubActive]}>
+                    How should I have responded?
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={s.feelingHeader}>
-              <Text style={[s.secLabel, { marginTop: 0, marginBottom: 0 }]}>What are you feeling?</Text>
-              <TouchableOpacity onPress={() => setHintOpen(!hintOpen)} style={s.hintBtn} activeOpacity={0.7}>
-                <Text style={s.hintBtnText}>ⓘ</Text>
-              </TouchableOpacity>
-            </View>
-            {hintOpen && (
-              <View style={s.hintBox}>
-                <Text style={s.hintText}>
-                  Marcus focuses on disturbing emotions because that's where the practice has work to do. Joy and contentment need no Stoic intervention; anger, anxiety, and shame do. Logging them here gives you the space between stimulus and response.
-                </Text>
+            <View style={[s.fieldCard, selectedEmotion && s.fieldCardActive]}>
+              <View style={s.feelingHeader}>
+                <Text style={[s.secQuestion, { marginTop: 0, marginBottom: 0 }]}>What are you feeling?</Text>
+                <TouchableOpacity onPress={() => setHintOpen(!hintOpen)} style={s.hintBtn} activeOpacity={0.7}>
+                  <Text style={s.hintBtnText}>ⓘ</Text>
+                </TouchableOpacity>
               </View>
-            )}
-            <View style={s.emotionGrid}>
+              {hintOpen && (
+                <View style={s.hintBox}>
+                  <Text style={s.hintText}>
+                    Marcus focuses on disturbing emotions because that's where the practice has work to do. Joy and contentment need no Stoic intervention; anger, anxiety, and shame do. Logging them here gives you the space between stimulus and response.
+                  </Text>
+                </View>
+              )}
+              <View style={s.emotionGrid}>
               {emotions.map(e => {
                 const ec = EMOTION_COLORS[e.id];
                 const isSelected = selectedEmotion === e.id;
@@ -265,6 +276,7 @@ export default function EmotionsScreen() {
                   </TouchableOpacity>
                 );
               })}
+              </View>
             </View>
 
             <Text style={s.stageLabel}>II · Describe</Text>
@@ -289,6 +301,7 @@ export default function EmotionsScreen() {
                 editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoTriggerAccessory' : undefined}
+                keyboardAppearance="dark"
               />
             </View>
 
@@ -307,6 +320,7 @@ export default function EmotionsScreen() {
                 editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoReactionAccessory' : undefined}
+                keyboardAppearance="dark"
               />
             </View>
 
@@ -317,11 +331,16 @@ export default function EmotionsScreen() {
               style={[
                 s.reframeCard,
                 selectedEmotion
-                  ? { borderColor: EMOTION_COLORS[selectedEmotion].border, backgroundColor: EMOTION_COLORS[selectedEmotion].tint }
+                  ? {
+                      borderColor: EMOTION_COLORS[selectedEmotion].border,
+                      backgroundColor: keyboardUp
+                        ? colors.bgElevated
+                        : EMOTION_COLORS[selectedEmotion].tint,
+                    }
                   : { borderColor: colors.border, backgroundColor: colors.bgElevated },
               ]}
             >
-              <Text style={[s.reframeEyebrow, { color: selectedEmotion ? EMOTION_COLORS[selectedEmotion].text : colors.textDim }]}>
+              <Text style={[s.reframeEyebrow, { color: selectedEmotion ? EMOTION_COLORS[selectedEmotion].border : colors.textDim }]}>
                 The Stoic reframe
               </Text>
               <Text style={[s.reframeText, !selectedEmotion && s.reframeTextMuted]}>
@@ -345,15 +364,15 @@ export default function EmotionsScreen() {
                       key={d.id}
                       style={[
                         s.distortionPill,
-                        isSelected && ec && { borderColor: ec.border, backgroundColor: ec.bg },
+                        isSelected && ec && { borderColor: ec.border, backgroundColor: ec.tint },
                       ]}
                       onPress={() => toggleDistortion(d.id)}
                       activeOpacity={0.7}
                     >
-                      <Text style={[s.distortionLabel, isSelected && ec && { color: ec.text }]}>
+                      <Text style={[s.distortionLabel, isSelected && ec && { color: ec.border }]}>
                         {d.label}
                       </Text>
-                      <Text style={[s.distortionQ, isSelected && ec && { color: ec.text }]}>
+                      <Text style={[s.distortionQ, isSelected && ec && { color: ec.border }]}>
                         {d.q}
                       </Text>
                     </TouchableOpacity>
@@ -381,6 +400,7 @@ export default function EmotionsScreen() {
                 editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}
+                keyboardAppearance="dark"
               />
             </View>
 
@@ -466,21 +486,32 @@ const s = StyleSheet.create({
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  // Title row hosts the page title on the left and the Past-X chip on the
+  // right, both bottom-aligned so the chip sits on the same baseline.
+  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, marginBottom: 6 },
-  sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
-  // "Past triggers" link below the hero — uses Valeriya's library
-  // smaller-button outlined-gold token (matches Past entries / Past readings / Past reviews).
-  pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  pastEntriesBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: radius.md,
+  // Memento strip below the hero — same Cormorant-serif treatment as the
+  // journal/review mementos. Holds the practice's philosophical anchor copy
+  // ("Between stimulus and response…") freed from the hero so the
+  // HeroOverlayChip can sit in the top-right without crowding.
+  mementoStrip: {
+    backgroundColor: colors.accentBg,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    padding: spacing.xl,
+    paddingVertical: 20,
   },
-  pastEntriesText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  mementoText: { fontSize: 19, color: colors.textPrimary, lineHeight: 30, fontFamily: font.serif },
+  mementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Light body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
-  stageLabel: { fontSize: 11, letterSpacing: 3, color: colors.accentDim, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 36, marginBottom: 14 },
+  // Section-level QUESTIONS rendered inside the emotions form (e.g., "When
+  // did this happen?", "What are you feeling?"). Match the wizard's
+  // promptQ — sentence case body text, not uppercase chrome. Valeriya's
+  // rule: questions should look like questions, not eyebrow labels.
+  secQuestion: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400', marginTop: 8, marginBottom: 12 },
+  stageLabel: { fontSize: 11, letterSpacing: 1.8, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 36, marginBottom: 14 },
   feelingHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, marginBottom: 12 },
   hintBtn: { padding: 6, marginTop: -6 },
   hintBtnText: { fontSize: 20, color: colors.accent },
@@ -503,12 +534,12 @@ const s = StyleSheet.create({
   fieldCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
   fieldCardActive: { borderColor: colors.inputBorderActive },
   fieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12 },
-  fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 25, minHeight: 64, textAlignVertical: 'top', paddingBottom: 60 },
+  fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 25, minHeight: 54, textAlignVertical: 'top' },
   // Non-focused state: dim the typed text per Valeriya's library (grey body text).
   fieldInputDim: { color: colors.textMuted },
   reframeCard: { borderWidth: 1, borderRadius: radius.lg, padding: 26, marginBottom: 12, backgroundColor: colors.bgCard },
   reframeEyebrow: { fontSize: font.microSize, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, fontWeight: '600' },
-  reframeText: { fontSize: 16, color: colors.textSecondary, fontFamily: font.serif, lineHeight: 26, marginBottom: 16 },
+  reframeText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, marginBottom: 16 },
   reframeTextMuted: { color: colors.textDim, fontStyle: 'italic' },
   fieldLabelMuted: { color: colors.textDim },
   reframeDivider: { height: 0.5, backgroundColor: colors.border, marginBottom: 16 },

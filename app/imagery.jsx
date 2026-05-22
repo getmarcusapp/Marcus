@@ -296,7 +296,7 @@ const s = StyleSheet.create({
     paddingLeft: 14,
     marginBottom: 18,
   },
-  virtueQuote: { fontSize: 15, color: colors.textPrimary, fontFamily: font.serif, lineHeight: 24, fontStyle: 'italic', marginBottom: 6 },
+  virtueQuote: { fontSize: 16, color: colors.textPrimary, fontFamily: font.serif, lineHeight: 22, marginBottom: 6 },
   virtueQuoteAttr: { fontSize: 11, color: colors.textMuted, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   virtueArtLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
 

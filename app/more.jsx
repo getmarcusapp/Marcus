@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity,
-  StyleSheet, SafeAreaView, ScrollView,
+  StyleSheet, SafeAreaView, ScrollView, ImageBackground,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getStreak } from '../store/db';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { useEntitlement } from '../lib/useEntitlement';
 
-const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 const menuItems = [
   {
@@ -59,18 +57,16 @@ export default function MoreScreen() {
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 
-        <LinearGradient
-          colors={HERO_GRADIENT}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
+        <ImageBackground
+          source={require('../assets/bg.png')}
           style={s.hero}
+          resizeMode="cover"
         >
           <Text style={s.title}>Marcus</Text>
           <Text style={s.sub}>A Stoic practice app</Text>
           <Text style={s.heroQuote}>"The impediment to action advances action. What stands in the way becomes the way."</Text>
           <Text style={s.heroAttr}>Marcus Aurelius</Text>
-        </LinearGradient>
+        </ImageBackground>
 
         <View style={s.statsCard}>
           <View style={s.statItem}>
@@ -94,17 +90,14 @@ export default function MoreScreen() {
             <View style={s.card}>
               <TouchableOpacity
                 style={s.row}
-                onPress={() => router.push('/paywall')}
+                onPress={() => router.push('/paywall?from=/more&fromLabel=More')}
                 activeOpacity={0.7}
               >
-                <View style={s.iconWrap}>
-                  <Ionicons name="diamond-outline" size={20} color={colors.accent} />
-                </View>
                 <View style={s.rowContent}>
                   <Text style={s.rowLabel}>Subscription</Text>
                   <Text style={s.rowSub}>{subSub}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={colors.textDim} />
+                <Ionicons name="diamond-outline" size={20} color={colors.accent} style={{ marginLeft: 12 }} />
               </TouchableOpacity>
             </View>
           </View>
@@ -126,14 +119,11 @@ export default function MoreScreen() {
                   }}
                   activeOpacity={0.7}
                 >
-                  <View style={s.iconWrap}>
-                    <Ionicons name={item.icon} size={20} color={colors.textMuted} />
-                  </View>
                   <View style={s.rowContent}>
                     <Text style={s.rowLabel}>{item.label}</Text>
                     <Text style={s.rowSub}>{item.sub}</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color={colors.textDim} />
+                  <Ionicons name={item.icon} size={20} color={colors.accent} style={{ marginLeft: 12 }} />
                 </TouchableOpacity>
               ))}
             </View>

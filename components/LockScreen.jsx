@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, Animated, Easing,
+  View, Text, Image, ImageBackground, TouchableOpacity, StyleSheet, SafeAreaView, Animated, Easing,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { authenticate } from '../lib/appLock';
 import { colors, radius, spacing, font } from '../constants/theme';
-
-const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 export function LockScreen() {
   const [authing, setAuthing] = useState(false);
@@ -36,12 +33,10 @@ export function LockScreen() {
 
   return (
     <View style={s.root}>
-      <LinearGradient
-        colors={HERO_GRADIENT}
-        locations={[0, 0.6, 1]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
+      <ImageBackground
+        source={require('../assets/bg.png')}
         style={StyleSheet.absoluteFillObject}
+        resizeMode="cover"
       />
       <SafeAreaView style={s.safe}>
         <View style={s.body}>

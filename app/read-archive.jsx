@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput, Image,
   TouchableOpacity, StyleSheet, SafeAreaView,
-  Platform, InputAccessoryView, Keyboard,
+  Platform, InputAccessoryView, Keyboard, KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -88,6 +88,11 @@ export default function ReadArchiveScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel="Back" />
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: colors.bgCard }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
@@ -112,6 +117,7 @@ export default function ReadArchiveScreen() {
               value={searchQ}
               onChangeText={setSearchQ}
               clearButtonMode="while-editing"
+              keyboardAppearance="dark"
             />
           </View>
           <View style={s.filterRow}>
@@ -217,6 +223,7 @@ export default function ReadArchiveScreen() {
                           scrollEnabled={false}
                           autoFocus
                           inputAccessoryViewID={Platform.OS === 'ios' ? 'readArchiveInsightAccessory' : undefined}
+                          keyboardAppearance="dark"
                         />
                       </View>
                     ) : entry.insight && (
@@ -233,6 +240,7 @@ export default function ReadArchiveScreen() {
           )}
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
       {Platform.OS === 'ios' && editingId && (
         <InputAccessoryView nativeID="readArchiveInsightAccessory">
           <View style={s.accessoryBarPair}>
@@ -300,7 +308,7 @@ const s = StyleSheet.create({
   archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.borderMid, paddingLeft: 12, marginTop: 8 },
   archiveInsightLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   archiveInsight: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
-  archiveInsightInput: { fontSize: 14, color: colors.textPrimary, lineHeight: 22, minHeight: 60, textAlignVertical: 'top', paddingBottom: 60 },
+  archiveInsightInput: { fontSize: 14, color: colors.textPrimary, lineHeight: 22, minHeight: 48, textAlignVertical: 'top' },
   // Library EDIT chip — matches journal-history / emotions-history / review-archive.
   editBtn: { borderRadius: 4, paddingHorizontal: 10, paddingVertical: 5 },
   editBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },

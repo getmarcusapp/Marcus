@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput, Image,
   TouchableOpacity, StyleSheet, SafeAreaView,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -93,6 +94,11 @@ export default function JournalHistoryScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel="Back" />
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: colors.bgCard }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
@@ -117,6 +123,7 @@ export default function JournalHistoryScreen() {
               value={searchQ}
               onChangeText={setSearchQ}
               clearButtonMode="while-editing"
+              keyboardAppearance="dark"
             />
           </View>
           <View style={s.filterRow}>
@@ -172,7 +179,17 @@ export default function JournalHistoryScreen() {
             )}
           </View>
 
-          {filteredHistory.length === 0 && history.length > 0 ? (
+          {editingEntry ? (
+            // When an entry is being edited, hide all OTHER entries so the
+            // editor card is the only thing competing for vertical space
+            // above the keyboard. Avoids the "lots of other entries visible
+            // between the active input and the keyboard" feel.
+            <JournalEntryEditor
+              entry={editingEntry}
+              onSave={handleEditSave}
+              onCancel={() => setEditingEntry(null)}
+            />
+          ) : filteredHistory.length === 0 && history.length > 0 ? (
             <View style={s.empty}>
               <Text style={s.emptyTitle}>Nothing matches your filter.</Text>
               <Text style={s.emptyText}>Adjust your search or open the field wider.</Text>
@@ -200,14 +217,7 @@ export default function JournalHistoryScreen() {
                 <View style={s.monthHeader}><Text style={s.monthHeaderText}>{group.label}</Text></View>
                 {group.entries.map(entry => (
                   <View key={entry.id}>
-                    {editingEntry?.id === entry.id ? (
-                      <JournalEntryEditor
-                        entry={editingEntry}
-                        onSave={handleEditSave}
-                        onCancel={() => setEditingEntry(null)}
-                      />
-                    ) : (
-                      <View style={s.histEntry}>
+                    <View style={s.histEntry}>
                         <View style={s.histEntryHeader}>
                           <View>
                             <Text style={s.histEntryDate}>
@@ -239,7 +249,6 @@ export default function JournalHistoryScreen() {
                           );
                         })}
                       </View>
-                    )}
                   </View>
                 ))}
               </View>
@@ -247,6 +256,7 @@ export default function JournalHistoryScreen() {
           )}
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

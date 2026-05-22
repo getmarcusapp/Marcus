@@ -53,6 +53,7 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
                 onChangeText={text => setAnswers(prev => ({ ...prev, [prompt.key]: text }))}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewArchiveEditAccessory' : undefined}
+                keyboardAppearance="dark"
               />
             </View>
           )}
@@ -78,6 +79,7 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
                 onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewArchiveEditAccessory' : undefined}
+                keyboardAppearance="dark"
               />
             </View>
           )}
@@ -102,22 +104,12 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
               onChangeText={setIntention}
               scrollEnabled={false}
               inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewArchiveEditAccessory' : undefined}
+              keyboardAppearance="dark"
             />
           </View>
         )}
       </TouchableOpacity>
 
-      <View style={s.btnRow}>
-        <GoldSecondary style={s.cancelBtn} onPress={onCancel}>
-          <Text style={s.cancelBtnText}>Cancel</Text>
-        </GoldSecondary>
-        <GoldPrimary
-          style={s.saveBtn}
-          onPress={() => onSave({ ...entry, answers, intention })}
-        >
-          <Text style={s.saveBtnText}>Save changes</Text>
-        </GoldPrimary>
-      </View>
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="reviewArchiveEditAccessory">
           <View style={s.accessoryBarPair}>
@@ -145,12 +137,12 @@ const s = StyleSheet.create({
   header: { backgroundColor: colors.accentBg, padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', letterSpacing: 0.8 },
   headerDate: { fontSize: 13, color: colors.accentDim },
-  promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, padding: 14, backgroundColor: colors.bgCard },
+  promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, paddingHorizontal: 8, paddingVertical: 14, backgroundColor: colors.bgCard },
   promptCardOpen: { backgroundColor: colors.bgElevated },
   promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
-  promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontFamily: font.serif },
+  promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
   promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 },
-  promptInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 80, textAlignVertical: 'top', paddingBottom: 60 },
+  promptInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top' },
   btnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
   cancelBtn: { flex: 1, height: 56, borderRadius: radius.md, paddingHorizontal: 16 },
   cancelBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },

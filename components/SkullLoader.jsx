@@ -19,5 +19,5 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   skull: { width: 160, height: 160, opacity: 0.9, marginBottom: 16 },
-  text: { fontSize: 14, color: colors.textMuted, marginTop: 4, fontFamily: font.serif },
+  text: { fontSize: 14, color: colors.textMuted, marginTop: 4, fontFamily: font.body },
 });

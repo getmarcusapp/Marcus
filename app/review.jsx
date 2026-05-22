@@ -14,10 +14,12 @@ import * as haptics from '../lib/haptics';
 import { useKeyboardVisible } from '../lib/useKeyboardVisible';
 import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
+import { HeroOverlayChip } from '../components/HeroOverlayChip';
 import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard } from '../components/ReviewShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { WizardHeader } from '../components/WizardHeader';
 
 const EMOTION_LABELS = {
   anger: 'Anger', anxiety: 'Anxiety', frustration: 'Frustration',
@@ -73,15 +75,6 @@ export default function ReviewScreen() {
     router.push('/paywall');
   }
 
-  useEffect(() => {
-    if (openPrompt < 0) return;
-    // iOS handles scroll-into-view via automaticallyAdjustKeyboardInsets;
-    // breathing room above the keyboard comes from paddingBottom inside the
-    // TextInput rather than fighting iOS's scroll.
-    const t = setTimeout(() => promptInputRefs.current[openPrompt]?.focus(), 200);
-    return () => clearTimeout(t);
-  }, [openPrompt]);
-
   useFocusEffect(useCallback(() => {
     setOpenHint(null);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
@@ -94,6 +87,58 @@ export default function ReviewScreen() {
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
   const [dailyIntensity, setDailyIntensity] = useState([]);
   const [roles, setRoles] = useState([]);
+
+  // Wizard step model: 6 or 7 steps depending on whether the user has any
+  // roles defined in Compass.
+  //  0..3  → I-IV text prompts (Honor / Reckon / Pattern / Body)
+  //  4     → V · Ledger virtue picker (no text input)
+  //  5     → VI · Account roles input (only when roles.length > 0)
+  //  last  → VI/VII · Commit intention input
+  const totalSteps = roles.length > 0 ? 7 : 6;
+  function stepKind(idx) {
+    if (idx < 4) return 'text';
+    if (idx === 4) return 'ledger';
+    if (roles.length > 0 && idx === 5) return 'roles';
+    return 'commit';
+  }
+
+  useEffect(() => {
+    if (openPrompt < 0) return;
+    if (!hasAccess) return;
+    // Auto-focus the input that owns the current step so the keyboard
+    // appears immediately. Ledger (virtue picker) has no input.
+    const kind = stepKind(openPrompt);
+    const t = setTimeout(() => {
+      if (kind === 'text') promptInputRefs.current[openPrompt]?.focus();
+      else if (kind === 'roles') accountInputRef.current?.focus();
+      else if (kind === 'commit') intentionInputRef.current?.focus();
+    }, 200);
+    return () => clearTimeout(t);
+  }, [openPrompt, hasAccess, roles.length]);
+
+  function wizardBack() {
+    haptics.tap();
+    if (openPrompt > 0) {
+      setOpenPrompt(openPrompt - 1);
+    } else {
+      setOpenPrompt(-1);
+      Keyboard.dismiss();
+    }
+  }
+  function wizardClose() {
+    haptics.tap();
+    setOpenPrompt(-1);
+    Keyboard.dismiss();
+  }
+  function wizardNext() {
+    haptics.tap();
+    if (openPrompt < totalSteps - 1) {
+      setOpenPrompt(openPrompt + 1);
+    } else {
+      Keyboard.dismiss();
+      requireAccess(handleSave);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -213,7 +258,17 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
+      {openPrompt < 0 ? (
+        <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
+      ) : (
+        <WizardHeader
+          title="Weekly Review"
+          step={openPrompt}
+          total={totalSteps}
+          onBack={wizardBack}
+          onClose={wizardClose}
+        />
+      )}
       {/* Off-screen share card. Re-renders when shareEntry changes. */}
       {shareEntry && (
         <View
@@ -252,40 +307,62 @@ export default function ReviewScreen() {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
-            <Text style={s.title}>
-              {`Week of ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
-            </Text>
+            <View style={s.heroTitleRow}>
+              <Text style={[s.title, { flex: 1 }]}>
+                {`Week of ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+              </Text>
+              <HeroOverlayChip onPress={() => router.push('/review-archive')}>
+                Past reviews
+              </HeroOverlayChip>
+            </View>
           </View>
         </View>
 
-        <View style={s.pastReviewsRow}>
-          <GoldSecondary
-            onPress={() => router.push('/review-archive')}
-            style={s.pastReviewsBtn}
-            contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-          >
-            <Text style={s.pastReviewsText}>Past reviews</Text>
-            <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
-          </GoldSecondary>
-        </View>
-
-        <View style={s.body}>
-
-            {/* Reflection prompts. The III · Pattern card injects the
-                7-day disturbance sparkline + a one-line summary as
-                inline context for the question — data informing
-                reflection rather than competing with it. */}
-            {reviewPrompts.map((p, idx) => {
+        {openPrompt < 0 ? (
+          // Landing — hero is already rendered above; remaining landing chrome
+          // is the memento quote and the Begin CTA. Tapping Begin enters the
+          // wizard at step 0.
+          <View style={s.body}>
+            <LinearGradient
+              colors={['#3D2D12', '#150E08', '#000000']}
+              locations={[0, 0.6, 1]}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+              style={s.reviewMementoStrip}
+            >
+              <Text style={s.reviewMementoText}>
+                "Look back over the past, with its changing empires that rose and fell, and you can foresee the future too."
+              </Text>
+              <Text style={s.reviewMementoSub}>
+                Marcus Aurelius · Meditations VII.49
+              </Text>
+            </LinearGradient>
+            <GoldPrimary
+              style={[s.editBtn, s.sealBtn]}
+              onPress={() => requireAccess(() => { haptics.tap(); setOpenPrompt(0); })}
+            >
+              <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                {history.some(r => r.weekOf === new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                  ? 'Edit this week\'s review'
+                  : 'Begin weekly review'}
+              </Text>
+            </GoldPrimary>
+            <Text style={s.sealBtnSub}>
+              {totalSteps} prompts · about 10 minutes
+            </Text>
+          </View>
+        ) : (
+          // Wizard — one step per page. Renders text prompt / Ledger picker /
+          // roles input / Commit input depending on stepKind(openPrompt).
+          <View style={s.body}>
+            {stepKind(openPrompt) === 'text' && (() => {
+              const idx = openPrompt;
+              const p = reviewPrompts[idx];
               const isPattern = p.key === 'challenges';
               const days = dailyIntensity.filter(d => d.avg !== null);
               const showPatternData = isPattern && days.length > 0;
               return (
-              <TouchableOpacity
-                key={p.key}
-                style={[s.promptCard, openPrompt === idx && s.promptCardOpen]}
-                onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)}
-                activeOpacity={0.8}
-              >
+              <View key={p.key} style={[s.promptCard, s.promptCardOpen]}>
                 <View style={s.promptTopRow}>
                   <Text style={s.promptNum}>{p.num}</Text>
                   {p.hint && (
@@ -356,28 +433,27 @@ export default function ReviewScreen() {
                     <Text style={s.hintText}>{p.hint}</Text>
                   </View>
                 )}
-                {openPrompt === idx && (
-                  <View style={s.promptAnswer}>
-                    <TextInput
-                      ref={el => { promptInputRefs.current[idx] = el; }}
-                      style={s.promptInput}
-                      multiline
-                      placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
-                      placeholderTextColor={colors.textDim}
-                      value={answers[p.key] || ''}
-                      onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
-                      editable={hasAccess}
-                      scrollEnabled={false}
-                      keyboardAppearance="dark"
-                      inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewPromptAccessory' : undefined}
-                    />
-                  </View>
-                )}
-              </TouchableOpacity>
+                <View style={s.promptAnswer}>
+                  <TextInput
+                    ref={el => { promptInputRefs.current[idx] = el; }}
+                    style={s.promptInput}
+                    multiline
+                    placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
+                    placeholderTextColor={colors.textDim}
+                    value={answers[p.key] || ''}
+                    onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
+                    editable={hasAccess}
+                    scrollEnabled={false}
+                    keyboardAppearance="dark"
+                    inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewWizardAccessory' : undefined}
+                  />
+                </View>
+              </View>
               );
-            })}
+            })()}
 
             {/* V · Ledger — pure honest self-assessment, no pre-fill */}
+            {stepKind(openPrompt) === 'ledger' && (
             <View style={s.promptCard}>
               <View style={s.promptTopRow}>
                 <Text style={s.promptNum}>V · Ledger</Text>
@@ -425,9 +501,11 @@ export default function ReviewScreen() {
                 </View>
               </View>
             </View>
+            )}
 
-            {/* VI · Account — role-fulfillment, only if user has defined roles */}
-            {roles.length > 0 && (
+            {/* VI · Account — role-fulfillment, only when user has defined
+                roles in their Compass. */}
+            {stepKind(openPrompt) === 'roles' && (
               <View style={s.promptCard}>
                 <View style={s.promptTopRow}>
                   <Text style={s.promptNum}>VI · Account</Text>
@@ -461,13 +539,14 @@ export default function ReviewScreen() {
                   onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
                   editable={hasAccess}
                   scrollEnabled={false}
-                  inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewAccountAccessory' : undefined}
+                  inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewWizardAccessory' : undefined}
                 />
               </View>
             )}
 
             {/* Commit — the output of all reflection above. Numbered VII
                 when the Roles · Account prompt is present, otherwise VI. */}
+            {stepKind(openPrompt) === 'commit' && (
             <View style={s.promptCard}>
               <View style={s.promptTopRow}>
                 <Text style={s.promptNum}>{roles.length > 0 ? 'VII · Commit' : 'VI · Commit'}</Text>
@@ -494,108 +573,66 @@ export default function ReviewScreen() {
                 onChangeText={setIntention}
                 editable={hasAccess}
                 scrollEnabled={false}
-                inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewIntentionAccessory' : undefined}
+                inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewWizardAccessory' : undefined}
               />
             </View>
+            )}
 
+            {/* Body Back/Next row — visible when the keyboard is dismissed.
+                Mirrors the accessory bar. On the last step Next becomes
+                Seal and triggers save. */}
             {!keyboardUp && (
-              <>
-                <GoldPrimary
-                  style={[s.editBtn, s.sealBtn, !canSeal && s.sealBtnDisabled]}
-                  onPress={() => requireAccess(handleSave)}
-                  disabled={!canSeal}
-                >
-                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Seal this week</Text>
-                </GoldPrimary>
-                <Text style={s.sealBtnSub}>
-                  {canSeal ? 'Saved to your review archive' : 'Answer at least one prompt to seal'}
-                </Text>
-              </>
+              <View style={s.wizardNavRow}>
+                <GoldSecondary onPress={wizardBack} style={s.editBtn}>
+                  <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
+                </GoldSecondary>
+                {openPrompt < totalSteps - 1 ? (
+                  <GoldPrimary onPress={wizardNext} style={s.editBtn}>
+                    <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next</Text>
+                  </GoldPrimary>
+                ) : (
+                  <GoldPrimary
+                    onPress={wizardNext}
+                    disabled={!canSeal}
+                    style={[s.editBtn, !canSeal && s.sealBtnDisabled]}
+                  >
+                    <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                      Seal this week
+                    </Text>
+                  </GoldPrimary>
+                )}
+              </View>
             )}
 
           </View>
+        )}
 
         </ScrollView>
       {Platform.OS === 'ios' && (
-        <>
-          <InputAccessoryView nativeID="reviewPromptAccessory">
-            <View style={s.accessoryBarPair}>
-              <GoldSecondary
-                style={s.editBtn}
-                onPress={() => {
-                  haptics.tap();
-                  if (openPrompt > 0) {
-                    setOpenPrompt(openPrompt - 1);
-                  } else {
-                    setOpenPrompt(-1);
-                    Keyboard.dismiss();
-                  }
-                }}
-              >
-                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
-              </GoldSecondary>
-              {openPrompt < reviewPrompts.length - 1 ? (
-                <GoldPrimary
-                  style={s.editBtn}
-                  onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
-                >
-                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next</Text>
-                </GoldPrimary>
-              ) : (
-                <GoldPrimary style={s.editBtn} onPress={() => Keyboard.dismiss()}>
-                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
-                </GoldPrimary>
-              )}
-            </View>
-          </InputAccessoryView>
-          {/* VI · Account — auto-focus Commit, since there's still one prompt after */}
-          <InputAccessoryView nativeID="reviewAccountAccessory">
-            <View style={s.accessoryBarPair}>
-              <GoldSecondary
-                style={s.editBtn}
-                onPress={() => {
-                  haptics.tap();
-                  // Back from Account → return to last reflection prompt (V · Ledger).
-                  setOpenPrompt(reviewPrompts.length - 1);
-                }}
-              >
-                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
-              </GoldSecondary>
-              <GoldPrimary
-                style={s.editBtn}
-                onPress={() => { haptics.tap(); intentionInputRef.current?.focus(); }}
-              >
+        // Single accessory bar shared by all wizard inputs (text prompts,
+        // Account roles input, Commit intention input). Buttons call the
+        // shared wizardBack / wizardNext handlers — same semantics as the
+        // body Back/Next row that shows when the keyboard is dismissed.
+        <InputAccessoryView nativeID="reviewWizardAccessory">
+          <View style={s.accessoryBarPair}>
+            <GoldSecondary style={s.editBtn} onPress={wizardBack}>
+              <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
+            </GoldSecondary>
+            {openPrompt < totalSteps - 1 ? (
+              <GoldPrimary style={s.editBtn} onPress={wizardNext}>
                 <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next</Text>
               </GoldPrimary>
-            </View>
-          </InputAccessoryView>
-          {/* VII · Commit — final prompt; Seal triggers save */}
-          <InputAccessoryView nativeID="reviewIntentionAccessory">
-            <View style={s.accessoryBarPair}>
-              <GoldSecondary
-                style={s.editBtn}
-                onPress={() => {
-                  haptics.tap();
-                  // Back from Commit → return to Account if roles exist, else last prompt.
-                  if (roles.length > 0) {
-                    accountInputRef.current?.focus();
-                  } else {
-                    setOpenPrompt(reviewPrompts.length - 1);
-                  }
-                }}
-              >
-                <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
-              </GoldSecondary>
+            ) : (
               <GoldPrimary
                 style={[s.editBtn, !canSeal && s.sealBtnDisabled]}
-                onPress={() => { Keyboard.dismiss(); requireAccess(handleSave); }}
+                onPress={wizardNext}
                 disabled={!canSeal}
               >
-                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Complete</Text>
+                <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Seal</Text>
               </GoldPrimary>
-            </View>
-          </InputAccessoryView>
-        </>
+            )}
+          </View>
+        </InputAccessoryView>
       )}
     </SafeAreaView>
   );
@@ -616,16 +653,10 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
+  // Title row hosts the page title on the left and the Past-X chip on the
+  // right, both bottom-aligned so the chip sits on the same baseline.
+  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
-  // "Past reviews" link below the hero — uses Valeriya's library
-  // smaller-button outlined-gold token (matches Past entries / Past readings).
-  pastReviewsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  pastReviewsBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: radius.md,
-  },
-  pastReviewsText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   body: { padding: spacing.md },
   // Prompts
   // Input field treatment per Valeriya's library: subtle elevation above
@@ -634,10 +665,10 @@ const s = StyleSheet.create({
   promptCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
   promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  promptNum: { fontSize: 11, letterSpacing: 1.8, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
-  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top', paddingBottom: 60 },
+  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top' },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair.
@@ -663,7 +694,7 @@ const s = StyleSheet.create({
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
-  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
+  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26 },
   // Inline pattern context — appears inside the III · Pattern card to
   // ground the question in the week's actual data without preceding it
   // with a separate analytics surface.
@@ -685,7 +716,7 @@ const s = StyleSheet.create({
   vpBtnText: { fontSize: 15, color: colors.textDim },
   // Intention
   intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
-  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 90, textAlignVertical: 'top', marginTop: 12, paddingBottom: 60 },
+  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', marginTop: 12 },
   // Role chip strip shown above the VI · Account textarea to remind the
   // user which roles are in scope while reflecting on the week. Warm
   // accent tint so they read against the dark prompt card.
@@ -703,4 +734,22 @@ const s = StyleSheet.create({
   // Disabled state — gated on at least one prompt OR intention having content.
   sealBtnDisabled: { opacity: 0.4 },
   sealBtnSub: { fontSize: 12, color: colors.textDim, textAlign: 'center', marginBottom: 36 },
+  // Memento strip on the review landing — same Cormorant-serif treatment as
+  // journal/emotions mementos. Carries Marcus's "look back over the past..."
+  // anchor before the user enters the wizard.
+  reviewMementoStrip: {
+    backgroundColor: colors.accentBg,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    padding: spacing.xl,
+    paddingVertical: 20,
+    marginHorizontal: -spacing.md,
+    marginTop: -spacing.md,
+    marginBottom: 16,
+  },
+  reviewMementoText: { fontSize: 19, color: colors.textPrimary, lineHeight: 30, fontFamily: font.serif },
+  reviewMementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  // Wizard Back/Next pair shown when the keyboard is dismissed. The
+  // InputAccessoryView covers the keyboard-up case.
+  wizardNavRow: { flexDirection: 'row', gap: 10, marginTop: 14, marginBottom: 36 },
 });

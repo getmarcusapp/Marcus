@@ -154,14 +154,18 @@ export default function Layout() {
           // bypass the subscription gate by tapping a tab. Paywall is the
           // single entry point to the app for non-trialing, non-paying
           // users.
-          tabBarStyle: (route.name === 'onboarding' || route.name === 'paywall' || route.name === 'ready') ? { display: 'none' } : {
-            backgroundColor: '#0d0a08',
+          tabBarStyle: (route.name === 'onboarding' || route.name === 'paywall' || route.name === 'ready' || route.name === 'welcome') ? { display: 'none' } : {
+            backgroundColor: colors.bg,
             borderTopColor: colors.border,
             borderTopWidth: 0.5,
             height: 84,
             paddingBottom: 24,
             paddingTop: 10,
           },
+          // iOS keyboard backdrop samples the tab bar behind it; the gold
+          // active-tab icon / label was bleeding through as a warm tint.
+          // Hide the bar while the keyboard is up to kill the leak.
+          tabBarHideOnKeyboard: true,
           tabBarActiveTintColor: colors.accent,
           tabBarInactiveTintColor: colors.textDim,
           tabBarLabelStyle: {
@@ -189,9 +193,10 @@ export default function Layout() {
         <Tabs.Screen
           name="more"
           options={{
-            // menu-outline is three thin horizontal bars and reads smaller than
-            // flame/heart at the same px size — bump it slightly for visual parity.
-            tabBarIcon: () => <ManagedTabIcon iconName="menu-outline" tabKey="more" size={26} />,
+            // reorder-three-outline: three horizontal bars with more breathing
+            // room than menu-outline. Per Valeriya's preference — gives the
+            // hamburger room to feel like a deliberate symbol, not a stack.
+            tabBarIcon: () => <ManagedTabIcon iconName="reorder-three-outline" tabKey="more" size={26} />,
             tabBarLabel: () => <ManagedTabLabel label="More" tabKey="more" />,
           }}
         />
@@ -209,6 +214,7 @@ export default function Layout() {
         <Tabs.Screen name="library" options={{ href: null }} />
         <Tabs.Screen name="paywall" options={{ href: null }} />
         <Tabs.Screen name="ready" options={{ href: null }} />
+        <Tabs.Screen name="welcome" options={{ href: null }} />
         <Tabs.Screen name="journal-history" options={{ href: null }} />
         <Tabs.Screen name="review-archive" options={{ href: null }} />
         <Tabs.Screen name="emotions-history" options={{ href: null }} />

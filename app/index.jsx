@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Image, Animated, ActivityIndicator,
+  StyleSheet, SafeAreaView, Image, ImageBackground, Animated, ActivityIndicator,
 } from 'react-native';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
@@ -14,11 +14,10 @@ import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/qu
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Video, ResizeMode } from 'expo-av';
 import * as haptics from '../lib/haptics';
 import { useEntitlement } from '../lib/useEntitlement';
 
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
-const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
@@ -321,13 +320,23 @@ export default function PracticeScreen() {
           contentContainerStyle={{ paddingBottom: playerInset }}
         >
 
-          <AnimatedLinearGradient
-            colors={HERO_GRADIENT}
-            locations={[0, 0.6, 1]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={[s.heroSealed, sealedAnimStyle(0)]}
-          >
+          <Animated.View style={[s.heroSealed, sealedAnimStyle(0)]}>
+            {/* Looping background video for the daily success moment.
+                Sits behind the dark overlay; foreground content (skull,
+                eyebrow, date, streak) renders above via JSX z-order. */}
+            <Video
+              source={require('../assets/intro-video.mov')}
+              style={StyleSheet.absoluteFillObject}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay
+              isLooping
+              isMuted
+              useNativeControls={false}
+            />
+            <View
+              pointerEvents="none"
+              style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.8)' }]}
+            />
             <Animated.Image
               source={require('../assets/skull.png')}
               style={[s.skullIconSealed, tiltTransform]}
@@ -343,7 +352,7 @@ export default function PracticeScreen() {
             >
               {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
             </Animated.Text>
-          </AnimatedLinearGradient>
+          </Animated.View>
 
           <Animated.View style={[s.sealedCard, sealedAnimStyle(1)]}>
             <Text style={s.sealedQuoteText}>“{sealQuote.text}”</Text>
@@ -426,12 +435,10 @@ export default function PracticeScreen() {
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 
-        <LinearGradient
-          colors={HERO_GRADIENT}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
+        <ImageBackground
+          source={require('../assets/bg.png')}
           style={s.hero}
+          resizeMode="cover"
         >
           <Animated.Image
             source={require('../assets/skull.png')}
@@ -443,7 +450,7 @@ export default function PracticeScreen() {
           <Text style={s.heroSub}>
             {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
           </Text>
-        </LinearGradient>
+        </ImageBackground>
 
         <View style={s.quoteCard}>
           <Text style={s.quoteText}>“{quote.text}”</Text>
@@ -569,7 +576,10 @@ const s = StyleSheet.create({
   heroDate: { fontSize: font.heroSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
   heroSub: { fontSize: font.subSize, color: colors.textMuted, textAlign: 'center' },
 
-  // Sealed hero
+  // Sealed hero — contains a looping background video + dark overlay
+  // sitting behind the skull/text content. No overflow:hidden because
+  // the skull's tilt-transform with perspective can render slightly
+  // outside its 180x180 bounding box and would get clipped otherwise.
   heroSealed: {
     backgroundColor: colors.bgDeep,
     paddingTop: 48,

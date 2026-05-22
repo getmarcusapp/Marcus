@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, font } from '../constants/theme';
 import { GoldPrimary, GoldSecondary } from './GoldButton';
 import { COMPASS_FIELDS } from '../constants/compassFields';
+import { useKeyboardVisible } from '../lib/useKeyboardVisible';
 
 // First-visit walkthrough for the Compass screen. Lifts the experience that
 // used to live in Onboarding (Your Compass is ready) into the live /compass
@@ -21,12 +22,13 @@ import { COMPASS_FIELDS } from '../constants/compassFields';
 //
 // Parent owns the compass state and persists changes; this component is
 // purely UI + local edit-step tracking.
-export function CompassIntro({ compass, setCompass, onDismiss }) {
+export function CompassIntro({ compass, setCompass, onDismiss, onBack }) {
   const [mode, setMode] = useState('summary');
   const [editIdx, setEditIdx] = useState(0);
   const [hintOpen, setHintOpen] = useState(false);
   const [editFocused, setEditFocused] = useState(false);
   const editInputRef = useRef(null);
+  const keyboardUp = useKeyboardVisible();
 
   useEffect(() => {
     if (mode !== 'edit') return;
@@ -56,6 +58,17 @@ export function CompassIntro({ compass, setCompass, onDismiss }) {
     const field = COMPASS_FIELDS[editIdx];
     return (
       <SafeAreaView style={s.safe}>
+        <View style={s.editHeader}>
+          <TouchableOpacity
+            onPress={() => { Keyboard.dismiss(); goBack(); }}
+            style={s.editHeaderBackBtn}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={18} color={colors.accent} />
+            <Text style={s.editHeaderBackText}>Back</Text>
+          </TouchableOpacity>
+        </View>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -66,7 +79,7 @@ export function CompassIntro({ compass, setCompass, onDismiss }) {
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ paddingBottom: 140 }}
+            contentContainerStyle={{ paddingBottom: keyboardUp ? 24 : 140 }}
           >
             <View style={s.stepHero}>
               <Text style={s.stepEyebrow}>{editIdx + 1} of {COMPASS_FIELDS.length}</Text>
@@ -107,14 +120,16 @@ export function CompassIntro({ compass, setCompass, onDismiss }) {
               </View>
             </View>
           </ScrollView>
-          <View style={s.footer}>
-            <GoldPrimary style={s.primaryBtn} onPress={advanceOrFinish}>
-              <Text style={[s.primaryBtnText, { color: '#1a1a1a' }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-                {editIdx < COMPASS_FIELDS.length - 1 ? 'Next' : 'Save'}
-              </Text>
-              <Ionicons name="arrow-forward" size={18} color="#1a1a1a" style={{ marginTop: 2 }} />
-            </GoldPrimary>
-          </View>
+          {!keyboardUp && (
+            <View style={s.footer}>
+              <GoldPrimary style={s.primaryBtn} onPress={advanceOrFinish}>
+                <Text style={[s.primaryBtnText, { color: '#1a1a1a' }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                  {editIdx < COMPASS_FIELDS.length - 1 ? 'Next' : 'Save'}
+                </Text>
+                <Ionicons name="arrow-forward" size={18} color="#1a1a1a" style={{ marginTop: 2 }} />
+              </GoldPrimary>
+            </View>
+          )}
         </KeyboardAvoidingView>
         {Platform.OS === 'ios' && (
           <InputAccessoryView nativeID="compassIntroAccessory">
@@ -140,6 +155,19 @@ export function CompassIntro({ compass, setCompass, onDismiss }) {
   // Summary mode (default)
   return (
     <SafeAreaView style={s.safe}>
+      {onBack && (
+        <View style={s.editHeader}>
+          <TouchableOpacity
+            onPress={onBack}
+            style={s.editHeaderBackBtn}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={18} color={colors.accent} />
+            <Text style={s.editHeaderBackText}>Back</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <ScrollView
         style={s.scroll}
         showsVerticalScrollIndicator={false}
@@ -194,11 +222,17 @@ export function CompassIntro({ compass, setCompass, onDismiss }) {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
+  // Top-of-screen back affordance for the multi-step edit flow. Without
+  // this users were stranded once the keyboard dismissed (the only
+  // alternate Back lives in the keyboard accessory bar).
+  editHeader: { paddingHorizontal: 18, paddingTop: 8, paddingBottom: 4 },
+  editHeaderBackBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4, paddingRight: 12, alignSelf: 'flex-start' },
+  editHeaderBackText: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   stepHero: {
     backgroundColor: colors.bgDeep,
     paddingHorizontal: 28,
-    paddingTop: 84,
-    paddingBottom: 32,
+    paddingTop: 12,
+    paddingBottom: 16,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
@@ -207,7 +241,7 @@ const s = StyleSheet.create({
     letterSpacing: font.sectionTracking,
     color: colors.accent,
     fontFamily: font.bodyMedium, textTransform: 'uppercase',
-    marginBottom: 12,
+    marginBottom: 6,
   },
   stepTitle: {
     fontSize: 44,
@@ -215,7 +249,7 @@ const s = StyleSheet.create({
     color: '#FFFFFF',
     letterSpacing: -1.5,
     lineHeight: 52,
-    marginBottom: 14,
+    marginBottom: 8,
   },
   stepSub: {
     fontSize: 17,
@@ -239,12 +273,10 @@ const s = StyleSheet.create({
   },
   compassInput: {
     fontSize: 18,
-    color: colors.textMuted,
+    color: colors.textPrimary,
     lineHeight: 28,
-    minHeight: 140,
+    minHeight: 240,
     textAlignVertical: 'top',
-    fontFamily: font.serif,
-    paddingBottom: 60,
   },
   compassInputFocused: {
     color: colors.textPrimary,
@@ -290,7 +322,6 @@ const s = StyleSheet.create({
     fontSize: 16,
     color: colors.textMuted,
     lineHeight: 24,
-    fontFamily: font.serif,
   },
   compassFooterNote: {
     borderWidth: 0.5,

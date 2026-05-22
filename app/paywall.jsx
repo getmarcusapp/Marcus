@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, Image, ActivityIndicator, Alert, ScrollView, Linking,
+  SafeAreaView, Image, ImageBackground, ActivityIndicator, Alert, ScrollView, Linking,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getOfferings, purchasePackage, restorePurchases } from '../store/purchases';
 import { useEntitlement } from '../lib/useEntitlement';
@@ -12,15 +11,20 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { GoldPrimary } from '../components/GoldButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 export default function PaywallScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   // When the paywall is reached during fresh onboarding, the post-paywall
   // landing is the ReadyStep ("Your practice begins now"). Otherwise
-  // (e.g., backup-restore flow) skip Ready and go straight to Practice.
+  // (e.g., upgrade from a locked surface) skip Ready and go straight to
+  // Practice on cancel / restore. On a successful first-time purchase the
+  // welcome screen acknowledges the threshold (see handlePurchase below).
   const postPaywallRoute = params?.from === 'onboarding' ? '/ready' : '/';
+  // Successful purchases from non-onboarding contexts route through /welcome
+  // first so the moment is acknowledged. From onboarding we keep the
+  // existing /ready path which already carries the Day-1 threshold copy.
+  const successRoute = params?.from === 'onboarding' ? '/ready' : '/welcome';
   const [offerings, setOfferings] = useState(null);
   const [loading, setLoading] = useState(true);
   // Surface current trial state so a user who's already trialing sees
@@ -85,7 +89,7 @@ export default function PaywallScreen() {
       // trial-state detection (the user would never see "X days left").
       // The dev/beta override in _layout.jsx still sets has_premium=true
       // at launch for unsigned builds.
-      router.replace(postPaywallRoute);
+      router.replace(successRoute);
     } else if (!result.userCancelled) {
       Alert.alert('', 'Something went wrong. Please try again or restore your purchases.');
     }
@@ -123,19 +127,17 @@ export default function PaywallScreen() {
     <SafeAreaView style={s.safe}>
       {showTopBack && (
         <ScreenHeader
-          fromLabel="Back"
-          onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+          fromPath={params?.from || '/'}
+          fromLabel={params?.fromLabel || 'Back'}
         />
       )}
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* Hero */}
-        <LinearGradient
-          colors={HERO_GRADIENT}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
+        <ImageBackground
+          source={require('../assets/bg.png')}
           style={s.hero}
+          resizeMode="cover"
         >
           <Image
             source={require('../assets/skull.png')}
@@ -155,7 +157,7 @@ export default function PaywallScreen() {
               <Text style={s.trialStatusSub}>Manage your subscription in iOS Settings.</Text>
             </View>
           )}
-        </LinearGradient>
+        </ImageBackground>
 
         {/* Feature list */}
         <View style={s.features}>
@@ -264,7 +266,14 @@ export default function PaywallScreen() {
             they can decline the trial and enter in read-only mode. */}
         <TouchableOpacity
           style={s.skipBtn}
-          onPress={() => (alreadySubscribed && router.canGoBack() ? router.back() : router.replace(postPaywallRoute))}
+          onPress={() => {
+            // Prefer the explicit `from` param if the paywall was opened
+            // from a specific surface (More · Subscription, locked features,
+            // etc.). Falls back to postPaywallRoute for the onboarding flow
+            // which doesn't pass a destination.
+            const declineRoute = params?.from && params.from !== 'onboarding' ? params.from : postPaywallRoute;
+            router.replace(declineRoute);
+          }}
           activeOpacity={0.7}
         >
           <Text style={s.skipBtnText}>{alreadySubscribed ? 'Done' : 'Continue without trial'}</Text>

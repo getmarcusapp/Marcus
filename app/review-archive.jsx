@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
-  StyleSheet, SafeAreaView, Share,
+  StyleSheet, SafeAreaView, Share, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -103,6 +103,11 @@ export default function ReviewArchiveScreen() {
 
       <ScreenHeader fromPath="/review" fromLabel="Back" />
 
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: colors.bgCard }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
@@ -196,6 +201,7 @@ export default function ReviewArchiveScreen() {
           })
         )}
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

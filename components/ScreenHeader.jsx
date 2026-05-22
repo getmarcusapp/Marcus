@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, font } from '../constants/theme';
 
 // Sticky top bar with a single back text-link. Used on every screen that
@@ -21,7 +22,8 @@ export function ScreenHeader({ fromPath = '/', fromLabel = 'Back', onBack }) {
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         activeOpacity={0.7}
       >
-        <Text style={s.backText}>{`‹  ${fromLabel}`}</Text>
+        <Ionicons name="arrow-back" size={18} color={colors.accent} />
+        <Text style={s.backText}>{fromLabel}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -36,6 +38,6 @@ const s = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 14,
   },
-  backBtn: { paddingVertical: 4, paddingRight: 12, alignSelf: 'flex-start' },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4, paddingRight: 12, alignSelf: 'flex-start' },
   backText: { fontSize: 13, color: colors.accent, letterSpacing: 0.8, textTransform: 'uppercase', fontFamily: font.bodyMedium },
 });

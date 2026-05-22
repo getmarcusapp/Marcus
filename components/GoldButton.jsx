@@ -3,12 +3,9 @@ import { TouchableOpacity, View, Image, StyleSheet, NativeModules, UIManager, Pl
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius } from '../constants/theme';
 
-// Valeriya's pre-composed button background. PNG exported at 4x for retina;
-// 2068×336 source resolves to ~517×84 at 1x, well above any button rendered
-// in the app. Stretches to fit the button bounds at runtime (vertical sheen
-// stays vertical; noise is invisible to horizontal distortion). Retired the
-// procedural SVG <feTurbulence> noise + LinearGradient stops in favor of
-// this single asset so the rendered look matches Figma exactly.
+// Valeriya's pre-composed button background — gradient + noise baked in
+// at 4x (2068×336). Stretches to fit button bounds; borderRadius clipping
+// happens via overflow:'hidden' on the outer TouchableOpacity.
 const BUTTON_BG = require('../assets/button-bg.png');
 
 // Detect whether a native module is registered in the running binary. We
@@ -52,7 +49,7 @@ function loadSvg() {
 // slightly toned-down gold so the sheen still reads as metallic.
 const GOLD_STOPS = ['#D9A868', '#FFCE82', '#D9A868'];
 const GOLD_LOCATIONS = [0, 0.5, 1];
-const NOISE_OPACITY = 0.25;
+const NOISE_OPACITY = 0.40;
 
 function GoldGradient({ style }) {
   return (
@@ -81,7 +78,7 @@ function NoiseLayer({ style }) {
       <SvgRoot width="100%" height="100%">
         <Defs>
           <Filter id="goldNoise" x="0" y="0" width="100%" height="100%">
-            <FeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="2" stitchTiles="stitch" />
+            <FeTurbulence type="fractalNoise" baseFrequency="2.5" numOctaves="1" seed="2" stitchTiles="stitch" />
             <FeColorMatrix
               type="matrix"
               values="0 0 0 0 0.278  0 0 0 0 0.207  0 0 0 0 0.075  0.333 0.333 0.333 0 0"
@@ -94,10 +91,9 @@ function NoiseLayer({ style }) {
   );
 }
 
-// Filled gold button — Valeriya's button-bg.png stretched to fill,
-// borderRadius clipping via overflow:'hidden' on the outer TouchableOpacity.
-// Children render on top of the background; they're responsible for their
-// own foreground color — use colors.bgDeep / '#1a1a1a' for legibility.
+// Filled gold button — pure vertical metallic gradient, no noise overlay.
+// (Noise via PNG / procedural feTurbulence both read harder than Figma's
+// renderer; gradient-only lands closest to the smooth-sheen reference.)
 export function GoldPrimary({
   onPress,
   disabled,
@@ -115,11 +111,7 @@ export function GoldPrimary({
       hitSlop={hitSlop}
       style={[s.base, { borderRadius }, style, disabled && s.disabled]}
     >
-      <Image
-        source={BUTTON_BG}
-        resizeMode="stretch"
-        style={StyleSheet.absoluteFill}
-      />
+      <GoldGradient style={StyleSheet.absoluteFill} />
       {children}
     </TouchableOpacity>
   );

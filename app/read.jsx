@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import SkullLoader from '../components/SkullLoader';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
+import { HeroOverlayChip } from '../components/HeroOverlayChip';
 import {
   getTodayReading, saveTodayReading, saveReadingInsight,
   getReadingHistory, getCompass,
@@ -20,6 +21,7 @@ import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { useEntitlement } from '../lib/useEntitlement';
+import { useKeyboardVisible } from '../lib/useKeyboardVisible';
 import { captureRef } from 'react-native-view-shot';
 import { ReadingShareCard } from '../components/ReadingShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
@@ -75,6 +77,7 @@ export default function ReadScreen() {
   // Per Valeriya's library, insight card switches stroke + text color on focus.
   const [insightFocused, setInsightFocused] = useState(false);
   const { hasAccess } = useEntitlement();
+  const keyboardUp = useKeyboardVisible();
   // Reusable gate — locked actions push to paywall instead of executing.
   function requireAccess(action) {
     if (hasAccess) { action(); return; }
@@ -347,7 +350,11 @@ Return only the JSON object.`;
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
-        contentContainerStyle={{ paddingBottom: playerInset }}
+        // Extra paddingBottom while the keyboard is up so the insight input
+        // (last element on the page) has scroll room to clear the keyboard
+        // + accessory bar. Without it, iOS auto-adjust can't move the input
+        // above the keyboard because there's nothing to scroll into.
+        contentContainerStyle={{ paddingBottom: keyboardUp ? 320 : playerInset }}
         scrollIndicatorInsets={{ bottom: 36 }}
       >
 
@@ -363,22 +370,18 @@ Return only the JSON object.`;
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.heroContent}>
-              <Text style={s.title}>
-                {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
-                {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-              </Text>
+              <View style={s.heroTitleRow}>
+                <Text style={[s.title, { flex: 1 }]}>
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
+                  {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                </Text>
+                <HeroOverlayChip
+                  onPress={() => router.push(`/read-archive?from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
+                >
+                  Past readings
+                </HeroOverlayChip>
+              </View>
             </View>
-          </View>
-
-          <View style={s.pastReadingsRow}>
-            <GoldSecondary
-              onPress={() => router.push(`/read-archive?from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
-              style={s.pastReadingsBtn}
-              contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-            >
-              <Text style={s.pastReadingsText}>Past readings</Text>
-              <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
-            </GoldSecondary>
           </View>
 
           <View style={s.body}>
@@ -388,7 +391,7 @@ Return only the JSON object.`;
               <>
                 <View style={s.quoteCard}>
                   <TouchableOpacity style={s.quoteShareIcon} onPress={handleShare} activeOpacity={0.6} hitSlop={10}>
-                    <Ionicons name="share-outline" size={20} color={colors.accent} />
+                    <Ionicons name="arrow-redo-outline" size={18} color={colors.accent} />
                   </TouchableOpacity>
                   <Text style={[s.quoteText, s.quoteTextWithIcon]}>“{reading.quote}”</Text>
                   <View style={s.quoteRule} />
@@ -403,7 +406,7 @@ Return only the JSON object.`;
                       hitSlop={10}
                       activeOpacity={0.7}
                     >
-                      <Text style={s.sourceHintBtnText}>ⓘ</Text>
+                      <Ionicons name="information-circle-outline" size={18} color={colors.accent} />
                     </TouchableOpacity>
                   </View>
                   {sourceHintOpen && (
@@ -452,12 +455,14 @@ Return only the JSON object.`;
                   />
                 </TouchableOpacity>
 
-                <GoldSecondary
-                  style={[s.readingBtn, s.readingBtnBody]}
-                  onPress={() => requireAccess(() => generateReading())}
-                >
-                  <Text style={s.readingBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Generate new reading</Text>
-                </GoldSecondary>
+                {!keyboardUp && (
+                  <GoldSecondary
+                    style={[s.readingBtn, s.readingBtnBody]}
+                    onPress={() => requireAccess(() => generateReading())}
+                  >
+                    <Text style={s.readingBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Generate new reading</Text>
+                  </GoldSecondary>
+                )}
               </>
             ) : (
               <GoldPrimary style={[s.readingBtn, s.readingBtnBody]} onPress={() => requireAccess(() => generateReading())}>
@@ -509,16 +514,11 @@ const s = StyleSheet.create({
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
+  // Title row hosts the page title on the left and the Past-X chip on the
+  // right, both bottom-aligned so the chip sits on the same baseline as the
+  // last line of a multi-line title.
+  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
-  // "Past readings" link below the hero — uses Valeriya's library
-  // smaller-button outlined-gold token (same as EDIT chips / nav pills).
-  pastReadingsRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  pastReadingsBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: radius.md,
-  },
-  pastReadingsText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Light reading body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   // Quote card stays dark — gravitas of the Stoic quote
@@ -532,7 +532,6 @@ const s = StyleSheet.create({
   quoteAuthor: { fontSize: 14, color: colors.textSecondary, fontFamily: font.bodyMedium },
   quoteWork: { fontSize: 12, color: colors.textDim, marginTop: 3 },
   sourceHintBtn: { paddingLeft: 12, paddingTop: 2 },
-  sourceHintBtnText: { fontSize: 16, color: colors.accent },
   sourceHintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bgElevated, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
   sourceHintText: { fontSize: 13, color: colors.textMuted, lineHeight: 20 },
   // Reflection — light
@@ -557,7 +556,7 @@ const s = StyleSheet.create({
   insightSub: { fontSize: 13, color: colors.textDim, marginBottom: 14 },
   insightInput: {
     fontSize: 16, color: colors.textPrimary, lineHeight: 26,
-    minHeight: 120, textAlignVertical: 'top', paddingBottom: 60,
+    minHeight: 56, textAlignVertical: 'top',
   },
   insightInputDim: { color: colors.textMuted },
   insightInputSaved: { color: colors.textSecondary, minHeight: 0 },
@@ -582,15 +581,13 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 8,
   },
-  readingBtnBody: { height: 56 },
+  readingBtnBody: { height: 56, marginBottom: 36 },
   readingBtnFilled: { backgroundColor: colors.accent },
   readingBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   readingBtnFilledText: { color: '#1a1a1a' },
   quoteShareIcon: {
-    position: 'absolute', top: 12, right: 12, zIndex: 1,
-    width: 36, height: 36, borderRadius: 18,
-    borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg,
-    alignItems: 'center', justifyContent: 'center',
+    position: 'absolute', top: 14, right: 14, zIndex: 1,
+    padding: 4,
   },
   quoteTextWithIcon: { paddingRight: 40 },
 });

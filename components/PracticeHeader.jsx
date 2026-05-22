@@ -38,7 +38,7 @@ export function PracticeHeader({ current }) {
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           activeOpacity={0.7}
         >
-          <Ionicons name="chevron-back" size={22} color={prevStep ? colors.accent : colors.textDim} />
+          <Ionicons name="arrow-back" size={22} color={prevStep ? colors.accent : colors.textDim} />
         </TouchableOpacity>
         <Text style={s.titleText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
           {currentStep.roman} · {currentStep.title}
@@ -50,7 +50,7 @@ export function PracticeHeader({ current }) {
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           activeOpacity={0.7}
         >
-          <Ionicons name="chevron-forward" size={22} color={nextStep ? colors.accent : colors.textDim} />
+          <Ionicons name="arrow-forward" size={22} color={nextStep ? colors.accent : colors.textDim} />
         </TouchableOpacity>
       </View>
 

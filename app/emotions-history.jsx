@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput, Image,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  Platform, InputAccessoryView, Keyboard,
+  Platform, InputAccessoryView, Keyboard, KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -75,6 +75,11 @@ export default function EmotionsHistoryScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath="/emotions" fromLabel="Back" />
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: colors.bgCard }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
@@ -99,6 +104,7 @@ export default function EmotionsHistoryScreen() {
               value={searchQ}
               onChangeText={setSearchQ}
               clearButtonMode="while-editing"
+              keyboardAppearance="dark"
             />
           </View>
           <View style={s.filterRow}>
@@ -157,14 +163,14 @@ export default function EmotionsHistoryScreen() {
                   if (editingEntry?.id === entry.id) {
                     return (
                       <View key={entry.id} style={[s.editCard, { borderColor: ec.border }]}>
-                        <View style={[s.editCardHeader, { backgroundColor: ec.bg }]}>
-                          <Text style={[s.editCardTitle, { color: ec.text }]}>Editing · {entry.emotion}</Text>
+                        <View style={[s.editCardHeader, { backgroundColor: ec.tint }]}>
+                          <Text style={[s.editCardTitle, { color: ec.border }]}>Editing · {entry.emotion}</Text>
                           <TouchableOpacity
                             onPress={() => { Keyboard.dismiss(); handleEditSave(editingEntry); }}
                             activeOpacity={0.7}
                             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                           >
-                            <Text style={[s.editCardDone, { color: ec.text }]}>Done</Text>
+                            <Text style={[s.editCardDone, { color: ec.border }]}>Done</Text>
                           </TouchableOpacity>
                         </View>
                         <View style={s.editCardBody}>
@@ -177,6 +183,7 @@ export default function EmotionsHistoryScreen() {
                             onChangeText={text => setEditingEntry(prev => ({ ...prev, trigger: text }))}
                             placeholderTextColor={colors.textDim}
                             scrollEnabled={false}
+                            keyboardAppearance="dark"
                           />
                           <View style={s.editDivider} />
                           <Text style={s.editFieldLabel}>My automatic reaction</Text>
@@ -188,6 +195,7 @@ export default function EmotionsHistoryScreen() {
                             onChangeText={text => setEditingEntry(prev => ({ ...prev, reaction: text }))}
                             placeholderTextColor={colors.textDim}
                             scrollEnabled={false}
+                            keyboardAppearance="dark"
                           />
                           <View style={s.editDivider} />
                           <Text style={s.editFieldLabel}>
@@ -201,6 +209,7 @@ export default function EmotionsHistoryScreen() {
                             onChangeText={text => setEditingEntry(prev => ({ ...prev, chosenResponse: text }))}
                             placeholderTextColor={colors.textDim}
                             scrollEnabled={false}
+                            keyboardAppearance="dark"
                           />
                           <View style={s.editDivider} />
                           <Text style={s.editFieldLabel}>Cognitive distortions</Text>
@@ -211,7 +220,7 @@ export default function EmotionsHistoryScreen() {
                               return (
                                 <TouchableOpacity
                                   key={d.id}
-                                  style={[s.distortionPill, isSelected && { backgroundColor: ec.bg, borderColor: ec.border }]}
+                                  style={[s.distortionPill, isSelected && { backgroundColor: ec.tint, borderColor: ec.border }]}
                                   onPress={() => {
                                     haptics.tap();
                                     const current = editingEntry.distortions || [];
@@ -222,8 +231,8 @@ export default function EmotionsHistoryScreen() {
                                   }}
                                   activeOpacity={0.7}
                                 >
-                                  <Text style={[s.distortionLabel, isSelected && { color: ec.text }]}>{d.label}</Text>
-                                  <Text style={[s.distortionQ, isSelected && { color: ec.text }]}>{d.q}</Text>
+                                  <Text style={[s.distortionLabel, isSelected && { color: ec.border }]}>{d.label}</Text>
+                                  <Text style={[s.distortionQ, isSelected && { color: ec.border }]}>{d.q}</Text>
                                 </TouchableOpacity>
                               );
                             })}
@@ -240,7 +249,7 @@ export default function EmotionsHistoryScreen() {
                           <Text style={s.histDate}>
                             {new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                           </Text>
-                          <Text style={[s.histEmotionLine, { color: ec.text }]}>
+                          <Text style={[s.histEmotionLine, { color: ec.border }]}>
                             {entry.emotion}{entry.timing ? ` · ${entry.timing === 'now' ? 'In the moment' : 'After the fact'}` : ''}
                           </Text>
                         </View>
@@ -259,8 +268,8 @@ export default function EmotionsHistoryScreen() {
                       {entry.distortions && entry.distortions.length > 0 && (
                         <View style={s.histDistortions}>
                           {entry.distortions.map(d => (
-                            <View key={d} style={[s.histDistortionTag, { borderColor: ec.border, backgroundColor: ec.bg }]}>
-                              <Text style={[s.histDistortionText, { color: ec.text }]}>{d.replace('_', ' ')}</Text>
+                            <View key={d} style={[s.histDistortionTag, { borderColor: ec.border, backgroundColor: ec.tint }]}>
+                              <Text style={[s.histDistortionText, { color: ec.border }]}>{d.replace('_', ' ')}</Text>
                             </View>
                           ))}
                         </View>
@@ -277,6 +286,7 @@ export default function EmotionsHistoryScreen() {
           )}
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
       {Platform.OS === 'ios' && editingEntry && (
         <InputAccessoryView nativeID="emoHistEditAccessory">
           <View style={s.accessoryBarPair}>
@@ -361,7 +371,7 @@ const s = StyleSheet.create({
   editCardDone: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   editCardBody: { padding: 16, backgroundColor: colors.inputBg },
   editFieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textDim, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10 },
-  editFieldInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top', paddingBottom: 60, marginBottom: 4 },
+  editFieldInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top', marginBottom: 4 },
   editDivider: { height: 0.5, backgroundColor: colors.border, marginVertical: 14 },
   // Library accessory bar — H44 outlined + filled-gold pair (matches the
   // pattern used in compass / journal / emotions / review / read).

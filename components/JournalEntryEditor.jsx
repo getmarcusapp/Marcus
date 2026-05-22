@@ -74,23 +74,13 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
                 onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'journalArchiveEditAccessory' : undefined}
+                keyboardAppearance="dark"
               />
             </View>
           )}
         </TouchableOpacity>
       ))}
 
-      <View style={s.btnRow}>
-        <GoldSecondary style={s.cancelBtn} onPress={onCancel}>
-          <Text style={s.cancelBtnText}>Cancel</Text>
-        </GoldSecondary>
-        <GoldPrimary
-          style={s.saveBtn}
-          onPress={() => onSave({ ...entry, answers })}
-        >
-          <Text style={s.saveBtnText}>Save changes</Text>
-        </GoldPrimary>
-      </View>
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="journalArchiveEditAccessory">
           <View style={s.accessoryBarPair}>
@@ -125,18 +115,18 @@ const s = StyleSheet.create({
   vpillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
   vpillName: { fontSize: 11, fontFamily: font.bodyMedium, color: colors.textDim },
   vpillNameActive: { color: colors.accent },
-  promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, padding: 14, backgroundColor: colors.bgCard },
+  promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, paddingHorizontal: 8, paddingVertical: 14, backgroundColor: colors.bgCard },
   promptCardOpen: { backgroundColor: colors.bgElevated },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
-  promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontFamily: font.serif },
+  promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
   promptSub: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: 6, lineHeight: 20 },
   promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 },
-  promptInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 80, textAlignVertical: 'top', paddingBottom: 60 },
+  promptInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top' },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 12, padding: 12, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
-  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
+  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26 },
   hintTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   hintSource: { fontSize: 12, color: colors.textDim, fontStyle: 'italic', letterSpacing: 0.3 },
   hintDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 12, marginBottom: 12 },

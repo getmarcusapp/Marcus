@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getJournals, getTriggers, getStreak } from '../store/db';
 import * as health from '../lib/health';
@@ -15,7 +16,11 @@ import { ScreenHeader } from '../components/ScreenHeader';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
-function NavRow({ label, sub, onPress, last }) {
+// Unique action icon on the right per Valeriya's pattern: the icon itself
+// is the affordance (the action it represents), rendered in accent gold.
+// No chevron or arrow-in-circle — chevrons are reserved for dropdowns;
+// the unique icon replaces the generic next-indicator entirely.
+function NavRow({ icon, label, sub, onPress, last }) {
   return (
     <TouchableOpacity
       style={[s.row, !last && s.rowBorder]}
@@ -26,7 +31,7 @@ function NavRow({ label, sub, onPress, last }) {
         <Text style={s.rowLabel}>{label}</Text>
         {sub ? <Text style={s.rowSub}>{sub}</Text> : null}
       </View>
-      <Text style={s.chev}>›</Text>
+      {icon && <Ionicons name={icon} size={20} color={colors.accent} style={{ marginLeft: 12 }} />}
     </TouchableOpacity>
   );
 }
@@ -213,12 +218,14 @@ export default function SettingsScreen() {
           <Text style={s.secLabel}>Practice</Text>
           <View style={s.card}>
             <NavRow
+              icon="notifications-outline"
               label="Notifications & Reminders"
               sub={reminderSummary}
               onPress={() => router.push('/settings-notifications')}
             />
             {healthAvailable && (
               <NavRow
+                icon="heart-outline"
                 label="Apple Health"
                 sub={healthAsked ? 'Mindful Minutes connected' : 'Sync your practice as Mindful Minutes'}
                 onPress={handleConnectHealth}
@@ -248,16 +255,19 @@ export default function SettingsScreen() {
           <Text style={s.secLabel}>Data</Text>
           <View style={s.card}>
             <NavRow
+              icon="share-outline"
               label="Export backup file"
               sub="Save a complete copy to Files. Restore on a new device."
               onPress={handleExportBackup}
             />
             <NavRow
+              icon="download-outline"
               label="Import backup file"
               sub="Restore everything from a previous export"
               onPress={handleImportBackup}
             />
             <NavRow
+              icon="document-text-outline"
               label="Export as text"
               sub="Share journals and emotion logs in human-readable form"
               onPress={handleExport}
@@ -268,11 +278,13 @@ export default function SettingsScreen() {
           <Text style={s.secLabel}>Marcus</Text>
           <View style={s.card}>
             <NavRow
+              icon="arrow-redo-outline"
               label="Share Marcus"
               sub="Send the app to someone who could use it"
               onPress={handleShareApp}
             />
             <NavRow
+              icon="mail-outline"
               label="Contact support"
               sub="Email the team. Questions, feedback, bug reports."
               onPress={handleContactSupport}
@@ -287,10 +299,12 @@ export default function SettingsScreen() {
               <Text style={s.rowValue}>1.0.0</Text>
             </View>
             <NavRow
+              icon="shield-checkmark-outline"
               label="Privacy policy"
               onPress={() => Linking.openURL('https://getmarcus.app/privacy.html')}
             />
             <NavRow
+              icon="globe-outline"
               label="getmarcus.app"
               onPress={() => Linking.openURL('https://getmarcus.app')}
               last
@@ -300,6 +314,7 @@ export default function SettingsScreen() {
           <Text style={s.secLabel}>Developer</Text>
           <View style={s.card}>
             <NavRow
+              icon="hammer-outline"
               label="Developer Tools"
               sub="Diagnostics and test seeds"
               onPress={() => router.push('/settings-developer')}
@@ -335,5 +350,4 @@ const s = StyleSheet.create({
   lockRow: { flexDirection: 'row', alignItems: 'center', padding: 18, gap: 14 },
   lockTextWrap: { flex: 1 },
   rowValue: { fontSize: 14, color: colors.textMuted, marginLeft: 12 },
-  chev: { fontSize: 22, color: colors.textMuted, marginLeft: 12 },
 });

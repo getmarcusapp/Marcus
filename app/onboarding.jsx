@@ -14,6 +14,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { saveCompass, setHasOnboarded, setHasSeenCompassIntro } from '../store/db';
 import { DEFAULT_COMPASS } from '../constants/compassFields';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
+import { VideoBackground } from '../components/VideoBackground';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
 import { MEDITATIONS_LIST, playPreview, stopPreview, useMeditationPlayer } from '../lib/meditationPlayer';
 import { pickAndImportBackup } from '../lib/backup';
@@ -39,7 +40,6 @@ const DEFAULT_NOTIF_SETTINGS = {
   reviewDay: 0,
 };
 
-const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 
 // Roman numerals used as left-side row markers in PracticePreview and
 // MeditationsStep. They convey order/sequence rather than completion,
@@ -84,7 +84,8 @@ export default function OnboardingScreen() {
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             activeOpacity={0.7}
           >
-            <Text style={s.onboardingBackText}>{`‹  Back`}</Text>
+            <Ionicons name="arrow-back" size={18} color={colors.accent} />
+            <Text style={s.onboardingBackText}>Back</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -139,13 +140,7 @@ function WelcomeStep({ onNext }) {
   }
 
   return (
-    <LinearGradient
-      colors={HERO_GRADIENT}
-      locations={[0, 0.6, 1]}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <VideoBackground>
       <SafeAreaView style={s.safeTransparent}>
         <ScrollView
           style={{ flex: 1 }}
@@ -184,7 +179,7 @@ function WelcomeStep({ onNext }) {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </LinearGradient>
+    </VideoBackground>
   );
 }
 
@@ -587,7 +582,6 @@ const s = StyleSheet.create({
   welcomeSub: {
     fontSize: 20,
     color: colors.textSecondary,
-    fontFamily: font.serif,
     marginBottom: 36,
     textAlign: 'center',
   },
@@ -750,7 +744,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 18,
     paddingBottom: 14,
   },
-  onboardingBackBtn: { paddingVertical: 4, paddingRight: 12, alignSelf: 'flex-start' },
+  onboardingBackBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4, paddingRight: 12, alignSelf: 'flex-start' },
   onboardingBackText: {
     fontSize: 13,
     color: colors.accent,
@@ -814,7 +808,6 @@ const s = StyleSheet.create({
     fontSize: 19,
     color: colors.textSecondary,
     lineHeight: 32,
-    fontFamily: font.serif,
     marginBottom: 36,
   },
   practiceHeading: {
@@ -967,12 +960,10 @@ const s = StyleSheet.create({
   },
   compassInput: {
     fontSize: 16,
-    color: colors.textMuted,
+    color: colors.textPrimary,
     lineHeight: 26,
     minHeight: 140,
     textAlignVertical: 'top',
-    fontFamily: font.serif,
-    paddingBottom: 60,
   },
   compassInputFocused: {
     color: colors.textPrimary,
@@ -1024,7 +1015,6 @@ const s = StyleSheet.create({
     fontSize: 14,
     color: colors.textMuted,
     lineHeight: 22,
-    fontFamily: font.serif,
   },
   // Keyboard accessory bar — H44 outlined + filled-gold pair per Valeriya's
   // library converted for iPhone scale (her Figma H56 / 1.5 ≈ 37 → 44 minimum).
@@ -1081,6 +1071,7 @@ const s = StyleSheet.create({
     height: 56,
     paddingHorizontal: 24,
     gap: 8,
+    marginBottom: 36,
   },
   // Half-width variant for side-by-side button pairs (Reminders step).
   primaryBtnHalf: {

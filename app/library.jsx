@@ -147,6 +147,7 @@ export default function LibraryScreen() {
             onChangeText={setSearchQ}
             clearButtonMode="while-editing"
             autoCorrect={false}
+            keyboardAppearance="dark"
           />
           <View style={s.sortRow}>
             <TouchableOpacity
@@ -295,8 +296,7 @@ const s = StyleSheet.create({
   chipsWrap: {
     backgroundColor: colors.bg,
     borderBottomWidth: 0.5, borderBottomColor: colors.border,
-    paddingVertical: 10,
-    minHeight: STICKY_NAV_HEIGHT,
+    paddingVertical: 6,
     justifyContent: 'center',
   },
   chip: {

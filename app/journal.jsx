@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
   Platform, InputAccessoryView, Keyboard,
-  ActivityIndicator, Image,
+  ActivityIndicator, Image, ImageBackground,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,10 +11,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { PracticeHeader } from '../components/PracticeHeader';
+import { WizardHeader } from '../components/WizardHeader';
+import { HeroOverlayChip } from '../components/HeroOverlayChip';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 
-const HERO_GRADIENT = ['#3D2D12', '#150E08', '#000000'];
 import { saveJournal, getTodayJournal, incrementStreak } from '../store/db';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
@@ -89,6 +90,11 @@ export default function JournalScreen() {
 
   const [answers, setAnswers] = useState({});
   const [openPrompt, setOpenPrompt] = useState(-1);
+  // True when the user is on the landing screen. Out-of-range openPrompt
+  // values are treated as landing too — that catches the race when the
+  // user switches morning <-> evening while openPrompt was set deeper
+  // than the new flow's prompt count (morning has 5 prompts, evening 4).
+  const onLanding = openPrompt < 0 || openPrompt >= prompts.length;
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
   const scrollRef = useRef(null);
@@ -115,6 +121,10 @@ export default function JournalScreen() {
       else { setAnswers({}); setAlreadySaved(false); }
     }
     reload();
+    // Reset wizard position when switching morning <-> evening — the two
+    // prompt arrays have different lengths (morning: 5, evening: 4), so
+    // an openPrompt index valid for one can be out of range for the other.
+    setOpenPrompt(-1);
   }, [sessionType]);
 
   useFocusEffect(useCallback(() => {
@@ -165,7 +175,29 @@ export default function JournalScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <PracticeHeader current={isMorning ? 'morning' : 'evening'} />
+      {onLanding ? (
+        <PracticeHeader current={isMorning ? 'morning' : 'evening'} />
+      ) : (
+        <WizardHeader
+          title={isMorning ? 'Morning Journal' : 'Evening Journal'}
+          step={openPrompt}
+          total={prompts.length}
+          onBack={() => {
+            haptics.tap();
+            if (openPrompt > 0) {
+              setOpenPrompt(openPrompt - 1);
+            } else {
+              setOpenPrompt(-1);
+              Keyboard.dismiss();
+            }
+          }}
+          onClose={() => {
+            haptics.tap();
+            setOpenPrompt(-1);
+            Keyboard.dismiss();
+          }}
+        />
+      )}
       <ScrollView
         ref={scrollRef}
         scrollIndicatorInsets={{ bottom: 36 }}
@@ -176,44 +208,43 @@ export default function JournalScreen() {
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
       >
-          <View style={s.header}>
-            <Image
-              source={isMorning
-                ? require('../assets/heroes/journal-morning.jpg')
-                : require('../assets/heroes/journal-evening.jpg')}
-              style={s.headerImage}
-              resizeMode="cover"
-            />
-            <LinearGradient
-              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
-              locations={[0, 0.55, 0.8, 1]}
-              style={StyleSheet.absoluteFillObject}
-            />
-            <View style={s.headerContent}>
-              <Text style={s.title}>
-                {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
-                {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-              </Text>
-            </View>
-          </View>
+          {onLanding ? (
+            // Landing — pre-writing context: date hero, past entries link, the
+            // meditative memento quote, optional pre-journal meditation, and
+            // the Begin CTA. Tapping Begin enters the prompt wizard at index 0.
+            <>
+              <View style={s.header}>
+                <Image
+                  source={isMorning
+                    ? require('../assets/heroes/journal-morning.jpg')
+                    : require('../assets/heroes/journal-evening.jpg')}
+                  style={s.headerImage}
+                  resizeMode="cover"
+                />
+                <LinearGradient
+                  colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
+                  locations={[0, 0.55, 0.8, 1]}
+                  style={StyleSheet.absoluteFillObject}
+                />
+                <View style={s.headerContent}>
+                  <View style={s.heroTitleRow}>
+                    <Text style={[s.title, { flex: 1 }]}>
+                      {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
+                      {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                    </Text>
+                    <HeroOverlayChip
+                      onPress={() => router.push(`/journal-history?type=${sessionType}&from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
+                    >
+                      Past entries
+                    </HeroOverlayChip>
+                  </View>
+                </View>
+              </View>
 
-          <View style={s.pastEntriesRow}>
-            <GoldSecondary
-              onPress={() => router.push(`/journal-history?type=${sessionType}&from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
-              style={s.pastEntriesBtn}
-              contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-            >
-              <Text style={s.pastEntriesText}>Past entries</Text>
-              <Ionicons name="arrow-forward" size={14} color={colors.accent} style={{ marginTop: 2 }} />
-            </GoldSecondary>
-          </View>
-
-          <LinearGradient
-                colors={HERO_GRADIENT}
-                locations={[0, 0.6, 1]}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
+              <ImageBackground
+                source={require('../assets/bg.png')}
                 style={s.mementoStrip}
+                resizeMode="cover"
               >
                 <Text style={s.mementoText}>
                   {isMorning
@@ -223,7 +254,7 @@ export default function JournalScreen() {
                 <Text style={s.mementoSub}>
                   {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
                 </Text>
-              </LinearGradient>
+              </ImageBackground>
 
               <View style={s.body}>
                 {(() => {
@@ -282,19 +313,39 @@ export default function JournalScreen() {
                   );
                 })()}
 
-                {prompts.map((prompt, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={[s.promptCard, openPrompt === idx && s.promptCardOpen]}
-                    onPress={() => setOpenPrompt(openPrompt === idx ? -1 : idx)}
-                    activeOpacity={0.8}
-                  >
+                <GoldPrimary
+                  style={[s.editBtn, s.saveBtn]}
+                  onPress={() => requireAccess(() => { haptics.tap(); setOpenPrompt(0); })}
+                >
+                  <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                    {alreadySaved
+                      ? `Edit ${isMorning ? 'morning' : 'evening'} journal`
+                      : `Begin ${isMorning ? 'morning' : 'evening'} journal`}
+                  </Text>
+                </GoldPrimary>
+                <Text style={s.saveBtnSub}>
+                  {prompts.length} prompts · about 5 minutes
+                </Text>
+              </View>
+            </>
+          ) : (
+            // Wizard — one prompt per "page". Back/Next steps between prompts;
+            // Back on the first prompt returns to the landing. On the last
+            // prompt Next becomes Complete and saves the entry.
+            // No inner progress bar — the prompt's roman-numeral eyebrow
+            // (e.g., "I · DISCERN") already communicates position, and the
+            // PracticeHeader at the top owns the practice-level progress.
+            <View style={s.body}>
+              {(() => {
+                const prompt = prompts[openPrompt];
+                return (
+                  <View style={[s.promptCard, s.promptCardOpen]}>
                     <View style={s.promptTopRow}>
                       <Text style={s.promptNum}>{prompt.num}</Text>
                       {(prompt.hint || prompt.info) && (
                         <TouchableOpacity
                           style={s.hintBtn}
-                          onPress={() => setOpenHint(openHint === idx ? null : idx)}
+                          onPress={() => setOpenHint(openHint === openPrompt ? null : openPrompt)}
                         >
                           <Text style={s.hintBtnText}>ⓘ</Text>
                         </TouchableOpacity>
@@ -304,7 +355,7 @@ export default function JournalScreen() {
                     {prompt.info && prompt.hint && (
                       <Text style={s.promptSub}>{prompt.hint}</Text>
                     )}
-                    {openHint === idx && (prompt.info || prompt.hint) && (
+                    {openHint === openPrompt && (prompt.info || prompt.hint) && (
                       <View style={s.hintBox}>
                         {prompt.info ? (
                           <>
@@ -320,43 +371,62 @@ export default function JournalScreen() {
                         )}
                       </View>
                     )}
-                    {openPrompt === idx && (
-                      <View style={s.promptAnswer}>
-                        <TextInput
-                          ref={el => { promptInputRefs.current[idx] = el; }}
-                          style={s.promptInput}
-                          multiline
-                          placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
-                          placeholderTextColor={colors.textDim}
-                          value={answers[idx] || ''}
-                          onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
-                          editable={hasAccess}
-                          scrollEnabled={false}
-                          keyboardAppearance="dark"
-                          inputAccessoryViewID={Platform.OS === 'ios' ? 'journalAccessory' : undefined}
-                        />
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                ))}
+                    <View style={s.promptAnswer}>
+                      <TextInput
+                        ref={el => { promptInputRefs.current[openPrompt] = el; }}
+                        style={s.promptInput}
+                        multiline
+                        placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
+                        placeholderTextColor={colors.textDim}
+                        value={answers[openPrompt] || ''}
+                        onChangeText={text => setAnswers(prev => ({ ...prev, [openPrompt]: text }))}
+                        editable={hasAccess}
+                        scrollEnabled={false}
+                        keyboardAppearance="dark"
+                        inputAccessoryViewID={Platform.OS === 'ios' ? 'journalAccessory' : undefined}
+                      />
+                    </View>
+                  </View>
+                );
+              })()}
 
-                {!keyboardUp && (
-                  <>
+              {!keyboardUp && (
+                <View style={s.wizardNavRow}>
+                  <GoldSecondary
+                    style={s.editBtn}
+                    onPress={() => {
+                      haptics.tap();
+                      if (openPrompt > 0) {
+                        setOpenPrompt(openPrompt - 1);
+                      } else {
+                        setOpenPrompt(-1);
+                      }
+                    }}
+                  >
+                    <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
+                  </GoldSecondary>
+                  {openPrompt < prompts.length - 1 ? (
                     <GoldPrimary
-                      style={[s.editBtn, s.saveBtn, !canSave && s.saveBtnDisabled]}
+                      style={s.editBtn}
+                      onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
+                    >
+                      <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Next</Text>
+                    </GoldPrimary>
+                  ) : (
+                    <GoldPrimary
+                      style={[s.editBtn, !canSave && s.saveBtnDisabled]}
                       onPress={() => requireAccess(handleSave)}
                       disabled={!canSave}
                     >
                       <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-                        {alreadySaved ? 'Update journal' : `Complete ${isMorning ? 'morning' : 'evening'} journal`}
+                        {alreadySaved ? 'Update' : 'Complete'}
                       </Text>
                     </GoldPrimary>
-                    <Text style={s.saveBtnSub}>
-                      {canSave ? `${answeredCount} of ${prompts.length} prompts answered` : 'Answer at least one prompt to complete'}
-                    </Text>
-                  </>
-                )}
-              </View>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
       </ScrollView>
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="journalAccessory">
@@ -416,16 +486,11 @@ const s = StyleSheet.create({
   },
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   headerContent: { padding: spacing.xl, paddingTop: 52 },
+  // Title row hosts the page title on the left and the Past-X chip on the
+  // right, both bottom-aligned so the chip sits on the same baseline as the
+  // last line of a multi-line title.
+  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
-  // "Past entries" link below the hero — uses Valeriya's library
-  // smaller-button outlined-gold token (same as Past readings).
-  pastEntriesRow: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  pastEntriesBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: radius.md,
-  },
-  pastEntriesText: { fontSize: 12, fontWeight: '600', color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   mementoStrip: {
     backgroundColor: colors.accentBg,
     borderBottomWidth: 0.5,
@@ -472,10 +537,10 @@ const s = StyleSheet.create({
   promptCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
   promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  promptNum: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  promptNum: { fontSize: 11, letterSpacing: 1.8, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
-  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 100, textAlignVertical: 'top', paddingBottom: 60 },
+  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top' },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair
@@ -505,7 +570,7 @@ const s = StyleSheet.create({
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
-  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, fontFamily: font.serif },
+  hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26 },
   // Subtitle shown beneath the question for prompts that ship a richer
   // info card (currently the discipline-of-assent prompt) — orients the
   // user before they tap the ⓘ to read the teaching.
@@ -523,4 +588,8 @@ const s = StyleSheet.create({
   // Disabled state — gated on at least one prompt having content.
   saveBtnDisabled: { opacity: 0.4 },
   saveBtnSub: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: 36 },
+  // Wizard Back/Next pair shown when the keyboard is dismissed. The
+  // InputAccessoryView covers the keyboard-up case; this is the parallel
+  // body row so the user can always navigate without re-focusing the input.
+  wizardNavRow: { flexDirection: 'row', gap: 10, marginTop: 14, marginBottom: 36 },
 });

@@ -4,7 +4,7 @@ import {
   TouchableOpacity, StyleSheet, SafeAreaView, Image,
   Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
-import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect, useNavigation } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -115,12 +115,35 @@ export default function CompassScreen() {
   // the live UI before the intro decision is made. Migration in _layout
   // marks existing onboarded users as already seen.
   const [introSeen, setIntroSeen] = useState(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     getCompass().then(c => setCompass(c || { ...DEFAULT_COMPASS }));
     getRoles().then(setRoles);
     getHasSeenCompassIntro().then(v => setIntroSeen(v === true));
   }, []);
+
+  // Hide the tab bar while CompassIntro is showing — the intro has its
+  // own ‹ BACK chrome, the tab bar would just be a confusing exit path
+  // mid-onboarding. When restoring, set the layout default style
+  // explicitly: passing `undefined` falls back to the system default
+  // (white on iOS) rather than the layout's screenOptions value.
+  useEffect(() => {
+    if (introSeen === false) {
+      navigation.setOptions({ tabBarStyle: { display: 'none' } });
+    } else if (introSeen === true) {
+      navigation.setOptions({
+        tabBarStyle: {
+          backgroundColor: colors.bg,
+          borderTopColor: colors.border,
+          borderTopWidth: 0.5,
+          height: 84,
+          paddingBottom: 24,
+          paddingTop: 10,
+        },
+      });
+    }
+  }, [introSeen, navigation]);
 
   async function dismissIntro() {
     // Persist whatever the user has (defaults or their edits) and mark
@@ -249,6 +272,7 @@ export default function CompassScreen() {
         compass={compass}
         setCompass={setCompass}
         onDismiss={dismissIntro}
+        onBack={() => router.canGoBack() ? router.back() : router.replace('/')}
       />
     );
   }
@@ -441,7 +465,7 @@ export default function CompassScreen() {
                               <Text style={s.roleCommitmentEmpty}>Tap to add a commitment.</Text>
                             )}
                           </View>
-                          <Text style={s.roleChev}>›</Text>
+                          <Ionicons name="create-outline" size={18} color={colors.accent} style={{ marginLeft: 12 }} />
                         </TouchableOpacity>
                       ))}
                     </>
@@ -606,9 +630,9 @@ const s = StyleSheet.create({
   // body text dims (grey) when non-active / brightens (white) when active.
   editInput: {
     borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.lg,
-    padding: 18, paddingBottom: 60,
+    padding: 18,
     fontSize: 16, color: colors.textPrimary, lineHeight: 26,
-    minHeight: 240, textAlignVertical: 'top', marginBottom: 12,
+    minHeight: 56, textAlignVertical: 'top', marginBottom: 12,
     backgroundColor: colors.inputBg,
   },
   editInputDim: { borderColor: colors.inputBorder, color: colors.textMuted },
@@ -672,16 +696,16 @@ const s = StyleSheet.create({
   roleEditSub: { fontSize: 13, color: colors.textMuted, marginTop: 14, marginBottom: 8 },
   roleNameInput: {
     borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.lg,
-    padding: 18, paddingBottom: 60,
+    padding: 18,
     fontSize: 16, color: colors.textPrimary, lineHeight: 26,
     backgroundColor: colors.inputBg,
   },
   roleNameInputDim: { borderColor: colors.inputBorder, color: colors.textMuted },
   roleCommitmentInput: {
     borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.lg,
-    padding: 18, paddingBottom: 60,
+    padding: 18,
     fontSize: 16, color: colors.textPrimary, lineHeight: 26,
-    minHeight: 120, textAlignVertical: 'top',
+    minHeight: 56, textAlignVertical: 'top',
     backgroundColor: colors.inputBg, marginBottom: 12,
   },
   roleCommitmentInputDim: { borderColor: colors.inputBorder, color: colors.textMuted },
