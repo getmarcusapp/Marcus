@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Marcus — A Stoic Practice App</title>
+<link rel="icon" type="image/png" href="skull-gold.png">
+<link rel="apple-touch-icon" href="skull-gold.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Cormorant:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -23,13 +25,14 @@
     --accent: #FFCE82;
     --accent-dim: #B38B5B;
     --accent-bg: #1a1610;
-    /* Brand typography matching the app: Didot for display headlines,
-       Inter for body/UI, Cormorant for the Marcus wordmark + literary
-       quotes. Didot is iOS/macOS-system with fallbacks. */
-    --font-display: 'Didot', 'Didot LT STD', 'Hoefler Text', Georgia, serif;
+    /* Brand typography matching the app — ONLY Cinzel + Inter.
+       Cinzel (Roman inscriptional caps) for display headlines + the Marcus
+       wordmark; Inter for body/UI; Inter Light Italic for the quote voice
+       (--font-serif kept as the var name, now points at Inter italic). */
+    --font-display: 'Cinzel', Georgia, serif;
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-    --font-wordmark: 'Cormorant', Georgia, serif;
-    --font-serif: 'Cormorant', Georgia, serif;
+    --font-wordmark: 'Cinzel', Georgia, serif;
+    --font-serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   }
 
   html { scroll-behavior: smooth; }
@@ -42,16 +45,16 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* All section display headlines use Didot — matches the app's
-     stepTitle / heroDate / paywall title treatment. */
+  /* All section display headlines use Cinzel — matches the app's
+     Cinzel title / date / paywall headline treatment (Roman caps). */
   .pain-title, .agitation-title, .mechanism-title, .what-title,
   .diff-title, .philosophy-title, .memento-title, .final-title,
   .faq-title, .pricing-title, .screenshots-title, .meditations-title {
     font-family: var(--font-display);
   }
   .price-amount { font-family: var(--font-display); }
-  /* Nav brand wordmark — matches the in-app "Marcus" Cormorant Bold. */
-  .nav-brand span { font-family: var(--font-wordmark); font-weight: 700; }
+  /* Nav brand wordmark — Cinzel regular, matching the in-app wordmark. */
+  .nav-brand span { font-family: var(--font-wordmark); font-weight: 400; letter-spacing: 0.5px; }
 
   /* ─── HERO ─────────────────────────────────────────── */
   .hero {
@@ -99,9 +102,9 @@
   .hero-title {
     font-family: var(--font-wordmark);
     font-size: clamp(52px, 10vw, 88px);
-    font-weight: 700;
+    font-weight: 400;
     color: #FFFFFF;
-    letter-spacing: -1px;
+    letter-spacing: 1px;
     line-height: 1;
     margin-bottom: 24px;
   }
@@ -109,6 +112,7 @@
   .hero-sub {
     font-family: var(--font-serif);
     font-size: clamp(18px, 3vw, 22px);
+    font-weight: 300;
     color: var(--text-secondary);
     font-style: italic;
     max-width: 540px;
@@ -1055,7 +1059,7 @@
 <!-- NAV -->
 <nav>
   <a class="nav-brand" href="#">
-    <img src="skull.png" alt="Marcus">
+    <img src="skull-gold.png" alt="Marcus">
     <span>Marcus</span>
   </a>
   <button class="hamburger" id="hamburger" onclick="toggleMenu()">
@@ -1080,7 +1084,7 @@
 <!-- HERO -->
 <section class="hero">
   <div class="skull-wrap">
-    <img src="skull.png" alt="Marcus" />
+    <img src="skull-gold.png" alt="Marcus" />
   </div>
   <p class="hero-eyebrow">Memento mori</p>
   <h1 class="hero-title">Marcus</h1>
@@ -1486,7 +1490,7 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
 
 <!-- MEMENTO MORI -->
 <section class="memento">
-  <img src="skull.png" alt="" style="width:120px;height:120px;object-fit:contain;opacity:0.9;margin-bottom:40px;filter:drop-shadow(0 0 40px rgba(200,169,122,0.15));" />
+  <img src="skull-gold.png" alt="" style="width:120px;height:120px;object-fit:contain;opacity:0.9;margin-bottom:40px;filter:drop-shadow(0 0 40px rgba(200,169,122,0.15));" />
   <h2 class="memento-title">You could leave life right now.<br>Let that determine what you do.</h2>
   <div class="memento-body">
     <p>Not motivational. The oldest philosophical technique for focusing a mind on what actually matters. Marcus Aurelius wrote it to himself — not as despair, but as clarification. If today were your last, would you spend it the way you're planning to?</p>
