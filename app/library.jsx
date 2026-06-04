@@ -142,7 +142,7 @@ export default function LibraryScreen() {
           <TextInput
             style={s.searchInput}
             placeholder="Search by title, author, or theme..."
-            placeholderTextColor={colors.textDim}
+            placeholderTextColor={colors.textSecondary}
             value={searchQ}
             onChangeText={setSearchQ}
             clearButtonMode="while-editing"
@@ -277,9 +277,9 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5, borderBottomColor: colors.border,
   },
   searchInput: {
-    backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid,
+    backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border,
     borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10,
-    fontSize: 15, color: colors.textPrimary,
+    fontSize: 15, color: colors.textPrimary, fontFamily: font.body,
   },
   sortRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 10, paddingBottom: 4 },
   sortBtn: {
@@ -287,10 +287,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 5,
     backgroundColor: colors.bgCard,
   },
-  sortBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  sortBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
+  sortBtnActive: { borderColor: colors.accent, backgroundColor: colors.bg },
+  sortBtnText: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.3 },
   sortBtnTextActive: { color: colors.accent, fontFamily: font.bodyMedium },
-  resultCount: { fontSize: 12, color: colors.textDim, marginLeft: 'auto' },
+  resultCount: { fontSize: 12, color: colors.textSecondary, marginLeft: 'auto' },
 
   // Sticky section chips
   chipsWrap: {
@@ -300,55 +300,55 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   chip: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: 18,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: 18,
     paddingHorizontal: 14, paddingVertical: 6,
     backgroundColor: colors.bgCard,
   },
   // Active filter pill — gold border + tinted bg + gold text (matches the
   // archive filter pill pattern in read-archive / emotions-history).
-  chipActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
+  chipActive: { borderColor: colors.accent, backgroundColor: colors.bg },
   chipText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.3, fontFamily: font.bodyMedium },
   chipTextActive: { color: colors.accent },
-  chipTextDim: { color: colors.textDim },
-  chipCount: { fontSize: 12, color: colors.textDim, fontWeight: '400' },
+  chipTextDim: { color: colors.textSecondary },
+  chipCount: { fontSize: 12, color: colors.textSecondary, fontWeight: '400' },
   chipCountActive: { color: colors.accentDim },
 
   body: { padding: spacing.md, paddingTop: spacing.lg },
 
   sectionWrap: { marginBottom: 28, marginTop: 18 },
   sectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6, paddingHorizontal: 4 },
-  sectionSub: { fontSize: 14, color: colors.textMuted, lineHeight: 22, marginBottom: 14, paddingHorizontal: 4 },
+  sectionSub: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 14, paddingHorizontal: 4 },
 
   card: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     backgroundColor: colors.bgCard, marginBottom: 14, padding: 18,
   },
-  title: { fontSize: 19, color: colors.textPrimary, fontFamily: font.serif, marginBottom: 4, lineHeight: 26 },
+  title: { fontSize: 19, color: colors.textPrimary, fontFamily: font.bodyMedium, marginBottom: 4, lineHeight: 26 },
   byline: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', marginBottom: 12 },
   author: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginRight: 4 },
-  translator: { fontSize: 12, color: colors.textDim, fontStyle: 'italic' },
+  translator: { fontSize: 12, color: colors.textSecondary, fontStyle: 'italic' },
   why: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 16 },
 
   linksRow: { flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
   primaryLink: {
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
     paddingVertical: 10, paddingHorizontal: 14,
-    backgroundColor: colors.accentBg,
+    backgroundColor: colors.bg,
   },
   primaryLinkText: { fontSize: 12, color: colors.accent, fontFamily: font.bodyMedium, letterSpacing: 0.8, textTransform: 'uppercase' },
   secondaryLink: {
     paddingVertical: 10, paddingHorizontal: 4,
   },
-  secondaryLinkText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  secondaryLinkText: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
 
   empty: { padding: 40, alignItems: 'center' },
-  emptyTitle: { fontSize: 18, color: colors.textSecondary, fontFamily: font.serif, marginBottom: 12, textAlign: 'center' },
-  emptyText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
+  emptyTitle: { fontSize: 18, color: colors.textSecondary, fontFamily: font.body, marginBottom: 12, textAlign: 'center' },
+  emptyText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, textAlign: 'center' },
 
   disclosureCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 16, marginHorizontal: spacing.md, marginTop: 18, marginBottom: 12,
     backgroundColor: colors.bgElevated,
   },
-  disclosureText: { fontSize: 12, color: colors.textDim, lineHeight: 19, fontStyle: 'italic' },
+  disclosureText: { fontSize: 12, color: colors.textSecondary, lineHeight: 19, fontStyle: 'italic' },
 });

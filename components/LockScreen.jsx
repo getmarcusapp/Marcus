@@ -41,7 +41,7 @@ export function LockScreen() {
       <SafeAreaView style={s.safe}>
         <View style={s.body}>
           <Image
-            source={require('../assets/skull.png')}
+            source={require('../assets/skull-gold.png')}
             style={s.skull}
             resizeMode="contain"
           />
@@ -74,12 +74,12 @@ const s = StyleSheet.create({
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl },
   skull: { width: 160, height: 160, marginBottom: 32, opacity: 0.95 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 14 },
-  title: { fontSize: 44, fontWeight: '300', color: colors.textPrimary, letterSpacing: -1, marginBottom: 18, fontFamily: font.serif },
-  sub: { fontSize: 16, color: colors.textMuted, textAlign: 'center', lineHeight: 26, fontFamily: font.serif },
+  title: { fontSize: 44, color: colors.textPrimary, letterSpacing: -1, marginBottom: 18, fontFamily: font.display },
+  sub: { fontSize: 16, color: colors.textSecondary, textAlign: 'center', lineHeight: 26, fontFamily: font.body },
   footer: { padding: spacing.xl, paddingBottom: 36 },
   unlockBtn: {
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
-    paddingVertical: 18, alignItems: 'center', backgroundColor: colors.accentBg,
+    paddingVertical: 18, alignItems: 'center', backgroundColor: colors.bg,
   },
   unlockBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
 });

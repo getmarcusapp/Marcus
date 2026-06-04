@@ -113,7 +113,6 @@ export default function NotificationsSettingsScreen() {
         <View style={s.hero}>
           <Text style={s.eyebrow}>Notifications</Text>
           <Text style={s.title}>Notifications & Reminders</Text>
-          <Text style={s.sub}>When Marcus reaches out across the day</Text>
         </View>
 
         {!permissionGranted && (
@@ -322,9 +321,9 @@ const t = StyleSheet.create({
   wrap: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginVertical: 12 },
   col: { alignItems: 'center', gap: 8 },
   btn: { width: 36, height: 36, borderWidth: 0.5, borderColor: colors.border, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  arrow: { fontSize: 12, color: colors.textMuted },
+  arrow: { fontSize: 12, color: colors.textSecondary },
   val: { fontSize: 22, fontWeight: '600', color: colors.textPrimary, minWidth: 36, textAlign: 'center' },
-  colon: { fontSize: 22, color: colors.textMuted, marginBottom: 4 },
+  colon: { fontSize: 22, color: colors.textSecondary, marginBottom: 4 },
 });
 
 const s = StyleSheet.create({
@@ -339,9 +338,8 @@ const s = StyleSheet.create({
   },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 6 },
-  sub: { fontSize: font.subSize, color: colors.textMuted },
   permissionBanner: {
-    backgroundColor: colors.accentBg,
+    backgroundColor: colors.bg,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
     padding: spacing.lg,
@@ -350,19 +348,19 @@ const s = StyleSheet.create({
   permissionText: { fontSize: 13, color: colors.accentDim, lineHeight: 20 },
   body: { padding: spacing.md, paddingBottom: 36 },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 20, marginBottom: 10 },
-  card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
+  card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 18, marginBottom: 4, backgroundColor: colors.bgCard },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rowTitle: { fontSize: 16, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 3 },
-  rowSub: { fontSize: 13, color: colors.textDim, marginBottom: 0 },
+  rowSub: { fontSize: 13, color: colors.textSecondary, marginBottom: 0 },
   timeSection: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
-  timeLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textDim, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4, textAlign: 'center' },
-  timePreview: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 10 },
+  timeLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textSecondary, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4, textAlign: 'center' },
+  timePreview: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 10 },
   sampleMsg: { backgroundColor: colors.bgDeep, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 12 },
-  sampleText: { fontSize: 13, color: colors.textMuted, lineHeight: 20, textAlign: 'center' },
+  sampleText: { fontSize: 13, color: colors.textSecondary, lineHeight: 20, textAlign: 'center' },
   dayRow: { flexDirection: 'row', gap: 6, marginTop: 14 },
   dayBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgDeep },
-  dayBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  dayBtnText: { fontSize: 11, color: colors.textDim },
+  dayBtnActive: { borderColor: colors.accent, backgroundColor: colors.bg },
+  dayBtnText: { fontSize: 11, color: colors.textSecondary },
   dayBtnTextActive: { color: colors.accent, fontWeight: '600' },
   // Library H56 filled-gold primary CTA (matches editBtn + editBtnSave pattern
   // used app-wide). saveBtnDone is a saved-confirmation variant (outlined gold).
@@ -375,6 +373,6 @@ const s = StyleSheet.create({
   saveBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: '#1a1a1a', letterSpacing: 0.3 },
   saveBtnTextDone: { color: colors.accent },
   notifNote: { padding: 16, backgroundColor: colors.bgCard, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, marginBottom: 36 },
-  notifNoteTitle: { fontSize: 12, fontWeight: '600', color: colors.textMuted, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
-  notifNoteText: { fontSize: 13, color: colors.textDim, lineHeight: 20 },
+  notifNoteTitle: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  notifNoteText: { fontSize: 13, color: colors.textSecondary, lineHeight: 20 },
 });

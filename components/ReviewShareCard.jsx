@@ -102,17 +102,16 @@ const s = StyleSheet.create({
   weekTitle: {
     fontSize: 96,
     color: colors.textPrimary,
-    fontFamily: font.serif,
-    fontWeight: '300',
+    fontFamily: font.display,
     letterSpacing: -2,
     lineHeight: 104,
   },
   statsLine: {
     fontSize: 24,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     letterSpacing: 1,
     marginTop: 28,
-    fontFamily: font.serif,
+    fontFamily: font.bodyLightItalic,
     fontStyle: 'italic',
   },
   divider: {
@@ -131,8 +130,7 @@ const s = StyleSheet.create({
   virtueName: {
     fontSize: 64,
     color: colors.textPrimary,
-    fontFamily: font.serif,
-    fontWeight: '300',
+    fontFamily: font.display,
     letterSpacing: -1,
   },
   intentionLabel: {
@@ -145,7 +143,7 @@ const s = StyleSheet.create({
   intentionText: {
     fontSize: 36,
     color: colors.textSecondary,
-    fontFamily: font.serif,
+    fontFamily: font.bodyLightItalic,
     lineHeight: 52,
     fontStyle: 'italic',
   },
@@ -161,14 +159,14 @@ const s = StyleSheet.create({
     fontSize: 28,
     letterSpacing: 12,
     color: colors.textPrimary,
-    fontFamily: font.wordmark,
+    fontFamily: font.display,
     marginBottom: 8,
   },
   tagline: {
     fontSize: 18,
     letterSpacing: 1,
-    color: colors.textMuted,
-    fontFamily: font.serif,
+    color: colors.textSecondary,
+    fontFamily: font.bodyLightItalic,
     fontStyle: 'italic',
   },
 });

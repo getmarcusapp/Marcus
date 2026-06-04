@@ -26,6 +26,9 @@ export function CompassIntro({ compass, setCompass, onDismiss, onBack }) {
   const [mode, setMode] = useState('summary');
   const [editIdx, setEditIdx] = useState(0);
   const [hintOpen, setHintOpen] = useState(false);
+  // Separate from hintOpen (which is the per-field edit-step hint) so the
+  // ready-step Roles bubble toggles independently.
+  const [rolesOpen, setRolesOpen] = useState(false);
   const [editFocused, setEditFocused] = useState(false);
   const editInputRef = useRef(null);
   const keyboardUp = useKeyboardVisible();
@@ -100,7 +103,7 @@ export function CompassIntro({ compass, setCompass, onDismiss, onBack }) {
                 </View>
                 {hintOpen && (
                   <View style={{ backgroundColor: colors.bg, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, padding: 14, marginBottom: 10 }}>
-                    <Text style={{ fontSize: 13, color: colors.textMuted, lineHeight: 21 }}>{field.hint}</Text>
+                    <Text style={{ fontSize: 13, color: colors.textSecondary, lineHeight: 21 }}>{field.hint}</Text>
                   </View>
                 )}
                 <TextInput
@@ -112,7 +115,7 @@ export function CompassIntro({ compass, setCompass, onDismiss, onBack }) {
                   onFocus={() => setEditFocused(true)}
                   onBlur={() => setEditFocused(false)}
                   placeholder={field.placeholder}
-                  placeholderTextColor={colors.textDim}
+                  placeholderTextColor={colors.textSecondary}
                   scrollEnabled={false}
                   keyboardAppearance="dark"
                   inputAccessoryViewID={Platform.OS === 'ios' ? 'compassIntroAccessory' : undefined}
@@ -174,11 +177,18 @@ export function CompassIntro({ compass, setCompass, onDismiss, onBack }) {
         contentContainerStyle={{ paddingBottom: 140 }}
       >
         <View style={s.stepHero}>
-          <Text style={s.stepEyebrow}>Your compass</Text>
           <Text style={s.stepTitle}>Your Compass{'\n'}is ready</Text>
           <Text style={s.stepSub}>
-            Three answers anchor your daily practice. The defaults below are a complete starting point. Customize them now or anytime later in Compass.
+            Three answers anchor your daily practice. The defaults below are a complete starting point. Customize them now or anytime later in Compass.{'\u00A0'}
+            <Text style={s.rolesInfoIcon} onPress={() => setRolesOpen(!rolesOpen)}>{'\u24D8'}</Text>
           </Text>
+          {rolesOpen && (
+            <View style={s.rolesBubble}>
+              <Text style={s.rolesBubbleText}>
+                Your Compass also has a Roles section for naming the relational positions you occupy: parent, partner, colleague, citizen. You can fill that in once your practice begins, in Compass · Roles.
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={s.stepBody}>
@@ -201,12 +211,6 @@ export function CompassIntro({ compass, setCompass, onDismiss, onBack }) {
               </Text>
             </TouchableOpacity>
           ))}
-
-          <View style={s.compassFooterNote}>
-            <Text style={s.compassFooterText}>
-              Your Compass also has a Roles section for naming the relational positions you occupy: parent, partner, colleague, citizen. You can fill that in once your practice begins, in Compass · Roles.
-            </Text>
-          </View>
         </View>
       </ScrollView>
       <View style={s.footer}>
@@ -253,7 +257,7 @@ const s = StyleSheet.create({
   },
   stepSub: {
     fontSize: 17,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     lineHeight: 26,
   },
   stepBody: {
@@ -262,8 +266,8 @@ const s = StyleSheet.create({
   },
   compassField: {
     borderWidth: 0.5,
-    borderColor: colors.inputBorder,
-    borderRadius: radius.lg,
+    borderColor: colors.border,
+    borderRadius: radius.md,
     padding: 20,
     marginBottom: 16,
     backgroundColor: colors.inputBg,
@@ -277,6 +281,7 @@ const s = StyleSheet.create({
     lineHeight: 28,
     minHeight: 240,
     textAlignVertical: 'top',
+    fontFamily: font.body,
   },
   compassInputFocused: {
     color: colors.textPrimary,
@@ -284,7 +289,7 @@ const s = StyleSheet.create({
   compassPreview: {
     borderWidth: 0.5,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     padding: 16,
     marginBottom: 12,
     backgroundColor: colors.bgCard,
@@ -320,22 +325,28 @@ const s = StyleSheet.create({
   },
   compassPreviewText: {
     fontSize: 16,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     lineHeight: 24,
   },
-  compassFooterNote: {
+  // Inline info affordance on the subheadline. Trailing ⓘ in accent, with a
+  // bordered reveal bubble matching the per-field hint bubble used in the
+  // edit step (bg fill, 0.5 border, radius 10, 14 padding).
+  rolesInfoIcon: {
+    fontSize: 15,
+    color: colors.accent,
+  },
+  rolesBubble: {
+    backgroundColor: colors.bg,
     borderWidth: 0.5,
     borderColor: colors.border,
-    borderRadius: radius.lg,
-    backgroundColor: colors.bgDeep,
-    padding: 16,
-    marginTop: 8,
-    marginBottom: 16,
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 12,
   },
-  compassFooterText: {
+  rolesBubbleText: {
     fontSize: 13,
-    color: colors.textMuted,
-    lineHeight: 20,
+    color: colors.textSecondary,
+    lineHeight: 21,
   },
   footer: {
     position: 'absolute',

@@ -48,7 +48,7 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
                 style={s.promptInput}
                 multiline
                 placeholder="Write here..."
-                placeholderTextColor={colors.textDim}
+                placeholderTextColor={colors.textSecondary}
                 value={answers[prompt.key] || ''}
                 onChangeText={text => setAnswers(prev => ({ ...prev, [prompt.key]: text }))}
                 scrollEnabled={false}
@@ -74,7 +74,7 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
                 style={s.promptInput}
                 multiline
                 placeholder="Be specific. Name names, name moments..."
-                placeholderTextColor={colors.textDim}
+                placeholderTextColor={colors.textSecondary}
                 value={answers.roles || ''}
                 onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
                 scrollEnabled={false}
@@ -99,7 +99,7 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
               style={s.promptInput}
               multiline
               placeholder="One commitment, kept."
-              placeholderTextColor={colors.textDim}
+              placeholderTextColor={colors.textSecondary}
               value={intention}
               onChangeText={setIntention}
               scrollEnabled={false}
@@ -133,8 +133,8 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
 }
 
 const s = StyleSheet.create({
-  container: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg, overflow: 'hidden', marginBottom: 12 },
-  header: { backgroundColor: colors.accentBg, padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  container: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, overflow: 'hidden', marginBottom: 12 },
+  header: { backgroundColor: colors.bg, padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', letterSpacing: 0.8 },
   headerDate: { fontSize: 13, color: colors.accentDim },
   promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, paddingHorizontal: 8, paddingVertical: 14, backgroundColor: colors.bgCard },
@@ -142,7 +142,7 @@ const s = StyleSheet.create({
   promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
   promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 },
-  promptInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top' },
+  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', fontFamily: font.body },
   btnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
   cancelBtn: { flex: 1, height: 56, borderRadius: radius.md, paddingHorizontal: 16 },
   cancelBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },

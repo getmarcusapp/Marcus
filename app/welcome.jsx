@@ -1,7 +1,11 @@
 import React from 'react';
-import { View, Text, Image, ImageBackground, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Image, StyleSheet, SafeAreaView, Dimensions } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, font } from '../constants/theme';
+
+// Background sized to the literal window (not flex:1 / absoluteFill), matching
+// the Practice/More fix — fills the screen 1:1 with no zoom. See app/index.jsx.
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 import { GoldPrimary } from '../components/GoldButton';
 import { useEntitlement } from '../lib/useEntitlement';
 
@@ -23,16 +27,19 @@ export default function WelcomeScreen() {
   const isTrial = subscriptionPeriod === 'TRIAL';
 
   return (
-    <ImageBackground
-      source={require('../assets/bg.png')}
-      style={{ flex: 1 }}
-      resizeMode="cover"
-    >
+    <View style={s.root}>
+      <Image
+        source={require('../assets/bg-svg4.png')}
+        style={s.bg}
+        resizeMode="cover"
+        pointerEvents="none"
+      />
       <SafeAreaView style={s.safe}>
         <View style={s.body}>
-          <Image source={require('../assets/skull.png')} style={s.skull} resizeMode="contain" />
+          <Image source={require('../assets/skull-gold.png')} style={s.skull} resizeMode="contain" />
           <Text style={s.eyebrow}>Welcome</Text>
-          <Text style={s.title}>Marcus{'\n'}is yours</Text>
+          <Image source={require('../assets/marcus-wordmark.png')} style={s.titleWordmark} resizeMode="contain" />
+          <Text style={s.titleTagline}>is yours</Text>
           <Text style={s.sub}>
             {isTrial
               ? 'Your 7-day trial is active. The practice runs uninterrupted.'
@@ -48,11 +55,13 @@ export default function WelcomeScreen() {
           </GoldPrimary>
         </View>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#050505', overflow: 'hidden' },
+  bg: { position: 'absolute', top: 0, left: 0, width: SCREEN_W, height: SCREEN_H },
   safe: { flex: 1, backgroundColor: 'transparent' },
   body: {
     flex: 1,
@@ -61,7 +70,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 36,
     paddingBottom: 40,
   },
-  skull: { width: 180, height: 180, marginBottom: 28, opacity: 1 },
+  skull: { width: 130, height: 130, marginBottom: 28, opacity: 1 },
   eyebrow: {
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
@@ -70,20 +79,19 @@ const s = StyleSheet.create({
     marginBottom: 14,
     textAlign: 'center',
   },
-  title: {
-    fontSize: 44,
-    fontFamily: font.display,
-    color: '#FFFFFF',
-    letterSpacing: -1.5,
-    marginBottom: 16,
-    textAlign: 'center',
-    lineHeight: 52,
-  },
+  // Marcus wordmark image + "is yours" tagline beneath it (replaces the
+  // Cormorant "Marcus is yours" text heading). 1144×203 source (aspect ≈ 5.64);
+  // explicit width+height at that aspect so it never crops to "ARC". Enlarged
+  // to match the onboarding welcome hero.
+  titleWordmark: { width: 232, height: 41, marginBottom: 10 },
+  titleTagline: { fontSize: 32, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1, textAlign: 'center', marginBottom: 16 },
+  // Matches the Practice/More hero sub: Inter 20, #AAAAAA, centered.
   sub: {
-    fontSize: 16,
-    color: colors.textMuted,
+    fontSize: 20,
+    fontFamily: font.body,
+    color: '#AAAAAA',
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 28,
     paddingHorizontal: 8,
   },
   footer: {

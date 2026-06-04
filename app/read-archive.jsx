@@ -113,7 +113,7 @@ export default function ReadArchiveScreen() {
             <TextInput
               style={s.searchInput}
               placeholder="Search quotes or insights..."
-              placeholderTextColor={colors.textDim}
+              placeholderTextColor={colors.textSecondary}
               value={searchQ}
               onChangeText={setSearchQ}
               clearButtonMode="while-editing"
@@ -186,7 +186,7 @@ export default function ReadArchiveScreen() {
                       <View style={{ flex: 1 }}>
                         <Text style={s.archiveDate}>{entry.date}</Text>
                         {entry.reading?.virtue && (
-                          <Text style={[s.archiveVirtue, { color: virtueColor[entry.reading.virtue] || colors.textDim, marginTop: 2 }]}>
+                          <Text style={[s.archiveVirtue, { color: virtueColor[entry.reading.virtue] || colors.textSecondary, marginTop: 2 }]}>
                             {entry.reading.virtue}
                           </Text>
                         )}
@@ -219,7 +219,7 @@ export default function ReadArchiveScreen() {
                           value={editDraft}
                           onChangeText={setEditDraft}
                           placeholder="Write your reflection..."
-                          placeholderTextColor={colors.textDim}
+                          placeholderTextColor={colors.textSecondary}
                           scrollEnabled={false}
                           autoFocus
                           inputAccessoryViewID={Platform.OS === 'ios' ? 'readArchiveInsightAccessory' : undefined}
@@ -275,26 +275,26 @@ const s = StyleSheet.create({
   },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36 },
-  sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8 },
+  sub: { fontSize: font.subSize, color: colors.textSecondary, marginTop: 8 },
   body: { paddingTop: 4 },
   searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
-  searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
+  searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary, fontFamily: font.body },
   filterRow: { paddingTop: 6, paddingBottom: 18 },
   filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
-  filterPillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  filterPillText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
+  filterPillActive: { borderColor: colors.accent, backgroundColor: colors.bg },
+  filterPillText: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.3 },
   filterPillTextActive: { color: colors.accent, fontFamily: font.bodyMedium },
-  filterCount: { fontSize: 12, color: colors.textDim },
+  filterCount: { fontSize: 12, color: colors.textSecondary },
   empty: { padding: 40, paddingTop: 56, alignItems: 'center' },
-  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
+  emptyEyebrow: { fontSize: font.labelSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
   emptyImage: { width: 180, height: 108, borderRadius: 12, marginBottom: 24 },
   emptyTitle: { fontSize: 26, color: colors.textPrimary, marginBottom: 14, textAlign: 'center', fontFamily: font.display, letterSpacing: -0.5, lineHeight: 32 },
-  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
+  emptyText: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
   emptyCta: {
     marginTop: 28,
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
     paddingVertical: 14, paddingHorizontal: 22,
-    backgroundColor: colors.accentBg,
+    backgroundColor: colors.bg,
   },
   emptyCtaText: { fontSize: 13, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 1, textTransform: 'uppercase' },
   monthHeader: { paddingHorizontal: 16, paddingTop: 18, paddingBottom: 12, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
@@ -303,12 +303,12 @@ const s = StyleSheet.create({
   archiveTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   archiveDate: { fontSize: 14, color: colors.textPrimary, fontFamily: font.bodyMedium },
   archiveVirtue: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
-  archiveTheme: { fontSize: 12, color: colors.textDim, letterSpacing: 0.3, marginBottom: 8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
-  archiveQuote: { fontSize: 14, color: colors.textMuted, fontFamily: font.serif, lineHeight: 22, marginBottom: 10 },
-  archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.borderMid, paddingLeft: 12, marginTop: 8 },
-  archiveInsightLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
+  archiveTheme: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.3, marginBottom: 8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  archiveQuote: { fontSize: 14, color: colors.textSecondary, fontFamily: font.bodyLightItalic, fontStyle: 'italic', lineHeight: 22, marginBottom: 10 },
+  archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.border, paddingLeft: 12, marginTop: 8 },
+  archiveInsightLabel: { fontSize: 11, color: colors.textSecondary, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   archiveInsight: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
-  archiveInsightInput: { fontSize: 14, color: colors.textPrimary, lineHeight: 22, minHeight: 48, textAlignVertical: 'top' },
+  archiveInsightInput: { fontSize: 14, color: colors.textPrimary, lineHeight: 22, minHeight: 48, textAlignVertical: 'top', fontFamily: font.body },
   // Library EDIT chip — matches journal-history / emotions-history / review-archive.
   editBtn: { borderRadius: 4, paddingHorizontal: 10, paddingVertical: 5 },
   editBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },

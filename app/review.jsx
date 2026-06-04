@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  Platform, InputAccessoryView, Keyboard, Image, Share,
+  Platform, InputAccessoryView, Keyboard, Image, Share, Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +20,8 @@ import { ReviewShareCard } from '../components/ReviewShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { WizardHeader } from '../components/WizardHeader';
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 const EMOTION_LABELS = {
   anger: 'Anger', anxiety: 'Anxiety', frustration: 'Frustration',
@@ -64,6 +66,7 @@ export default function ReviewScreen() {
   const [worstVirtue, setWorstVirtue] = useState(virtues[3].id);
   const [intention, setIntention] = useState('');
   const [openPrompt, setOpenPrompt] = useState(-1);
+  const [sealed, setSealed] = useState(false);
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
   const intentionInputRef = useRef(null);
@@ -219,10 +222,9 @@ export default function ReviewScreen() {
     haptics.success();
     const updated = await getReviews();
     setHistory(updated);
-    // Return to Practice — the Weekly Review tile renders in its sealed
-    // state there, which is the in-context acknowledgment. Share lives on
-    // every review-archive entry for users who want it later.
-    router.replace('/');
+    // Show the dedicated "Week sealed" moment (independent of the daily
+    // practice seal), then the user continues to Practice from there.
+    setSealed(true);
   }
 
   async function shareReviewEntry(entry) {
@@ -254,6 +256,32 @@ export default function ReviewScreen() {
       ].filter(Boolean).join('\n');
       try { await Share.share({ message: fallback }); } catch {}
     }
+  }
+
+  // Dedicated "Week sealed" moment, shown right after the review is saved —
+  // independent of the daily practice seal. Mirrors the practice hero's
+  // centered type language (gold eyebrow, Didot date/quote, Inter body).
+  if (sealed) {
+    const sealedDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    return (
+      <View style={s.weekSealedRoot}>
+        <Image source={require('../assets/bg-svg4.png')} style={s.weekSealedBg} resizeMode="cover" pointerEvents="none" />
+        <SafeAreaView style={s.weekSealedSafe}>
+          <View style={s.weekSealedBody}>
+            <Image source={require('../assets/skull-gold.png')} style={s.weekSealedSkull} resizeMode="contain" />
+            <Text style={s.weekSealedEyebrow}>Week sealed</Text>
+            <Text style={s.weekSealedDate}>{sealedDate}</Text>
+            <Text style={s.weekSealedTitle}>The week is examined</Text>
+            <Text style={s.weekSealedSub}>You have looked back with honesty. Carry what it taught you into the week ahead.</Text>
+          </View>
+          <View style={s.weekSealedFooter}>
+            <GoldPrimary style={s.weekSealedBtn} onPress={() => router.replace('/')}>
+              <Text style={s.weekSealedBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Go to Practice →</Text>
+            </GoldPrimary>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
   }
 
   return (
@@ -323,20 +351,14 @@ export default function ReviewScreen() {
           // is the memento quote and the Begin CTA. Tapping Begin enters the
           // wizard at step 0.
           <View style={s.body}>
-            <LinearGradient
-              colors={['#3D2D12', '#150E08', '#000000']}
-              locations={[0, 0.6, 1]}
-              start={{ x: 0.5, y: 0 }}
-              end={{ x: 0.5, y: 1 }}
-              style={s.reviewMementoStrip}
-            >
+            <View style={s.reviewMementoStrip}>
               <Text style={s.reviewMementoText}>
                 "Look back over the past, with its changing empires that rose and fell, and you can foresee the future too."
               </Text>
               <Text style={s.reviewMementoSub}>
                 Marcus Aurelius · Meditations VII.49
               </Text>
-            </LinearGradient>
+            </View>
             <GoldPrimary
               style={[s.editBtn, s.sealBtn]}
               onPress={() => requireAccess(() => { haptics.tap(); setOpenPrompt(0); })}
@@ -348,7 +370,7 @@ export default function ReviewScreen() {
               </Text>
             </GoldPrimary>
             <Text style={s.sealBtnSub}>
-              {totalSteps} prompts · about 10 minutes
+              {totalSteps} steps · about 10 minutes
             </Text>
           </View>
         ) : (
@@ -400,10 +422,10 @@ export default function ReviewScreen() {
                         {dailyIntensity.map((d, i) => {
                           const SPARK_HEIGHT = 60;
                           const color = d.avg === null
-                            ? colors.borderMid
-                            : d.avg >= 7 ? colors.virtueBad
+                            ? colors.border
+                            : d.avg >= 7 ? colors.accentDim
                             : d.avg >= 4 ? colors.accent
-                            : colors.borderStrong;
+                            : colors.border;
                           const barHeight = d.avg !== null
                             ? Math.max(3, (d.avg / 10) * SPARK_HEIGHT)
                             : 0;
@@ -439,7 +461,7 @@ export default function ReviewScreen() {
                     style={s.promptInput}
                     multiline
                     placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
-                    placeholderTextColor={colors.textDim}
+                    placeholderTextColor={colors.textSecondary}
                     value={answers[p.key] || ''}
                     onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
                     editable={hasAccess}
@@ -479,7 +501,7 @@ export default function ReviewScreen() {
                       style={[s.vpBtn, bestVirtue === v.id && s.vpBtnActive]}
                       onPress={() => { haptics.tap(); setBestVirtue(v.id); }}
                     >
-                      <Text style={[s.vpBtnText, bestVirtue === v.id && { color: colors.virtueGood, fontWeight: '600' }]}>
+                      <Text style={[s.vpBtnText, bestVirtue === v.id && { color: colors.accent, fontWeight: '600' }]}>
                         {v.name}
                       </Text>
                     </TouchableOpacity>
@@ -493,7 +515,7 @@ export default function ReviewScreen() {
                       style={[s.vpBtn, worstVirtue === v.id && s.vpBtnActive]}
                       onPress={() => { haptics.tap(); setWorstVirtue(v.id); }}
                     >
-                      <Text style={[s.vpBtnText, worstVirtue === v.id && { color: colors.virtueBad, fontWeight: '600' }]}>
+                      <Text style={[s.vpBtnText, worstVirtue === v.id && { color: colors.accentDim, fontWeight: '600' }]}>
                         {v.name}
                       </Text>
                     </TouchableOpacity>
@@ -534,7 +556,7 @@ export default function ReviewScreen() {
                   style={s.intentionInput}
                   multiline
                   placeholder={hasAccess ? "Be specific. Name names, name moments..." : "Start your 7-day free trial to write."}
-                  placeholderTextColor={colors.textDim}
+                  placeholderTextColor={colors.textSecondary}
                   value={answers.roles || ''}
                   onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
                   editable={hasAccess}
@@ -568,7 +590,7 @@ export default function ReviewScreen() {
                 style={s.intentionInput}
                 multiline
                 placeholder={hasAccess ? "Write it as a commitment, not a wish..." : "Start your 7-day free trial to write."}
-                placeholderTextColor={colors.textDim}
+                placeholderTextColor={colors.textSecondary}
                 value={intention}
                 onChangeText={setIntention}
                 editable={hasAccess}
@@ -640,6 +662,23 @@ export default function ReviewScreen() {
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bgDeep },
+  // "Week sealed" screen (shown after the review saves). Mirrors the practice
+  // hero / threshold language: bg-svg4 wave, centered, gold eyebrow, Didot
+  // date, Inter body, gold CTA pinned at the bottom.
+  weekSealedRoot: { flex: 1, backgroundColor: '#050505', overflow: 'hidden' },
+  weekSealedBg: { position: 'absolute', top: 0, left: 0, width: SCREEN_W, height: SCREEN_H },
+  weekSealedSafe: { flex: 1, backgroundColor: 'transparent' },
+  weekSealedBody: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 36, paddingBottom: 40 },
+  weekSealedSkull: { width: 150, height: 150, marginBottom: 40, opacity: 1 },
+  weekSealedEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
+  weekSealedDate: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 28, textAlign: 'center' },
+  // marginTop opens a clear gap between the WEEK SEALED / date header and the
+  // "examined" message, so the message reads as a distinct, lower beat (per V).
+  weekSealedTitle: { fontSize: 20, color: colors.textPrimary, fontFamily: font.bodyMedium, marginTop: 44, marginBottom: 10, textAlign: 'center' },
+  weekSealedSub: { fontSize: 17, color: colors.textSecondary, fontFamily: font.body, lineHeight: 26, textAlign: 'center' },
+  weekSealedFooter: { paddingHorizontal: 24, paddingBottom: 24 },
+  weekSealedBtn: { borderRadius: radius.md, height: 56 },
+  weekSealedBtnText: { fontSize: 15, fontWeight: '700', color: '#000', letterSpacing: 0.3 },
   shareCardOffscreen: { position: 'absolute', left: -99999, top: 0 },
   scroll: { flex: 1 },
   hero: {
@@ -662,13 +701,13 @@ const s = StyleSheet.create({
   // Input field treatment per Valeriya's library: subtle elevation above
   // screen bg, with stroke shifting between non-active (#474747) and
   // active (#878787) focus states.
-  promptCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
+  promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
   promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   promptNum: { fontSize: 11, letterSpacing: 1.8, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
-  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top' },
+  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', fontFamily: font.body },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair.
@@ -699,31 +738,31 @@ const s = StyleSheet.create({
   // ground the question in the week's actual data without preceding it
   // with a separate analytics surface.
   patternData: { marginBottom: 16, paddingBottom: 16, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  patternSummary: { fontSize: 13, color: colors.textMuted, marginBottom: 12, letterSpacing: 0.2, lineHeight: 19 },
+  patternSummary: { fontSize: 13, color: colors.textSecondary, marginBottom: 12, letterSpacing: 0.2, lineHeight: 19 },
   sparkChart: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 4 },
   sparkCol: { flex: 1, alignItems: 'center' },
   sparkBarTrack: { width: '100%', justifyContent: 'flex-end', alignItems: 'center' },
   sparkBar: { width: '70%', borderRadius: 3, minHeight: 3 },
   sparkBaseline: { width: '70%', height: 1.5, backgroundColor: colors.border, borderRadius: 1 },
-  sparkDay: { fontSize: 11, color: colors.textDim, marginTop: 8, letterSpacing: 0.4 },
+  sparkDay: { fontSize: 11, color: colors.textSecondary, marginTop: 8, letterSpacing: 0.4 },
   sparkDayToday: { color: colors.accent, fontWeight: '600' },
   // Virtue ledger (inside promptCard)
   virtueRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.md, overflow: 'hidden' },
-  vpLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', padding: 12, paddingHorizontal: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.inputBorder },
-  vpBtn: { padding: 13, paddingHorizontal: 14, borderBottomWidth: 0.5, borderBottomColor: colors.inputBorder },
+  virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' },
+  vpLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', padding: 12, paddingHorizontal: 14, backgroundColor: colors.bgDeep, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+  vpBtn: { padding: 13, paddingHorizontal: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border },
   vpBtnActive: { backgroundColor: colors.bgElevated },
-  vpBtnText: { fontSize: 15, color: colors.textDim },
+  vpBtnText: { fontSize: 15, color: colors.textSecondary },
   // Intention
-  intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, marginBottom: 14, backgroundColor: colors.bgCard },
-  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', marginTop: 12 },
+  intentionCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 18, marginBottom: 14, backgroundColor: colors.inputBg },
+  intentionInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', marginTop: 12, fontFamily: font.body },
   // Role chip strip shown above the VI · Account textarea to remind the
   // user which roles are in scope while reflecting on the week. Warm
   // accent tint so they read against the dark prompt card.
   roleChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12, marginBottom: 4 },
   roleChip: {
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: 14,
-    paddingHorizontal: 10, paddingVertical: 4, backgroundColor: colors.accentBg,
+    paddingHorizontal: 10, paddingVertical: 4, backgroundColor: colors.bg,
   },
   roleChipText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   // Seal button
@@ -733,22 +772,23 @@ const s = StyleSheet.create({
   sealBtn: { height: 56, marginBottom: 12 },
   // Disabled state — gated on at least one prompt OR intention having content.
   sealBtnDisabled: { opacity: 0.4 },
-  sealBtnSub: { fontSize: 12, color: colors.textDim, textAlign: 'center', marginBottom: 36 },
-  // Memento strip on the review landing — same Cormorant-serif treatment as
+  sealBtnSub: { fontSize: 12, color: colors.textSecondary, textAlign: 'center', marginBottom: 36 },
+  // Memento strip on the review landing — same treatment as the
   // journal/emotions mementos. Carries Marcus's "look back over the past..."
   // anchor before the user enters the wizard.
+  // Quiet black card — matches the journal memento card exactly. Sits inside
+  // the body's spacing.md padding (no negative margins / full-bleed anymore).
   reviewMementoStrip: {
-    backgroundColor: colors.accentBg,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
+    backgroundColor: colors.bgCard,
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
     padding: spacing.xl,
     paddingVertical: 20,
-    marginHorizontal: -spacing.md,
-    marginTop: -spacing.md,
     marginBottom: 16,
   },
-  reviewMementoText: { fontSize: 19, color: colors.textPrimary, lineHeight: 30, fontFamily: font.serif },
-  reviewMementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  reviewMementoText: { fontSize: 17, color: colors.textPrimary, lineHeight: 27, fontFamily: font.body },
+  reviewMementoSub: { fontSize: 13, color: '#AAAAAA', marginTop: 10, fontFamily: font.body },
   // Wizard Back/Next pair shown when the keyboard is dismissed. The
   // InputAccessoryView covers the keyboard-up case.
   wizardNavRow: { flexDirection: 'row', gap: 10, marginTop: 14, marginBottom: 36 },

@@ -264,6 +264,22 @@ export default function CompassScreen() {
     return () => clearTimeout(t);
   }, [editing]);
 
+  // On focus, scroll the active field near the top of the viewport so it
+  // clears the keyboard + accessory bar (Cancel/Save), which otherwise cover
+  // the text area. automaticallyAdjustKeyboardInsets alone doesn't account
+  // for the accessory bar here, so we scroll explicitly.
+  function scrollInputIntoView(ref) {
+    setTimeout(() => {
+      const scrollNode = scrollRef.current?.getScrollableNode?.() || scrollRef.current;
+      if (!scrollNode || !ref?.current) return;
+      ref.current.measureLayout(
+        scrollNode,
+        (_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - 80), animated: true }),
+        () => {},
+      );
+    }, 280);
+  }
+
   if (!compass || introSeen === null) return <SafeAreaView style={s.safe} />;
 
   if (!introSeen) {
@@ -346,10 +362,10 @@ export default function CompassScreen() {
                   multiline
                   value={draft}
                   onChangeText={setDraft}
-                  onFocus={() => setFocusedField('edit')}
+                  onFocus={() => { setFocusedField('edit'); scrollInputIntoView(editInputRef); }}
                   onBlur={() => setFocusedField(null)}
                   placeholder={COMPASS_HINTS[tabKeys[activeTab]]?.placeholder || ''}
-                  placeholderTextColor={colors.textDim}
+                  placeholderTextColor={colors.textSecondary}
                   scrollEnabled={false}
                   keyboardAppearance="dark"
                   inputAccessoryViewID={Platform.OS === 'ios' ? 'compassEditAccessory' : undefined}
@@ -413,10 +429,10 @@ export default function CompassScreen() {
                     style={[s.roleNameInput, focusedField !== 'roleName' && s.roleNameInputDim]}
                     value={roleNameDraft}
                     onChangeText={setRoleNameDraft}
-                    onFocus={() => setFocusedField('roleName')}
+                    onFocus={() => { setFocusedField('roleName'); scrollInputIntoView(roleNameInputRef); }}
                     onBlur={() => setFocusedField(null)}
                     placeholder="Name (e.g. Parent, Citizen)"
-                    placeholderTextColor={colors.textDim}
+                    placeholderTextColor={colors.textSecondary}
                     autoCapitalize="words"
                     autoFocus
                     keyboardAppearance="dark"
@@ -429,12 +445,12 @@ export default function CompassScreen() {
                     multiline
                     value={roleCommitmentDraft}
                     onChangeText={setRoleCommitmentDraft}
-                    onFocus={() => setFocusedField('roleCommitment')}
+                    onFocus={() => { setFocusedField('roleCommitment'); scrollInputIntoView(roleCommitmentInputRef); }}
                     onBlur={() => setFocusedField(null)}
                     placeholder={placeholderFor(roleNameDraft)
                       ? `e.g. ${placeholderFor(roleNameDraft)}`
                       : DEFAULT_ROLE_PLACEHOLDER}
-                    placeholderTextColor={colors.textDim}
+                    placeholderTextColor={colors.textSecondary}
                     scrollEnabled={false}
                     keyboardAppearance="dark"
                     inputAccessoryViewID={Platform.OS === 'ios' ? 'roleCommitmentAccessory' : undefined}
@@ -608,7 +624,7 @@ const s = StyleSheet.create({
   // Light reading/editing body
   body: { padding: spacing.md, paddingTop: spacing.lg, backgroundColor: colors.bgCard },
   textCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 22, marginBottom: 14, backgroundColor: colors.bgElevated,
   },
   bodyText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28 },
@@ -629,13 +645,13 @@ const s = StyleSheet.create({
   // screen bg, stroke shifts non-active (#474747) → active (#878787),
   // body text dims (grey) when non-active / brightens (white) when active.
   editInput: {
-    borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.md,
     padding: 18,
-    fontSize: 16, color: colors.textPrimary, lineHeight: 26,
+    fontSize: 16, color: colors.textPrimary, lineHeight: 26, fontFamily: font.body,
     minHeight: 56, textAlignVertical: 'top', marginBottom: 12,
     backgroundColor: colors.inputBg,
   },
-  editInputDim: { borderColor: colors.inputBorder, color: colors.textMuted },
+  editInputDim: { borderColor: colors.border, color: colors.textSecondary },
   // Cancel / Save pair per Valeriya's library — H56 outlined-gold + filled-gold
   // pair, more square than pill (radius.sm). Side-by-side via flex: 1 so the
   // pair stays intact on small screens (labels are short, no min-width).
@@ -654,28 +670,28 @@ const s = StyleSheet.create({
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 14 },
 
   // Roles tab
-  rolesEmpty: { fontSize: 14, color: colors.textMuted, lineHeight: 22, marginBottom: 18, fontStyle: 'italic' },
+  rolesEmpty: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 18, fontStyle: 'italic' },
   roleSectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 20 },
   roleSuggestRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   roleSuggestPill: {
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 8, backgroundColor: colors.accentBg,
+    paddingHorizontal: 14, paddingVertical: 8, backgroundColor: colors.bg,
   },
   roleSuggestText: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },
   roleCard: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 16, marginBottom: 8, backgroundColor: colors.bgElevated,
   },
   roleName: { fontSize: 16, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 2 },
-  roleCommitment: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
-  roleCommitmentEmpty: { fontSize: 13, color: colors.textDim, fontStyle: 'italic' },
-  roleChev: { fontSize: 22, color: colors.textDim, marginLeft: 8 },
+  roleCommitment: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+  roleCommitmentEmpty: { fontSize: 13, color: colors.textSecondary, fontStyle: 'italic' },
+  roleChev: { fontSize: 22, color: colors.textSecondary, marginLeft: 8 },
   roleAddBtn: {
-    borderWidth: 0.5, borderColor: colors.borderMid, borderRadius: radius.md,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 14, alignItems: 'center', marginTop: 8, marginBottom: 28,
   },
-  roleAddBtnText: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.5 },
+  roleAddBtnText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.5 },
   roleEditLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Header row for the role-edit form: section label on the left, Delete
   // chip on the right (only when editing an existing role). Keeps the
@@ -693,22 +709,22 @@ const s = StyleSheet.create({
     borderRadius: 4,
   },
   roleDeleteChipText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
-  roleEditSub: { fontSize: 13, color: colors.textMuted, marginTop: 14, marginBottom: 8 },
+  roleEditSub: { fontSize: 13, color: colors.textSecondary, marginTop: 14, marginBottom: 8 },
   roleNameInput: {
-    borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.md,
     padding: 18,
-    fontSize: 16, color: colors.textPrimary, lineHeight: 26,
+    fontSize: 16, color: colors.textPrimary, lineHeight: 26, fontFamily: font.body,
     backgroundColor: colors.inputBg,
   },
-  roleNameInputDim: { borderColor: colors.inputBorder, color: colors.textMuted },
+  roleNameInputDim: { borderColor: colors.border, color: colors.textSecondary },
   roleCommitmentInput: {
-    borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.inputBorderActive, borderRadius: radius.md,
     padding: 18,
-    fontSize: 16, color: colors.textPrimary, lineHeight: 26,
+    fontSize: 16, color: colors.textPrimary, lineHeight: 26, fontFamily: font.body,
     minHeight: 56, textAlignVertical: 'top',
     backgroundColor: colors.inputBg, marginBottom: 12,
   },
-  roleCommitmentInputDim: { borderColor: colors.inputBorder, color: colors.textMuted },
+  roleCommitmentInputDim: { borderColor: colors.border, color: colors.textSecondary },
   // Hint styles
   hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   // Right-aligned ⓘ-only row used on the Roles tab where the "Roles" label
@@ -736,7 +752,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8,
   },
   accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
-  accessoryDoneText: { fontSize: 14, color: colors.textDim, letterSpacing: 0.3 },
-  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.accentBg },
+  accessoryDoneText: { fontSize: 14, color: colors.textSecondary, letterSpacing: 0.3 },
+  accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.bg },
   accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
 });

@@ -10,31 +10,34 @@ export const colors = {
   bgCard: '#0a0a0a',
   bgElevated: '#0a0a0a',
 
-  border: '#252525',
-  borderMid: '#2a2a2a',
-  borderStrong: '#363636',
-  borderBright: '#444444',
+  // Single border per V's meeting (Plate II simplification). Previous
+  // tokens border #252525, borderMid #2A2A2A, borderStrong #363636,
+  // borderBright #444444, and inputBorder #474747 all consolidated into
+  // ONE token at #474747. Brighter than the old #252525, so strokes are
+  // present rather than near-invisible. Do not reintroduce dim variants.
+  border: '#474747',
 
-  // Input field tokens per Valeriya's library — applied to every text input
-  // surface (journal/review prompt cards, emotions fieldCards, compass edit
-  // inputs, read insight card, onboarding compass input). The bg sits one
-  // step above the screen black so the field has subtle elevation; strokes
-  // shift between non-active and active focus states.
+  // Input field tokens. The single non-active border is `border` above;
+  // active/focused state uses this brighter stroke per V's spec.
   inputBg: '#121212',
-  inputBorder: '#474747',
   inputBorderActive: '#878787',
 
+  // Text scale collapsed to two steps per V's meeting (Plate II). Previous
+  // tokens textMuted #A0A0A0, textDim #707070, textGhost #2A2A2A retired —
+  // anything dim now standardizes on textSecondary. If a specific element
+  // needs to read as disabled or placeholder, give it an explicit
+  // hard-coded value with a comment; do not reintroduce dim tokens.
   textPrimary: '#F0F0F0',
   textSecondary: '#C8C8C8',
-  textMuted: '#A0A0A0',
-  textDim: '#707070',
-  textGhost: '#2a2a2a',
 
+  // Accent. accentBg (#1A1610 warm-dark brown) retired per V — accent-tinted
+  // surfaces (memento strips, lock screen, notification banners) now use
+  // colors.bg for a flat dark backdrop without the warm tint.
   accent: '#FFCE82',
   accentDim: '#B38B5B',
-  accentBg: '#1a1610',
 
-  // ── Light zones (cards, writing surfaces, checklists) ──
+  // ── Light zones (share cards, writing surfaces, light-mode artifacts) ──
+  // Kept for the share-card export pipeline (renders on white background).
   lightBg: '#F7F5F2',
   lightBg2: '#EFECEA',
   lightBg3: '#E8E5E1',
@@ -45,43 +48,48 @@ export const colors = {
   lightText2: '#3A3A3A',
   lightMuted: '#6A6A6A',
   lightDim: '#9A9A9A',
-
-  virtueGood: '#6a9a6a',
-  virtueBad: '#9a6a4a',
-
-  successBg: '#0a140a',
-  successBorder: '#3a5a3a',
+  // Semantic colors (virtueGood / virtueBad / successBg / successBorder)
+  // retired per V — virtues/success no longer distinguished by hue in the
+  // dark UI. Where a state was previously colored, callers now use accent
+  // (positive) / accentDim (warning) / border (neutral state divider).
 };
 
 export const font = {
   heroSize: 36,
   titleSize: 28,
-  bodySize: 17,
+  // Base body text per V's meeting: 17 → 18 for better readability and to
+  // match the design-system canonical scale.
+  bodySize: 18,
   subSize: 15,
+  // microSize (10pt) retired per V's meeting — eyebrow/label-tier text
+  // standardizes on labelSize (11pt). Every former micro consumer now uses
+  // labelSize. If anything genuinely needs <11pt later, give it an explicit
+  // hard-coded value with a comment; do not reintroduce micro.
   labelSize: 11,
-  microSize: 10,
   sectionTracking: 1.8,
-  // Brand typography per Valeriya's strategy doc.
-  // - display (Didot): marquee headlines — iOS-system, no load needed.
-  // - body / bodyMedium (Inter): UI text + buttons + section labels.
-  // - wordmark (Cormorant Medium): "Marcus" brand name on welcome screen.
-  // - serif (Cormorant Regular): in-app quote / philosophical voice.
-  //   Cormorant is brand-consistent with the wordmark (same family) but
-  //   engineered for text sizes, so quote bodies stay legible — unlike
-  //   Didot, which is a display serif and gets heavy at 15-19pt.
-  display: 'Didot',
+  // Brand typography — the app uses ONLY two families: Inter and Cinzel.
+  // - display (Cinzel): marquee headlines, dates, the gold "Day N", screen
+  //   titles, virtue names, the wordmark on share cards. Roman inscriptional
+  //   caps — matches the Cinzel wordmark image. ALL-CAPS by nature (no true
+  //   lowercase, no italic), so it's display-only.
+  // - body / bodyMedium (Inter): UI text, buttons, section labels, list
+  //   titles, inputs — everything readable/scannable.
+  // - bodyLightItalic (Inter Light Italic): the reflective/quote voice
+  //   (floating quotes, share-card quotes, philosophical asides). True italic
+  //   variant — RN won't synthesize italic from a custom TTF.
+  // (Didot and Cormorant were both retired in favor of Cinzel + Inter.)
+  display: 'Cinzel_400Regular',
   body: 'Inter_400Regular',
   bodyMedium: 'Inter_500Medium',
-  wordmark: 'Cormorant_700Bold',
-  serif: 'Cormorant_400Regular',
+  bodyLightItalic: 'Inter_300Light_Italic',
 };
 
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  pill: 100,
+  sm: 8,    // small accents
+  md: 12,   // buttons, inputs, prompt/field cards (took over for the
+            // retired radius.lg = 16 per V's meeting)
+  chip: 4,  // EDIT chip, TODAY tag (small label-bearing rects)
+  pill: 20, // Filter pill / role pill / pill-shaped action buttons
 };
 
 export const spacing = {

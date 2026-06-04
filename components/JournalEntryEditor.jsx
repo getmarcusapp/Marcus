@@ -69,7 +69,7 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
                 style={s.promptInput}
                 multiline
                 placeholder="Write here..."
-                placeholderTextColor={colors.textDim}
+                placeholderTextColor={colors.textSecondary}
                 value={answers[idx] || ''}
                 onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
                 scrollEnabled={false}
@@ -104,31 +104,31 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
 }
 
 const s = StyleSheet.create({
-  container: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg, overflow: 'hidden', marginBottom: 12 },
-  header: { backgroundColor: colors.accentBg, padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  container: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, overflow: 'hidden', marginBottom: 12 },
+  header: { backgroundColor: colors.bg, padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', letterSpacing: 0.8 },
   headerDate: { fontSize: 13, color: colors.accentDim },
   virtueSection: { padding: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border },
-  sectionLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10 },
+  sectionLabel: { fontSize: font.labelSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10 },
   virtuePills: { flexDirection: 'row', gap: 6 },
   vpill: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center' },
-  vpillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  vpillName: { fontSize: 11, fontFamily: font.bodyMedium, color: colors.textDim },
+  vpillActive: { borderColor: colors.accent, backgroundColor: colors.bg },
+  vpillName: { fontSize: 11, fontFamily: font.bodyMedium, color: colors.textSecondary },
   vpillNameActive: { color: colors.accent },
   promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, paddingHorizontal: 8, paddingVertical: 14, backgroundColor: colors.bgCard },
   promptCardOpen: { backgroundColor: colors.bgElevated },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   promptNum: { fontSize: 9, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   promptQ: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
-  promptSub: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: 6, lineHeight: 20 },
+  promptSub: { fontSize: 13, color: colors.textSecondary, fontStyle: 'italic', marginTop: 6, lineHeight: 20 },
   promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 },
-  promptInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top' },
+  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', fontFamily: font.body },
   hintBtn: { padding: 4 },
   hintBtnText: { fontSize: 18, color: colors.accent },
   hintBox: { marginTop: 12, padding: 12, backgroundColor: colors.bg, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
   hintText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26 },
   hintTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
-  hintSource: { fontSize: 12, color: colors.textDim, fontStyle: 'italic', letterSpacing: 0.3 },
+  hintSource: { fontSize: 12, color: colors.textSecondary, fontStyle: 'italic', letterSpacing: 0.3 },
   hintDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 12, marginBottom: 12 },
   btnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
   // Library H56 outlined + filled-gold pair (matches editBtn / editBtnSave used

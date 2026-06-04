@@ -77,7 +77,8 @@ const s = StyleSheet.create({
   quote: {
     fontSize: 56,
     color: colors.textPrimary,
-    fontFamily: font.serif,
+    fontFamily: font.bodyLightItalic,
+    fontStyle: 'italic',
     lineHeight: 78,
     marginBottom: 56,
   },
@@ -96,9 +97,9 @@ const s = StyleSheet.create({
   },
   work: {
     fontSize: 22,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontStyle: 'italic',
-    fontFamily: font.serif,
+    fontFamily: font.bodyLightItalic,
   },
 
   footer: {
@@ -112,14 +113,14 @@ const s = StyleSheet.create({
     fontSize: 28,
     letterSpacing: 12,
     color: colors.textPrimary,
-    fontFamily: font.wordmark,
+    fontFamily: font.display,
     marginBottom: 8,
   },
   tagline: {
     fontSize: 18,
     letterSpacing: 1,
-    color: colors.textMuted,
-    fontFamily: font.serif,
+    color: colors.textSecondary,
+    fontFamily: font.bodyLightItalic,
     fontStyle: 'italic',
   },
 });

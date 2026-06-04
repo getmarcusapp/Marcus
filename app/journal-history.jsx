@@ -119,7 +119,7 @@ export default function JournalHistoryScreen() {
             <TextInput
               style={s.searchInput}
               placeholder="Search entries..."
-              placeholderTextColor={colors.textDim}
+              placeholderTextColor={colors.textSecondary}
               value={searchQ}
               onChangeText={setSearchQ}
               clearButtonMode="while-editing"
@@ -273,32 +273,32 @@ const s = StyleSheet.create({
   },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36 },
-  sub: { fontSize: font.subSize, color: colors.textMuted, marginTop: 8 },
+  sub: { fontSize: font.subSize, color: colors.textSecondary, marginTop: 8 },
   body: { paddingTop: 4 },
   searchBar: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
-  searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.borderMid, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary },
+  searchInput: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textPrimary, fontFamily: font.body },
   filterRow: { paddingTop: 6, paddingBottom: 6 },
   filterPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.bgCard },
-  filterPillActive: { borderColor: colors.accent, backgroundColor: colors.accentBg },
-  filterPillText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
+  filterPillActive: { borderColor: colors.accent, backgroundColor: colors.bg },
+  filterPillText: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.3 },
   filterPillTextActive: { color: colors.accent, fontFamily: font.bodyMedium },
   sortRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 6, paddingBottom: 8 },
   sortBtn: { paddingVertical: 4 },
-  sortBtnText: { fontSize: 12, color: colors.textMuted, letterSpacing: 0.3 },
-  filterCount: { fontSize: 12, color: colors.textDim },
+  sortBtnText: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.3 },
+  filterCount: { fontSize: 12, color: colors.textSecondary },
   empty: { padding: 40, paddingTop: 56, alignItems: 'center' },
   emptyImage: { width: 180, height: 108, borderRadius: 12, marginBottom: 24 },
-  emptyEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
+  emptyEyebrow: { fontSize: font.labelSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' },
   emptyTitle: { fontSize: 26, color: colors.textPrimary, fontFamily: font.display, letterSpacing: -0.5, lineHeight: 32, marginBottom: 14, textAlign: 'center' },
-  emptyText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center', marginBottom: 22 },
-  emptyCta: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, paddingVertical: 12, paddingHorizontal: 22, backgroundColor: colors.accentBg },
+  emptyText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, textAlign: 'center', marginBottom: 22 },
+  emptyCta: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, paddingVertical: 12, paddingHorizontal: 22, backgroundColor: colors.bg },
   emptyCtaText: { fontSize: 13, color: colors.accent, letterSpacing: 0.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   monthHeader: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   monthHeaderText: { fontSize: 11, letterSpacing: 1.5, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', fontWeight: '600' },
   histEntry: { borderTopWidth: 0.5, borderTopColor: colors.border, padding: 16, backgroundColor: colors.bgCard },
   histEntryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
   histEntryDate: { fontSize: 13, color: colors.textSecondary, fontFamily: font.bodyMedium },
-  histEntryVirtue: { fontSize: 11, color: colors.textDim, letterSpacing: 0.5, textTransform: 'capitalize', marginTop: 2 },
+  histEntryVirtue: { fontSize: 11, color: colors.textSecondary, letterSpacing: 0.5, textTransform: 'capitalize', marginTop: 2 },
   // Canonical EDIT chip — matches compass roleDeleteChip / compassPreviewEdit
   // (gold border, gold text + create-outline glyph, radius.md).
   editBtn: { borderRadius: 4, paddingHorizontal: 10, paddingVertical: 5 },

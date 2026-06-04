@@ -397,8 +397,9 @@ Return only the JSON object.`;
                   <View style={s.quoteRule} />
                   <View style={s.quoteAuthorRow}>
                     <View style={{ flex: 1 }}>
-                      <Text style={s.quoteAuthor}>— {reading.author}</Text>
-                      {reading.work && <Text style={s.quoteWork}>{reading.work}</Text>}
+                      <Text style={s.quoteAuthor}>
+                        {reading.author}{reading.work ? ` · ${reading.work}` : ''}
+                      </Text>
                     </View>
                     <TouchableOpacity
                       onPress={() => setSourceHintOpen(!sourceHintOpen)}
@@ -443,7 +444,7 @@ Return only the JSON object.`;
                     style={[s.insightInput, insightSaved && s.insightInputSaved, !insightFocused && !insightSaved && s.insightInputDim]}
                     multiline
                     placeholder={hasAccess ? "Write your reaction, insight, or intention..." : "Start your 7-day free trial to write an insight"}
-                    placeholderTextColor={colors.textDim}
+                    placeholderTextColor={colors.textSecondary}
                     value={insight}
                     onChangeText={text => setInsight(text)}
                     onFocus={() => setInsightFocused(true)}
@@ -455,14 +456,6 @@ Return only the JSON object.`;
                   />
                 </TouchableOpacity>
 
-                {!keyboardUp && (
-                  <GoldSecondary
-                    style={[s.readingBtn, s.readingBtnBody]}
-                    onPress={() => requireAccess(() => generateReading())}
-                  >
-                    <Text style={s.readingBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Generate new reading</Text>
-                  </GoldSecondary>
-                )}
               </>
             ) : (
               <GoldPrimary style={[s.readingBtn, s.readingBtnBody]} onPress={() => requireAccess(() => generateReading())}>
@@ -512,7 +505,10 @@ const s = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'flex-end',
   },
-  heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  // Slight uniform zoom (5%) pushes the asset's baked-in edge lines outside
+  // the container, where the hero's overflow:hidden clips them. Keeps aspect
+  // (no distortion); crops ~2.5% off each side.
+  heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', transform: [{ scale: 1.05 }] },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
   // Title row hosts the page title on the left and the Past-X chip on the
   // right, both bottom-aligned so the chip sits on the same baseline as the
@@ -523,42 +519,45 @@ const s = StyleSheet.create({
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   // Quote card stays dark — gravitas of the Stoic quote
   quoteCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 22, marginTop: 12, marginBottom: 12, backgroundColor: colors.bgDeep,
   },
-  quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontFamily: font.serif },
+  quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontFamily: font.body },
   quoteRule: { height: 0.5, backgroundColor: colors.border, marginVertical: 16 },
   quoteAuthorRow: { flexDirection: 'row', alignItems: 'flex-start' },
-  quoteAuthor: { fontSize: 14, color: colors.textSecondary, fontFamily: font.bodyMedium },
-  quoteWork: { fontSize: 12, color: colors.textDim, marginTop: 3 },
+  // Author · work on one gold uppercase tracked line — matches the
+  // emotional-mastery / journal attribution exactly so all three pages align.
+  quoteAuthor: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   sourceHintBtn: { paddingLeft: 12, paddingTop: 2 },
   sourceHintBox: { marginTop: 14, padding: 14, backgroundColor: colors.bgElevated, borderRadius: radius.md, borderWidth: 0.5, borderColor: colors.border },
-  sourceHintText: { fontSize: 13, color: colors.textMuted, lineHeight: 20 },
+  sourceHintText: { fontSize: 13, color: colors.textSecondary, lineHeight: 20 },
   // Reflection — light
   reflectionCard: {
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 22, marginBottom: 12, backgroundColor: colors.bgElevated,
   },
-  reflectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12 },
+  reflectionLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textSecondary, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12 },
   // Body prose — matches compass.bodyText (Why / Overcome / Aspire sections).
   // Quote text above stays serif because it is an ancient passage; the
   // reflection is contemporary explanation and reads better sans-serif at length.
-  reflectionText: { fontSize: 17, color: colors.textSecondary, lineHeight: 28 },
+  // Inter to match the quote card for readability, with the same textPrimary
+  // color. Hierarchy now comes from size alone (quote 19 / reflection 17).
+  reflectionText: { fontSize: 17, color: colors.textPrimary, lineHeight: 28, fontFamily: font.body },
   // Input field treatment per Valeriya's library: subtle elevation above
   // screen bg, stroke shifts non-active (#474747) → active (#878787),
   // typed text dims (grey) when non-active / brightens (white) when active.
   insightCard: {
-    borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 20, marginBottom: 12, backgroundColor: colors.inputBg,
   },
   insightCardActive: { borderColor: colors.inputBorderActive },
-  insightLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textMuted, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
-  insightSub: { fontSize: 13, color: colors.textDim, marginBottom: 14 },
+  insightLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textSecondary, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
+  insightSub: { fontSize: 13, color: colors.textSecondary, marginBottom: 14 },
   insightInput: {
     fontSize: 16, color: colors.textPrimary, lineHeight: 26,
-    minHeight: 56, textAlignVertical: 'top',
+    minHeight: 56, textAlignVertical: 'top', fontFamily: font.body,
   },
-  insightInputDim: { color: colors.textMuted },
+  insightInputDim: { color: colors.textSecondary },
   insightInputSaved: { color: colors.textSecondary, minHeight: 0 },
   insightLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   insightEditBtn: { fontSize: 13, color: colors.accent, letterSpacing: 0.3 },

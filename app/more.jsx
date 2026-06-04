@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  View, Text, TouchableOpacity,
-  StyleSheet, SafeAreaView, ScrollView, ImageBackground,
+  View, Text, TouchableOpacity, Image,
+  StyleSheet, SafeAreaView, ScrollView, Dimensions,
 } from 'react-native';
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+// Page-level fixed bg — see index.jsx for the design constraint that
+// forced this (bg.png is portrait-aspect; no room for parallax drift
+// without cropping the hourglass curves).
+const PARALLAX_BG_HEIGHT = SCREEN_H;
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getStreak } from '../store/db';
 import { Ionicons } from '@expo/vector-icons';
@@ -49,24 +55,28 @@ export default function MoreScreen() {
   }, []));
 
   return (
-    <SafeAreaView style={s.safe}>
+    <View style={s.root}>
+      <Image
+        source={require('../assets/bg-svg4.png')}
+        style={s.parallaxBg}
+        resizeMode="cover"
+        pointerEvents="none"
+      />
+      <View style={s.bgOverlay} pointerEvents="none" />
+      <SafeAreaView style={s.safeTransparent}>
       <ScrollView
         ref={scrollRef}
-        style={[s.scroll, { backgroundColor: colors.bgCard }]}
+        style={s.scroll}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 
-        <ImageBackground
-          source={require('../assets/bg.png')}
-          style={s.hero}
-          resizeMode="cover"
-        >
-          <Text style={s.title}>Marcus</Text>
+        <View style={s.hero}>
+          <Image source={require('../assets/marcus-wordmark.png')} style={s.titleWordmark} resizeMode="contain" />
           <Text style={s.sub}>A Stoic practice app</Text>
-          <Text style={s.heroQuote}>"The impediment to action advances action. What stands in the way becomes the way."</Text>
-          <Text style={s.heroAttr}>Marcus Aurelius</Text>
-        </ImageBackground>
+          <Text style={s.heroQuote}>“The impediment to action advances action. What stands in the way becomes the way.”</Text>
+          <Text style={s.heroAttr}>— Marcus Aurelius</Text>
+        </View>
 
         <View style={s.statsCard}>
           <View style={s.statItem}>
@@ -131,42 +141,72 @@ export default function MoreScreen() {
         ))}
 
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#050505', overflow: 'hidden' },
+  safeTransparent: { flex: 1, backgroundColor: 'transparent' },
   safe: { flex: 1, backgroundColor: colors.bg },
-  scroll: { flex: 1 },
-  hero: {
-    padding: spacing.xl,
-    paddingTop: 48,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
+  scroll: { flex: 1, backgroundColor: 'transparent' },
+  // Size to the literal window, NOT absoluteFillObject — see index.jsx for the
+  // full explanation (absoluteFillObject fills the oversized parent and makes
+  // cover zoom the image to a center slice). Explicit SCREEN_W × SCREEN_H fixes it.
+  parallaxBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: SCREEN_W,
+    height: SCREEN_H,
   },
-  title: { fontSize: font.heroSize, fontFamily: font.wordmark, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8 },
-  sub: { fontSize: 18, color: colors.textSecondary, fontFamily: font.serif, marginBottom: 20 },
+  // V's tall composition has darkness baked in — transparent no-op. Keep in
+  // sync with index.jsx; raise the alpha to go darker than her bake.
+  bgOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+  },
+  // Mirrors the practice-page hero: centered, no bottom border, floating on
+  // the bg. Same spacing (paddingTop 64 / paddingBottom 44) and same type
+  // system below (gold eyebrow, Didot italic quote, Inter #AAAAAA attribution).
+  hero: {
+    paddingHorizontal: spacing.xl,
+    paddingTop: 64,
+    paddingBottom: 44,
+    alignItems: 'center',
+  },
+  // Marcus wordmark image (replaces the Cormorant text). 1144×203 source
+  // (aspect ≈ 5.64). Explicit width+height at that aspect — no aspectRatio,
+  // which let the box mis-resolve and crop to "ARC". Sized to match the
+  // onboarding welcome hero, with marginBottom opening space to the eyebrow.
+  titleWordmark: { width: 232, height: 41, marginBottom: 22 },
+  // Gold eyebrow — matches the practice hero's "Memento mori" treatment.
+  sub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', textAlign: 'center' },
   statsCard: {
     flexDirection: 'row',
     marginHorizontal: spacing.lg,
     marginBottom: spacing.md,
     borderWidth: 0.5,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     backgroundColor: colors.bgCard,
     overflow: 'hidden',
   },
   statItem: { flex: 1, alignItems: 'center', paddingVertical: 16 },
   statNum: { fontSize: 26, fontWeight: '600', color: colors.textSecondary, marginBottom: 4 },
-  statLabel: { fontSize: 10, color: colors.textDim, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  statLabel: { fontSize: 11, color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   statDivider: { width: 0.5, backgroundColor: colors.border },
-  heroQuote: { fontSize: 15, color: colors.textMuted, fontFamily: font.serif, lineHeight: 24 },
-  heroAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 8 },
+  // Quote + attribution — same treatment as the practice hero.
+  heroQuote: { fontSize: 22, color: colors.textPrimary, lineHeight: 32, fontFamily: font.bodyLightItalic, fontStyle: 'italic', textAlign: 'center', marginTop: 28 },
+  // Gold uppercase attribution — matches the onboarding welcome screen so
+  // every quote reads as one unified component. Was Inter 20 gray title-case.
+  heroAttr: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 16, textAlign: 'center' },
   section: { paddingHorizontal: spacing.md, paddingTop: spacing.lg, paddingBottom: 36 },
   card: {
     borderWidth: 0.5,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     backgroundColor: colors.bgCard,
     overflow: 'hidden',
   },
@@ -178,10 +218,5 @@ const s = StyleSheet.create({
   },
   rowContent: { flex: 1 },
   rowLabel: { fontSize: 16, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 2 },
-  rowSub: { fontSize: 13, color: colors.textDim },
-  footerQuote: {
-    fontSize: 14, color: colors.textMuted, fontStyle: 'italic', fontFamily: font.serif,
-    textAlign: 'center', lineHeight: 22, marginBottom: 8,
-  },
-  footerAttr: { fontSize: 11, color: colors.textDim, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  rowSub: { fontSize: 13, color: colors.textSecondary },
 });

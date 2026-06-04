@@ -96,7 +96,7 @@ export function MiniMeditationPlayer() {
             <MaterialCommunityIcons name="fast-forward-15" size={26} color={colors.textSecondary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => unload()} style={s.closeBtn}>
-            <Ionicons name="close" size={22} color={colors.textDim} />
+            <Ionicons name="close" size={22} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -130,7 +130,7 @@ const s = StyleSheet.create({
   },
   titleArea: { flex: 1 },
   title: { fontSize: 13, color: colors.textPrimary, fontFamily: font.bodyMedium },
-  time: { fontSize: 11, color: colors.textDim, marginTop: 2, letterSpacing: 0.3 },
+  time: { fontSize: 11, color: colors.textSecondary, marginTop: 2, letterSpacing: 0.3 },
   controls: { flexDirection: 'row', alignItems: 'center' },
   // 44pt tap targets per Apple HIG; consistent square buttons so spacing
   // is visually even and fat-fingering doesn't hit the wrong control.
@@ -144,7 +144,7 @@ const s = StyleSheet.create({
   },
   playCircle: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: colors.accentBg,
+    backgroundColor: colors.bg,
     borderWidth: 0.5, borderColor: colors.accentDim,
     alignItems: 'center', justifyContent: 'center',
   },

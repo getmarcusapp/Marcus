@@ -1,8 +1,23 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Image, ImageBackground, Animated, ActivityIndicator,
+  StyleSheet, SafeAreaView, Image, Animated, ActivityIndicator,
+  Dimensions,
 } from 'react-native';
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+// Page-level fixed bg. Sized exactly to the viewport so bg.png
+// (2364×5120, ~9:19.5 phone aspect) displays at its natural aspect with
+// imperceptible side crop — the hourglass curves are uncropped and
+// clearly visible. The cards scroll over this fixed layer.
+//
+// True parallax (bg drifting at a fraction of scroll speed) is not used
+// here because it requires a container TALLER than the viewport for
+// drift room, and any extra height forces cover-mode to crop the image
+// sides — which clips the hourglass curves and produces a solid-dark
+// failure. Revisit if/when V supplies a taller bg-parallax.png asset
+// designed with vertical headroom built in.
+const PARALLAX_BG_HEIGHT = SCREEN_H;
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { useDeviceTilt } from '../lib/useDeviceTilt';
@@ -14,7 +29,6 @@ import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/qu
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Video, ResizeMode } from 'expo-av';
 import * as haptics from '../lib/haptics';
 import { useEntitlement } from '../lib/useEntitlement';
 
@@ -161,6 +175,11 @@ export default function PracticeScreen() {
   // skull / day count / sealed quote.
   const sealedScrollRef = useRef(null);
   const scrollRef = useRef(null);
+  // Bg layer is static. No parallax, no animated layer, no aspectRatio
+  // constraint — just a fixed Image filling the viewport with resizeMode
+  // cover. Centered crop of V's 1242×4000 composition shows her middle
+  // band (the focal moment) without GPU compositing artifacts that
+  // animated transforms can produce.
   useFocusEffect(useCallback(() => {
     if (!allDone) return;
     sealedScrollRef.current?.scrollTo({ y: 0, animated: false });
@@ -275,7 +294,7 @@ export default function PracticeScreen() {
       : () => router.push('/review?from=/&fromLabel=Practice');
     return (
       <>
-        <View style={s.practiceHeader}>
+        <View style={s.weeklyHeader}>
           <Text style={s.secLabel}>Weekly</Text>
         </View>
         <View style={s.routineCard}>
@@ -312,7 +331,15 @@ export default function PracticeScreen() {
 
   if (allDone) {
     return (
-      <SafeAreaView style={s.safe}>
+      <View style={s.root}>
+        <Image
+          source={require('../assets/bg-svg4.png')}
+          style={s.parallaxBg}
+          resizeMode="cover"
+          pointerEvents="none"
+        />
+        <View style={s.bgOverlay} pointerEvents="none" />
+        <SafeAreaView style={s.safeTransparent}>
         <ScrollView
           ref={sealedScrollRef}
           style={s.scroll}
@@ -321,28 +348,14 @@ export default function PracticeScreen() {
         >
 
           <Animated.View style={[s.heroSealed, sealedAnimStyle(0)]}>
-            {/* Looping background video for the daily success moment.
-                Sits behind the dark overlay; foreground content (skull,
-                eyebrow, date, streak) renders above via JSX z-order. */}
-            <Video
-              source={require('../assets/intro-video.mov')}
-              style={StyleSheet.absoluteFillObject}
-              resizeMode={ResizeMode.COVER}
-              shouldPlay
-              isLooping
-              isMuted
-              useNativeControls={false}
-            />
-            <View
-              pointerEvents="none"
-              style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.8)' }]}
-            />
+            {/* Transparent — the page-level bg-svg4 wave (at the root of this
+                branch) shows through, matching the normal practice hero. */}
             <Animated.Image
-              source={require('../assets/skull.png')}
+              source={require('../assets/skull-gold.png')}
               style={[s.skullIconSealed, tiltTransform]}
               resizeMode="contain"
             />
-            <Text style={s.sealedEyebrow}>{reviewDone && isReviewDay ? 'Week sealed' : 'Practice complete'}</Text>
+            <Text style={s.sealedEyebrow}>Practice complete</Text>
             <Text style={s.sealedDate}>{dateStr}</Text>
             <Animated.Text
               style={[
@@ -356,8 +369,7 @@ export default function PracticeScreen() {
 
           <Animated.View style={[s.sealedCard, sealedAnimStyle(1)]}>
             <Text style={s.sealedQuoteText}>“{sealQuote.text}”</Text>
-            <View style={s.sealedQuoteRule} />
-            <Text style={s.sealedQuoteAttr}>— {sealQuote.author.toUpperCase()}, {sealQuote.source.toUpperCase()}</Text>
+            <Text style={s.sealedQuoteAttr}>— {sealQuote.author}, {sealQuote.source}</Text>
           </Animated.View>
 
           <Animated.View style={[s.sealedRestCard, sealedAnimStyle(2)]}>
@@ -422,12 +434,21 @@ export default function PracticeScreen() {
           </Animated.View>
 
         </ScrollView>
-      </SafeAreaView>
+        </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={s.safe}>
+    <View style={s.root}>
+      <Image
+        source={require('../assets/bg-svg4.png')}
+        style={s.parallaxBg}
+        resizeMode="cover"
+        pointerEvents="none"
+      />
+      <View style={s.bgOverlay} pointerEvents="none" />
+      <SafeAreaView style={s.safeTransparent}>
       <ScrollView
         ref={scrollRef}
         style={s.scroll}
@@ -435,34 +456,23 @@ export default function PracticeScreen() {
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 
-        <ImageBackground
-          source={require('../assets/bg.png')}
-          style={s.hero}
-          resizeMode="cover"
-        >
+        <View style={s.hero}>
           <Animated.Image
-            source={require('../assets/skull.png')}
+            source={require('../assets/skull-gold.png')}
             style={[s.skullIcon, tiltTransform]}
             resizeMode="contain"
           />
-          <Text style={s.eyebrow}>Memento mori</Text>
           <Text style={s.heroDate}>{dateStr}</Text>
-          <Text style={s.heroSub}>
-            {streak.current > 0 ? `Day ${streak.current} of your finite days` : 'Your practice begins today'}
-          </Text>
-        </ImageBackground>
-
-        <View style={s.quoteCard}>
+          <Text style={s.heroStreak}>{streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}</Text>
           <Text style={s.quoteText}>“{quote.text}”</Text>
-          <Text style={s.quoteAttr}>— {quote.author.toUpperCase()}, {quote.source.toUpperCase()}</Text>
+          <Text style={s.quoteAttr}>— {quote.author}, {quote.source}</Text>
         </View>
 
         {streak.totalDays === 0 && completed === 0 && !morningComplete && (
           <View style={s.welcomeCard}>
-            <Text style={s.welcomeEyebrow}>Welcome</Text>
-            <Text style={s.welcomeTitle}>Start with one.</Text>
+            <Text style={s.welcomeTitle}>Start with one</Text>
             <Text style={s.welcomeText}>
-              Four steps below. Take them as the day allows. There is no streak to defend yet — only the practice.
+              Four steps below. Take them as the day allows. There is no streak to defend yet, only the practice.
             </Text>
           </View>
         )}
@@ -553,93 +563,172 @@ export default function PracticeScreen() {
 
         </View>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
+  // Root wraps everything so the bg image can extend behind the status
+  // bar and tab bar (beyond SafeAreaView's insets). #050505 is a hair
+  // darker than the image's dark zones — gives the curves a tiny bit
+  // more visual presence without changing the design.
+  root: { flex: 1, backgroundColor: '#050505', overflow: 'hidden' },
+  // Transparent SafeAreaView lets the bg image show through above content.
+  safeTransparent: { flex: 1, backgroundColor: 'transparent' },
+  // Kept for any consumer that might still reference s.safe (legacy
+  // protection — most callers were migrated to s.safeTransparent above).
   safe: { flex: 1, backgroundColor: colors.bg },
-  scroll: { flex: 1 },
+  // ScrollView is transparent so the page-level bg shows through.
+  // Cards/tiles inside the scroll have their own opaque dark backgrounds
+  // and remain readable as they pass over the bg image.
+  scroll: { flex: 1, backgroundColor: 'transparent' },
+  // Full-screen box; the Image uses resizeMode="contain" so the ENTIRE image
+  // is shown (scaled to fit, no crop). Because the image is wider-aspect than
+  // the phone, contain fits by width and leaves dark margins top/bottom.
+  // CRITICAL: size the bg to the literal window, NOT absoluteFillObject.
+  // absoluteFillObject fills the PARENT (root), which lays out taller than the
+  // visible screen (it extends behind the tab bar), so resizeMode="cover"
+  // scaled the image up to cover that oversized box — showing only a zoomed
+  // center slice (the "gradient" bug). Explicit SCREEN_W × SCREEN_H fixes it.
+  parallaxBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: SCREEN_W,
+    height: SCREEN_H,
+  },
+  // V's tall composition already has darkness baked in, so this overlay is a
+  // transparent no-op. Raise the alpha if you want it darker than her bake.
+  bgOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+  },
 
-  // Normal hero
+  // Normal hero — transparent so the page-level parallax bg shows through.
+  // Hero block keeps its padding + border-bottom to mark the section
+  // boundary, just without its own image fill.
+  // No bottom border: the hero now flows skull → eyebrow → date → sub →
+  // quote → attribution as one unified centered block sitting directly on
+  // the page bg image (no separate quote card). The section keyline lives
+  // above "Today's practice" instead.
+  // paddingTop 48 matches heroSealed so the in-progress and sealed heroes
+  // start at the same height (per V — composition mirrors the sealed screen).
   hero: {
-    backgroundColor: colors.bgDeep,
+    backgroundColor: 'transparent',
     paddingTop: 48,
-    paddingBottom: 36,
+    paddingBottom: 44,
     paddingHorizontal: spacing.xl,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
     alignItems: 'center',
   },
-  skullIcon: { width: 180, height: 180, marginBottom: 20, opacity: 0.9 },
-  eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
-  heroDate: { fontSize: font.heroSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
-  heroSub: { fontSize: font.subSize, color: colors.textMuted, textAlign: 'center' },
+  skullIcon: { width: 150, height: 150, marginBottom: 24, opacity: 0.9 },
+  // Date is the secondary line (titleSize), with the gold "Day N" below as the
+  // focal point — mirrors the sealed hero (sealedDate / sealedStreak).
+  heroDate: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
+  // Gold "Day N" — identical treatment to the sealed hero's sealedStreak.
+  heroStreak: { fontSize: 48, fontFamily: font.display, color: colors.accent, letterSpacing: -0.5, textAlign: 'center' },
 
   // Sealed hero — contains a looping background video + dark overlay
   // sitting behind the skull/text content. No overflow:hidden because
   // the skull's tilt-transform with perspective can render slightly
   // outside its 180x180 bounding box and would get clipped otherwise.
+  // Transparent so the page-level bg-svg4 wave shows through (video removed).
+  // Matches the normal practice hero — no fill, no bottom border.
   heroSealed: {
-    backgroundColor: colors.bgDeep,
+    backgroundColor: 'transparent',
     paddingTop: 48,
-    paddingBottom: 36,
+    // 10 + sealedCard's 26 paddingTop ≈ 36, matching the active hero's
+    // streak→quote gap (quoteText marginTop). Was 36, which stacked with the
+    // card's 26 into a ~62px chasm between "Day N" and the quote.
+    paddingBottom: 10,
     paddingHorizontal: spacing.xl,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.accentDim,
     alignItems: 'center',
   },
-  skullIconSealed: { width: 180, height: 180, marginBottom: 24, opacity: 1 },
+  skullIconSealed: { width: 150, height: 150, marginBottom: 24, opacity: 1 },
   sealedEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' },
   sealedDate: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
   sealedStreak: { fontSize: 48, fontFamily: font.display, color: colors.accent, letterSpacing: -0.5, textAlign: 'center' },
 
   // Sealed quote
+  // Floats like the practice/more hero quote — no card fill, no border, no
+  // divider rule. Centered, transparent.
   sealedCard: {
-    backgroundColor: colors.accentBg,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.accentDim,
-    padding: spacing.xl,
+    paddingHorizontal: spacing.xl,
     paddingVertical: 26,
+    alignItems: 'center',
   },
-  sealedQuoteText: { fontSize: 18, color: colors.textSecondary, lineHeight: 30, fontStyle: 'italic', fontFamily: font.serif },
-  sealedQuoteRule: { height: 0.5, backgroundColor: colors.accentDim, marginVertical: 16 },
-  sealedQuoteAttr: { fontSize: 10, color: colors.accentDim, letterSpacing: 1.5 },
+  // Matches the practice/more hero quote treatment exactly.
+  sealedQuoteText: { fontSize: 24, color: colors.textPrimary, lineHeight: 34, fontFamily: font.bodyLightItalic, fontStyle: 'italic', textAlign: 'center' },
+  // Gold uppercase attribution — matches the onboarding welcome screen
+  // (gold, Inter Medium, uppercase, tracked) so every quote reads as one
+  // unified component. Was Inter 20 gray title-case.
+  sealedQuoteAttr: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 16, textAlign: 'center' },
 
   // Sealed rest card — light zone
+  // Quiet black card — matches the welcome / morning-complete cards: #0a0a0a
+  // fill, 0.5 #474747 border, radius.md, inset from the edges.
   sealedRestCard: {
-    padding: spacing.xl,
-    paddingVertical: 24,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
     backgroundColor: colors.bgCard,
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: 18,
+    marginHorizontal: spacing.md,
+    marginBottom: 4,
   },
-  sealedRestTitle: { fontSize: 20, fontWeight: '400', color: colors.textPrimary, marginBottom: 8 },
-  sealedRestSub: { fontSize: 15, color: colors.textMuted, lineHeight: 24, fontFamily: font.serif },
+  // Matches the welcome card exactly (title 17 / sub 14) so the two cards read
+  // as one consistent component.
+  sealedRestTitle: { fontSize: 17, color: colors.textPrimary, fontFamily: font.bodyMedium, marginBottom: 6 },
+  sealedRestSub: { fontSize: 14, color: colors.textSecondary, fontFamily: font.body, lineHeight: 21 },
 
-  // Normal quote
-  quoteCard: {
-    backgroundColor: colors.bgDeep,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
-    padding: spacing.xl,
-    paddingVertical: 22,
+  // In-hero quote — centered, larger italic serif, sitting on the bg image
+  // directly (no card background). Attribution centered below in title case
+  // to match V's mock ("— Marcus Aurelius, Meditations V.20").
+  // Quote body — Inter Light Italic (the unified quote voice). Kept as the
+  // brightest/largest line so it's the focal point above the 20pt secondary
+  // tier (sub + attribution).
+  quoteText: {
+    fontSize: 24,
+    color: colors.textPrimary,
+    lineHeight: 34,
+    fontFamily: font.bodyLightItalic,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 36,
   },
-  quoteText: { fontSize: 18, color: colors.textPrimary, lineHeight: 30, fontFamily: font.serif },
-  quoteAttr: { fontSize: 11, color: colors.textMuted, marginTop: 12, letterSpacing: 1.5 },
+  // Gold uppercase attribution — matches the onboarding welcome screen so
+  // every quote reads as one unified component. Was Inter 20 gray title-case.
+  quoteAttr: {
+    fontSize: font.labelSize,
+    letterSpacing: font.sectionTracking,
+    color: colors.accent,
+    fontFamily: font.bodyMedium,
+    textTransform: 'uppercase',
+    marginTop: 16,
+    textAlign: 'center',
+  },
 
-  // Light body zone
-  body: { padding: spacing.md, backgroundColor: colors.bgCard },
+  // Body wrapper below the hero. Transparent so the page-level bg image
+  // shows through between cards. Each card inside still has its own
+  // opaque dark fill, so card content remains fully readable; only the
+  // gaps reveal the bg.
+  body: { padding: spacing.md, backgroundColor: 'transparent' },
   // Small banner shown only when the user is in an active 7-day free
   // trial. Tappable so the user can review their subscription state.
   trialBanner: {
     borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
-    backgroundColor: colors.accentBg,
+    backgroundColor: colors.bg,
     paddingVertical: 10, paddingHorizontal: 14,
     marginBottom: 12, alignItems: 'center',
   },
   trialBannerText: { fontSize: 12, color: colors.accent, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: font.bodyMedium },
-  practiceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 8, marginBottom: 10 },
+  // Keyline above the row only (border-top). Warm accentDim to match V's
+  // mock. The progress bar below the row stays as the lower divider.
+  practiceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', borderTopWidth: 0.5, borderTopColor: colors.accentDim, paddingTop: 18, marginTop: 12, marginBottom: 10 },
+  // Weekly sub-section header — same row layout as practiceHeader but NO
+  // gold keyline. The accent eyebrow label alone separates it from the
+  // Today's-practice list above; a second gold rule would be redundant.
+  weeklyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 8, marginBottom: 10 },
   practiceCount: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accentDim, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   progressBar: { height: 1, backgroundColor: colors.border, borderRadius: 1, marginBottom: 8, overflow: 'hidden', flexDirection: 'row' },
@@ -649,7 +738,7 @@ const s = StyleSheet.create({
   routineCard: {
     borderWidth: 0.5,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     backgroundColor: colors.bgElevated,
     overflow: 'hidden',
     marginBottom: 16,
@@ -657,48 +746,58 @@ const s = StyleSheet.create({
   routineRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 18, borderLeftWidth: 2, borderLeftColor: 'transparent' },
   routineRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
   routineRowNext: { borderLeftColor: colors.accent },
-  dot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.textMuted },
+  dot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.textSecondary },
   dotDone: { backgroundColor: colors.accent, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
   routineContent: { flex: 1 },
   routineTitle: { fontSize: 15, fontWeight: '400', color: colors.textPrimary, marginBottom: 3 },
-  titleDone: { color: colors.textDim, textDecorationLine: 'line-through' },
-  titleLocked: { color: colors.textDim },
-  routineSub: { fontSize: 12, color: colors.textMuted },
+  titleDone: { color: colors.textSecondary, textDecorationLine: 'line-through' },
+  titleLocked: { color: colors.textSecondary },
+  routineSub: { fontSize: 12, color: colors.textSecondary },
   tag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
-  tagNext: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  tagAccent: { borderColor: colors.borderMid },
-  tagText: { fontSize: 10, color: colors.textMuted, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  tagNext: { borderColor: colors.accentDim, backgroundColor: colors.bg },
+  tagAccent: { borderColor: colors.border },
+  tagText: { fontSize: 11, color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   tagTextNext: { color: colors.accent, fontFamily: font.bodyMedium },
-  tagTextAccent: { color: colors.textMuted },
+  tagTextAccent: { color: colors.textSecondary },
 
+  // Quiet black card — matches the welcome card and the app's other inset
+  // cards: #0a0a0a fill, 0.5 #474747 border, radius.md, inset from the edges.
   morningCompleteCard: {
-    backgroundColor: colors.accentBg,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.accentDim,
-    padding: spacing.xl,
-    paddingVertical: 18,
+    backgroundColor: colors.bgCard,
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: 18,
+    marginHorizontal: spacing.md,
+    marginBottom: 4,
   },
-  morningCompleteEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
-  morningCompleteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22 },
+  morningCompleteEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  morningCompleteText: { fontSize: 14, color: colors.textSecondary, fontFamily: font.body, lineHeight: 21 },
 
   // Day-1 welcome — shows on the very first practice screen view, before
   // any item is completed and before any full day has been sealed. Hides
   // the moment any practice element is tapped.
+  // Day-one welcome — quiet dark card in the list-card language (not the
+  // hero's). Deliberately avoids echoing the hero so it doesn't read as a
+  // second screen: muted (non-gold) label, Inter title (not Didot), Inter
+  // body. #0a0a0a fill + 0.5 #474747 border + radius.md, inset to align
+  // with the practice cards below. Left-aligned like those cards.
   welcomeCard: {
-    backgroundColor: colors.accentBg,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.accentDim,
-    padding: spacing.xl,
-    paddingVertical: 22,
+    backgroundColor: colors.bgCard,
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: 18,
+    marginHorizontal: spacing.md,
+    marginBottom: 4,
   },
-  welcomeEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
-  welcomeTitle: { fontSize: 20, color: colors.textPrimary, fontFamily: font.serif, marginBottom: 10 },
-  welcomeText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
+  welcomeTitle: { fontSize: 17, color: colors.textPrimary, fontFamily: font.bodyMedium, marginBottom: 6 },
+  welcomeText: { fontSize: 14, color: colors.textSecondary, fontFamily: font.body, lineHeight: 21 },
 
   medCard: {
     borderWidth: 0.5,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     marginTop: 8,
     marginBottom: 12,
     backgroundColor: colors.bgCard,
@@ -724,10 +823,10 @@ const s = StyleSheet.create({
   medBody: { padding: 22, paddingTop: 18 },
   medTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
   medEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
-  medSubtitle: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
+  medSubtitle: { fontSize: font.labelSize, letterSpacing: 2, color: colors.textSecondary, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   medTitle: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
   medDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 14 },
-  medMeta: { fontSize: 12, color: colors.textDim, letterSpacing: 0.5 },
+  medMeta: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.5 },
   medProgressBar: {
     height: 2,
     backgroundColor: colors.border,
@@ -738,7 +837,7 @@ const s = StyleSheet.create({
   },
   medProgressFill: { backgroundColor: colors.accent, borderRadius: 1 },
   medTimeRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  medTimeText: { fontSize: 11, color: colors.textDim, letterSpacing: 0.3 },
+  medTimeText: { fontSize: 11, color: colors.textSecondary, letterSpacing: 0.3 },
   medAllBtn: { alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 12, marginBottom: 20 },
   medAllText: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
 });

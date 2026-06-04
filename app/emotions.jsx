@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  KeyboardAvoidingView, Platform, InputAccessoryView, Keyboard, Image, ImageBackground,
+  Platform, InputAccessoryView, Keyboard, Image,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -58,7 +58,7 @@ function IntensitySlider({ value, onChange }) {
 const iss = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
   btn: {
-    width: 44, height: 44, borderWidth: 0.5, borderColor: colors.borderMid,
+    width: 44, height: 44, borderWidth: 0.5, borderColor: colors.border,
     borderRadius: 10, alignItems: 'center', justifyContent: 'center',
     backgroundColor: colors.bgElevated,
   },
@@ -79,6 +79,9 @@ export default function EmotionsScreen() {
   const [chosenResponse, setChosenResponse] = useState('');
   const [selectedDistortions, setSelectedDistortions] = useState([]);
   const [hintOpen, setHintOpen] = useState(false);
+  // Inline ⓘ bubble holding the emotion-specific Stoic reframe in the
+  // III · Reframe "What story…" card. Only shown once an emotion is picked.
+  const [reframeInfoOpen, setReframeInfoOpen] = useState(false);
   // Tracks which input field is currently focused so the wrapping fieldCard
   // can switch between non-active (darker stroke) and active (brighter stroke).
   const [focusedField, setFocusedField] = useState(null);
@@ -97,6 +100,21 @@ export default function EmotionsScreen() {
   // the Reaction accessory scrolls to just above it (not deeper into the
   // reframe card itself).
   const reframeRef = useRef(null);
+
+  // The response field is the last input, so when focused it lands flush
+  // against the keyboard accessory bar (Done/Log). Force it near the top of
+  // the viewport on focus so it clears the keyboard + accessory entirely.
+  function scrollResponseIntoView() {
+    setTimeout(() => {
+      const scrollNode = scrollRef.current?.getScrollableNode?.() || scrollRef.current;
+      if (!scrollNode || !responseInputRef.current) return;
+      responseInputRef.current.measureLayout(
+        scrollNode,
+        (_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - 80), animated: true }),
+        () => {},
+      );
+    }, 280);
+  }
 
   function scrollToReframe() {
     Keyboard.dismiss();
@@ -122,6 +140,7 @@ export default function EmotionsScreen() {
 
   useFocusEffect(useCallback(() => {
     setHintOpen(false);
+    setReframeInfoOpen(false);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, []));
 
@@ -156,16 +175,12 @@ export default function EmotionsScreen() {
     setSelectedDistortions([]);
     setIntensity(5);
     setTiming('now');
+    setReframeInfoOpen(false);
     Alert.alert('', 'Trigger logged.', [{ text: 'Done' }]);
   }
 
   return (
     <SafeAreaView style={s.safe}>
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.bg }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
-      >
         <ScrollView
           ref={scrollRef}
           scrollIndicatorInsets={{ bottom: 36 }}
@@ -174,6 +189,7 @@ export default function EmotionsScreen() {
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
         >
 
           <View style={s.hero}>
@@ -198,18 +214,14 @@ export default function EmotionsScreen() {
             </View>
           </View>
 
-          <ImageBackground
-            source={require('../assets/bg.png')}
-            style={s.mementoStrip}
-            resizeMode="cover"
-          >
+          <View style={s.mementoStrip}>
             <Text style={s.mementoText}>
               "Men are disturbed not by the things which happen, but by the opinions about the things."
             </Text>
             <Text style={s.mementoSub}>
               Epictetus · Enchiridion 5
             </Text>
-          </ImageBackground>
+          </View>
 
           <View style={s.body}>
 
@@ -282,18 +294,20 @@ export default function EmotionsScreen() {
             <Text style={s.stageLabel}>II · Describe</Text>
 
             <View style={s.fieldCard}>
-              <Text style={s.fieldLabel}>Intensity</Text>
+              <Text style={s.fieldQuestion}>
+                {timing === 'now' ? 'How strong is the feeling?' : 'How strong was the feeling?'}
+              </Text>
               <IntensitySlider value={intensity} onChange={setIntensity} />
             </View>
 
             <View style={[s.fieldCard, focusedField === 'trigger' && s.fieldCardActive]}>
-              <Text style={s.fieldLabel}>What triggered it?</Text>
+              <Text style={s.fieldQuestion}>What triggered it?</Text>
               <TextInput
                 ref={triggerInputRef}
                 style={[s.fieldInput, focusedField !== 'trigger' && s.fieldInputDim]}
                 multiline
                 placeholder="Describe the situation..."
-                placeholderTextColor={colors.textDim}
+                placeholderTextColor={colors.textSecondary}
                 value={trigger}
                 onChangeText={setTrigger}
                 onFocus={() => setFocusedField('trigger')}
@@ -306,13 +320,15 @@ export default function EmotionsScreen() {
             </View>
 
             <View style={[s.fieldCard, focusedField === 'reaction' && s.fieldCardActive]}>
-              <Text style={s.fieldLabel}>My automatic reaction</Text>
+              <Text style={s.fieldQuestion}>
+                {timing === 'now' ? 'What is your first impulse?' : 'What was your first impulse?'}
+              </Text>
               <TextInput
                 ref={reactionInputRef}
                 style={[s.fieldInput, focusedField !== 'reaction' && s.fieldInputDim]}
                 multiline
-                placeholder="What did you want to do or say?"
-                placeholderTextColor={colors.textDim}
+                placeholder="The thing you wanted to do or say, before reflection..."
+                placeholderTextColor={colors.textSecondary}
                 value={reaction}
                 onChangeText={setReaction}
                 onFocus={() => setFocusedField('reaction')}
@@ -327,34 +343,11 @@ export default function EmotionsScreen() {
             <View ref={reframeRef} collapsable={false}>
               <Text style={s.stageLabel}>III · Reframe</Text>
             </View>
-            <View
-              style={[
-                s.reframeCard,
-                selectedEmotion
-                  ? {
-                      borderColor: EMOTION_COLORS[selectedEmotion].border,
-                      backgroundColor: keyboardUp
-                        ? colors.bgElevated
-                        : EMOTION_COLORS[selectedEmotion].tint,
-                    }
-                  : { borderColor: colors.border, backgroundColor: colors.bgElevated },
-              ]}
-            >
-              <Text style={[s.reframeEyebrow, { color: selectedEmotion ? EMOTION_COLORS[selectedEmotion].border : colors.textDim }]}>
-                The Stoic reframe
-              </Text>
-              <Text style={[s.reframeText, !selectedEmotion && s.reframeTextMuted]}>
-                {selectedEmotion
-                  ? stoicReframesUpdated[selectedEmotion]
-                  : 'Pick what you are feeling above. A Stoic reframe will appear here, with patterns to notice and a place to choose your response.'}
-              </Text>
-
-              <View style={s.reframeDivider} />
-
-              <View collapsable={false}>
-                <Text style={[s.fieldLabel, !selectedEmotion && s.fieldLabelMuted]}>What story are you telling yourself?</Text>
-                <Text style={s.distortionSub}>Select any patterns you notice in your thinking</Text>
-              </View>
+            {/* Card 1 — the story / cognitive patterns. Neutral card styling,
+                consistent with the Describe step. */}
+            <View style={s.fieldCard}>
+              <Text style={[s.fieldQuestion, { marginBottom: 4 }, !selectedEmotion && s.fieldLabelMuted]}>What story are you telling yourself?</Text>
+              <Text style={s.distortionSub}>Select any patterns you notice in your thinking</Text>
               <View style={s.distortionGrid}>
                 {DISTORTIONS.map(d => {
                   const isSelected = selectedDistortions.includes(d.id);
@@ -379,23 +372,38 @@ export default function EmotionsScreen() {
                   );
                 })}
               </View>
+            </View>
 
-              <View style={s.reframeDivider} />
-
-              <Text style={[s.fieldLabel, !selectedEmotion && s.fieldLabelMuted]}>
-                {timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
-              </Text>
+            {/* Card 2 — chosen response. The emotion-specific Stoic reframe
+                lives in the inline ⓘ bubble here (the reframe reads as
+                response-guidance), shown only once an emotion is picked. */}
+            <View style={[s.fieldCard, focusedField === 'response' && s.fieldCardActive]}>
+              <View style={s.feelingHeader}>
+                <Text style={[s.secQuestion, { marginTop: 0, marginBottom: 0, flex: 1 }, !selectedEmotion && s.fieldLabelMuted]}>
+                  {timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
+                </Text>
+                {selectedEmotion && (
+                  <TouchableOpacity onPress={() => setReframeInfoOpen(!reframeInfoOpen)} style={s.hintBtn} activeOpacity={0.7}>
+                    <Text style={s.hintBtnText}>ⓘ</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              {selectedEmotion && reframeInfoOpen && (
+                <View style={s.hintBox}>
+                  <Text style={s.hintText}>{stoicReframesUpdated[selectedEmotion]}</Text>
+                </View>
+              )}
               <TextInput
                 ref={responseInputRef}
                 style={[s.fieldInput, focusedField !== 'response' && s.fieldInputDim]}
                 multiline
                 placeholder={timing === 'now'
-                  ? "What is your chosen response going forward?"
-                  : "Looking back, what would the Stoic have done?"}
-                placeholderTextColor={colors.textDim}
+                  ? "The response you choose to take, going forward..."
+                  : "Looking back, what the Stoic would have done..."}
+                placeholderTextColor={colors.textSecondary}
                 value={chosenResponse}
                 onChangeText={setChosenResponse}
-                onFocus={() => setFocusedField('response')}
+                onFocus={() => { setFocusedField('response'); scrollResponseIntoView(); }}
                 onBlur={() => setFocusedField(null)}
                 editable={hasAccess}
                 scrollEnabled={false}
@@ -421,7 +429,6 @@ export default function EmotionsScreen() {
 
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
       {Platform.OS === 'ios' && (
         <>
           <InputAccessoryView nativeID="emoTriggerAccessory">
@@ -490,19 +497,23 @@ const s = StyleSheet.create({
   // right, both bottom-aligned so the chip sits on the same baseline.
   heroTitleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, marginBottom: 6 },
-  // Memento strip below the hero — same Cormorant-serif treatment as the
-  // journal/review mementos. Holds the practice's philosophical anchor copy
-  // ("Between stimulus and response…") freed from the hero so the
-  // HeroOverlayChip can sit in the top-right without crowding.
+  // Quiet black card — identical to the journal/review memento cards:
+  // #0a0a0a fill, 0.5 #474747 border, radius.md, inset from the edges.
+  // Replaces the old bg.png image strip so all quote surfaces match.
   mementoStrip: {
-    backgroundColor: colors.accentBg,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
+    backgroundColor: colors.bgCard,
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
     padding: spacing.xl,
     paddingVertical: 20,
+    marginHorizontal: spacing.md,
+    marginTop: 16,
   },
-  mementoText: { fontSize: 19, color: colors.textPrimary, lineHeight: 30, fontFamily: font.serif },
-  mementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  mementoText: { fontSize: 17, color: colors.textPrimary, lineHeight: 27, fontFamily: font.body },
+  // Gold uppercase attribution — matches the onboarding welcome screen so
+  // every quote reads as one unified component. Was Inter 13 gray title-case.
+  mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
   // Light body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },
@@ -518,11 +529,11 @@ const s = StyleSheet.create({
   hintBox: { backgroundColor: colors.bgDeep, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, marginBottom: 14 },
   hintText: { fontSize: 15, color: colors.textSecondary, lineHeight: 24 },
   timingRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 16, backgroundColor: colors.bgElevated },
+  timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, backgroundColor: colors.bgElevated },
   timingBtnActive: { borderColor: colors.textSecondary, backgroundColor: colors.bgElevated },
-  timingBtnText: { fontSize: 14, fontWeight: '400', color: colors.textMuted, marginBottom: 4 },
+  timingBtnText: { fontSize: 14, fontWeight: '400', color: colors.textSecondary, marginBottom: 4 },
   timingBtnTextActive: { color: colors.textPrimary, fontFamily: font.bodyMedium },
-  timingBtnSub: { fontSize: 12, color: colors.textDim, lineHeight: 18 },
+  timingBtnSub: { fontSize: 12, color: colors.textSecondary, lineHeight: 18 },
   timingBtnSubActive: { color: colors.textSecondary },
   emotionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginBottom: 16 },
   ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 18, alignItems: 'center', backgroundColor: colors.bgElevated, overflow: 'hidden' },
@@ -531,23 +542,22 @@ const s = StyleSheet.create({
   // Input field treatment per Valeriya's library: subtle elevation above
   // screen bg, with stroke shifting between non-active (#474747) and
   // active (#878787) focus states.
-  fieldCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
+  fieldCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
   fieldCardActive: { borderColor: colors.inputBorderActive },
-  fieldLabel: { fontSize: font.microSize, letterSpacing: 2, color: colors.textMuted, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12 },
-  fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 25, minHeight: 54, textAlignVertical: 'top' },
+  // In-card question — matches the journal wizard's promptQ (white, sentence
+  // case, weight 400). Replaces the uppercase fieldLabel so questions read as
+  // questions, not eyebrow chrome (Valeriya's rule). Tuned for in-card use:
+  // no marginTop (the card's padding handles it), marginBottom to the input.
+  fieldQuestion: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400', marginBottom: 14 },
+  fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', fontFamily: font.body },
   // Non-focused state: dim the typed text per Valeriya's library (grey body text).
-  fieldInputDim: { color: colors.textMuted },
-  reframeCard: { borderWidth: 1, borderRadius: radius.lg, padding: 26, marginBottom: 12, backgroundColor: colors.bgCard },
-  reframeEyebrow: { fontSize: font.microSize, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, fontWeight: '600' },
-  reframeText: { fontSize: 16, color: colors.textSecondary, lineHeight: 26, marginBottom: 16 },
-  reframeTextMuted: { color: colors.textDim, fontStyle: 'italic' },
-  fieldLabelMuted: { color: colors.textDim },
-  reframeDivider: { height: 0.5, backgroundColor: colors.border, marginBottom: 16 },
-  distortionSub: { fontSize: 13, color: colors.textMuted, marginBottom: 14 },
+  fieldInputDim: { color: colors.textSecondary },
+  fieldLabelMuted: { color: colors.textSecondary },
+  distortionSub: { fontSize: 13, color: colors.textSecondary, marginBottom: 14 },
   distortionGrid: { gap: 10, marginBottom: 16 },
   distortionPill: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 14, backgroundColor: colors.bgElevated },
   distortionLabel: { fontSize: 15, fontFamily: font.bodyMedium, color: colors.textPrimary, marginBottom: 4 },
-  distortionQ: { fontSize: 13, color: colors.textMuted, lineHeight: 20 },
+  distortionQ: { fontSize: 13, color: colors.textSecondary, lineHeight: 20 },
   // In-body primary CTA reuses library editBtn + editBtnSave; this override
   // just adds spacing below the button before the caption.
   // In-body primary CTA — H56 override (no-keyboard primary per library).
@@ -555,7 +565,7 @@ const s = StyleSheet.create({
   // Disabled state — gated on selectedEmotion. Emotion must be picked
   // before a trigger can be logged; everything else stays optional.
   saveBtnDisabled: { opacity: 0.4 },
-  saveBtnSub: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: 36 },
+  saveBtnSub: { fontSize: 12, color: colors.textSecondary, textAlign: 'center', marginBottom: 36 },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair.
   accessoryBarPair: {
     flexDirection: 'row',

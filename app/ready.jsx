@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Image, StyleSheet, SafeAreaView, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, radius, font } from '../constants/theme';
 import { GoldPrimary } from '../components/GoldButton';
-import { VideoBackground } from '../components/VideoBackground';
+
+// Background sized to the literal window, matching Practice/More (see index.jsx).
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 // Post-paywall confirmation screen. Sits between the paywall and the
 // Practice tab so the "your practice begins now" moment lands after the
@@ -11,17 +13,19 @@ import { VideoBackground } from '../components/VideoBackground';
 // from the paywall when the source was onboarding (?from=onboarding).
 export default function ReadyScreen() {
   const router = useRouter();
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    <VideoBackground>
+    <View style={s.root}>
+      <Image
+        source={require('../assets/bg-svg4.png')}
+        style={s.bg}
+        resizeMode="cover"
+        pointerEvents="none"
+      />
       <SafeAreaView style={s.safe}>
         <View style={s.body}>
-          <Image source={require('../assets/skull.png')} style={s.skull} resizeMode="contain" />
-          <Text style={s.eyebrow}>Memento mori</Text>
+          <Image source={require('../assets/skull-gold.png')} style={s.skull} resizeMode="contain" />
           <Text style={s.title}>Your practice{'\n'}begins now</Text>
-          <Text style={s.date}>{dateStr}</Text>
           <Text style={s.streak}>Day 1</Text>
         </View>
         <View style={s.footer}>
@@ -33,11 +37,13 @@ export default function ReadyScreen() {
           </GoldPrimary>
         </View>
       </SafeAreaView>
-    </VideoBackground>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#050505', overflow: 'hidden' },
+  bg: { position: 'absolute', top: 0, left: 0, width: SCREEN_W, height: SCREEN_H },
   safe: { flex: 1, backgroundColor: 'transparent' },
   body: {
     flex: 1,
@@ -46,36 +52,28 @@ const s = StyleSheet.create({
     paddingHorizontal: 36,
     paddingBottom: 40,
   },
-  skull: { width: 180, height: 180, marginBottom: 28, opacity: 1 },
-  eyebrow: {
-    fontSize: font.labelSize,
-    letterSpacing: font.sectionTracking,
-    color: colors.accent,
-    fontFamily: font.bodyMedium, textTransform: 'uppercase',
-    marginBottom: 14,
-    textAlign: 'center',
-  },
+  // Larger skull per V's new design (180 → 200) — sits as a stronger
+  // anchor in the upper third before the title/streak stack.
+  skull: { width: 200, height: 200, marginBottom: 32, opacity: 1 },
   title: {
     fontSize: 44,
     fontFamily: font.display,
     color: '#FFFFFF',
     letterSpacing: -1.5,
-    marginBottom: 16,
+    marginBottom: 32,
     textAlign: 'center',
     lineHeight: 52,
   },
-  date: {
-    fontSize: 18,
-    color: colors.textMuted,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
+  // "Day 1" gets the Didot display font per V's new design (was plain
+  // Inter at 56pt bold). Pairs visually with the title above and sits
+  // between the title and the date below.
   streak: {
-    fontSize: 56,
-    fontWeight: '700',
+    fontSize: 64,
+    fontFamily: font.display,
     color: colors.accent,
     letterSpacing: -1,
     textAlign: 'center',
+    marginBottom: 8,
   },
   footer: {
     paddingHorizontal: 24,

@@ -142,7 +142,7 @@ export default function MeditateScreen() {
 
               <View style={s.controls}>
                 <TouchableOpacity style={s.skipBtn} onPress={() => seek(-1)}>
-                  <MaterialCommunityIcons name="rewind-15" size={30} color={colors.textMuted} />
+                  <MaterialCommunityIcons name="rewind-15" size={30} color={colors.textSecondary} />
                 </TouchableOpacity>
 
                 <TouchableOpacity style={s.playBtn} onPress={togglePlay}>
@@ -159,7 +159,7 @@ export default function MeditateScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={s.skipBtn} onPress={() => seek(1)}>
-                  <MaterialCommunityIcons name="fast-forward-15" size={30} color={colors.textMuted} />
+                  <MaterialCommunityIcons name="fast-forward-15" size={30} color={colors.textSecondary} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -231,12 +231,12 @@ const s = StyleSheet.create({
   headerContent: { paddingHorizontal: 28, paddingTop: 48, paddingBottom: 32 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, textShadowColor: 'rgba(0,0,0,0.85)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
   title: { fontSize: 44, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1.5, lineHeight: 52, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
-  sub: { fontSize: font.subSize, color: colors.textMuted, lineHeight: 22 },
+  sub: { fontSize: font.subSize, color: colors.textSecondary, lineHeight: 22 },
 
   player: {
     marginHorizontal: spacing.lg,
     backgroundColor: colors.bgCard,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 0.5,
     borderColor: colors.border,
     marginBottom: spacing.lg,
@@ -248,7 +248,7 @@ const s = StyleSheet.create({
   playerBody: { padding: spacing.lg },
   playerSubtitle: { fontSize: font.labelSize, color: colors.accent, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   playerTitle: { fontSize: 22, fontWeight: '600', color: colors.textPrimary },
-  playerDesc: { fontSize: 14, color: colors.textMuted, lineHeight: 20, marginBottom: spacing.lg },
+  playerDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 20, marginBottom: spacing.lg },
 
   progressBar: {
     height: 2,
@@ -260,7 +260,7 @@ const s = StyleSheet.create({
   },
   progressFill: { backgroundColor: colors.accent, borderRadius: 1 },
   timeRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.lg },
-  timeText: { fontSize: 12, color: colors.textDim },
+  timeText: { fontSize: 12, color: colors.textSecondary },
 
   controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xl },
   playBtn: {
@@ -274,7 +274,7 @@ const s = StyleSheet.create({
   skipBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 
   list: { paddingHorizontal: spacing.lg },
-  sectionLabel: { fontSize: font.labelSize, color: colors.textDim, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: spacing.md },
+  sectionLabel: { fontSize: font.labelSize, color: colors.textSecondary, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: spacing.md },
 
   medCard: {
     flexDirection: 'row',
@@ -300,5 +300,5 @@ const s = StyleSheet.create({
   medText: { flex: 1 },
   medTitle: { fontSize: 15, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 3 },
   medTitleActive: { color: colors.textPrimary },
-  medMeta: { fontSize: 12, color: colors.textDim },
+  medMeta: { fontSize: 12, color: colors.textSecondary },
 });

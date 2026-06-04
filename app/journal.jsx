@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
   Platform, InputAccessoryView, Keyboard,
-  ActivityIndicator, Image, ImageBackground,
+  ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -241,11 +241,7 @@ export default function JournalScreen() {
                 </View>
               </View>
 
-              <ImageBackground
-                source={require('../assets/bg.png')}
-                style={s.mementoStrip}
-                resizeMode="cover"
-              >
+              <View style={s.mementoStrip}>
                 <Text style={s.mementoText}>
                   {isMorning
                     ? '"When you wake, expect to meet people who are difficult: meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."'
@@ -254,7 +250,7 @@ export default function JournalScreen() {
                 <Text style={s.mementoSub}>
                   {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
                 </Text>
-              </ImageBackground>
+              </View>
 
               <View style={s.body}>
                 {(() => {
@@ -324,7 +320,7 @@ export default function JournalScreen() {
                   </Text>
                 </GoldPrimary>
                 <Text style={s.saveBtnSub}>
-                  {prompts.length} prompts · about 5 minutes
+                  {prompts.length} steps · about 5 minutes
                 </Text>
               </View>
             </>
@@ -377,7 +373,7 @@ export default function JournalScreen() {
                         style={s.promptInput}
                         multiline
                         placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
-                        placeholderTextColor={colors.textDim}
+                        placeholderTextColor={colors.textSecondary}
                         value={answers[openPrompt] || ''}
                         onChangeText={text => setAnswers(prev => ({ ...prev, [openPrompt]: text }))}
                         editable={hasAccess}
@@ -491,23 +487,32 @@ const s = StyleSheet.create({
   // last line of a multi-line title.
   heroTitleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
+  // Quiet black card (matches the welcome / list-card language): #0a0a0a
+  // fill, 0.5 #474747 border, radius.md, inset from the screen edges. Replaces
+  // the old bg.png image strip so all quote surfaces read consistently.
   mementoStrip: {
-    backgroundColor: colors.accentBg,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
+    backgroundColor: colors.bgCard,
+    borderWidth: 0.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
     padding: spacing.xl,
     paddingVertical: 20,
+    marginHorizontal: spacing.md,
+    marginTop: 16,
   },
-  mementoText: { fontSize: 19, color: colors.textPrimary, lineHeight: 30, fontFamily: font.serif },
-  mementoSub: { fontSize: 10, color: colors.accentDim, marginTop: 8, letterSpacing: 1.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  // Inter, white, left-aligned — readable for the long morning passage.
+  mementoText: { fontSize: 17, color: colors.textPrimary, lineHeight: 27, fontFamily: font.body },
+  // Gold uppercase attribution — matches the onboarding welcome screen so
+  // every quote reads as one unified component. Was Inter 13 gray title-case.
+  mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
 
   // Light writing surface
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
   listenCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.lg,
-    padding: 12, paddingRight: 16, marginBottom: 14, backgroundColor: colors.accentBg,
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    padding: 12, paddingRight: 16, marginBottom: 14, backgroundColor: colors.bg,
   },
   listenThumb: {
     width: 64, height: 64, borderRadius: radius.md,
@@ -521,26 +526,29 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.35)',
   },
   listenContent: { flex: 1 },
-  listenEyebrow: { fontSize: font.microSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
-  listenTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 },
-  listenDesc: { fontSize: 12, color: colors.textMuted, lineHeight: 18 },
+  // Title + desc bumped to match the quote card above (body 17 / attribution
+  // 13) per V; eyebrow stays at the app-wide label tier. Margins opened a
+  // touch to breathe at the larger sizes.
+  listenEyebrow: { fontSize: 12, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
+  listenTitle: { fontSize: 17, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
+  listenDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 20 },
   listenProgressBar: {
     height: 2, backgroundColor: colors.border, borderRadius: 1,
     flexDirection: 'row', overflow: 'hidden', marginTop: 4, marginBottom: 6,
   },
   listenProgressFill: { backgroundColor: colors.accent, borderRadius: 1 },
   listenTimeRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  listenTimeText: { fontSize: 10, color: colors.textDim, letterSpacing: 0.3 },
+  listenTimeText: { fontSize: 11, color: colors.textSecondary, letterSpacing: 0.3 },
   // Input field treatment per Valeriya's library: subtle elevation above
   // screen bg, with stroke shifting between non-active (#474747) and
   // active (#878787) focus states.
-  promptCard: { borderWidth: 0.5, borderColor: colors.inputBorder, borderRadius: radius.lg, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
+  promptCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 20, marginBottom: 10, backgroundColor: colors.inputBg },
   promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   promptNum: { fontSize: 11, letterSpacing: 1.8, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
-  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top' },
+  promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', fontFamily: font.body },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   nextPromptText: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Library tokens for keyboard accessory bar — H56 outlined/filled pair
@@ -574,12 +582,12 @@ const s = StyleSheet.create({
   // Subtitle shown beneath the question for prompts that ship a richer
   // info card (currently the discipline-of-assent prompt) — orients the
   // user before they tap the ⓘ to read the teaching.
-  promptSub: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: 6, lineHeight: 20 },
+  promptSub: { fontSize: 13, color: colors.textSecondary, fontStyle: 'italic', marginTop: 6, lineHeight: 20 },
   // Header treatment inside the hintBox when prompt.info is present:
   // small uppercase title in accent, dim source citation below, then a
   // hairline divider before the body paragraphs.
   hintTitle: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
-  hintSource: { fontSize: 12, color: colors.textDim, fontStyle: 'italic', letterSpacing: 0.3 },
+  hintSource: { fontSize: 12, color: colors.textSecondary, fontStyle: 'italic', letterSpacing: 0.3 },
   hintDivider: { height: 0.5, backgroundColor: colors.border, marginTop: 12, marginBottom: 12 },
   // In-body primary CTA reuses the library editBtn + editBtnSave H56 filled-gold
   // pair; this override just adds bottom spacing below the button.
@@ -587,7 +595,7 @@ const s = StyleSheet.create({
   saveBtn: { height: 56, marginBottom: 12 },
   // Disabled state — gated on at least one prompt having content.
   saveBtnDisabled: { opacity: 0.4 },
-  saveBtnSub: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: 36 },
+  saveBtnSub: { fontSize: 12, color: colors.textSecondary, textAlign: 'center', marginBottom: 36 },
   // Wizard Back/Next pair shown when the keyboard is dismissed. The
   // InputAccessoryView covers the keyboard-up case; this is the parallel
   // body row so the user can always navigate without re-focusing the input.

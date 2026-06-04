@@ -12,11 +12,25 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MiniMeditationPlayer } from '../components/MiniMeditationPlayer';
 import { LockScreen } from '../components/LockScreen';
 import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
-import { useFonts, Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
-import { Cormorant_400Regular, Cormorant_500Medium, Cormorant_700Bold } from '@expo-google-fonts/cormorant';
+import { useFonts, Inter_400Regular, Inter_500Medium, Inter_300Light_Italic } from '@expo-google-fonts/inter';
+import { Cinzel_400Regular } from '@expo-google-fonts/cinzel';
 
 function TabIcon({ name, color, size = 22 }) {
   return <Ionicons name={name} size={size} color={color} />;
+}
+
+// Custom hamburger for the More tab. Ionicons' reorder-three-outline glyph
+// has fixed line spacing; this builds the three bars as Views so the gap
+// between them is tunable. `gap` is the breathing room V wanted.
+function HamburgerIcon({ color, size = 26, barWidth = 22, barHeight = 2, gap = 4 }) {
+  const bar = { width: barWidth, height: barHeight, borderRadius: 1, backgroundColor: color };
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={[bar, { marginBottom: gap }]} />
+      <View style={[bar, { marginBottom: gap }]} />
+      <View style={bar} />
+    </View>
+  );
 }
 
 // Maps the current pathname to the logical tab a user is "in" so the
@@ -37,14 +51,19 @@ function useLogicalTabKey() {
 
 function ManagedTabIcon({ iconName, tabKey, size }) {
   const active = useLogicalTabKey() === tabKey;
-  return <TabIcon name={iconName} size={size} color={active ? colors.accent : colors.textDim} />;
+  return <TabIcon name={iconName} size={size} color={active ? colors.accent : colors.textSecondary} />;
+}
+
+function ManagedHamburgerIcon({ tabKey }) {
+  const active = useLogicalTabKey() === tabKey;
+  return <HamburgerIcon color={active ? colors.accent : colors.textSecondary} />;
 }
 
 function ManagedTabLabel({ label, tabKey }) {
   const active = useLogicalTabKey() === tabKey;
   return (
     <Text
-      style={{ fontSize: 9, letterSpacing: 1.4, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 3, color: active ? colors.accent : colors.textDim }}
+      style={{ fontSize: 9, letterSpacing: 1.4, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 3, color: active ? colors.accent : colors.textSecondary }}
       numberOfLines={1}
       adjustsFontSizeToFit
       minimumFontScale={0.8}
@@ -83,13 +102,12 @@ export default function Layout() {
   const { isLocked } = useAppLock();
   // Block first paint until brand fonts are loaded so headlines, body,
   // and the Marcus wordmark all land with the right typography on cold
-  // start. Didot is iOS-system, no load needed.
+  // start. Cinzel (display) is bundled now that it replaced iOS-system Didot.
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
-    Cormorant_400Regular,
-    Cormorant_500Medium,
-    Cormorant_700Bold,
+    Inter_300Light_Italic,
+    Cinzel_400Regular,
   });
 
   // Set Inter Regular as the default for any <Text> that doesn't set
@@ -167,7 +185,7 @@ export default function Layout() {
           // Hide the bar while the keyboard is up to kill the leak.
           tabBarHideOnKeyboard: true,
           tabBarActiveTintColor: colors.accent,
-          tabBarInactiveTintColor: colors.textDim,
+          tabBarInactiveTintColor: colors.textSecondary,
           tabBarLabelStyle: {
             fontSize: 9,
             letterSpacing: 1.4,
@@ -193,10 +211,11 @@ export default function Layout() {
         <Tabs.Screen
           name="more"
           options={{
-            // reorder-three-outline: three horizontal bars with more breathing
-            // room than menu-outline. Per Valeriya's preference — gives the
+            // Custom HamburgerIcon (not the reorder-three-outline glyph) so the
+            // gap between the three bars is tunable. Per Valeriya's preference —
+            // gives the
             // hamburger room to feel like a deliberate symbol, not a stack.
-            tabBarIcon: () => <ManagedTabIcon iconName="reorder-three-outline" tabKey="more" size={26} />,
+            tabBarIcon: () => <ManagedHamburgerIcon tabKey="more" />,
             tabBarLabel: () => <ManagedTabLabel label="More" tabKey="more" />,
           }}
         />

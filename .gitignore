@@ -48,3 +48,6 @@ yarn-error.*
 /android
 .env
 .env.local
+
+# generated newsletter drafts (disk-fallback when Beehiiv API is unavailable)
+scripts/out/

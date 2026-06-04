@@ -14,7 +14,6 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { saveCompass, setHasOnboarded, setHasSeenCompassIntro } from '../store/db';
 import { DEFAULT_COMPASS } from '../constants/compassFields';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
-import { VideoBackground } from '../components/VideoBackground';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
 import { MEDITATIONS_LIST, playPreview, stopPreview, useMeditationPlayer } from '../lib/meditationPlayer';
 import { pickAndImportBackup } from '../lib/backup';
@@ -96,7 +95,7 @@ export default function OnboardingScreen() {
 
 function WelcomeStep({ onNext }) {
   const router = useRouter();
-  const { height: screenHeight } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   // iPhone SE (667), 8 (667), Mini (812) — below this, the full hero
   // stack is too tall and the input slips below the absolute footer.
   // Compact mode shrinks the skull/title and drops the decorative quote
@@ -140,7 +139,13 @@ function WelcomeStep({ onNext }) {
   }
 
   return (
-    <VideoBackground>
+    <View style={s.welcomeRoot}>
+      <Image
+        source={require('../assets/bg-svg4.png')}
+        style={{ position: 'absolute', top: 0, left: 0, width: screenWidth, height: screenHeight }}
+        resizeMode="cover"
+        pointerEvents="none"
+      />
       <SafeAreaView style={s.safeTransparent}>
         <ScrollView
           style={{ flex: 1 }}
@@ -152,15 +157,18 @@ function WelcomeStep({ onNext }) {
           bounces={false}
         >
           <Image
-            source={require('../assets/skull.png')}
+            source={require('../assets/skull-gold.png')}
             style={[s.welcomeSkull, isSmall && s.welcomeSkullSmall]}
             resizeMode="contain"
           />
-          <Text style={[s.welcomeTitle, isSmall && s.welcomeTitleSmall]}>Marcus</Text>
+          <Image
+            source={require('../assets/marcus-wordmark.png')}
+            style={[s.welcomeWordmark, isSmall && s.welcomeWordmarkSmall]}
+            resizeMode="contain"
+          />
           <Text style={[s.welcomeSub, isSmall && s.welcomeSubSmall]}>A Stoic practice app</Text>
           {!isSmall && (
             <>
-              <View style={s.welcomeDivider} />
               <Text style={s.welcomeTagline}>
                 “Waste no more time arguing about what a good man should be. Be one.”
               </Text>
@@ -169,17 +177,26 @@ function WelcomeStep({ onNext }) {
           )}
 
         </ScrollView>
-        <View style={s.footer}>
+        {/* Subtle bottom scrim so the CTA + restore link stay legible over the
+            wave, while the wave runs full-bleed to the bottom (no black bar). */}
+        <LinearGradient
+          colors={['transparent', 'rgba(5,5,5,0.9)']}
+          style={s.welcomeFooterScrim}
+          pointerEvents="none"
+        />
+        <View style={[s.footer, s.welcomeFooter]}>
+          {/* Restore link ABOVE the CTA so "Continue" stays anchored at the
+              bottom in the same position as every other onboarding step. */}
+          <TouchableOpacity onPress={handleRestore} activeOpacity={0.7} style={s.welcomeRestore}>
+            <Text style={s.welcomeRestoreText}>I have a backup from another device</Text>
+          </TouchableOpacity>
           <GoldPrimary style={s.primaryBtn} onPress={handleNext}>
             <Text style={[s.primaryBtnText, s.primaryBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Continue</Text>
             <Ionicons name="arrow-forward" size={18} color="#1a1a1a" style={{ marginTop: 2 }} />
           </GoldPrimary>
-          <TouchableOpacity onPress={handleRestore} activeOpacity={0.7} style={s.welcomeRestore}>
-            <Text style={s.welcomeRestoreText}>I have a backup from another device</Text>
-          </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </VideoBackground>
+    </View>
   );
 }
 
@@ -548,6 +565,9 @@ function RemindersStep({ onNext }) {
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
+  // Onboarding welcome uses the static bg-svg4 wave (matching Practice/More).
+  // Window-sized Image is set inline.
+  welcomeRoot: { flex: 1, backgroundColor: '#050505', overflow: 'hidden' },
   safeTransparent: { flex: 1, backgroundColor: 'transparent' },
   scroll: { flex: 1 },
 
@@ -568,46 +588,51 @@ const s = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 180,
   },
-  welcomeSkull: { width: 180, height: 180, marginBottom: 32, opacity: 0.95 },
-  welcomeSkullSmall: { width: 110, height: 110, marginBottom: 16 },
-  welcomeTitle: {
-    fontSize: 64,
-    fontFamily: font.wordmark,
-    color: '#FFFFFF',
-    letterSpacing: -1,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  welcomeTitleSmall: { fontSize: 44, letterSpacing: -0.5, marginBottom: 6 },
+  welcomeSkull: { width: 130, height: 130, marginBottom: 36, opacity: 0.95 },
+  welcomeSkullSmall: { width: 96, height: 96, marginBottom: 16 },
+  // Marcus wordmark image (replaces the Cormorant text). 1144×203 source
+  // (aspect ≈ 5.64); explicit width+height so it never crops to "ARC".
+  // Enlarged per V's reference; extra marginBottom opens space to the eyebrow.
+  welcomeWordmark: { width: 232, height: 41, marginBottom: 22 },
+  welcomeWordmarkSmall: { width: 190, height: 34, marginBottom: 16 },
+  // Gold eyebrow — matches the More hero sub.
   welcomeSub: {
-    fontSize: 20,
-    color: colors.textSecondary,
-    marginBottom: 36,
+    fontSize: font.labelSize,
+    letterSpacing: font.sectionTracking,
+    color: colors.accent,
+    fontFamily: font.bodyMedium,
+    textTransform: 'uppercase',
     textAlign: 'center',
   },
-  welcomeSubSmall: { fontSize: 17, marginBottom: 20 },
-  welcomeDivider: {
-    width: 40,
-    height: 0.5,
-    backgroundColor: colors.accentDim,
-    marginBottom: 28,
-  },
+  welcomeSubSmall: { marginBottom: 20 },
+  // Quote: Inter Light italic per V's reference (true italic variant, not a
+  // synthesized slant). fontStyle italic kept as a belt-and-suspenders cue.
   welcomeTagline: {
-    fontSize: 20,
-    color: colors.textMuted,
-    fontFamily: font.serif,
+    fontSize: 22,
+    color: colors.textPrimary,
+    fontFamily: font.bodyLightItalic,
+    fontStyle: 'italic',
     textAlign: 'center',
-    lineHeight: 30,
-    marginBottom: 12,
+    lineHeight: 32,
+    marginTop: 28,
   },
+  // Attribution: same font + color as the "A STOIC PRACTICE APP" eyebrow —
+  // gold, Inter Medium, uppercase, tracked.
   welcomeAttr: {
-    fontSize: 13,
-    color: colors.textDim,
-    letterSpacing: 0.5,
+    fontSize: font.labelSize,
+    letterSpacing: font.sectionTracking,
+    color: colors.accent,
+    fontFamily: font.bodyMedium,
+    textTransform: 'uppercase',
+    marginTop: 20,
     textAlign: 'center',
   },
+  // Welcome-only: transparent footer (no black bar / seam) so the wave runs
+  // to the bottom. The scrim below provides CTA legibility instead.
+  welcomeFooter: { backgroundColor: 'transparent', borderTopWidth: 0 },
+  welcomeFooterScrim: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 220 },
   welcomeRestore: { paddingVertical: 14, alignItems: 'center' },
-  welcomeRestoreText: { fontSize: 13, color: colors.textMuted, letterSpacing: 0.4 },
+  welcomeRestoreText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.4 },
   welcomeNameWrap: {
     marginTop: 36,
     width: '100%',
@@ -632,11 +657,11 @@ const s = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   welcomeNameInputFocused: {
-    borderColor: colors.borderBright,
+    borderColor: colors.border,
     color: colors.textPrimary,
   },
 
@@ -667,14 +692,14 @@ const s = StyleSheet.create({
   previewEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, textShadowColor: 'rgba(0,0,0,0.85)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
   previewTitle: { fontSize: 44, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1.5, lineHeight: 52, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   previewBody: { padding: 20 },
-  previewCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.bgCard, overflow: 'hidden', marginBottom: 16 },
+  previewCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.bgCard, overflow: 'hidden', marginBottom: 16 },
   previewRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
   previewRowBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
   // Roman-numeral row marker. Replaces the open-circle previewDot so
   // each row reads as ordered (sequence) instead of as a checkbox to
   // complete.
   previewNum: { width: 28, fontSize: 12, color: colors.accent, letterSpacing: 1.5, fontWeight: '600', textAlign: 'center' },
-  previewHint: { fontSize: 12, color: colors.textMuted, fontStyle: 'italic', marginBottom: 12, paddingHorizontal: 4, letterSpacing: 0.3 },
+  previewHint: { fontSize: 12, color: colors.textSecondary, fontStyle: 'italic', marginBottom: 12, paddingHorizontal: 4, letterSpacing: 0.3 },
   // Meditation card pattern — mirrors the in-app /meditate list so the
   // onboarding preview shows the actual product design (painting thumbnail
   // + title + meta) instead of a generic numbered list.
@@ -686,16 +711,16 @@ const s = StyleSheet.create({
   medOnbThumbOverlay: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.4)' },
   medOnbText: { flex: 1 },
   medOnbTitle: { fontSize: 15, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 3 },
-  medOnbMeta: { fontSize: 12, color: colors.textDim },
+  medOnbMeta: { fontSize: 12, color: colors.textSecondary },
   previewContent: { flex: 1 },
   previewItemTitle: { fontSize: 16, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 2 },
-  previewItemSub: { fontSize: 13, color: colors.textMuted },
+  previewItemSub: { fontSize: 13, color: colors.textSecondary },
   previewTag: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 4 },
-  previewTagNext: { borderColor: colors.accentDim, backgroundColor: colors.accentBg },
-  previewTagText: { fontSize: 10, color: colors.textDim, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  previewTagNext: { borderColor: colors.accentDim, backgroundColor: colors.bg },
+  previewTagText: { fontSize: 11, color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   previewTagTextNext: { color: colors.accent, fontFamily: font.bodyMedium },
-  previewNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.lg, padding: 18, backgroundColor: colors.bgDeep },
-  previewNoteText: { fontSize: 14, color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
+  previewNote: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 18, backgroundColor: colors.bgDeep },
+  previewNoteText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, textAlign: 'left' },
   extrasHeading: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 28, marginBottom: 12, paddingHorizontal: 4 },
 
   readySkull: { width: 180, height: 180, marginBottom: 28, opacity: 1 },
@@ -718,7 +743,7 @@ const s = StyleSheet.create({
   },
   readyDate: {
     fontSize: 18,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -792,7 +817,7 @@ const s = StyleSheet.create({
   },
   stepSub: {
     fontSize: 17,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     lineHeight: 26,
     textShadowColor: 'rgba(0,0,0,0.7)',
     textShadowOffset: { width: 0, height: 1 },
@@ -820,7 +845,7 @@ const s = StyleSheet.create({
   reminderList: {
     borderWidth: 0.5,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     backgroundColor: colors.bgCard,
     overflow: 'hidden',
     marginBottom: 16,
@@ -878,18 +903,18 @@ const s = StyleSheet.create({
   },
   reminderAdjusterColon: {
     fontSize: 22,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontWeight: '300',
   },
   reminderAdjusterAmpm: {
     fontSize: 12,
-    color: colors.textDim,
+    color: colors.textSecondary,
     letterSpacing: 1,
     marginLeft: 8,
   },
   reminderNote: {
     fontSize: 13,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     lineHeight: 20,
     marginTop: 4,
   },
@@ -915,7 +940,7 @@ const s = StyleSheet.create({
   },
   practiceItemDesc: {
     fontSize: 15,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     lineHeight: 23,
   },
 
@@ -924,8 +949,8 @@ const s = StyleSheet.create({
   // screen bg, stroke shifts non-active (#474747) → active (#878787).
   compassField: {
     borderWidth: 0.5,
-    borderColor: colors.inputBorder,
-    borderRadius: radius.lg,
+    borderColor: colors.border,
+    borderRadius: radius.md,
     padding: 20,
     marginBottom: 16,
     backgroundColor: colors.inputBg,
@@ -941,13 +966,13 @@ const s = StyleSheet.create({
   },
   compassFieldSub: {
     fontSize: 14,
-    color: colors.textDim,
+    color: colors.textSecondary,
     marginBottom: 16,
   },
   compassFooterNote: {
     borderWidth: 0.5,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     backgroundColor: colors.bgDeep,
     padding: 16,
     marginTop: 8,
@@ -955,7 +980,7 @@ const s = StyleSheet.create({
   },
   compassFooterText: {
     fontSize: 13,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   compassInput: {
@@ -974,7 +999,7 @@ const s = StyleSheet.create({
   compassPreview: {
     borderWidth: 0.5,
     borderColor: colors.border,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     padding: 16,
     marginBottom: 12,
     backgroundColor: colors.bgCard,
@@ -1013,7 +1038,7 @@ const s = StyleSheet.create({
   },
   compassPreviewText: {
     fontSize: 14,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     lineHeight: 22,
   },
   // Keyboard accessory bar — H44 outlined + filled-gold pair per Valeriya's
@@ -1037,7 +1062,7 @@ const s = StyleSheet.create({
   editBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   editBtnSaveText: { color: '#1a1a1a' },
   skipLink: { paddingVertical: 20, alignItems: 'center' },
-  skipLinkText: { fontSize: 15, color: colors.textDim },
+  skipLinkText: { fontSize: 15, color: colors.textSecondary },
 
   // Footer
   footer: {
