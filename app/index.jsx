@@ -18,7 +18,7 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 // failure. Revisit if/when V supplies a taller bg-parallax.png asset
 // designed with vertical headroom built in.
 const PARALLAX_BG_HEIGHT = SCREEN_H;
-import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
+import { MEDITATIONS, MEDITATIONS_LIST, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { useDeviceTilt } from '../lib/useDeviceTilt';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -50,6 +50,41 @@ function pickContextualMeditation() {
   return MEDITATIONS['view-from-above'];
 }
 
+// Compact gallery card for the "More meditations" swipe row on the Practice
+// page. Reads the shared player snapshot to show its own play/pause state;
+// tapping plays it inline via the singleton player.
+function MeditationGalleryCard({ med, player, onPress }) {
+  const isCurrent = player.currentMedId === med.id;
+  const isPlaying = isCurrent && player.isPlaying;
+  const isLoading = isCurrent && player.isLoading;
+  return (
+    <TouchableOpacity
+      style={s.galleryCard}
+      onPress={() => onPress(med)}
+      activeOpacity={0.85}
+      disabled={isLoading}
+    >
+      <View style={s.galleryImageWrap}>
+        <Image source={med.image} style={s.galleryImage} resizeMode="cover" />
+        <LinearGradient
+          colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']}
+          style={s.medImageOverlay}
+        />
+        <View style={s.galleryPlay}>
+          {isLoading ? (
+            <ActivityIndicator color={colors.accent} size="small" />
+          ) : (
+            <Ionicons name={isPlaying ? 'pause-circle' : 'play-circle'} size={30} color={colors.accent} />
+          )}
+        </View>
+      </View>
+      <Text style={s.gallerySubtitle} numberOfLines={1}>{med.subtitle}</Text>
+      <Text style={s.galleryTitle} numberOfLines={2}>{med.title}</Text>
+      <Text style={s.galleryMeta}>{med.duration}</Text>
+    </TouchableOpacity>
+  );
+}
+
 export default function PracticeScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
@@ -77,11 +112,17 @@ export default function PracticeScreen() {
   const medHasLoaded = medDuration > 0;
 
   const { hasAccess, trialDaysLeft } = useEntitlement();
-  function toggleMedPlay() {
+  // Play/pause any meditation (featured card or gallery card) through the
+  // shared singleton player, gated on entitlement.
+  function playMed(med) {
     if (!hasAccess) { router.push('/paywall'); return; }
     haptics.tap();
-    toggleMeditation(todayMed);
+    toggleMeditation(med);
   }
+  function toggleMedPlay() { playMed(todayMed); }
+  // The other five meditations browse-able in the gallery beneath the
+  // featured contextual pick (featured-first).
+  const otherMeds = MEDITATIONS_LIST.filter(m => m.id !== todayMed.id);
 
   const today = todayDate;
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -329,6 +370,67 @@ export default function PracticeScreen() {
     );
   })();
 
+  // Meditation section — featured contextual pick (big card) followed by a
+  // horizontal swipe gallery of the other five. Shared between the in-progress
+  // and sealed renders so they stay in sync.
+  const meditationBlock = (
+    <>
+      <TouchableOpacity
+        style={s.medCard}
+        onPress={toggleMedPlay}
+        activeOpacity={0.85}
+        disabled={medIsLoading}
+      >
+        <View style={s.medImageWrap}>
+          <Image source={todayMed.image} style={s.medImage} resizeMode="cover" />
+          <LinearGradient
+            colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.55, 1]}
+            style={s.medImageOverlay}
+          />
+          <View style={s.medImageBottom}>
+            <Text style={s.medEyebrow}>Today's meditation</Text>
+            {medIsLoading ? (
+              <ActivityIndicator color={colors.accent} />
+            ) : (
+              <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={44} color={colors.accent} />
+            )}
+          </View>
+        </View>
+        <View style={s.medBody}>
+          <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
+          <Text style={s.medTitle}>{todayMed.title}</Text>
+          <Text style={s.medDesc}>{todayMed.description}</Text>
+          {medHasLoaded ? (
+            <>
+              <View style={s.medProgressBar}>
+                <View style={[s.medProgressFill, { flex: medProgress }]} />
+                <View style={{ flex: Math.max(0, 1 - medProgress) }} />
+              </View>
+              <View style={s.medTimeRow}>
+                <Text style={s.medTimeText}>{formatMedTime(medPosition)}</Text>
+                <Text style={s.medTimeText}>{formatMedTime(medDuration)}</Text>
+              </View>
+            </>
+          ) : (
+            <Text style={s.medMeta}>{'< 5 min · guided'}</Text>
+          )}
+        </View>
+      </TouchableOpacity>
+
+      <Text style={s.galleryHeading}>More meditations</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={s.galleryRow}
+      >
+        {otherMeds.map(med => (
+          <MeditationGalleryCard key={med.id} med={med} player={player} onPress={playMed} />
+        ))}
+      </ScrollView>
+    </>
+  );
+
   if (allDone) {
     return (
       <View style={s.root}>
@@ -386,51 +488,7 @@ export default function PracticeScreen() {
           </Animated.View>
 
           <Animated.View style={[s.body, sealedAnimStyle(4)]}>
-            <TouchableOpacity
-              style={s.medCard}
-              onPress={toggleMedPlay}
-              activeOpacity={0.85}
-              disabled={medIsLoading}
-            >
-              <View style={s.medImageWrap}>
-                <Image source={todayMed.image} style={s.medImage} resizeMode="cover" />
-                <LinearGradient
-                  colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
-                  locations={[0, 0.55, 1]}
-                  style={s.medImageOverlay}
-                />
-                <View style={s.medImageBottom}>
-                  <Text style={s.medEyebrow}>Today's meditation</Text>
-                  {medIsLoading ? (
-                    <ActivityIndicator color={colors.accent} />
-                  ) : (
-                    <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={44} color={colors.accent} />
-                  )}
-                </View>
-              </View>
-              <View style={s.medBody}>
-                <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
-                <Text style={s.medTitle}>{todayMed.title}</Text>
-                <Text style={s.medDesc}>{todayMed.description}</Text>
-                {medHasLoaded ? (
-                  <>
-                    <View style={s.medProgressBar}>
-                      <View style={[s.medProgressFill, { flex: medProgress }]} />
-                      <View style={{ flex: Math.max(0, 1 - medProgress) }} />
-                    </View>
-                    <View style={s.medTimeRow}>
-                      <Text style={s.medTimeText}>{formatMedTime(medPosition)}</Text>
-                      <Text style={s.medTimeText}>{formatMedTime(medDuration)}</Text>
-                    </View>
-                  </>
-                ) : (
-                  <Text style={s.medMeta}>{'< 5 min · guided'}</Text>
-                )}
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/meditate?from=/&fromLabel=Practice')} style={s.medAllBtn} activeOpacity={0.7}>
-              <Text style={s.medAllText}>All meditations →</Text>
-            </TouchableOpacity>
+            {meditationBlock}
           </Animated.View>
 
         </ScrollView>
@@ -515,51 +573,7 @@ export default function PracticeScreen() {
 
           {weeklyTileBlock}
 
-          <TouchableOpacity
-            style={s.medCard}
-            onPress={toggleMedPlay}
-            activeOpacity={0.85}
-            disabled={medIsLoading}
-          >
-            <View style={s.medImageWrap}>
-              <Image source={todayMed.image} style={s.medImage} resizeMode="cover" />
-              <LinearGradient
-                colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.95)']}
-                locations={[0, 0.55, 1]}
-                style={s.medImageOverlay}
-              />
-              <View style={s.medImageBottom}>
-                <Text style={s.medEyebrow}>Today's meditation</Text>
-                {medIsLoading ? (
-                  <ActivityIndicator color={colors.accent} />
-                ) : (
-                  <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={44} color={colors.accent} />
-                )}
-              </View>
-            </View>
-            <View style={s.medBody}>
-              <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
-              <Text style={s.medTitle}>{todayMed.title}</Text>
-              <Text style={s.medDesc}>{todayMed.description}</Text>
-              {medHasLoaded ? (
-                <>
-                  <View style={s.medProgressBar}>
-                    <View style={[s.medProgressFill, { flex: medProgress }]} />
-                    <View style={{ flex: Math.max(0, 1 - medProgress) }} />
-                  </View>
-                  <View style={s.medTimeRow}>
-                    <Text style={s.medTimeText}>{formatMedTime(medPosition)}</Text>
-                    <Text style={s.medTimeText}>{formatMedTime(medDuration)}</Text>
-                  </View>
-                </>
-              ) : (
-                <Text style={s.medMeta}>{'< 5 min · guided'}</Text>
-              )}
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/meditate?from=/&fromLabel=Practice')} style={s.medAllBtn} activeOpacity={0.7}>
-            <Text style={s.medAllText}>All meditations →</Text>
-          </TouchableOpacity>
+          {meditationBlock}
 
         </View>
       </ScrollView>
@@ -838,6 +852,14 @@ const s = StyleSheet.create({
   medProgressFill: { backgroundColor: colors.accent, borderRadius: 1 },
   medTimeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   medTimeText: { fontSize: 11, color: colors.textSecondary, letterSpacing: 0.3 },
-  medAllBtn: { alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 12, marginBottom: 20 },
-  medAllText: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  // "More meditations" swipe gallery (the other five, browse-able inline).
+  galleryHeading: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textSecondary, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 8, marginBottom: 14, marginLeft: 2 },
+  galleryRow: { paddingRight: 16, paddingBottom: 20, gap: 12 },
+  galleryCard: { width: 148 },
+  galleryImageWrap: { width: 148, height: 148, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000', position: 'relative', marginBottom: 10 },
+  galleryImage: { width: '100%', height: '100%' },
+  galleryPlay: { position: 'absolute', bottom: 8, right: 8 },
+  gallerySubtitle: { fontSize: font.labelSize, letterSpacing: 1.5, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
+  galleryTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, lineHeight: 19, marginBottom: 4 },
+  galleryMeta: { fontSize: 11, color: colors.textSecondary, letterSpacing: 0.3 },
 });
