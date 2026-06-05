@@ -1,0 +1,51 @@
+# EAS upload ignore — REPLACES .gitignore for EAS Build, so this mirrors the
+# important .gitignore entries (minus /ios, which the bare workflow needs
+# uploaded) and adds non-app tooling we don't want in the build.
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native artifacts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# secrets / env
+.env
+.env.local
+.env*.local
+
+# editor / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# debug / build
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.tsbuildinfo
+.metro-health-check*
+/android
+
+# non-app tooling + drafts + backups (not needed in the app build)
+scripts/haro-triage/
+scripts/out/
+*.bak-*
+
+# website (marketing site, not part of the app build)
+public/
