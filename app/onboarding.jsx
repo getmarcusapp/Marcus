@@ -170,7 +170,7 @@ function WelcomeStep({ onNext }) {
           {!isSmall && (
             <>
               <Text style={s.welcomeTagline}>
-                “Waste no more time arguing about what a good man should be. Be one.”
+                {'“Waste no more time arguing about what a good man should be.\nBe one.”'}
               </Text>
               <Text style={s.welcomeAttr}>— Marcus Aurelius, Meditations X.16</Text>
             </>
