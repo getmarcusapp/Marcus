@@ -11,6 +11,14 @@ dist/
 web-build/
 expo-env.d.ts
 
+# iOS build artifacts — EAS runs pod install fresh, so uploading the local
+# Pods/build (built against local node_modules) causes a stale-vs-fresh
+# mismatch (e.g. "hermes/Public/HermesExport.h file not found"). Exclude them
+# so EAS installs node_modules + Pods consistently.
+ios/Pods/
+ios/build/
+ios/DerivedData/
+
 # Native artifacts
 .kotlin/
 *.orig.*
