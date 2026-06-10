@@ -222,22 +222,22 @@ export default function JournalScreen() {
                   resizeMode="cover"
                 />
                 <LinearGradient
-                  colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
-                  locations={[0, 0.55, 0.8, 1]}
+                  colors={['rgba(0,0,0,0.85)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)']}
+                  locations={[0, 0.25, 0.6, 1]}
                   style={StyleSheet.absoluteFillObject}
                 />
                 <View style={s.headerContent}>
-                  <View style={s.heroTitleRow}>
-                    <Text style={[s.title, { flex: 1 }]}>
-                      {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
-                      {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                    </Text>
-                    <HeroOverlayChip
-                      onPress={() => router.push(`/journal-history?type=${sessionType}&from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
-                    >
-                      Past entries
-                    </HeroOverlayChip>
-                  </View>
+                  <Text style={s.title}>
+                    {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
+                    {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                  </Text>
+                </View>
+                <View style={s.heroChipBottom}>
+                  <HeroOverlayChip
+                    onPress={() => router.push(`/journal-history?type=${sessionType}&from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
+                  >
+                    Past entries
+                  </HeroOverlayChip>
                 </View>
               </View>
 
@@ -263,8 +263,10 @@ export default function JournalScreen() {
                   const jProgress = jDuration > 0 ? jPosition / jDuration : 0;
                   const jLoaded = jDuration > 0;
                   return (
+                    <>
+                    <Text style={s.listenEyebrow}>{'< 5 min meditation'}</Text>
                     <TouchableOpacity
-                      style={s.listenCard}
+                      style={[s.listenCard, isCurrent && s.listenCardActive]}
                       onPress={() => { haptics.tap(); toggleMeditation(journalMed); }}
                       activeOpacity={0.85}
                       disabled={jIsLoading}
@@ -284,7 +286,6 @@ export default function JournalScreen() {
                         </View>
                       </View>
                       <View style={s.listenContent}>
-                        <Text style={s.listenEyebrow}>Optional · &lt; 5 min meditation</Text>
                         <Text style={s.listenTitle}>{journalMed.title}</Text>
                         {jLoaded ? (
                           <>
@@ -306,6 +307,7 @@ export default function JournalScreen() {
                         )}
                       </View>
                     </TouchableOpacity>
+                    </>
                   );
                 })()}
 
@@ -478,14 +480,16 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     position: 'relative',
     overflow: 'hidden',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
   },
   headerImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   headerContent: { padding: spacing.xl, paddingTop: 52 },
   // Title row hosts the page title on the left and the Past-X chip on the
   // right, both bottom-aligned so the chip sits on the same baseline as the
   // last line of a multi-line title.
-  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
+  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
+  // Chip anchored bottom-right (asymmetric with the top-left heading) per V.
+  heroChipBottom: { position: 'absolute', right: spacing.xl, bottom: spacing.xl },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   // Quiet black card (matches the welcome / list-card language): #0a0a0a
   // fill, 0.5 #474747 border, radius.md, inset from the screen edges. Replaces
@@ -501,7 +505,8 @@ const s = StyleSheet.create({
     marginTop: 16,
   },
   // Inter, white, left-aligned — readable for the long morning passage.
-  mementoText: { fontSize: 17, color: colors.textPrimary, lineHeight: 27, fontFamily: font.body },
+  // 20px Inter Light Italic — unified quote treatment across the app (per V).
+  mementoText: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
   // Gold uppercase attribution — matches the onboarding welcome screen so
   // every quote reads as one unified component. Was Inter 13 gray title-case.
   mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
@@ -511,9 +516,13 @@ const s = StyleSheet.create({
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, marginTop: 8 },
   listenCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    // Neutral inactive border by default; activates to gold while this
+    // meditation is the one loaded/playing in the player (see listenCardActive).
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 12, paddingRight: 16, marginBottom: 14, backgroundColor: colors.bg,
   },
+  // Active state — bright gold border while this meditation is current.
+  listenCardActive: { borderColor: colors.accent },
   listenThumb: {
     width: 64, height: 64, borderRadius: radius.md,
     overflow: 'hidden', backgroundColor: '#000',
@@ -529,7 +538,9 @@ const s = StyleSheet.create({
   // Title + desc bumped to match the quote card above (body 17 / attribution
   // 13) per V; eyebrow stays at the app-wide label tier. Margins opened a
   // touch to breathe at the larger sizes.
-  listenEyebrow: { fontSize: 12, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
+  // Now a gold section label ABOVE the listen card (per V) — moved out of the
+  // card and dropped the "Optional ·" prefix.
+  listenEyebrow: { fontSize: 12, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 4, marginBottom: 12 },
   listenTitle: { fontSize: 17, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
   listenDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 20 },
   listenProgressBar: {

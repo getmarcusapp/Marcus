@@ -198,7 +198,7 @@ const s = StyleSheet.create({
   statLabel: { fontSize: 11, color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   statDivider: { width: 0.5, backgroundColor: colors.border },
   // Quote + attribution — same treatment as the practice hero.
-  heroQuote: { fontSize: 22, color: colors.textPrimary, lineHeight: 32, fontFamily: font.bodyLightItalic, fontStyle: 'italic', textAlign: 'center', marginTop: 28 },
+  heroQuote: { fontSize: 20, color: colors.textPrimary, lineHeight: 28, fontFamily: font.bodyLightItalic, fontStyle: 'italic', textAlign: 'center', marginTop: 28 },
   // Gold uppercase attribution — matches the onboarding welcome screen so
   // every quote reads as one unified component. Was Inter 20 gray title-case.
   heroAttr: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 16, textAlign: 'center' },

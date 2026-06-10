@@ -145,6 +145,16 @@ export default function CompassScreen() {
     }
   }, [introSeen, navigation]);
 
+  // Mark the intro as seen the moment it's shown, so the walkthrough is truly
+  // one-time: re-entering the Compass always lands on the normal view, no
+  // matter how the user leaves the intro (complete, back, or interruption).
+  // Only the persisted flag is written — local introSeen stays false so the
+  // intro still renders this visit. The normal Compass shows their saved
+  // answers and is fully editable, so skipping the walkthrough strands no one.
+  useEffect(() => {
+    if (introSeen === false) setHasSeenCompassIntro(true);
+  }, [introSeen]);
+
   async function dismissIntro() {
     // Persist whatever the user has (defaults or their edits) and mark
     // the intro as seen so it never re-renders.
@@ -313,8 +323,8 @@ export default function CompassScreen() {
             resizeMode="cover"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
-            locations={[0, 0.55, 0.8, 1]}
+            colors={['rgba(0,0,0,0.85)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)']}
+            locations={[0, 0.25, 0.6, 1]}
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.heroContent}>
@@ -592,7 +602,7 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     position: 'relative',
     overflow: 'hidden',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },

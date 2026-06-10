@@ -52,9 +52,9 @@ const s = StyleSheet.create({
     paddingHorizontal: 36,
     paddingBottom: 40,
   },
-  // Larger skull per V's new design (180 → 200) — sits as a stronger
-  // anchor in the upper third before the title/streak stack.
-  skull: { width: 200, height: 200, marginBottom: 32, opacity: 1 },
+  // Skull at the app's standard logo scale (150) — matches the Practice /
+  // sealed hero so the logo never changes size between screens (per V).
+  skull: { width: 150, height: 150, marginBottom: 28, opacity: 1 },
   title: {
     fontSize: 44,
     fontFamily: font.display,
@@ -64,14 +64,13 @@ const s = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 52,
   },
-  // "Day 1" gets the Didot display font per V's new design (was plain
-  // Inter at 56pt bold). Pairs visually with the title above and sits
-  // between the title and the date below.
+  // "Day 1" at the app's standard gold "Day N" scale (48) — matches the
+  // Practice / sealed hero streak so typography stays consistent (per V).
   streak: {
-    fontSize: 64,
+    fontSize: 48,
     fontFamily: font.display,
     color: colors.accent,
-    letterSpacing: -1,
+    letterSpacing: -0.5,
     textAlign: 'center',
     marginBottom: 8,
   },

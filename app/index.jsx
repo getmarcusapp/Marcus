@@ -375,8 +375,9 @@ export default function PracticeScreen() {
   // and sealed renders so they stay in sync.
   const meditationBlock = (
     <>
+      <Text style={s.galleryHeading}>Today's meditation</Text>
       <TouchableOpacity
-        style={s.medCard}
+        style={[s.medCard, isCurrentMed && s.medCardActive]}
         onPress={toggleMedPlay}
         activeOpacity={0.85}
         disabled={medIsLoading}
@@ -389,7 +390,6 @@ export default function PracticeScreen() {
             style={s.medImageOverlay}
           />
           <View style={s.medImageBottom}>
-            <Text style={s.medEyebrow}>Today's meditation</Text>
             {medIsLoading ? (
               <ActivityIndicator color={colors.accent} />
             ) : (
@@ -558,16 +558,17 @@ export default function PracticeScreen() {
             </TouchableOpacity>
           )}
 
-          <View style={s.practiceHeader}>
-            <Text style={s.secLabel}>Today's practice</Text>
-            <Text style={s.practiceCount}>{completed} of {totalItems}</Text>
-          </View>
+          {/* Gold progress bar sits above the header — it replaces the old
+              static gold keyline (per V): dim-gold track reads as the line at
+              0%, bright-gold fill shows progress. */}
           <View style={s.progressBar}>
             <View style={[s.progressFill, { flex: progress }]} />
             <View style={{ flex: Math.max(0, 1 - progress) }} />
           </View>
-
-
+          <View style={s.practiceHeader}>
+            <Text style={s.secLabel}>Today's practice</Text>
+            <Text style={s.practiceCount}>{completed} of {totalItems}</Text>
+          </View>
 
           {dailyTiles}
 
@@ -631,7 +632,10 @@ const s = StyleSheet.create({
   hero: {
     backgroundColor: 'transparent',
     paddingTop: 48,
-    paddingBottom: 44,
+    // Trimmed from 44 — with the gold keyline gone and the progress bar now
+    // leading the practice section, 44 + body 16 + bar 4 ≈ 48px reads as a
+    // connected section start rather than a floaty gap.
+    paddingBottom: 28,
     paddingHorizontal: spacing.xl,
     alignItems: 'center',
   },
@@ -651,10 +655,10 @@ const s = StyleSheet.create({
   heroSealed: {
     backgroundColor: 'transparent',
     paddingTop: 48,
-    // 10 + sealedCard's 26 paddingTop ≈ 36, matching the active hero's
-    // streak→quote gap (quoteText marginTop). Was 36, which stacked with the
-    // card's 26 into a ~62px chasm between "Day N" and the quote.
-    paddingBottom: 10,
+    // 2 + sealedCard's 26 paddingTop = 28, matching the active hero's
+    // streak→quote gap (quoteText marginTop 28) — tightened from 36 after the
+    // quote shrank to 20px so the quote no longer floats away from the Day.
+    paddingBottom: 2,
     paddingHorizontal: spacing.xl,
     alignItems: 'center',
   },
@@ -672,7 +676,9 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   // Matches the practice/more hero quote treatment exactly.
-  sealedQuoteText: { fontSize: 24, color: colors.textPrimary, lineHeight: 34, fontFamily: font.bodyLightItalic, fontStyle: 'italic', textAlign: 'center' },
+  // Reduced from 24 per V ("huge text") — kept clearly below the 28px date so
+  // the quote reads as subordinate to the date/Day on the sealed screen.
+  sealedQuoteText: { fontSize: 20, color: colors.textPrimary, lineHeight: 28, fontFamily: font.bodyLightItalic, fontStyle: 'italic', textAlign: 'center' },
   // Gold uppercase attribution — matches the onboarding welcome screen
   // (gold, Inter Medium, uppercase, tracked) so every quote reads as one
   // unified component. Was Inter 20 gray title-case.
@@ -692,8 +698,9 @@ const s = StyleSheet.create({
   },
   // Matches the welcome card exactly (title 17 / sub 14) so the two cards read
   // as one consistent component.
-  sealedRestTitle: { fontSize: 17, color: colors.textPrimary, fontFamily: font.bodyMedium, marginBottom: 6 },
-  sealedRestSub: { fontSize: 14, color: colors.textSecondary, fontFamily: font.body, lineHeight: 21 },
+  // Sized to match the Stoic Compass routine tile (title 15 / sub 12) per V.
+  sealedRestTitle: { fontSize: 15, color: colors.textPrimary, fontFamily: font.bodyMedium, marginBottom: 6 },
+  sealedRestSub: { fontSize: 12, color: colors.textSecondary, fontFamily: font.body, lineHeight: 18 },
 
   // In-hero quote — centered, larger italic serif, sitting on the bg image
   // directly (no card background). Attribution centered below in title case
@@ -701,14 +708,16 @@ const s = StyleSheet.create({
   // Quote body — Inter Light Italic (the unified quote voice). Kept as the
   // brightest/largest line so it's the focal point above the 20pt secondary
   // tier (sub + attribution).
+  // Matches the sealed-screen quote (20 / lh 28) so the active and sealed
+  // practice heroes read identically (per V).
   quoteText: {
-    fontSize: 24,
+    fontSize: 20,
     color: colors.textPrimary,
-    lineHeight: 34,
+    lineHeight: 28,
     fontFamily: font.bodyLightItalic,
     fontStyle: 'italic',
     textAlign: 'center',
-    marginTop: 36,
+    marginTop: 28,
   },
   // Gold uppercase attribution — matches the onboarding welcome screen so
   // every quote reads as one unified component. Was Inter 20 gray title-case.
@@ -736,17 +745,19 @@ const s = StyleSheet.create({
     marginBottom: 12, alignItems: 'center',
   },
   trialBannerText: { fontSize: 12, color: colors.accent, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: font.bodyMedium },
-  // Keyline above the row only (border-top). Warm accentDim to match V's
-  // mock. The progress bar below the row stays as the lower divider.
-  practiceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', borderTopWidth: 0.5, borderTopColor: colors.accentDim, paddingTop: 18, marginTop: 12, marginBottom: 10 },
+  // No keyline — the gold progress bar above now serves as the divider (per V).
+  practiceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 },
   // Weekly sub-section header — same row layout as practiceHeader but NO
   // gold keyline. The accent eyebrow label alone separates it from the
   // Today's-practice list above; a second gold rule would be redundant.
   weeklyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 8, marginBottom: 10 },
   practiceCount: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accentDim, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
-  progressBar: { height: 1, backgroundColor: colors.border, borderRadius: 1, marginBottom: 8, overflow: 'hidden', flexDirection: 'row' },
-  progressFill: { backgroundColor: colors.textPrimary, borderRadius: 1 },
+  // Gold divider/progress bar above the header: dim-gold track (reads as the
+  // old keyline at 0%), bright-gold fill shows completion. marginTop separates
+  // it from the section above.
+  progressBar: { height: 1, backgroundColor: colors.accentDim, borderRadius: 1, marginTop: 4, marginBottom: 8, overflow: 'hidden', flexDirection: 'row' },
+  progressFill: { backgroundColor: colors.accent, borderRadius: 1 },
 
 
   routineCard: {
@@ -812,11 +823,15 @@ const s = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: colors.border,
     borderRadius: radius.md,
-    marginTop: 8,
+    // No top margin — the "Today's meditation" heading's marginBottom (10)
+    // alone sets the gap, matching the other section heading→card spacing.
     marginBottom: 12,
     backgroundColor: colors.bgCard,
     overflow: 'hidden',
   },
+  // Active state — bright gold border while this meditation is current
+  // (matches the journal listen card).
+  medCardActive: { borderColor: colors.accent },
   medImageWrap: {
     width: '100%',
     height: 180,
@@ -825,6 +840,8 @@ const s = StyleSheet.create({
   },
   medImage: { width: '100%', height: '100%' },
   medImageOverlay: { ...StyleSheet.absoluteFillObject },
+  // Eyebrow moved out to a section label above the card (per V); the play
+  // button now sits alone, right-aligned over the image.
   medImageBottom: {
     position: 'absolute',
     left: 18,
@@ -832,12 +849,13 @@ const s = StyleSheet.create({
     bottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
   },
-  medBody: { padding: 22, paddingTop: 18 },
+  // Text shifted up (tighter to the image) per V — was paddingTop 18.
+  medBody: { padding: 22, paddingTop: 14 },
   medTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
-  medEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
-  medSubtitle: { fontSize: font.labelSize, letterSpacing: 2, color: colors.textSecondary, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
+  // Subtitle ("Accounting" etc.) gold per V — was textSecondary.
+  medSubtitle: { fontSize: font.labelSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
   medTitle: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
   medDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 14 },
   medMeta: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.5 },
@@ -852,8 +870,12 @@ const s = StyleSheet.create({
   medProgressFill: { backgroundColor: colors.accent, borderRadius: 1 },
   medTimeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   medTimeText: { fontSize: 11, color: colors.textSecondary, letterSpacing: 0.3 },
-  // "More meditations" swipe gallery (the other five, browse-able inline).
-  galleryHeading: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textSecondary, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 8, marginBottom: 14, marginLeft: 2 },
+  // Meditation section labels ("Today's meditation" / "More meditations") —
+  // gold, above the frame, matching the WEEKLY / page section labels (per V).
+  // marginBottom 10 matches the Weekly / Today's-practice section headers so
+  // the heading→card gap is consistent (was 14, which + medCard's top margin
+  // made the meditation gap visibly larger than the others).
+  galleryHeading: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 8, marginBottom: 10, marginLeft: 2 },
   galleryRow: { paddingRight: 16, paddingBottom: 20, gap: 12 },
   galleryCard: { width: 148 },
   galleryImageWrap: { width: 148, height: 148, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000', position: 'relative', marginBottom: 10 },

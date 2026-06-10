@@ -199,18 +199,18 @@ export default function EmotionsScreen() {
               resizeMode="cover"
             />
             <LinearGradient
-              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
-              locations={[0, 0.55, 0.8, 1]}
+              colors={['rgba(0,0,0,0.85)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)']}
+              locations={[0, 0.25, 0.6, 1]}
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.heroContent}>
               <Text style={s.eyebrow}>Emotional mastery</Text>
-              <View style={s.heroTitleRow}>
-                <Text style={[s.title, { flex: 1 }]}>Log a trigger</Text>
-                <HeroOverlayChip onPress={() => router.push('/emotions-history')}>
-                  Past triggers
-                </HeroOverlayChip>
-              </View>
+              <Text style={s.title}>Log a trigger</Text>
+            </View>
+            <View style={s.heroChipBottom}>
+              <HeroOverlayChip onPress={() => router.push('/emotions-history')}>
+                Past triggers
+              </HeroOverlayChip>
             </View>
           </View>
 
@@ -488,14 +488,16 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     position: 'relative',
     overflow: 'hidden',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
   },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   heroContent: { padding: spacing.xl, paddingTop: 52 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
   // Title row hosts the page title on the left and the Past-X chip on the
   // right, both bottom-aligned so the chip sits on the same baseline.
-  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
+  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
+  // Chip anchored bottom-right (asymmetric with the top-left heading) per V.
+  heroChipBottom: { position: 'absolute', right: spacing.xl, bottom: spacing.xl },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, marginBottom: 6 },
   // Quiet black card — identical to the journal/review memento cards:
   // #0a0a0a fill, 0.5 #474747 border, radius.md, inset from the edges.
@@ -510,7 +512,8 @@ const s = StyleSheet.create({
     marginHorizontal: spacing.md,
     marginTop: 16,
   },
-  mementoText: { fontSize: 17, color: colors.textPrimary, lineHeight: 27, fontFamily: font.body },
+  // 20px Inter Light Italic — unified quote treatment across the app (per V).
+  mementoText: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
   // Gold uppercase attribution — matches the onboarding welcome screen so
   // every quote reads as one unified component. Was Inter 13 gray title-case.
   mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },

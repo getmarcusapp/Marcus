@@ -286,7 +286,6 @@ function PracticePreviewStep({ onNext }) {
           <View style={s.stepHeroText}>
             <Text style={s.stepEyebrow}>Your daily practice</Text>
             <Text style={s.stepTitle}>The shape{'\n'}of your day</Text>
-            <Text style={s.stepSub}>Four elements. Executed with intention.</Text>
           </View>
         </View>
 
@@ -690,7 +689,7 @@ const s = StyleSheet.create({
   medOnbHeroImg: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   medOnbHeroText: { padding: 28, paddingTop: 48, paddingBottom: 32 },
   previewEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 12, textShadowColor: 'rgba(0,0,0,0.85)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
-  previewTitle: { fontSize: 44, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1.5, lineHeight: 52, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
+  previewTitle: { fontSize: 36, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1, lineHeight: 42, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   previewBody: { padding: 20 },
   previewCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.bgCard, overflow: 'hidden', marginBottom: 16 },
   previewRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingHorizontal: 20 },
@@ -805,23 +804,17 @@ const s = StyleSheet.create({
     textShadowRadius: 6,
   },
   stepTitle: {
-    fontSize: 44,
+    // 36 (was 44) per V — the Cinzel all-caps read much larger than the point
+    // size suggested, so the onboarding headings are toned down.
+    fontSize: 36,
     fontFamily: font.display,
     color: '#FFFFFF',
-    letterSpacing: -1.5,
-    lineHeight: 52,
+    letterSpacing: -1,
+    lineHeight: 42,
     marginBottom: 14,
     textShadowColor: 'rgba(0,0,0,0.7)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 8,
-  },
-  stepSub: {
-    fontSize: 17,
-    color: colors.textSecondary,
-    lineHeight: 26,
-    textShadowColor: 'rgba(0,0,0,0.7)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
   },
   stepBody: {
     paddingHorizontal: 24,

@@ -308,7 +308,7 @@ Return only the JSON object.`;
       console.log('Share image failed, falling back to text:', e?.message);
       const lines = [
         `"${reading.quote}"`,
-        `— ${reading.author}${reading.work ? `, ${reading.work}` : ''}`,
+        `— ${reading.author}${reading.work && reading.work !== reading.author ? `, ${reading.work}` : ''}`,
         '',
         reading.reflection,
         '',
@@ -365,22 +365,22 @@ Return only the JSON object.`;
               resizeMode="cover"
             />
             <LinearGradient
-              colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.85)']}
-              locations={[0, 0.55, 0.8, 1]}
+              colors={['rgba(0,0,0,0.85)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)']}
+              locations={[0, 0.25, 0.6, 1]}
               style={StyleSheet.absoluteFillObject}
             />
             <View style={s.heroContent}>
-              <View style={s.heroTitleRow}>
-                <Text style={[s.title, { flex: 1 }]}>
-                  {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
-                  {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                </Text>
-                <HeroOverlayChip
-                  onPress={() => router.push(`/read-archive?from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
-                >
-                  Past readings
-                </HeroOverlayChip>
-              </View>
+              <Text style={s.title}>
+                {new Date().toLocaleDateString('en-US', { weekday: 'long' })}{'\n'}
+                {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+              </Text>
+            </View>
+            <View style={s.heroChipBottom}>
+              <HeroOverlayChip
+                onPress={() => router.push(`/read-archive?from=${encodeURIComponent(fromPath)}&fromLabel=${encodeURIComponent(fromLabel)}`)}
+              >
+                Past readings
+              </HeroOverlayChip>
             </View>
           </View>
 
@@ -398,7 +398,7 @@ Return only the JSON object.`;
                   <View style={s.quoteAuthorRow}>
                     <View style={{ flex: 1 }}>
                       <Text style={s.quoteAuthor}>
-                        {reading.author}{reading.work ? ` · ${reading.work}` : ''}
+                        {reading.author}{reading.work && reading.work !== reading.author ? ` · ${reading.work}` : ''}
                       </Text>
                     </View>
                     <TouchableOpacity
@@ -503,7 +503,7 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     position: 'relative',
     overflow: 'hidden',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
   },
   // Slight uniform zoom (5%) pushes the asset's baked-in edge lines outside
   // the container, where the hero's overflow:hidden clips them. Keeps aspect
@@ -513,7 +513,9 @@ const s = StyleSheet.create({
   // Title row hosts the page title on the left and the Past-X chip on the
   // right, both bottom-aligned so the chip sits on the same baseline as the
   // last line of a multi-line title.
-  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
+  heroTitleRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
+  // Chip anchored bottom-right (asymmetric with the top-left heading) per V.
+  heroChipBottom: { position: 'absolute', right: spacing.xl, bottom: spacing.xl },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   // Light reading body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
@@ -522,7 +524,9 @@ const s = StyleSheet.create({
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     padding: 22, marginTop: 12, marginBottom: 12, backgroundColor: colors.bgDeep,
   },
-  quoteText: { fontSize: 19, color: colors.textPrimary, lineHeight: 32, fontFamily: font.body },
+  // 20px Inter Light Italic — unified quote treatment across the app (per V),
+  // matching the hero quotes. Was Inter regular 19.
+  quoteText: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
   quoteRule: { height: 0.5, backgroundColor: colors.border, marginVertical: 16 },
   quoteAuthorRow: { flexDirection: 'row', alignItems: 'flex-start' },
   // Author · work on one gold uppercase tracked line — matches the

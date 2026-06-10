@@ -43,11 +43,13 @@ function loadSvg() {
   return SvgModule;
 }
 
-// Valeriya's gold gradient — symmetric metallic sheen, vertical (top → bottom).
-// Stops shifted to harmonize with the brighter accent gold (#FFCE82): the
-// midpoint matches Valeriya's strategy-doc highlight, edges drop to a
-// slightly toned-down gold so the sheen still reads as metallic.
-const GOLD_STOPS = ['#D9A868', '#FFCE82', '#D9A868'];
+// Gold gradient — symmetric metallic sheen, vertical (top → bottom).
+// Tones matched to the skull logo's gold (sampled at ~#C39B5F, luma 129-168)
+// per V: the bright accent midpoint (#FFCE82, luma 212) read hotter than the
+// logo, so the peak is capped at the skull's lightest gold and the edges sit
+// in its darker range — same gold family, sheen retained, no longer out-
+// shining the skull. (The accent gold for text/labels stays #FFCE82.)
+const GOLD_STOPS = ['#AC844F', '#CBA164', '#AC844F'];
 const GOLD_LOCATIONS = [0, 0.5, 1];
 const NOISE_OPACITY = 0.40;
 

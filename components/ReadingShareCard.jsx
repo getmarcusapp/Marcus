@@ -38,7 +38,7 @@ export function ReadingShareCard({ quote, author, work }) {
         <View style={s.divider} />
 
         <Text style={s.author}>{author?.toUpperCase?.()}</Text>
-        {work ? <Text style={s.work}>{work}</Text> : null}
+        {work && work !== author ? <Text style={s.work}>{work}</Text> : null}
       </View>
 
       <View style={s.footer}>

@@ -284,7 +284,17 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
   },
-  medCardActive: {},
+  // Active/playing row — bright gold bordered box, matching the journal &
+  // practice meditation cards. Negative margin + matching padding lets the
+  // border expand outward into the list inset so content doesn't shift.
+  medCardActive: {
+    borderWidth: 0.5,
+    borderColor: colors.accent,
+    borderBottomColor: colors.accent,
+    borderRadius: radius.md,
+    marginHorizontal: -10,
+    paddingHorizontal: 10,
+  },
   medLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, flex: 1 },
   medThumb: {
     width: 64, height: 64, borderRadius: radius.md,
