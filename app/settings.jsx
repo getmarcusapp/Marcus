@@ -13,6 +13,7 @@ import { useAppLock, setLockEnabled, authenticate, getSupportedAuthLabel } from 
 import { exportBackup, pickAndImportBackup } from '../lib/backup';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
+import Constants from 'expo-constants';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
@@ -22,7 +23,7 @@ const NOTIF_SETTINGS_KEY = 'notification_settings';
 // (premium override, data resets). The PIN ships in the JS bundle, so treat
 // it as obscurity, not real security. CHANGE THIS to your own code.
 const DEV_BUILD = __DEV__ || process.env.EXPO_PUBLIC_IS_BETA === 'true';
-const DEV_TOOLS_PIN = '1389';
+const DEV_TOOLS_PIN = '4389';
 
 // Unique action icon on the right per Valeriya's pattern: the icon itself
 // is the affordance (the action it represents), rendered in accent gold.
@@ -329,7 +330,7 @@ export default function SettingsScreen() {
               activeOpacity={1}
             >
               <Text style={s.rowLabel}>Version</Text>
-              <Text style={s.rowValue}>1.0.0</Text>
+              <Text style={s.rowValue}>{Constants.expoConfig?.version ?? '1.0.2'}</Text>
             </TouchableOpacity>
             <NavRow
               icon="shield-checkmark-outline"
