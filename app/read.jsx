@@ -498,7 +498,7 @@ const s = StyleSheet.create({
   // Dark header with hero image
   hero: {
     backgroundColor: colors.bgDeep,
-    minHeight: 260,
+    minHeight: 280,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
     position: 'relative',

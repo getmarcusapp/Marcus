@@ -683,7 +683,7 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   hero: {
     backgroundColor: colors.bgDeep,
-    minHeight: 220,
+    minHeight: 280,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
     position: 'relative',
@@ -789,7 +789,9 @@ const s = StyleSheet.create({
     paddingVertical: 20,
     marginBottom: 16,
   },
-  reviewMementoText: { fontSize: 17, color: colors.textPrimary, lineHeight: 27, fontFamily: font.body },
+  // 20px Inter Light Italic — unified quote treatment across the app (matches
+  // the Daily Reading / Journal / Emotions card quotes). Was Inter regular 17.
+  reviewMementoText: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
   // Gold uppercase attribution — matches the unified treatment across the app
   // (onboarding / journal / emotions / read). Was Inter 13 gray title-case.
   reviewMementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },

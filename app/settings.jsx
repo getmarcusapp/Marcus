@@ -16,6 +16,14 @@ import { ScreenHeader } from '../components/ScreenHeader';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
+// Developer Tools gate. Shown freely in dev + TestFlight beta builds. In
+// production it's hidden until you tap the Version number 7× and enter this
+// PIN — a "hidden + PIN" gate so curious users can't reach the test toggles
+// (premium override, data resets). The PIN ships in the JS bundle, so treat
+// it as obscurity, not real security. CHANGE THIS to your own code.
+const DEV_BUILD = __DEV__ || process.env.EXPO_PUBLIC_IS_BETA === 'true';
+const DEV_TOOLS_PIN = '1389';
+
 // Unique action icon on the right per Valeriya's pattern: the icon itself
 // is the affordance (the action it represents), rendered in accent gold.
 // No chevron or arrow-in-circle — chevrons are reserved for dropdowns;
@@ -48,6 +56,27 @@ export default function SettingsScreen() {
   const { lockEnabled } = useAppLock();
   const playerInset = useMiniPlayerInset();
   const scrollRef = useRef(null);
+  // Developer Tools visibility — unlocked by default in dev/beta; in
+  // production, revealed by tapping the Version number 7× + entering the PIN.
+  const [devUnlocked, setDevUnlocked] = useState(DEV_BUILD);
+  const versionTapsRef = useRef(0);
+  function handleVersionTap() {
+    if (devUnlocked) return;
+    versionTapsRef.current += 1;
+    if (versionTapsRef.current < 7) return;
+    versionTapsRef.current = 0;
+    Alert.prompt(
+      'Enter code',
+      undefined,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'OK', onPress: (pin) => { if (pin === DEV_TOOLS_PIN) setDevUnlocked(true); } },
+      ],
+      'secure-text',
+      '',
+      'number-pad',
+    );
+  }
 
   // Re-load on focus (not just mount) so the reminder summary refreshes
   // when the user returns from the Notifications subscreen — otherwise
@@ -294,10 +323,14 @@ export default function SettingsScreen() {
 
           <Text style={s.secLabel}>About</Text>
           <View style={s.card}>
-            <View style={[s.row, s.rowBorder]}>
+            <TouchableOpacity
+              style={[s.row, s.rowBorder]}
+              onPress={handleVersionTap}
+              activeOpacity={1}
+            >
               <Text style={s.rowLabel}>Version</Text>
               <Text style={s.rowValue}>1.0.0</Text>
-            </View>
+            </TouchableOpacity>
             <NavRow
               icon="shield-checkmark-outline"
               label="Privacy policy"
@@ -311,16 +344,20 @@ export default function SettingsScreen() {
             />
           </View>
 
-          <Text style={s.secLabel}>Developer</Text>
-          <View style={s.card}>
-            <NavRow
-              icon="hammer-outline"
-              label="Developer Tools"
-              sub="Diagnostics and test seeds"
-              onPress={() => router.push('/settings-developer')}
-              last
-            />
-          </View>
+          {devUnlocked && (
+            <>
+              <Text style={s.secLabel}>Developer</Text>
+              <View style={s.card}>
+                <NavRow
+                  icon="hammer-outline"
+                  label="Developer Tools"
+                  sub="Diagnostics and test seeds"
+                  onPress={() => router.push('/settings-developer')}
+                  last
+                />
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

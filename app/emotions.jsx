@@ -134,9 +134,12 @@ export default function EmotionsScreen() {
   // bringing the input into view.
   useEffect(() => {
     if (!selectedEmotion) return;
+    // Preview users can pick an emotion (exploration), but the fields are
+    // gated — don't try to focus a non-editable input.
+    if (!hasAccess) return;
     const t = setTimeout(() => triggerInputRef.current?.focus(), 250);
     return () => clearTimeout(t);
-  }, [selectedEmotion]);
+  }, [selectedEmotion, hasAccess]);
 
   useFocusEffect(useCallback(() => {
     setHintOpen(false);
@@ -300,13 +303,17 @@ export default function EmotionsScreen() {
               <IntensitySlider value={intensity} onChange={setIntensity} />
             </View>
 
-            <View style={[s.fieldCard, focusedField === 'trigger' && s.fieldCardActive]}>
+            <TouchableOpacity
+              style={[s.fieldCard, focusedField === 'trigger' && s.fieldCardActive]}
+              activeOpacity={hasAccess ? 1 : 0.85}
+              onPress={hasAccess ? undefined : () => router.push('/paywall')}
+            >
               <Text style={s.fieldQuestion}>What triggered it?</Text>
               <TextInput
                 ref={triggerInputRef}
                 style={[s.fieldInput, focusedField !== 'trigger' && s.fieldInputDim]}
                 multiline
-                placeholder="Describe the situation..."
+                placeholder={hasAccess ? "Describe the situation..." : "Start your 7-day free trial to write."}
                 placeholderTextColor={colors.textSecondary}
                 value={trigger}
                 onChangeText={setTrigger}
@@ -317,9 +324,13 @@ export default function EmotionsScreen() {
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoTriggerAccessory' : undefined}
                 keyboardAppearance="dark"
               />
-            </View>
+            </TouchableOpacity>
 
-            <View style={[s.fieldCard, focusedField === 'reaction' && s.fieldCardActive]}>
+            <TouchableOpacity
+              style={[s.fieldCard, focusedField === 'reaction' && s.fieldCardActive]}
+              activeOpacity={hasAccess ? 1 : 0.85}
+              onPress={hasAccess ? undefined : () => router.push('/paywall')}
+            >
               <Text style={s.fieldQuestion}>
                 {timing === 'now' ? 'What is your first impulse?' : 'What was your first impulse?'}
               </Text>
@@ -327,7 +338,7 @@ export default function EmotionsScreen() {
                 ref={reactionInputRef}
                 style={[s.fieldInput, focusedField !== 'reaction' && s.fieldInputDim]}
                 multiline
-                placeholder="The thing you wanted to do or say, before reflection..."
+                placeholder={hasAccess ? "The thing you wanted to do or say, before reflection..." : "Start your 7-day free trial to write."}
                 placeholderTextColor={colors.textSecondary}
                 value={reaction}
                 onChangeText={setReaction}
@@ -338,7 +349,7 @@ export default function EmotionsScreen() {
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoReactionAccessory' : undefined}
                 keyboardAppearance="dark"
               />
-            </View>
+            </TouchableOpacity>
 
             <View ref={reframeRef} collapsable={false}>
               <Text style={s.stageLabel}>III · Reframe</Text>
@@ -377,7 +388,11 @@ export default function EmotionsScreen() {
             {/* Card 2 — chosen response. The emotion-specific Stoic reframe
                 lives in the inline ⓘ bubble here (the reframe reads as
                 response-guidance), shown only once an emotion is picked. */}
-            <View style={[s.fieldCard, focusedField === 'response' && s.fieldCardActive]}>
+            <TouchableOpacity
+              style={[s.fieldCard, focusedField === 'response' && s.fieldCardActive]}
+              activeOpacity={hasAccess ? 1 : 0.85}
+              onPress={hasAccess ? undefined : () => router.push('/paywall')}
+            >
               <View style={s.feelingHeader}>
                 <Text style={[s.secQuestion, { marginTop: 0, marginBottom: 0, flex: 1 }, !selectedEmotion && s.fieldLabelMuted]}>
                   {timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
@@ -397,9 +412,11 @@ export default function EmotionsScreen() {
                 ref={responseInputRef}
                 style={[s.fieldInput, focusedField !== 'response' && s.fieldInputDim]}
                 multiline
-                placeholder={timing === 'now'
-                  ? "The response you choose to take, going forward..."
-                  : "Looking back, what the Stoic would have done..."}
+                placeholder={!hasAccess
+                  ? "Start your 7-day free trial to write."
+                  : timing === 'now'
+                    ? "The response you choose to take, going forward..."
+                    : "Looking back, what the Stoic would have done..."}
                 placeholderTextColor={colors.textSecondary}
                 value={chosenResponse}
                 onChangeText={setChosenResponse}
@@ -410,7 +427,7 @@ export default function EmotionsScreen() {
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}
                 keyboardAppearance="dark"
               />
-            </View>
+            </TouchableOpacity>
 
             {!keyboardUp && (
               <>
@@ -483,7 +500,7 @@ const s = StyleSheet.create({
   // Dark header with hero image
   hero: {
     backgroundColor: colors.bgDeep,
-    minHeight: 240,
+    minHeight: 280,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
     position: 'relative',

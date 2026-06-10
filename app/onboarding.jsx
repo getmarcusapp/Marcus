@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Video, ResizeMode } from 'expo-av';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -140,12 +141,24 @@ function WelcomeStep({ onNext }) {
 
   return (
     <View style={s.welcomeRoot}>
-      <Image
-        source={require('../assets/bg-svg4.png')}
+      {/* Looping muted video background + dark overlay (replaces the static
+          bg-svg4 image). The overlay darkens the full-color video to match the
+          pre-darkened background and keep the wordmark/quote legible — raise
+          the alpha to go darker. */}
+      <View
         style={{ position: 'absolute', top: 0, left: 0, width: screenWidth, height: screenHeight }}
-        resizeMode="cover"
         pointerEvents="none"
-      />
+      >
+        <Video
+          source={require('../assets/welcome-bg.mp4')}
+          style={{ width: '100%', height: '100%' }}
+          resizeMode={ResizeMode.COVER}
+          shouldPlay
+          isLooping
+          isMuted
+        />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(5,5,5,0.5)' }]} />
+      </View>
       <SafeAreaView style={s.safeTransparent}>
         <ScrollView
           style={{ flex: 1 }}

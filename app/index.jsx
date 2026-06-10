@@ -389,13 +389,6 @@ export default function PracticeScreen() {
             locations={[0, 0.55, 1]}
             style={s.medImageOverlay}
           />
-          <View style={s.medImageBottom}>
-            {medIsLoading ? (
-              <ActivityIndicator color={colors.accent} />
-            ) : (
-              <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={44} color={colors.accent} />
-            )}
-          </View>
         </View>
         <View style={s.medBody}>
           <Text style={s.medSubtitle}>{todayMed.subtitle}</Text>
@@ -414,6 +407,16 @@ export default function PracticeScreen() {
             </>
           ) : (
             <Text style={s.medMeta}>{'< 5 min · guided'}</Text>
+          )}
+        </View>
+        {/* Play button straddling the image/body seam — floating FAB layered
+            above the text panel (last child = on top). pointerEvents none so
+            taps fall through to the whole card. */}
+        <View style={s.medPlayFab} pointerEvents="none">
+          {medIsLoading ? (
+            <ActivityIndicator color={colors.accent} />
+          ) : (
+            <Ionicons name={medIsPlaying ? 'pause-circle' : 'play-circle'} size={44} color={colors.accent} />
           )}
         </View>
       </TouchableOpacity>
@@ -840,16 +843,18 @@ const s = StyleSheet.create({
   },
   medImage: { width: '100%', height: '100%' },
   medImageOverlay: { ...StyleSheet.absoluteFillObject },
-  // Eyebrow moved out to a section label above the card (per V); the play
-  // button now sits alone, right-aligned over the image.
-  medImageBottom: {
+  // Floating play button anchored just below the image/body seam (per V —
+  // bumped down so it no longer reads as hanging off the image). top 180 =
+  // image height, so the button sits fully in the body at the text start.
+  // Sized to the icon so pointerEvents:none taps fall through to the card.
+  medPlayFab: {
     position: 'absolute',
-    left: 18,
-    right: 14,
-    bottom: 12,
-    flexDirection: 'row',
+    right: 18,
+    top: 180,
+    width: 44,
+    height: 44,
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
   },
   // Text shifted up (tighter to the image) per V — was paddingTop 18.
   medBody: { padding: 22, paddingTop: 14 },

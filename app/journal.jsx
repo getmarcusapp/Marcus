@@ -313,7 +313,7 @@ export default function JournalScreen() {
 
                 <GoldPrimary
                   style={[s.editBtn, s.saveBtn]}
-                  onPress={() => requireAccess(() => { haptics.tap(); setOpenPrompt(0); })}
+                  onPress={() => { haptics.tap(); setOpenPrompt(0); }}
                 >
                   <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
                     {alreadySaved
@@ -369,7 +369,11 @@ export default function JournalScreen() {
                         )}
                       </View>
                     )}
-                    <View style={s.promptAnswer}>
+                    <TouchableOpacity
+                      style={s.promptAnswer}
+                      activeOpacity={hasAccess ? 1 : 0.85}
+                      onPress={hasAccess ? undefined : () => router.push('/paywall')}
+                    >
                       <TextInput
                         ref={el => { promptInputRefs.current[openPrompt] = el; }}
                         style={s.promptInput}
@@ -383,7 +387,7 @@ export default function JournalScreen() {
                         keyboardAppearance="dark"
                         inputAccessoryViewID={Platform.OS === 'ios' ? 'journalAccessory' : undefined}
                       />
-                    </View>
+                    </TouchableOpacity>
                   </View>
                 );
               })()}
