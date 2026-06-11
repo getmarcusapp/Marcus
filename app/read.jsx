@@ -34,8 +34,10 @@ import { STOIC_QUOTES, selectCandidates } from '../constants/stoicQuotes';
 // model, and token cap all live server-side — nothing sensitive ships in the
 // JS bundle. EXPO_PUBLIC_READING_ENDPOINT can override for local testing
 // (e.g. a `vercel dev` instance).
+// www is the canonical host — the apex 307-redirects to it, and skipping
+// the redirect saves a round-trip on every generation.
 const READING_ENDPOINT =
-  process.env.EXPO_PUBLIC_READING_ENDPOINT || 'https://getmarcus.app/api/generate-reading';
+  process.env.EXPO_PUBLIC_READING_ENDPOINT || 'https://www.getmarcus.app/api/generate-reading';
 
 function normalizeQuote(q) {
   return (q || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
