@@ -57,3 +57,6 @@ scripts/out/
 
 # website (marketing site, not part of the app build)
 public/
+
+# server functions (deployed to Vercel with the site, not part of the app build)
+api/

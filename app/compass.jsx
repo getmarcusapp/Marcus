@@ -512,7 +512,7 @@ export default function CompassScreen() {
                             <TouchableOpacity
                               key={name}
                               style={s.roleSuggestPill}
-                              onPress={() => quickAddRole(name)}
+                              onPress={() => requireAccess(() => quickAddRole(name))}
                               activeOpacity={0.7}
                             >
                               <Text style={s.roleSuggestText}>+ {name}</Text>
@@ -764,5 +764,5 @@ const s = StyleSheet.create({
   accessoryDone: { paddingVertical: 6, paddingHorizontal: 8 },
   accessoryDoneText: { fontSize: 14, color: colors.textSecondary, letterSpacing: 0.3 },
   accessoryAction: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 0.5, borderColor: colors.accentDim, backgroundColor: colors.bg },
-  accessoryActionText: { fontSize: 13, fontWeight: '600', color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  accessoryActionText: { fontSize: 13, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
 });

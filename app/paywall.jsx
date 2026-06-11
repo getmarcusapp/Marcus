@@ -48,21 +48,29 @@ export default function PaywallScreen() {
   }, []);
 
   async function loadOfferings() {
+    setLoading(true);
     const offering = await getOfferings();
     setOfferings(offering);
     setLoading(false);
   }
 
-  function getPackageByType(type) {
-    if (!offerings?.availablePackages) {
-      console.log('No available packages in offerings:', offerings);
+  // Derived per-day price from the live store price (never hardcoded —
+  // hardcoded fallbacks display wrong amounts in non-US storefronts).
+  // Returns null when the price/currency isn't available or Intl can't
+  // format it; callers simply omit the line in that case.
+  function perDayLabel(pkg) {
+    const p = pkg?.product;
+    if (!p?.price || !p?.currencyCode) return null;
+    try {
+      const fmt = new Intl.NumberFormat(undefined, { style: 'currency', currency: p.currencyCode });
+      return `${fmt.format(p.price / 365)} a day`;
+    } catch {
       return null;
     }
-    console.log('Available packages:', offerings.availablePackages.map(p => ({
-      id: p.identifier,
-      type: p.packageType,
-      product: p.product?.productIdentifier
-    })));
+  }
+
+  function getPackageByType(type) {
+    if (!offerings?.availablePackages) return null;
     return offerings.availablePackages.find(pkg =>
       type === 'annual'
         ? pkg.packageType === 'ANNUAL' || pkg.packageType === 'TWO_MONTH' ||
@@ -106,6 +114,10 @@ export default function PaywallScreen() {
       Alert.alert('', 'Purchase restored.', [
         { text: 'Continue', onPress: () => router.replace(postPaywallRoute) }
       ]);
+    } else if (result.error) {
+      // Network/store failure is not the same as "no subscription" — a
+      // paying user offline must not be told their subscription is gone.
+      Alert.alert('', "Couldn't reach the App Store. Check your connection and try again.");
     } else {
       Alert.alert('', 'No active subscription found.');
     }
@@ -114,8 +126,12 @@ export default function PaywallScreen() {
   const annualPkg = getPackageByType('annual');
   const monthlyPkg = getPackageByType('monthly');
 
-  const annualPrice = annualPkg?.product?.priceString || '$59.99';
-  const monthlyPrice = monthlyPkg?.product?.priceString || '$7.99';
+  // Live store prices only. When offerings fail to load (offline, App Store
+  // hiccup) the plan section renders a retry state instead of fake prices.
+  const annualPrice = annualPkg?.product?.priceString;
+  const monthlyPrice = monthlyPkg?.product?.priceString;
+  const annualPerDay = perDayLabel(annualPkg);
+  const offeringsUnavailable = !loading && !annualPkg && !monthlyPkg;
 
   // Top back chrome — shown whenever the paywall was reached from inside
   // the app (More · Subscription, requireAccess gates, etc.) so the user
@@ -146,7 +162,10 @@ export default function PaywallScreen() {
           />
           <Text style={s.eyebrow}>Marcus Premium</Text>
           <Text style={s.title}>Become someone{'\n'}you respect</Text>
-          <Text style={s.sub}>A complete daily Stoic practice.{'\n'}7 days free, then 16¢ a day.</Text>
+          <Text style={s.sub}>
+            A complete daily Stoic practice.{'\n'}
+            {annualPrice ? `7 days free, then ${annualPrice}/year.` : 'Your first 7 days are free.'}
+          </Text>
           {trialDaysLeft !== null && (
             <View style={s.trialStatusPill}>
               <Text style={s.trialStatusText}>
@@ -191,10 +210,25 @@ export default function PaywallScreen() {
         {/* Plan selector */}
         {loading ? (
           <ActivityIndicator color={colors.accent} style={{ marginVertical: 32 }} />
+        ) : offeringsUnavailable ? (
+          // Offerings couldn't load (offline / App Store hiccup). Never show
+          // hardcoded prices — they'd be wrong in non-US storefronts and the
+          // CTA would dead-end anyway. Offer a retry instead.
+          <View style={s.plansError}>
+            <Text style={s.plansErrorText}>
+              Couldn't reach the App Store. Check your connection and try again.
+            </Text>
+            <TouchableOpacity style={s.retryBtn} onPress={loadOfferings} activeOpacity={0.8}>
+              <Text style={s.retryBtnText}>Try again</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <View style={s.plans}>
 
-            {/* Annual — default/highlighted */}
+            {/* Annual — default/highlighted. Billed price is the headline;
+                the per-day derivation stays secondary (3.1.2: the actual
+                billed amount must be at least as prominent). */}
+            {annualPkg && (
             <TouchableOpacity
               style={[s.planCard, selectedPackage === 'annual' && s.planCardSelected]}
               onPress={() => setSelectedPackage('annual')}
@@ -208,14 +242,16 @@ export default function PaywallScreen() {
                 <Text style={[s.planName, selectedPackage === 'annual' && s.planNameSelected]}>Annual</Text>
               </View>
               <Text style={[s.planPrice, selectedPackage === 'annual' && s.planPriceSelected]}>
-                16¢<Text style={s.planPeriod}>/day</Text>
+                {annualPrice}<Text style={s.planPeriod}>/year</Text>
               </Text>
               <Text style={[s.planNote, selectedPackage === 'annual' && s.planNoteSelected]}>
-                Billed {annualPrice}/year · Save 37% vs monthly
+                {annualPerDay ? `${annualPerDay} · ` : ''}Save 37% vs monthly
               </Text>
             </TouchableOpacity>
+            )}
 
             {/* Monthly */}
+            {monthlyPkg && (
             <TouchableOpacity
               style={[s.planCard, selectedPackage === 'monthly' && s.planCardSelected]}
               onPress={() => setSelectedPackage('monthly')}
@@ -232,11 +268,14 @@ export default function PaywallScreen() {
                 Cancel anytime
               </Text>
             </TouchableOpacity>
+            )}
 
           </View>
         )}
 
-        {/* CTA */}
+        {/* CTA — hidden when there's nothing purchasable to start */}
+        {!offeringsUnavailable && (
+        <>
         <GoldPrimary
           style={s.cta}
           onPress={handlePurchase}
@@ -252,6 +291,8 @@ export default function PaywallScreen() {
         <Text style={s.ctaNote}>
           No charge until day 7. Cancel anytime.
         </Text>
+        </>
+        )}
         </>
         )}
 
@@ -283,6 +324,26 @@ export default function PaywallScreen() {
           Subscription automatically renews unless cancelled at least 24 hours before the end of the current period.
           {alreadySubscribed ? ' Manage your subscription in iOS Settings.' : ''}
         </Text>
+
+        {/* Terms + Privacy — required in the binary for auto-renewable
+            subscriptions (Guideline 3.1.2). Terms uses Apple's standard EULA. */}
+        <View style={s.legalLinks}>
+          <TouchableOpacity
+            onPress={() => Linking.openURL('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={s.legalLinkText}>Terms of Use</Text>
+          </TouchableOpacity>
+          <Text style={s.legalLinkDot}>·</Text>
+          <TouchableOpacity
+            onPress={() => Linking.openURL('https://getmarcus.app/privacy.html')}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={s.legalLinkText}>Privacy Policy</Text>
+          </TouchableOpacity>
+        </View>
 
       </ScrollView>
     </SafeAreaView>
@@ -316,7 +377,7 @@ const s = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 16,
     alignItems: 'center',
   },
-  trialStatusText: { fontSize: 13, color: colors.accent, letterSpacing: 0.4, fontWeight: '600' },
+  trialStatusText: { fontSize: 13, color: colors.accent, letterSpacing: 0.4, fontFamily: font.bodySemiBold },
   trialStatusSub: { fontSize: 12, color: colors.textSecondary, marginTop: 4, textAlign: 'center' },
 
   features: {
@@ -344,9 +405,9 @@ const s = StyleSheet.create({
     position: 'absolute', top: -1, right: 16,
     backgroundColor: colors.accent,
     paddingHorizontal: 10, paddingVertical: 3,
-    borderRadius: '0 0 6px 6px',
+    borderBottomLeftRadius: 6, borderBottomRightRadius: 6,
   },
-  planBadgeText: { fontSize: 11, fontWeight: '700', color: '#000', letterSpacing: 0.5 },
+  planBadgeText: { fontSize: 11, fontFamily: font.bodyBold, color: '#000', letterSpacing: 0.5 },
   planTop: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8, marginTop: 8 },
   planRadio: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: colors.border },
   planRadioSelected: { borderColor: colors.accent, backgroundColor: colors.accent },
@@ -354,7 +415,7 @@ const s = StyleSheet.create({
   planNameSelected: { color: colors.textPrimary },
   planPrice: { fontSize: 28, fontFamily: font.display, color: colors.textSecondary, letterSpacing: -0.5 },
   planPriceSelected: { color: colors.accent },
-  planPeriod: { fontSize: 14, fontWeight: '400' },
+  planPeriod: { fontSize: 14, fontFamily: font.body },
   planNote: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
   planNoteSelected: { color: colors.accentDim },
 
@@ -365,7 +426,7 @@ const s = StyleSheet.create({
     height: 56,
   },
   ctaDisabled: { opacity: 0.6 },
-  ctaText: { fontSize: 15, fontWeight: '700', color: '#000', letterSpacing: 0.3 },
+  ctaText: { fontSize: 15, fontFamily: font.bodyBold, color: '#000', letterSpacing: 0.3 },
   ctaNote: { fontSize: 12, color: colors.textSecondary, textAlign: 'center', marginTop: 10, marginHorizontal: spacing.md },
 
   restoreBtn: { alignItems: 'center', padding: 16, marginTop: 4 },
@@ -377,4 +438,18 @@ const s = StyleSheet.create({
     fontSize: 12, color: colors.textSecondary, textAlign: 'center',
     lineHeight: 18, marginHorizontal: spacing.xl, marginTop: 8,
   },
+  legalLinks: {
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+    gap: 8, marginTop: 12,
+  },
+  legalLinkText: { fontSize: 12, color: colors.textSecondary, textDecorationLine: 'underline' },
+  legalLinkDot: { fontSize: 12, color: colors.textSecondary },
+
+  plansError: { padding: spacing.xl, alignItems: 'center' },
+  plansErrorText: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, marginBottom: 16 },
+  retryBtn: {
+    borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md,
+    paddingVertical: 12, paddingHorizontal: 28,
+  },
+  retryBtnText: { fontSize: 14, color: colors.accent, letterSpacing: 0.3 },
 });

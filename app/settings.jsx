@@ -11,6 +11,7 @@ import { getJournals, getTriggers, getStreak } from '../store/db';
 import * as health from '../lib/health';
 import { useAppLock, setLockEnabled, authenticate, getSupportedAuthLabel } from '../lib/appLock';
 import { exportBackup, pickAndImportBackup } from '../lib/backup';
+import { unlockDevTools, devToolsUnlocked } from '../lib/devGate';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import Constants from 'expo-constants';
@@ -22,7 +23,6 @@ const NOTIF_SETTINGS_KEY = 'notification_settings';
 // PIN — a "hidden + PIN" gate so curious users can't reach the test toggles
 // (premium override, data resets). The PIN ships in the JS bundle, so treat
 // it as obscurity, not real security. CHANGE THIS to your own code.
-const DEV_BUILD = __DEV__ || process.env.EXPO_PUBLIC_IS_BETA === 'true';
 const DEV_TOOLS_PIN = '4389';
 
 // Unique action icon on the right per Valeriya's pattern: the icon itself
@@ -59,7 +59,9 @@ export default function SettingsScreen() {
   const scrollRef = useRef(null);
   // Developer Tools visibility — unlocked by default in dev/beta; in
   // production, revealed by tapping the Version number 7× + entering the PIN.
-  const [devUnlocked, setDevUnlocked] = useState(DEV_BUILD);
+  // The unlock also flips the shared devGate so /settings-developer itself
+  // admits the session (it redirects out otherwise — see lib/devGate.js).
+  const [devUnlocked, setDevUnlocked] = useState(devToolsUnlocked());
   const versionTapsRef = useRef(0);
   function handleVersionTap() {
     if (devUnlocked) return;
@@ -71,7 +73,7 @@ export default function SettingsScreen() {
       undefined,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: (pin) => { if (pin === DEV_TOOLS_PIN) setDevUnlocked(true); } },
+        { text: 'OK', onPress: (pin) => { if (pin === DEV_TOOLS_PIN) { unlockDevTools(); setDevUnlocked(true); } } },
       ],
       'secure-text',
       '',
@@ -257,7 +259,7 @@ export default function SettingsScreen() {
               <NavRow
                 icon="heart-outline"
                 label="Apple Health"
-                sub={healthAsked ? 'Mindful Minutes connected' : 'Sync your practice as Mindful Minutes'}
+                sub={healthAsked ? 'Manage access in iOS Settings → Health' : 'Sync your practice as Mindful Minutes'}
                 onPress={handleConnectHealth}
                 last
               />

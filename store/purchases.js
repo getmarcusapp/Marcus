@@ -55,8 +55,6 @@ export async function purchasePackage(pkg) {
     // RevenueCat may take a moment to sync the entitlement — treat the
     // absence of an error as success rather than checking entitlement
     // immediately, which can fail in sandbox due to sync delay.
-    const isActive = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined';
-    console.log('Purchase completed. Entitlement active:', isActive, 'Active entitlements:', Object.keys(customerInfo.entitlements.active));
     return { success: true, customerInfo };
   } catch (e) {
     if (!e.userCancelled) {
@@ -66,7 +64,10 @@ export async function purchasePackage(pkg) {
   }
 }
 
-// Restore purchases (required by App Store guidelines)
+// Restore purchases (required by App Store guidelines). `error: true`
+// distinguishes "couldn't reach the store" (offline, RC outage) from a
+// genuine no-subscription result — a paying user offline must not be told
+// they have no subscription.
 export async function restorePurchases() {
   try {
     const customerInfo = await Purchases.restorePurchases();
@@ -74,6 +75,6 @@ export async function restorePurchases() {
     return { success: true, isActive };
   } catch (e) {
     console.log('restorePurchases error:', e);
-    return { success: false, isActive: false };
+    return { success: false, isActive: false, error: true };
   }
 }

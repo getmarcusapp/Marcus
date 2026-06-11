@@ -28,30 +28,13 @@ import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { PracticeHeader } from '../components/PracticeHeader';
 import { STOIC_QUOTES, selectCandidates } from '../constants/stoicQuotes';
 
-const SYSTEM_PROMPT = `You are a curator of Stoic and philosophical wisdom generating a personalized daily reading for a user of a Stoic practice app.
-
-CRITICAL: You will be given a list of CANDIDATE QUOTES with their authors, works, and source citations. You MUST select your quote from this candidate list — do not generate, paraphrase, or substitute any quote. Use the exact quote text and exact attribution as provided. This is non-negotiable: misattribution destroys user trust.
-
-Your job is to:
-1. Select the candidate that best resonates with the user's Compass — what brought them to the practice, what they want to overcome, who they aspire to be.
-2. Write a 3–4 sentence reflection in the second person that connects the quote to the user's practice. The reflection may quietly echo language or ideas from their Compass when it earns the connection — never quote the Compass back at them.
-
-Output this EXACT JSON format with no other text:
-{
-  "quote_id": "the id of the candidate you selected",
-  "quote": "the exact quote text from the candidate (verbatim)",
-  "author": "the exact author from the candidate (verbatim)",
-  "work": "the exact work from the candidate (verbatim)",
-  "theme": "2-4 word Stoic theme",
-  "virtue": "Wisdom|Courage|Temperance|Justice",
-  "reflection": "A 3-4 sentence reflection in second person, grounded in the user's Compass when it earns the connection."
-}
-
-Rules:
-- Pick the quote whose theme genuinely speaks to something in the user's Compass. Prefer relevance over rotation.
-- Reflection must be original and specific to the chosen quote — no generic Stoic platitudes.
-- Match the virtue field to the dominant virtue of the chosen candidate.
-- Do not use temporal markers (today, yesterday, this week, recently) in the reflection — the reading should read as timeless.`;
+// Reading generation goes through our server proxy (api/generate-reading.js,
+// deployed with the getmarcus.app site). The Anthropic key, system prompt,
+// model, and token cap all live server-side — nothing sensitive ships in the
+// JS bundle. EXPO_PUBLIC_READING_ENDPOINT can override for local testing
+// (e.g. a `vercel dev` instance).
+const READING_ENDPOINT =
+  process.env.EXPO_PUBLIC_READING_ENDPOINT || 'https://getmarcus.app/api/generate-reading';
 
 function normalizeQuote(q) {
   return (q || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
@@ -85,6 +68,7 @@ export default function ReadScreen() {
   }
   const shareCardRef = useRef(null);
   const scrollRef = useRef(null);
+  const generatingRef = useRef(false);
   const commitMindfulSession = useMindfulSession();
   const playerInset = useMiniPlayerInset();
 
@@ -114,6 +98,11 @@ export default function ReadScreen() {
   }, []));
 
   async function generateReading() {
+    // In-flight guard: the focus effect re-calls this when the user bounces
+    // away and back mid-generation; a second concurrent run produced
+    // duplicate history entries and double-counted the rate caps. A ref
+    // (not `loading` state) because the focus-effect closure goes stale.
+    if (generatingRef.current) return;
     // Rate limit: protect AI cost per user. Cap enforces a reasonable
     // ceiling for normal use (most users generate ≤2/day) while catching
     // abuse before unit economics go negative.
@@ -132,6 +121,7 @@ export default function ReadScreen() {
       );
       return;
     }
+    generatingRef.current = true;
     setLoading(true);
     setLoadingPhase(0);
     const phaseTimer = setTimeout(() => setLoadingPhase(1), 4000);
@@ -177,31 +167,18 @@ Return only the JSON object.`;
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000);
         try {
-          const response = await fetch('https://api.anthropic.com/v1/messages', {
+          const response = await fetch(READING_ENDPOINT, {
             method: 'POST',
             signal: controller.signal,
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': process.env.EXPO_PUBLIC_ANTHROPIC_KEY,
-              'anthropic-version': '2023-06-01',
-              'anthropic-dangerous-direct-browser-access': 'true',
-            },
-            body: JSON.stringify({
-              model: 'claude-sonnet-4-6',
-              max_tokens: 2048,
-              system: SYSTEM_PROMPT,
-              messages: [{ role: 'user', content: userMessage }],
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userMessage }),
           });
           const data = await response.json();
           if (!response.ok) {
             console.log('Reading API non-OK:', response.status, JSON.stringify(data));
-            throw new Error(`API ${response.status}: ${data?.error?.message || 'unknown'}`);
+            throw new Error(`API ${response.status}: ${data?.error || 'unknown'}`);
           }
-          const textBlock = Array.isArray(data.content)
-            ? data.content.filter(b => b.type === 'text').pop()
-            : null;
-          const text = textBlock?.text || data.content?.[0]?.text || '';
+          const text = data.text || '';
           const stripped = text.replace(/```json|```/g, '').trim();
           const start = stripped.indexOf('{');
           const end = stripped.lastIndexOf('}');
@@ -271,6 +248,7 @@ Return only the JSON object.`;
       );
     } finally {
       clearTimeout(phaseTimer);
+      generatingRef.current = false;
       setLoading(false);
       setLoadingPhase(0);
     }
@@ -390,7 +368,14 @@ Return only the JSON object.`;
             ) : reading ? (
               <>
                 <View style={s.quoteCard}>
-                  <TouchableOpacity style={s.quoteShareIcon} onPress={handleShare} activeOpacity={0.6} hitSlop={10}>
+                  <TouchableOpacity
+                    style={s.quoteShareIcon}
+                    onPress={handleShare}
+                    activeOpacity={0.6}
+                    hitSlop={10}
+                    accessibilityRole="button"
+                    accessibilityLabel="Share this quote"
+                  >
                     <Ionicons name="arrow-redo-outline" size={18} color={colors.accent} />
                   </TouchableOpacity>
                   <Text style={[s.quoteText, s.quoteTextWithIcon]}>“{reading.quote}”</Text>

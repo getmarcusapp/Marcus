@@ -3,17 +3,29 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Alert,
 } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, Redirect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { cancelAllNotifications } from '../notifications';
 import { clearTodayPractice, sealTodayPractice, seedWeekOfPracticeData } from '../store/db';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { devToolsUnlocked } from '../lib/devGate';
 
 const NOTIF_SETTINGS_KEY = 'notification_settings';
 
 export default function DeveloperSettingsScreen() {
+  // Route-level enforcement: the expo-router route exists in every build, so
+  // a deep link (marcus://settings-developer) reaches this screen directly,
+  // skipping the Settings PIN gate. Bounce anyone who hasn't unlocked.
+  // Stable for the lifetime of a mount, so the early return is hook-safe.
+  if (!devToolsUnlocked()) {
+    return <Redirect href="/settings" />;
+  }
+  return <DeveloperSettingsInner />;
+}
+
+function DeveloperSettingsInner() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
   const scrollRef = useRef(null);
@@ -84,7 +96,9 @@ export default function DeveloperSettingsScreen() {
     await cancelAllNotifications();
     const raw = await AsyncStorage.getItem(NOTIF_SETTINGS_KEY);
     const settings = raw ? JSON.parse(raw) : {};
-    const updated = { ...settings, morningEnabled: false, eveningEnabled: false, reviewEnabled: false };
+    // Disable every reminder type — otherwise the still-enabled ones are
+    // re-scheduled by the next foreground re-sync, undoing the cancel.
+    const updated = { ...settings, morningEnabled: false, eveningEnabled: false, reviewEnabled: false, compassEnabled: false, middayEnabled: false };
     await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, JSON.stringify(updated));
     Alert.alert('', 'All notifications cancelled.');
   }
