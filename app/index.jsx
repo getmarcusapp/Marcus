@@ -97,9 +97,12 @@ export default function PracticeScreen() {
   const [compassDone, setCompassDone] = useState(false);
   const [readingDone, setReadingDone] = useState(false);
   const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
-  // 1-based number of the next unlocked-but-unread Foundations letter, or
-  // null when caught up / past the card's window.
-  const [foundationsNext, setFoundationsNext] = useState(null);
+  // Foundations card state: { nextUnread, unlockedCount, read, daysSinceStart }
+  // or null when the card is past its window. Unlike the first cut (which
+  // hid the card the moment today's letter was read — it read as a glitch
+  // and killed the "tomorrow:" anticipation hook), the card stays for the
+  // rest of the day in a quiet read state pointing at tomorrow's letter.
+  const [foundations, setFoundationsState] = useState(null);
   const [todayDate, setTodayDate] = useState(new Date());
   const [reviewDay, setReviewDay] = useState(0);
   const [reviewDone, setReviewDone] = useState(false);
@@ -172,14 +175,15 @@ export default function PracticeScreen() {
     setReadingDone(!!reading);
     setCompassDone(compassToday);
     setStreak(s);
-    // Foundations card: present while there's an unlocked-but-unread letter
-    // in the user's first stretch; self-retires when caught up and caps at
-    // two weeks regardless. The series stays available in the Library.
+    // Foundations card: lives through the unlock week (and a grace window
+    // for users with unread letters), then retires to the Library for good.
     try {
       const f = await getFoundationsState();
-      setFoundationsNext(f.nextUnread !== null && f.daysSinceStart < 14 ? f.nextUnread : null);
+      const seriesDone = f.read.length >= FOUNDATIONS_LETTERS.length;
+      const inWindow = f.daysSinceStart < 14 && !seriesDone;
+      setFoundationsState(inWindow ? f : null);
     } catch {
-      setFoundationsNext(null);
+      setFoundationsState(null);
     }
     // Re-sync notifications against today's done-state
     refreshNotificationsForToday().catch(() => {});
@@ -423,11 +427,16 @@ export default function PracticeScreen() {
   })();
 
   // Foundations card — the seven-letter teaching arc for the first week.
-  // Surfaces the next unread letter; absent once the user is caught up.
-  // Shared between the in-progress and sealed renders.
-  const foundationsBlock = foundationsNext !== null && (() => {
-    const letter = FOUNDATIONS_LETTERS[foundationsNext - 1];
+  // Two states: an unread letter today (TODAY tag), or caught-up (quiet
+  // read state that re-opens today's letter and teases tomorrow's). Shared
+  // between the in-progress and sealed renders.
+  const foundationsBlock = foundations !== null && (() => {
+    const caughtUp = foundations.nextUnread === null;
+    // Caught up: the card points back at today's (latest unlocked) letter.
+    const letterNum = caughtUp ? foundations.unlockedCount : foundations.nextUnread;
+    const letter = FOUNDATIONS_LETTERS[letterNum - 1];
     if (!letter) return null;
+    const nextLetter = FOUNDATIONS_LETTERS[foundations.unlockedCount]; // undefined after VII
     return (
       <>
         <View style={s.weeklyHeader}>
@@ -438,18 +447,32 @@ export default function PracticeScreen() {
             style={s.routineRow}
             onPress={() => {
               haptics.tap();
-              router.push(`/foundations?letter=${foundationsNext}&from=/&fromLabel=Practice`);
+              router.push(`/foundations?letter=${letterNum}&from=/&fromLabel=Practice`);
             }}
             activeOpacity={0.7}
           >
-            <Ionicons name="mail-outline" size={18} color={colors.accent} />
+            {caughtUp ? (
+              <View style={[s.dot, s.dotDone]}>
+                <Ionicons name="checkmark" size={13} color={colors.bg} />
+              </View>
+            ) : (
+              <Ionicons name="mail-outline" size={18} color={colors.accent} />
+            )}
             <View style={s.routineContent}>
-              <Text style={s.routineTitle}>Letter {letter.num} · {letter.title}</Text>
-              <Text style={s.routineSub}>Two minutes. One tool.</Text>
+              <Text style={[s.routineTitle, caughtUp && s.titleDone]}>
+                Letter {letter.num} · {letter.title}
+              </Text>
+              <Text style={s.routineSub}>
+                {caughtUp
+                  ? (nextLetter ? `Letter ${nextLetter.num} arrives tomorrow` : 'The foundations are laid')
+                  : 'Two minutes. One tool.'}
+              </Text>
             </View>
-            <View style={[s.tag, s.tagAccent]}>
-              <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
-            </View>
+            {!caughtUp && (
+              <View style={[s.tag, s.tagAccent]}>
+                <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </>
