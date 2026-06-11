@@ -136,6 +136,11 @@ export default function PaywallScreen() {
   const annualPrice = annualPkg?.product?.priceString;
   const monthlyPrice = monthlyPkg?.product?.priceString;
   const annualPerDay = perDayLabel(annualPkg);
+  // Savings derived from live prices so a repricing in App Store Connect
+  // can never strand a stale hardcoded percentage here.
+  const savingsPct = annualPkg?.product?.price && monthlyPkg?.product?.price
+    ? Math.round((1 - annualPkg.product.price / (monthlyPkg.product.price * 12)) * 100)
+    : null;
   const offeringsUnavailable = !loading && !annualPkg && !monthlyPkg;
 
   // Top back chrome — shown whenever the paywall was reached from inside
@@ -250,7 +255,7 @@ export default function PaywallScreen() {
                 {annualPrice}<Text style={s.planPeriod}>/year</Text>
               </Text>
               <Text style={[s.planNote, selectedPackage === 'annual' && s.planNoteSelected]}>
-                {annualPerDay ? `${annualPerDay} · ` : ''}Save 37% vs monthly
+                {annualPerDay ? `${annualPerDay}` : ''}{annualPerDay && savingsPct ? ' · ' : ''}{savingsPct ? `Save ${savingsPct}% vs monthly` : ''}
               </Text>
             </TouchableOpacity>
             )}
