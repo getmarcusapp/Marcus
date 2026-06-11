@@ -157,6 +157,11 @@ export async function saveTodayReading(reading) {
       date: new Date().toDateString(),
     }));
     await addToReadingHistory(reading);
+    // The reading may be the user's final practice of the day — credit the
+    // streak here too. incrementStreak is idempotent (lastDate check) and
+    // self-gates on all four practices being done, so every completion
+    // writer can safely call it regardless of the order the user finished in.
+    await incrementStreak();
     return true;
   } catch (e) { return false; }
 }
@@ -302,6 +307,9 @@ export async function persistCompassDone() {
     await AsyncStorage.setItem('compass_done', JSON.stringify({
       date: new Date().toDateString(),
     }));
+    // Same as saveTodayReading: the compass may be the last step completed
+    // today, so credit the streak from here as well (idempotent, self-gated).
+    await incrementStreak();
     return true;
   } catch (e) { return false; }
 }

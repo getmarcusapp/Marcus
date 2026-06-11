@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Tabs, useRouter, useSegments, usePathname } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, AppState, Platform } from 'react-native';
+import { View, Text, AppState, Platform, StyleSheet, Image } from 'react-native';
 import { colors, font } from '../constants/theme';
 import { hasOnboarded, getHasSeenCompassIntro, setHasSeenCompassIntro } from '../store/db';
 import { initializePurchases } from '../store/purchases';
@@ -13,7 +13,7 @@ import { MiniMeditationPlayer } from '../components/MiniMeditationPlayer';
 import { LockScreen } from '../components/LockScreen';
 import { LaunchSplash } from '../components/LaunchSplash';
 import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
-import { useFonts, Inter_400Regular, Inter_500Medium, Inter_300Light_Italic } from '@expo-google-fonts/inter';
+import { useFonts, Inter_300Light, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_300Light_Italic } from '@expo-google-fonts/inter';
 import { Cinzel_400Regular } from '@expo-google-fonts/cinzel';
 
 function TabIcon({ name, color, size = 22 }) {
@@ -100,33 +100,36 @@ function OnboardingGate() {
 }
 
 export default function Layout() {
-  const { isLocked } = useAppLock();
+  const { isLocked, lockEnabled } = useAppLock();
   // Animated launch splash sits over the app until it dissolves away.
   const [splashDone, setSplashDone] = useState(false);
+  // True while the app is inactive/backgrounded. With App Lock on, an opaque
+  // cover renders during that window so iOS's app-switcher snapshot captures
+  // the skull — not the user's journal text. Without it, the lock's privacy
+  // promise is defeated by the switcher carousel.
+  const [appBlurred, setAppBlurred] = useState(false);
   // Block first paint until brand fonts are loaded so headlines, body,
   // and the Marcus wordmark all land with the right typography on cold
   // start. Cinzel (display) is bundled now that it replaced iOS-system Didot.
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_300Light,
     Inter_400Regular,
     Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
     Inter_300Light_Italic,
     Cinzel_400Regular,
   });
+  // If font loading errors (rare — they're bundled — but possible), render
+  // the app with system-font fallbacks rather than spinning on the splash
+  // forever. A wrong typeface beats a bricked app.
+  const appReady = fontsLoaded || !!fontError;
 
-  // Set Inter Regular as the default for any <Text> that doesn't set
-  // its own fontFamily. Runs after fonts load to avoid pointing at a
-  // not-yet-registered font name. Side-effect outside render to avoid
-  // the React-warning that bit us last time.
-  useEffect(() => {
-    if (!fontsLoaded) return;
-    if (Text.defaultProps?._marcusBrandFontApplied) return;
-    Text.defaultProps = Text.defaultProps || {};
-    const prior = Text.defaultProps.style;
-    Text.defaultProps.style = prior
-      ? [prior, { fontFamily: 'Inter_400Regular' }]
-      : { fontFamily: 'Inter_400Regular' };
-    Text.defaultProps._marcusBrandFontApplied = true;
-  }, [fontsLoaded]);
+  // Note: there used to be a Text.defaultProps mutation here that set Inter
+  // as the app-wide default font. React 19 / RN 0.81 no longer read
+  // defaultProps on function components, so it was a silent no-op — any
+  // <Text> that needs Inter must set fontFamily explicitly (font.body et
+  // al. from constants/theme).
 
   useEffect(() => {
     // Boot the app lock first so the lock screen can show immediately on
@@ -143,9 +146,15 @@ export default function Layout() {
       const asked = await AsyncStorage.getItem('health_permission_asked');
       if (asked === 'true') await health.requestPermission();
     })();
-    // Bypass paywall in dev and beta builds — never runs in production
+    // Bypass paywall in dev and beta builds. In production, proactively
+    // remove any persisted dev overrides — AsyncStorage survives the
+    // TestFlight-beta → App Store update, and a stale has_premium flag
+    // must not grant lifetime access. useEntitlement also ignores these
+    // flags outside dev/beta; this cleanup is belt-and-braces.
     if (__DEV__ || process.env.EXPO_PUBLIC_IS_BETA === 'true') {
       AsyncStorage.setItem('has_premium', 'true');
+    } else {
+      AsyncStorage.multiRemove(['has_premium', 'dev_trial_days_left']).catch(() => {});
     }
 
     // AppState listener handles two things: re-schedule notifications on
@@ -154,9 +163,11 @@ export default function Layout() {
     // for more than the threshold defined in lib/appLock.js.
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') {
+        setAppBlurred(false);
         scheduleAllNotifications();
         handleForeground();
       } else if (state === 'background' || state === 'inactive') {
+        setAppBlurred(true);
         handleBackground();
       }
     });
@@ -168,7 +179,7 @@ export default function Layout() {
   // ready, then animates away, so there's never a blank flash.
   return (
     <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
-      {fontsLoaded && (
+      {appReady && (
       <SafeAreaProvider>
       <OnboardingGate />
       <Tabs
@@ -250,7 +261,19 @@ export default function Layout() {
     </SafeAreaProvider>
       )}
       {!splashDone && (
-        <LaunchSplash active={fontsLoaded} onDone={() => setSplashDone(true)} />
+        <LaunchSplash active={appReady} onDone={() => setSplashDone(true)} />
+      )}
+      {/* Snapshot privacy cover — topmost, only while backgrounded with
+          App Lock on. FaceID's own system sheet briefly flips AppState to
+          inactive too; covering during that blink is harmless. */}
+      {lockEnabled && appBlurred && (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center' }]}>
+          <Image
+            source={require('../assets/skull-gold.png')}
+            style={{ width: 96, height: 96, opacity: 0.9 }}
+            resizeMode="contain"
+          />
+        </View>
       )}
     </View>
   );

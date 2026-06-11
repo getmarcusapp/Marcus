@@ -1,10 +1,14 @@
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// How notifications appear when app is foregrounded
+// How notifications appear when app is foregrounded. shouldShowBanner /
+// shouldShowList are the current expo-notifications keys; shouldShowAlert is
+// kept for back-compat until the SDK drops the deprecated mapping.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: false,
     shouldSetBadge: false,
   }),
@@ -41,91 +45,136 @@ async function isTodayReadingDone() {
   } catch { return false; }
 }
 
-export async function scheduleAllNotifications() {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+async function isTodayCompassDone() {
+  try {
+    // Written by db.js persistCompassDone under 'compass_done' as { date }.
+    const raw = await AsyncStorage.getItem('compass_done');
+    if (!raw) return false;
+    const { date } = JSON.parse(raw);
+    return date === new Date().toDateString();
+  } catch { return false; }
+}
+
+// Schedule one practice reminder. The subtlety: a repeating `daily` trigger
+// can't suppress just today's fire, and skipping it entirely (the old
+// behavior) also removed tomorrow's and every future day's reminder — a user
+// who practiced today and didn't reopen the app got no reminder ever again.
+//
+// So: when the practice is already done today AND the reminder time is still
+// ahead (a repeating trigger would ping after completion), schedule a
+// one-shot for tomorrow instead; the repeating trigger is re-established on
+// the next app open, which the one-shot itself usually prompts. In every
+// other case use the repeating daily trigger so reminders keep firing even
+// if the app isn't opened for days.
+async function scheduleDailyReminder(identifier, content, hour, minute, doneToday) {
+  const now = new Date();
+  const timeAheadToday = hour * 60 + minute > now.getHours() * 60 + now.getMinutes();
+  if (doneToday && timeAheadToday) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(hour, minute, 0, 0);
+    await Notifications.scheduleNotificationAsync({
+      identifier,
+      content,
+      trigger: { type: 'date', date: tomorrow },
+    });
+  } else {
+    await Notifications.scheduleNotificationAsync({
+      identifier,
+      content,
+      trigger: { type: 'daily', hour, minute },
+    });
+  }
+}
+
+// Stable identifiers for the practice reminders, so a re-sync replaces only
+// these — a blanket cancelAllScheduledNotificationsAsync was also wiping the
+// re-engagement notifications scheduled at boot (the two calls race).
+const REMINDER_IDS = {
+  compass: 'reminder-compass',
+  reading: 'reminder-reading',
+  morning: 'reminder-morning',
+  evening: 'reminder-evening',
+  midday: 'reminder-midday',
+  review: 'reminder-review',
+};
+
+// Re-entrancy guard: boot and the AppState foreground listener can both call
+// this in quick succession (FaceID prompts cause inactive→active blips). Two
+// interleaved runs would each cancel-all then schedule, duplicating every
+// reminder. Concurrent callers share the in-flight run instead.
+let scheduleInFlight = null;
+
+export function scheduleAllNotifications() {
+  if (scheduleInFlight) return scheduleInFlight;
+  scheduleInFlight = doScheduleAllNotifications()
+    .catch(() => {})
+    .finally(() => { scheduleInFlight = null; });
+  return scheduleInFlight;
+}
+
+async function doScheduleAllNotifications() {
+  // Replace only the practice reminders (stable ids), never the
+  // re-engagement notifications.
+  await Promise.all(
+    Object.values(REMINDER_IDS).map(id =>
+      Notifications.cancelScheduledNotificationAsync(id).catch(() => {})
+    )
+  );
 
   const raw = await AsyncStorage.getItem('notification_settings');
   if (!raw) return;
-  const settings = JSON.parse(raw);
+  let settings;
+  try {
+    settings = JSON.parse(raw);
+  } catch {
+    return; // corrupt settings — leave everything unscheduled rather than throw
+  }
 
-  const now = new Date();
-  const nowMins = now.getHours() * 60 + now.getMinutes();
-
-  // Compass — skip if already done today
+  // Compass
   if (settings.compassEnabled) {
-    const compassDone = await AsyncStorage.getItem('compass_done_today');
-    const compassDate = compassDone ? JSON.parse(compassDone) : null;
-    const compassAlreadyDone = compassDate === new Date().toDateString();
-    if (!compassAlreadyDone) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Begin with your compass',
-          body: 'Let it orient the day.',
-          sound: false,
-        },
-        trigger: { type: 'daily', hour: settings.compassHour, minute: settings.compassMinute },
-      });
-    }
+    await scheduleDailyReminder(
+      REMINDER_IDS.compass,
+      { title: 'Begin with your compass', body: 'Let it orient the day.', sound: false },
+      settings.compassHour, settings.compassMinute,
+      await isTodayCompassDone(),
+    );
   }
 
-  // Reading — skip if already done today
+  // Reading
   if (settings.readingEnabled) {
-    const readingDone = await isTodayReadingDone();
-    if (!readingDone) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Today's reading is ready",
-          body: 'A passage chosen for this day. Read it before the noise begins.',
-          sound: false,
-        },
-        trigger: { type: 'daily', hour: settings.readingHour, minute: settings.readingMinute },
-      });
-    }
+    await scheduleDailyReminder(
+      REMINDER_IDS.reading,
+      { title: "Today's reading is ready", body: 'A passage chosen for this day. Read it before the noise begins.', sound: false },
+      settings.readingHour, settings.readingMinute,
+      await isTodayReadingDone(),
+    );
   }
 
-  // Morning — skip if already done today OR if the time has already passed today
+  // Morning journal
   if (settings.morningEnabled) {
-    const morningDone = await isTodayJournalDone('morning');
-    const morningMins = settings.morningHour * 60 + settings.morningMinute;
-    const morningPassedToday = nowMins > morningMins;
-    if (!morningDone || !morningPassedToday) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Morning practice',
-          body: 'The hourglass turns. Reflect and intend.',
-          sound: false,
-        },
-        trigger: {
-          type: 'daily',
-          hour: settings.morningHour,
-          minute: settings.morningMinute,
-        },
-      });
-    }
+    await scheduleDailyReminder(
+      REMINDER_IDS.morning,
+      { title: 'Morning practice', body: 'The hourglass turns. Reflect and intend.', sound: false },
+      settings.morningHour, settings.morningMinute,
+      await isTodayJournalDone('morning'),
+    );
   }
 
-  // Evening — skip if already done today
+  // Evening journal
   if (settings.eveningEnabled) {
-    const eveningDone = await isTodayJournalDone('evening');
-    if (!eveningDone) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'The day closes',
-          body: 'Time to examine it before you sleep.',
-          sound: false,
-        },
-        trigger: {
-          type: 'daily',
-          hour: settings.eveningHour,
-          minute: settings.eveningMinute,
-        },
-      });
-    }
+    await scheduleDailyReminder(
+      REMINDER_IDS.evening,
+      { title: 'The day closes', body: 'Time to examine it before you sleep.', sound: false },
+      settings.eveningHour, settings.eveningMinute,
+      await isTodayJournalDone('evening'),
+    );
   }
 
-  // Midday check-in
+  // Midday check-in — no completion state, always repeating
   if (settings.middayEnabled) {
     await Notifications.scheduleNotificationAsync({
+      identifier: REMINDER_IDS.midday,
       content: {
         title: 'Pause',
         body: 'How are you meeting the day?',
@@ -138,6 +187,7 @@ export async function scheduleAllNotifications() {
   // Weekly review
   if (settings.reviewEnabled) {
     await Notifications.scheduleNotificationAsync({
+      identifier: REMINDER_IDS.review,
       content: {
         title: 'Sunday reckoning',
         body: 'Five questions. The week is yours to close.',
@@ -153,54 +203,20 @@ export async function scheduleAllNotifications() {
   }
 }
 
-// Call this when the app comes to foreground — cancels notifications
-// for things already completed today
+// Call this when the app comes to foreground, or when a practice completes.
+// A full re-sync replaces the old keyword-matching cancel: scheduleAll
+// already reads each practice's done-state and suppresses only today's fire
+// (one-shot-for-tomorrow), so completed practices stop pinging today without
+// losing tomorrow's reminder — which the old cancel-the-repeating-trigger
+// approach silently did.
 export async function refreshNotificationsForToday() {
-  try {
-    const raw = await AsyncStorage.getItem('notification_settings');
-    if (!raw) return;
-    const settings = JSON.parse(raw);
-
-    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    const morningDone = await isTodayJournalDone('morning');
-    const eveningDone = await isTodayJournalDone('evening');
-
-    for (const notif of scheduled) {
-      const haystack = ((notif.content?.title || '') + ' ' + (notif.content?.body || '')).toLowerCase();
-      if (morningDone && haystack.includes('morning practice')) {
-        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
-      }
-      if (eveningDone && haystack.includes('the day closes')) {
-        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
-      }
-    }
-  } catch (e) {
-    console.log('refreshNotifications error:', e);
-  }
+  await scheduleAllNotifications();
 }
 
-
-// Call immediately when a journal is saved — cancels the notification for that type
-export async function cancelJournalNotification(type) {
-  try {
-    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    const keywords = {
-      morning: 'morning practice',
-      evening: 'the day closes',
-      compass: 'begin with your compass',
-      reading: "today's reading",
-    };
-    const keyword = keywords[type] || '';
-    if (!keyword) return;
-    for (const notif of scheduled) {
-      const haystack = ((notif.content?.title || '') + ' ' + (notif.content?.body || '')).toLowerCase();
-      if (haystack.includes(keyword)) {
-        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
-      }
-    }
-  } catch (e) {
-    console.log('cancelJournalNotification error:', e);
-  }
+// Call immediately when a practice is completed. The type param is kept for
+// call-site compatibility; the re-sync reads done-state directly.
+export async function cancelJournalNotification(_type) {
+  await scheduleAllNotifications();
 }
 
 
@@ -211,8 +227,17 @@ export async function cancelJournalNotification(type) {
 const REENGAGEMENT_IDS = {
   day2: 'reengagement-day2',
   day7: 'reengagement-day7',
-  streakRisk: 'reengagement-streak-risk',
 };
+
+// Next occurrence of `hour`:00 that is at least a couple of hours away —
+// tomorrow morning in practice. A raw timeInterval ("8 hours from now") fired
+// at 3am for users who opened the app in the evening.
+function nextMorningAt(hour) {
+  const t = new Date();
+  t.setDate(t.getDate() + 1);
+  t.setHours(hour, 0, 0, 0);
+  return t;
+}
 
 export async function scheduleReengagementNotifications() {
   try {
@@ -240,7 +265,7 @@ export async function scheduleReengagementNotifications() {
           body: "The practice doesn't judge absence. It just waits.",
           sound: false,
         },
-        trigger: { type: 'timeInterval', seconds: 60 * 60 * 8, repeats: false },
+        trigger: { type: 'date', date: nextMorningAt(8) },
       });
       return;
     }
@@ -267,7 +292,7 @@ export async function scheduleReengagementNotifications() {
         body: 'He always returned. So can you.',
         sound: false,
       },
-      trigger: { type: 'timeInterval', seconds: 60 * 60 * 7, repeats: false },
+      trigger: { type: 'date', date: nextMorningAt(7) },
     });
 
   } catch (e) {

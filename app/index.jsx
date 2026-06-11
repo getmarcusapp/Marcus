@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image, Animated, ActivityIndicator,
-  Dimensions,
+  Dimensions, AppState,
 } from 'react-native';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
@@ -137,38 +137,55 @@ export default function PracticeScreen() {
   const quote = getDailyQuote(morningQuotes);
   const sealQuote = getDailyQuote(mementoMoriQuotes, 7);
 
-  useFocusEffect(useCallback(() => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-    sealedScrollRef.current?.scrollTo({ y: 0, animated: false });
-    async function load() {
-      const now = new Date();
-      setTodayDate(now);
-      const morning = await getTodayJournal('morning');
-      const evening = await getTodayJournal('evening');
-      const reading = await getTodayReading();
-      const compassToday = await getCompassDone();
-      const s = await getStreak();
-      setTotalDays(s.totalDays || 0);
+  const load = useCallback(async () => {
+    const now = new Date();
+    setTodayDate(now);
+    const morning = await getTodayJournal('morning');
+    const evening = await getTodayJournal('evening');
+    const reading = await getTodayReading();
+    const compassToday = await getCompassDone();
+    const s = await getStreak();
+    setTotalDays(s.totalDays || 0);
+    try {
       const settings = await AsyncStorage.getItem('notification_settings');
       if (settings) {
         const parsed = JSON.parse(settings);
         if (parsed.reviewDay !== undefined) setReviewDay(parsed.reviewDay);
       }
-      // Check if weekly review was completed this review window
-      const reviews = await getReviews();
-      const weekAgo = Date.now() - 3 * 24 * 60 * 60 * 1000; // 3-day window
-      const reviewedThisWindow = reviews.some(r => new Date(r.date).getTime() > weekAgo);
-      setReviewDone(reviewedThisWindow);
-      setMorningDone(!!morning);
-      setEveningDone(!!evening);
-      setReadingDone(!!reading);
-      setCompassDone(compassToday);
-      setStreak(s);
-      // Cancel notifications for anything already done today
-      refreshNotificationsForToday().catch(() => {});
+    } catch {
+      // Corrupt settings shouldn't take down the whole load — the done
+      // flags below matter more than the review-day preference.
     }
+    // Check if weekly review was completed this review window
+    const reviews = await getReviews();
+    const weekAgo = Date.now() - 3 * 24 * 60 * 60 * 1000; // 3-day window
+    const reviewedThisWindow = reviews.some(r => new Date(r.date).getTime() > weekAgo);
+    setReviewDone(reviewedThisWindow);
+    setMorningDone(!!morning);
+    setEveningDone(!!evening);
+    setReadingDone(!!reading);
+    setCompassDone(compassToday);
+    setStreak(s);
+    // Re-sync notifications against today's done-state
+    refreshNotificationsForToday().catch(() => {});
+  }, []);
+
+  useFocusEffect(useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    sealedScrollRef.current?.scrollTo({ y: 0, animated: false });
     load();
-  }, []));
+  }, [load]));
+
+  // useFocusEffect fires on navigation focus, not app foreground — without
+  // this, a user who sealed yesterday and reopens the app after midnight
+  // lands on yesterday's sealed screen (stale date, stale done flags) until
+  // they bounce to another tab and back.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') load();
+    });
+    return () => sub.remove();
+  }, [load]);
 
   // Daily practice is a fixed 4-step flow. Weekly Review is a separate
   // cadence surfaced as its own tile and does not count toward daily progress.
@@ -777,7 +794,7 @@ const s = StyleSheet.create({
   dot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.textSecondary },
   dotDone: { backgroundColor: colors.accent, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
   routineContent: { flex: 1 },
-  routineTitle: { fontSize: 15, fontWeight: '400', color: colors.textPrimary, marginBottom: 3 },
+  routineTitle: { fontSize: 15, fontFamily: font.body, color: colors.textPrimary, marginBottom: 3 },
   titleDone: { color: colors.textSecondary, textDecorationLine: 'line-through' },
   titleLocked: { color: colors.textSecondary },
   routineSub: { fontSize: 12, color: colors.textSecondary },
@@ -861,7 +878,7 @@ const s = StyleSheet.create({
   medTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
   // Subtitle ("Accounting" etc.) gold per V — was textSecondary.
   medSubtitle: { fontSize: font.labelSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
-  medTitle: { fontSize: 20, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
+  medTitle: { fontSize: 20, fontFamily: font.bodySemiBold, color: colors.textPrimary, marginBottom: 8 },
   medDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 14 },
   medMeta: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.5 },
   medProgressBar: {
@@ -887,6 +904,6 @@ const s = StyleSheet.create({
   galleryImage: { width: '100%', height: '100%' },
   galleryPlay: { position: 'absolute', bottom: 8, right: 8 },
   gallerySubtitle: { fontSize: font.labelSize, letterSpacing: 1.5, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
-  galleryTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, lineHeight: 19, marginBottom: 4 },
+  galleryTitle: { fontSize: 14, fontFamily: font.bodySemiBold, color: colors.textPrimary, lineHeight: 19, marginBottom: 4 },
   galleryMeta: { fontSize: 11, color: colors.textSecondary, letterSpacing: 0.3 },
 });

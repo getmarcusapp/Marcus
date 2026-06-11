@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
-import { saveReview, getReviews, getJournals, getTriggers, getRoles } from '../store/db';
+import { saveReview, updateReview, getReviews, getJournals, getTriggers, getRoles } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { useKeyboardVisible } from '../lib/useKeyboardVisible';
 import { useEntitlement } from '../lib/useEntitlement';
@@ -83,6 +83,11 @@ export default function ReviewScreen() {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, []));
   const [history, setHistory] = useState([]);
+  // The review (if any) already sealed in the current review window. Editing
+  // it updates in place — re-opening the wizard used to start blank and seal
+  // a duplicate entry for the same week.
+  const [editingReview, setEditingReview] = useState(null);
+  const savingRef = useRef(false);
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
   const shareCardRef = useRef(null);
   const scrollRef = useRef(null);
@@ -147,6 +152,18 @@ export default function ReviewScreen() {
     async function load() {
       const reviews = await getReviews();
       setHistory(reviews);
+      // Pre-load this window's review (same 3-day window the Practice
+      // screen uses for its done-state) so "Edit this week's review"
+      // actually edits instead of duplicating.
+      const windowMs = 3 * 86400000;
+      const current = reviews.find(r => Date.now() - new Date(r.date).getTime() < windowMs);
+      if (current) {
+        setEditingReview(current);
+        setAnswers(current.answers || {});
+        if (current.bestVirtue) setBestVirtue(current.bestVirtue);
+        if (current.worstVirtue) setWorstVirtue(current.worstVirtue);
+        setIntention(current.intention || '');
+      }
       const journals = await getJournals();
       const triggers = await getTriggers();
       const userRoles = await getRoles();
@@ -211,20 +228,35 @@ export default function ReviewScreen() {
     || (intention || '').trim().length > 0;
 
   async function handleSave() {
-    if (!canSeal) return;
-    const entry = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      weekOf: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      answers, bestVirtue, worstVirtue, intention, stats,
-    };
-    await saveReview(entry);
-    haptics.success();
-    const updated = await getReviews();
-    setHistory(updated);
-    // Show the dedicated "Week sealed" moment (independent of the daily
-    // practice seal), then the user continues to Practice from there.
-    setSealed(true);
+    // savingRef guards double-taps on the final wizard step — two quick
+    // taps on Seal used to save two entries.
+    if (!canSeal || savingRef.current) return;
+    savingRef.current = true;
+    try {
+      if (editingReview) {
+        // Re-sealing within the same window updates the existing entry.
+        const entry = { ...editingReview, answers, bestVirtue, worstVirtue, intention, stats };
+        await updateReview(entry);
+        setEditingReview(entry);
+      } else {
+        const entry = {
+          id: Date.now().toString(),
+          date: new Date().toISOString(),
+          weekOf: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          answers, bestVirtue, worstVirtue, intention, stats,
+        };
+        await saveReview(entry);
+        setEditingReview(entry);
+      }
+      haptics.success();
+      const updated = await getReviews();
+      setHistory(updated);
+      // Show the dedicated "Week sealed" moment (independent of the daily
+      // practice seal), then the user continues to Practice from there.
+      setSealed(true);
+    } finally {
+      savingRef.current = false;
+    }
   }
 
   async function shareReviewEntry(entry) {
@@ -364,9 +396,7 @@ export default function ReviewScreen() {
               onPress={() => requireAccess(() => { haptics.tap(); setOpenPrompt(0); })}
             >
               <Text style={[s.editBtnText, s.editBtnSaveText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-                {history.some(r => r.weekOf === new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
-                  ? 'Edit this week\'s review'
-                  : 'Begin weekly review'}
+                {editingReview ? 'Edit this week\'s review' : 'Begin weekly review'}
               </Text>
             </GoldPrimary>
             <Text style={s.sealBtnSub}>
@@ -501,7 +531,7 @@ export default function ReviewScreen() {
                       style={[s.vpBtn, bestVirtue === v.id && s.vpBtnActive]}
                       onPress={() => { haptics.tap(); setBestVirtue(v.id); }}
                     >
-                      <Text style={[s.vpBtnText, bestVirtue === v.id && { color: colors.accent, fontWeight: '600' }]}>
+                      <Text style={[s.vpBtnText, bestVirtue === v.id && { color: colors.accent, fontFamily: font.bodySemiBold }]}>
                         {v.name}
                       </Text>
                     </TouchableOpacity>
@@ -515,7 +545,7 @@ export default function ReviewScreen() {
                       style={[s.vpBtn, worstVirtue === v.id && s.vpBtnActive]}
                       onPress={() => { haptics.tap(); setWorstVirtue(v.id); }}
                     >
-                      <Text style={[s.vpBtnText, worstVirtue === v.id && { color: colors.accentDim, fontWeight: '600' }]}>
+                      <Text style={[s.vpBtnText, worstVirtue === v.id && { color: colors.accentDim, fontFamily: font.bodySemiBold }]}>
                         {v.name}
                       </Text>
                     </TouchableOpacity>
@@ -678,7 +708,7 @@ const s = StyleSheet.create({
   weekSealedSub: { fontSize: 17, color: colors.textSecondary, fontFamily: font.body, lineHeight: 26, textAlign: 'center' },
   weekSealedFooter: { paddingHorizontal: 24, paddingBottom: 24 },
   weekSealedBtn: { borderRadius: radius.md, height: 56 },
-  weekSealedBtnText: { fontSize: 15, fontWeight: '700', color: '#000', letterSpacing: 0.3 },
+  weekSealedBtnText: { fontSize: 15, fontFamily: font.bodyBold, color: '#000', letterSpacing: 0.3 },
   shareCardOffscreen: { position: 'absolute', left: -99999, top: 0 },
   scroll: { flex: 1 },
   hero: {
@@ -707,7 +737,7 @@ const s = StyleSheet.create({
   promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   promptNum: { fontSize: 11, letterSpacing: 1.8, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
-  promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
+  promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontFamily: font.body },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', fontFamily: font.body },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
@@ -747,7 +777,7 @@ const s = StyleSheet.create({
   sparkBar: { width: '70%', borderRadius: 3, minHeight: 3 },
   sparkBaseline: { width: '70%', height: 1.5, backgroundColor: colors.border, borderRadius: 1 },
   sparkDay: { fontSize: 11, color: colors.textSecondary, marginTop: 8, letterSpacing: 0.4 },
-  sparkDayToday: { color: colors.accent, fontWeight: '600' },
+  sparkDayToday: { color: colors.accent, fontFamily: font.bodySemiBold },
   // Virtue ledger (inside promptCard)
   virtueRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
   virtuePicker: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' },

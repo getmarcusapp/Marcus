@@ -110,6 +110,19 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
         )}
       </TouchableOpacity>
 
+      {/* Always-visible Save/Cancel — the keyboard accessory pair only exists
+          while an input is focused, which left no way to save when the
+          keyboard was down (e.g. after editing only the distortion pills).
+          Same hazard emotions-history solved with its header Done button. */}
+      <View style={s.btnRow}>
+        <GoldSecondary style={s.cancelBtn} onPress={onCancel}>
+          <Text style={s.cancelBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Cancel</Text>
+        </GoldSecondary>
+        <GoldPrimary style={s.saveBtn} onPress={() => onSave({ ...entry, answers, intention })}>
+          <Text style={s.saveBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Save changes</Text>
+        </GoldPrimary>
+      </View>
+
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID="reviewArchiveEditAccessory">
           <View style={s.accessoryBarPair}>
@@ -135,7 +148,7 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
 const s = StyleSheet.create({
   container: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, overflow: 'hidden', marginBottom: 12 },
   header: { backgroundColor: colors.bg, padding: 16, borderBottomWidth: 0.5, borderBottomColor: colors.accentDim, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerTitle: { fontSize: 14, fontWeight: '600', color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', letterSpacing: 0.8 },
+  headerTitle: { fontSize: 14, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', letterSpacing: 0.8 },
   headerDate: { fontSize: 13, color: colors.accentDim },
   promptCard: { borderBottomWidth: 0.5, borderBottomColor: colors.border, paddingHorizontal: 8, paddingVertical: 14, backgroundColor: colors.bgCard },
   promptCardOpen: { backgroundColor: colors.bgElevated },

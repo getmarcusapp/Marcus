@@ -6,6 +6,7 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
+import * as Notifications from 'expo-notifications';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -81,8 +82,16 @@ export default function NotificationsSettingsScreen() {
 
   useEffect(() => {
     AsyncStorage.getItem(NOTIF_SETTINGS_KEY).then(raw => {
-      if (raw) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(raw) });
+      if (raw) {
+        try { setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(raw) }); } catch {}
+      }
     });
+    // Reflect the real permission state on mount — the banner used to show
+    // "Notifications not enabled" to users whose reminders were firing fine,
+    // because permissionGranted only updated after a Save.
+    Notifications.getPermissionsAsync().then(({ status }) => {
+      setPermissionGranted(status === 'granted');
+    }).catch(() => {});
   }, []);
 
   function update(key, value) {
@@ -91,16 +100,21 @@ export default function NotificationsSettingsScreen() {
   }
 
   async function handleSave() {
+    // Persist first, regardless of permission — a denial used to silently
+    // discard every toggle/time the user just configured. With settings
+    // saved, enabling notifications later in iOS Settings picks them up on
+    // the next foreground re-sync.
+    await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, JSON.stringify(settings));
     const granted = await requestNotificationPermissions();
     setPermissionGranted(granted);
     if (!granted) {
       Alert.alert(
-        'Permission denied',
-        'Enable notifications in iPhone Settings → Marcus to receive reminders.',
+        'Settings saved',
+        'Your reminder settings are saved, but notifications are off for Marcus in iOS Settings. Enable them there to receive reminders.',
       );
+      setSaved(true);
       return;
     }
-    await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, JSON.stringify(settings));
     await scheduleAllNotifications();
     setSaved(true);
   }
@@ -302,7 +316,7 @@ export default function NotificationsSettingsScreen() {
             style={s.saveBtn}
             onPress={handleSave}
           >
-            <Text style={s.saveBtnText}>{saved ? 'Notifications scheduled ✓' : 'Save & schedule notifications'}</Text>
+            <Text style={s.saveBtnText}>{saved ? 'Settings saved ✓' : 'Save & schedule notifications'}</Text>
           </GoldPrimary>
 
           <View style={s.notifNote}>
@@ -322,7 +336,7 @@ const t = StyleSheet.create({
   col: { alignItems: 'center', gap: 8 },
   btn: { width: 36, height: 36, borderWidth: 0.5, borderColor: colors.border, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   arrow: { fontSize: 12, color: colors.textSecondary },
-  val: { fontSize: 22, fontWeight: '600', color: colors.textPrimary, minWidth: 36, textAlign: 'center' },
+  val: { fontSize: 22, fontFamily: font.bodySemiBold, color: colors.textPrimary, minWidth: 36, textAlign: 'center' },
   colon: { fontSize: 22, color: colors.textSecondary, marginBottom: 4 },
 });
 
@@ -344,7 +358,7 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
     padding: spacing.lg,
   },
-  permissionTitle: { fontSize: 13, fontWeight: '600', color: colors.accent, marginBottom: 6, fontFamily: font.bodyMedium },
+  permissionTitle: { fontSize: 13, color: colors.accent, marginBottom: 6, fontFamily: font.bodyMedium },
   permissionText: { fontSize: 13, color: colors.accentDim, lineHeight: 20 },
   body: { padding: spacing.md, paddingBottom: 36 },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 20, marginBottom: 10 },
@@ -361,7 +375,7 @@ const s = StyleSheet.create({
   dayBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.bgDeep },
   dayBtnActive: { borderColor: colors.accent, backgroundColor: colors.bg },
   dayBtnText: { fontSize: 11, color: colors.textSecondary },
-  dayBtnTextActive: { color: colors.accent, fontWeight: '600' },
+  dayBtnTextActive: { color: colors.accent, fontFamily: font.bodySemiBold },
   // Library H56 filled-gold primary CTA (matches editBtn + editBtnSave pattern
   // used app-wide). saveBtnDone is a saved-confirmation variant (outlined gold).
   saveBtn: {
@@ -373,6 +387,6 @@ const s = StyleSheet.create({
   saveBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: '#1a1a1a', letterSpacing: 0.3 },
   saveBtnTextDone: { color: colors.accent },
   notifNote: { padding: 16, backgroundColor: colors.bgCard, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, marginBottom: 36 },
-  notifNoteTitle: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  notifNoteTitle: { fontSize: 12, color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
   notifNoteText: { fontSize: 13, color: colors.textSecondary, lineHeight: 20 },
 });

@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image,
   KeyboardAvoidingView, Platform, Alert,
-  useWindowDimensions,
+  useWindowDimensions, AccessibilityInfo,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -102,6 +102,15 @@ function WelcomeStep({ onNext }) {
   // Compact mode shrinks the skull/title and drops the decorative quote
   // so the input lands above the fold on every screen size.
   const isSmall = screenHeight < 750;
+  // Fall back to the static gradient (the same bg /welcome and /ready use)
+  // when video decode fails or the user has Reduce Motion on — a failed
+  // video left a flat unbranded #050505 behind the wordmark.
+  const [videoFallback, setVideoFallback] = useState(false);
+  useEffect(() => {
+    AccessibilityInfo.isReduceMotionEnabled().then(reduce => {
+      if (reduce) setVideoFallback(true);
+    }).catch(() => {});
+  }, []);
 
   function handleNext() {
     onNext();
@@ -110,7 +119,7 @@ function WelcomeStep({ onNext }) {
   function handleRestore() {
     Alert.alert(
       'Restore from backup?',
-      'Pick a backup file you exported from another device. Your practice — journals, emotion logs, weekly reviews, compass, streak — will be restored. You\'ll skip the rest of onboarding.',
+      'Pick a backup file you exported from another device. Your practice will be restored: journals, emotion logs, weekly reviews, compass, streak. You\'ll skip the rest of onboarding.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -149,14 +158,23 @@ function WelcomeStep({ onNext }) {
         style={{ position: 'absolute', top: 0, left: 0, width: screenWidth, height: screenHeight }}
         pointerEvents="none"
       >
-        <Video
-          source={require('../assets/welcome-bg.mp4')}
-          style={{ width: '100%', height: '100%' }}
-          resizeMode={ResizeMode.COVER}
-          shouldPlay
-          isLooping
-          isMuted
-        />
+        {videoFallback ? (
+          <Image
+            source={require('../assets/bg-svg4.png')}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
+          />
+        ) : (
+          <Video
+            source={require('../assets/welcome-bg.mp4')}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode={ResizeMode.COVER}
+            shouldPlay
+            isLooping
+            isMuted
+            onError={() => setVideoFallback(true)}
+          />
+        )}
         <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(5,5,5,0.5)' }]} />
       </View>
       <SafeAreaView style={s.safeTransparent}>
@@ -483,10 +501,20 @@ function RemindersStep({ onNext }) {
   }
 
   async function handleEnable() {
+    // Persist the chosen times regardless of the permission outcome — a
+    // denial used to silently discard any times the user had just edited.
+    // Scheduling is a no-op without permission; if they later enable
+    // notifications in iOS Settings, the saved times take effect on the
+    // next foreground re-sync.
+    await AsyncStorage.setItem('notification_settings', JSON.stringify(settings));
     const granted = await requestNotificationPermissions();
     if (granted) {
-      await AsyncStorage.setItem('notification_settings', JSON.stringify(settings));
       await scheduleAllNotifications();
+    } else {
+      Alert.alert(
+        'Reminders saved',
+        'Notifications are off for Marcus in iOS Settings. Your reminder times are saved and will work once you enable them: Settings → Notifications → Marcus.',
+      );
     }
     onNext();
   }
@@ -710,7 +738,7 @@ const s = StyleSheet.create({
   // Roman-numeral row marker. Replaces the open-circle previewDot so
   // each row reads as ordered (sequence) instead of as a checkbox to
   // complete.
-  previewNum: { width: 28, fontSize: 12, color: colors.accent, letterSpacing: 1.5, fontWeight: '600', textAlign: 'center' },
+  previewNum: { width: 28, fontSize: 12, color: colors.accent, letterSpacing: 1.5, fontFamily: font.bodySemiBold, textAlign: 'center' },
   previewHint: { fontSize: 12, color: colors.textSecondary, fontStyle: 'italic', marginBottom: 12, paddingHorizontal: 4, letterSpacing: 0.3 },
   // Meditation card pattern — mirrors the in-app /meditate list so the
   // onboarding preview shows the actual product design (painting thumbnail
@@ -761,7 +789,7 @@ const s = StyleSheet.create({
   },
   readyStreak: {
     fontSize: 56,
-    fontWeight: '700',
+    fontFamily: font.bodyBold,
     color: colors.accent,
     letterSpacing: -1,
     textAlign: 'center',
@@ -786,8 +814,8 @@ const s = StyleSheet.create({
     fontSize: 13,
     color: colors.accent,
     letterSpacing: 0.8,
-    fontFamily: font.bodyMedium, textTransform: 'uppercase',
     fontFamily: font.bodyMedium,
+    textTransform: 'uppercase',
   },
   // Step screens — image-hero pattern: full-bleed painting underneath,
   // text aligned to bottom-left, dark gradient overlay for legibility.
@@ -902,7 +930,7 @@ const s = StyleSheet.create({
   },
   reminderAdjusterVal: {
     fontSize: 22,
-    fontWeight: '300',
+    fontFamily: font.bodyLight,
     color: colors.textPrimary,
     minWidth: 32,
     textAlign: 'center',
@@ -910,7 +938,7 @@ const s = StyleSheet.create({
   reminderAdjusterColon: {
     fontSize: 22,
     color: colors.textSecondary,
-    fontWeight: '300',
+    fontFamily: font.bodyLight,
   },
   reminderAdjusterAmpm: {
     fontSize: 12,
@@ -940,7 +968,7 @@ const s = StyleSheet.create({
   practiceItemContent: { flex: 1 },
   practiceItemTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: font.bodySemiBold,
     color: colors.textPrimary,
     marginBottom: 5,
   },
@@ -966,7 +994,7 @@ const s = StyleSheet.create({
   },
   compassFieldLabel: {
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: font.bodySemiBold,
     color: colors.textPrimary,
     marginBottom: 4,
   },
@@ -1018,7 +1046,7 @@ const s = StyleSheet.create({
   },
   compassPreviewLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: font.bodySemiBold,
     color: colors.textPrimary,
     letterSpacing: 0.2,
   },

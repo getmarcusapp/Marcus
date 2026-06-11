@@ -68,7 +68,12 @@ export function LaunchSplash({ active, onDone }) {
 
   return (
     <Animated.View
-      pointerEvents="none"
+      // Swallow touches for the splash's entire lifetime — the full app
+      // mounts underneath as soon as fonts load, and with pointerEvents
+      // "none" taps were landing on UI the user couldn't see (including
+      // the LockScreen, which could pre-trigger FaceID). The overlay
+      // unmounts via onDone, so touches flow the moment the dissolve ends.
+      pointerEvents="auto"
       style={[StyleSheet.absoluteFill, styles.root, { opacity: rootOpacity, transform: [{ scale: rootScale }] }]}
     >
       {/* Gradient background (same as Home) blooms in behind the logo */}

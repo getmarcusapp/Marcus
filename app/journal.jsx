@@ -128,20 +128,26 @@ export default function JournalScreen() {
   }, [sessionType]);
 
   useFocusEffect(useCallback(() => {
-    async function load() {
+    let cancelled = false;
+    (async () => {
       const existing = await getTodayJournal(isMorning ? 'morning' : 'evening');
+      if (cancelled) return;
+      setAlreadySaved(!!existing);
+      // Hydrate from storage only when nothing is typed locally. A refocus
+      // happens mid-wizard too (tab switch, paywall bounce, Past entries),
+      // and the previous unconditional setAnswers({}) erased every unsaved
+      // answer the user had typed. Unsaved local text always wins here; the
+      // mount/sessionType effect above handles the clean-slate cases.
       if (existing) {
-        setAnswers(existing.answers || {});
-        setAlreadySaved(true);
-      } else {
-        setAnswers({});
-        setAlreadySaved(false);
+        setAnswers(prev =>
+          Object.values(prev).some(v => v && v.trim().length > 0) ? prev : (existing.answers || {})
+        );
       }
-    }
-    load();
+    })();
     // Reset scaffolding state on focus — info bubbles are help, not user input.
     setOpenHint(null);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
+    return () => { cancelled = true; };
   }, [sessionType]));
 
   const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, prompts.length);
@@ -545,7 +551,7 @@ const s = StyleSheet.create({
   // Now a gold section label ABOVE the listen card (per V) — moved out of the
   // card and dropped the "Optional ·" prefix.
   listenEyebrow: { fontSize: 12, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 4, marginBottom: 12 },
-  listenTitle: { fontSize: 17, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
+  listenTitle: { fontSize: 17, fontFamily: font.bodySemiBold, color: colors.textPrimary, marginBottom: 8 },
   listenDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 20 },
   listenProgressBar: {
     height: 2, backgroundColor: colors.border, borderRadius: 1,
@@ -561,7 +567,7 @@ const s = StyleSheet.create({
   promptCardOpen: { borderColor: colors.inputBorderActive },
   promptTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   promptNum: { fontSize: 11, letterSpacing: 1.8, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
-  promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400' },
+  promptQ: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontFamily: font.body },
   promptAnswer: { marginTop: 16, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 16 },
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', fontFamily: font.body },
   nextPromptBtn: { marginTop: 12, alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
