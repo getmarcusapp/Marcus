@@ -120,21 +120,27 @@ export default function JournalScreen() {
   // { lead, text } or null when there's nothing to surface.
   const [morningEcho, setMorningEcho] = useState(null);
 
+  // Loads the evening landing's loop-closure callout from today's morning
+  // entry. Called on mount/session-switch AND on every focus — the screen
+  // stays mounted in the tab navigator, so without the focus refresh the
+  // echo could miss a just-written morning entry or show yesterday's after
+  // midnight.
+  const loadMorningEcho = useCallback(async () => {
+    if (isMorning) { setMorningEcho(null); return; }
+    const morning = await getTodayJournal('morning');
+    const named = morning?.answers?.[2]?.trim();
+    const braced = morning?.answers?.[1]?.trim();
+    if (named) setMorningEcho({ lead: 'This morning you named what matters:', text: named });
+    else if (braced) setMorningEcho({ lead: 'This morning you braced for:', text: braced });
+    else setMorningEcho(null);
+  }, [isMorning]);
+
   useEffect(() => {
     async function reload() {
       const existing = await getTodayJournal(isMorning ? 'morning' : 'evening');
       if (existing) { setAnswers(existing.answers || {}); setAlreadySaved(true); }
       else { setAnswers({}); setAlreadySaved(false); }
-      if (!isMorning) {
-        const morning = await getTodayJournal('morning');
-        const named = morning?.answers?.[2]?.trim();
-        const braced = morning?.answers?.[1]?.trim();
-        if (named) setMorningEcho({ lead: 'This morning you named what matters:', text: named });
-        else if (braced) setMorningEcho({ lead: 'This morning you braced for:', text: braced });
-        else setMorningEcho(null);
-      } else {
-        setMorningEcho(null);
-      }
+      loadMorningEcho();
     }
     reload();
     // Reset wizard position when switching morning <-> evening — the two
@@ -159,12 +165,13 @@ export default function JournalScreen() {
           Object.values(prev).some(v => v && v.trim().length > 0) ? prev : (existing.answers || {})
         );
       }
+      loadMorningEcho();
     })();
     // Reset scaffolding state on focus — info bubbles are help, not user input.
     setOpenHint(null);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
     return () => { cancelled = true; };
-  }, [sessionType]));
+  }, [sessionType, loadMorningEcho]));
 
   const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, prompts.length);
   // Gate completion on at least one prompt having content. An empty
