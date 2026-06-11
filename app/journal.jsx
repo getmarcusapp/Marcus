@@ -130,8 +130,10 @@ export default function JournalScreen() {
     const morning = await getTodayJournal('morning');
     const named = morning?.answers?.[2]?.trim();
     const braced = morning?.answers?.[1]?.trim();
-    if (named) setMorningEcho({ lead: 'This morning you named what matters:', text: named });
-    else if (braced) setMorningEcho({ lead: 'This morning you braced for:', text: braced });
+    // The ask line is what makes this a reckoning rather than a mirror:
+    // the echo poses the question the evening examination exists to answer.
+    if (named) setMorningEcho({ lead: 'You named what matters:', text: named, ask: 'Tonight asks: did you move toward it?' });
+    else if (braced) setMorningEcho({ lead: 'You braced for:', text: braced, ask: 'Tonight asks: how did you meet it?' });
     else setMorningEcho(null);
   }, [isMorning]);
 
@@ -284,13 +286,20 @@ export default function JournalScreen() {
 
               <View style={s.body}>
                 {morningEcho && (
-                  <View style={s.echoBox}>
+                  <TouchableOpacity
+                    style={s.echoBox}
+                    activeOpacity={0.8}
+                    onPress={() => { haptics.tap(); setOpenPrompt(0); }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Begin the evening journal with this morning's commitment"
+                  >
                     <Text style={s.echoEyebrow}>This morning</Text>
                     <Text style={s.echoLead}>{morningEcho.lead}</Text>
                     <Text style={s.echoQuote} numberOfLines={4}>
                       “{morningEcho.text.length > 180 ? `${morningEcho.text.slice(0, 180)}…` : morningEcho.text}”
                     </Text>
-                  </View>
+                    <Text style={s.echoAsk}>{morningEcho.ask}</Text>
+                  </TouchableOpacity>
                 )}
                 {(() => {
                   const journalMed = MEDITATIONS[isMorning ? 'premeditatio' : 'evening-examination'];
@@ -569,6 +578,9 @@ const s = StyleSheet.create({
   echoEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
   echoLead: { fontSize: 13, color: colors.textSecondary, fontFamily: font.body, marginBottom: 6 },
   echoQuote: { fontSize: 17, color: colors.textPrimary, lineHeight: 26, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
+  // The reckoning question — gold, so the box reads as a door into the
+  // examination rather than a display of the morning's words.
+  echoAsk: { fontSize: 13, color: colors.accent, fontFamily: font.bodyMedium, marginTop: 12, letterSpacing: 0.3 },
 
   // Light writing surface
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
