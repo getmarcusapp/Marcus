@@ -11,6 +11,7 @@ import * as health from '../lib/health';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MiniMeditationPlayer } from '../components/MiniMeditationPlayer';
 import { LockScreen } from '../components/LockScreen';
+import { LaunchSplash } from '../components/LaunchSplash';
 import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_300Light_Italic } from '@expo-google-fonts/inter';
 import { Cinzel_400Regular } from '@expo-google-fonts/cinzel';
@@ -100,6 +101,8 @@ function OnboardingGate() {
 
 export default function Layout() {
   const { isLocked } = useAppLock();
+  // Animated launch splash sits over the app until it dissolves away.
+  const [splashDone, setSplashDone] = useState(false);
   // Block first paint until brand fonts are loaded so headlines, body,
   // and the Marcus wordmark all land with the right typography on cold
   // start. Cinzel (display) is bundled now that it replaced iOS-system Didot.
@@ -160,10 +163,13 @@ export default function Layout() {
     return () => sub.remove();
   }, []);
 
-  if (!fontsLoaded) return null;
-
+  // Note: we no longer return null while fonts load — instead the LaunchSplash
+  // overlay (which matches the native splash) covers everything until fonts are
+  // ready, then animates away, so there's never a blank flash.
   return (
-    <SafeAreaProvider>
+    <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+      {fontsLoaded && (
+      <SafeAreaProvider>
       <OnboardingGate />
       <Tabs
         screenOptions={({ route }) => ({
@@ -242,5 +248,10 @@ export default function Layout() {
       <MiniMeditationPlayer />
       {isLocked && <LockScreen />}
     </SafeAreaProvider>
+      )}
+      {!splashDone && (
+        <LaunchSplash active={fontsLoaded} onDone={() => setSplashDone(true)} />
+      )}
+    </View>
   );
 }
