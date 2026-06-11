@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useRef } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { FOUNDATIONS_LETTERS } from '../constants/foundations';
@@ -39,12 +40,26 @@ export default function FoundationsListScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 36 + playerInset }}
       >
+        {/* Caravaggio, Saint Jerome Writing (1605–06) — an old man writing
+            with a skull on the desk. Letters and memento mori in one frame. */}
         <View style={s.hero}>
-          <Text style={s.eyebrow}>The Foundations</Text>
-          <Text style={s.title}>Seven letters{'\n'}on the practice</Text>
-          <Text style={s.sub}>
-            One unlocked each day of your first week. Each takes two minutes. Each gives you one tool.
-          </Text>
+          <Image
+            source={require('../assets/heroes/foundations.jpg')}
+            style={s.heroImage}
+            resizeMode="cover"
+          />
+          <LinearGradient
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.35)', 'rgba(0,0,0,0.85)', 'rgba(0,0,0,0.95)']}
+            locations={[0, 0.4, 0.75, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={s.heroContent}>
+            <Text style={s.eyebrow}>The Foundations</Text>
+            <Text style={s.title}>Seven letters{'\n'}on the practice</Text>
+            <Text style={s.sub}>
+              One unlocked each day of your first week. Each takes two minutes. Each gives you one tool.
+            </Text>
+          </View>
         </View>
 
         <View style={s.body}>
@@ -89,11 +104,15 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   hero: {
     backgroundColor: colors.bgDeep,
-    padding: spacing.xl,
-    paddingTop: 52,
+    minHeight: 280,
     borderBottomWidth: 0.5,
     borderBottomColor: colors.border,
+    position: 'relative',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
+  heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  heroContent: { padding: spacing.xl, paddingTop: 52 },
   eyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 10, lineHeight: 36 },
   sub: { fontSize: font.subSize, color: colors.textSecondary, lineHeight: 22 },
