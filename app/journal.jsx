@@ -63,6 +63,20 @@ const virtuePronunciations = {
   dikaiosyne: 'dee-KAY-oh-sih-nee',
 };
 
+// Info sheet for the Reckoning step — matches the scholarly register of the
+// other prompts' info cards.
+const RECKON_INFO = {
+  title: 'The Reckoning',
+  source: 'Seneca, On Anger 3.36',
+  body: "Every night, before sleep, Seneca put his day on trial: 'I examine my entire day and go back over what I have done and said, hiding nothing from myself, passing nothing by.' The examination begins where the morning began.\n\nEach morning you name what you are postponing, or brace for a difficulty ahead. This step holds you to it. The question is not whether you succeeded. It is whether you moved: a step taken, a call made, an avoidance noticed and named.\n\nAnswer plainly. 'I did not touch it' is a complete and honest answer, and writing it down is how the pattern becomes visible. The Stoics did not grade the day. They learned from it.",
+};
+
+// Display numerals when the Reckoning joins the evening sequence — the
+// night renumbers as one flow (I · Morning, II · Examine, ...). Archive
+// rendering keeps the constants' numbering; the reckoning appears there
+// as its own labeled block.
+const ROMANS = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+
 export default function JournalScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
@@ -134,22 +148,28 @@ export default function JournalScreen() {
 
   // Wizard step list. The four standard prompts keep their historical
   // numeric answer keys (0-3) so saved entries stay shape-stable; the
-  // Reckoning, when present, is a guest first step with its own eyebrow
-  // (no Roman numeral, so Examine stays I in every archive) and a stable
-  // 'reckon' answer key.
+  // Reckoning, when present, leads as I · Morning and the rest renumber
+  // for display so the night reads as one sequence.
   const wizardPrompts = React.useMemo(() => {
-    const base = prompts.map((p, i) => ({ ...p, answerKey: i }));
     if (!isMorning && morningEcho) {
-      return [{
-        reckon: true,
-        answerKey: 'reckon',
-        num: 'This morning',
-        q: morningEcho.question,
-        echoLead: morningEcho.lead,
-        echoText: morningEcho.text,
-      }, ...base];
+      return [
+        {
+          reckon: true,
+          answerKey: 'reckon',
+          num: 'I · Morning',
+          q: morningEcho.question,
+          echoLead: morningEcho.lead,
+          echoText: morningEcho.text,
+          info: RECKON_INFO,
+        },
+        ...prompts.map((p, i) => ({
+          ...p,
+          answerKey: i,
+          num: `${ROMANS[i + 1]} · ${p.num.split(' · ')[1]}`,
+        })),
+      ];
     }
-    return base;
+    return prompts.map((p, i) => ({ ...p, answerKey: i }));
   }, [prompts, isMorning, morningEcho]);
 
   // True when the user is on the landing screen. Out-of-range openPrompt
