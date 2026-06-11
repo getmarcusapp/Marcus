@@ -577,7 +577,9 @@ const s = StyleSheet.create({
   },
   echoEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
   echoLead: { fontSize: 13, color: colors.textSecondary, fontFamily: font.body, marginBottom: 6 },
-  echoQuote: { fontSize: 17, color: colors.textPrimary, lineHeight: 26, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
+  // 20px Light Italic — the unified quote treatment (per V), matching the
+  // memento strip adjacent on this screen.
+  echoQuote: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
   // The reckoning question — gold, so the box reads as a door into the
   // examination rather than a display of the morning's words.
   echoAsk: { fontSize: 13, color: colors.accent, fontFamily: font.bodyMedium, marginTop: 12, letterSpacing: 0.3 },
