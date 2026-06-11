@@ -132,7 +132,7 @@ export default function JournalScreen() {
     const braced = morning?.answers?.[1]?.trim();
     // The ask line is what makes this a reckoning rather than a mirror:
     // the echo poses the question the evening examination exists to answer.
-    if (named) setMorningEcho({ lead: 'You named what matters:', text: named, ask: 'Tonight asks: did you move toward it?' });
+    if (named) setMorningEcho({ lead: 'You named what you were postponing:', text: named, ask: 'Tonight asks: did you move toward it?' });
     else if (braced) setMorningEcho({ lead: 'You braced for:', text: braced, ask: 'Tonight asks: how did you meet it?' });
     else setMorningEcho(null);
   }, [isMorning]);
