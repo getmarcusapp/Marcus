@@ -40,8 +40,11 @@ export default function FoundationsListScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 36 + playerInset }}
       >
-        {/* Caravaggio, Saint Jerome Writing (1605–06) — an old man writing
-            with a skull on the desk. Letters and memento mori in one frame. */}
+        {/* Valentin de Boulogne, Saint Paul Writing His Epistles (c. 1618,
+            MFA Houston) — letters being written, in the gallery's tenebrist
+            register, by a painter not used elsewhere in the app. (The first
+            pick, Caravaggio's Saint Jerome, was already the evening
+            examination meditation's image.) */}
         <View style={s.hero}>
           <Image
             source={require('../assets/heroes/foundations.jpg')}
