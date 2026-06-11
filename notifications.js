@@ -154,6 +154,14 @@ async function doScheduleAllNotifications() {
     return; // corrupt settings — leave everything unscheduled rather than throw
   }
 
+  // Done-states fetched once: each reminder needs its own, and the evening
+  // copy varies with the overall count (see below).
+  const compassDoneToday = await isTodayCompassDone();
+  const readingDoneToday = await isTodayReadingDone();
+  const morningDoneToday = await isTodayJournalDone('morning');
+  const eveningDoneToday = await isTodayJournalDone('evening');
+  const doneCount = [compassDoneToday, readingDoneToday, morningDoneToday, eveningDoneToday].filter(Boolean).length;
+
   // Personalized variants: on odd days of the month, the morning and midday
   // reminders carry a fragment of the user's own Compass instead of the
   // standard copy. Deterministic by date so the many re-syncs within a day
@@ -167,7 +175,7 @@ async function doScheduleAllNotifications() {
       REMINDER_IDS.compass,
       { title: 'Begin with your compass', body: 'Let it orient the day.', sound: false },
       settings.compassHour, settings.compassMinute,
-      await isTodayCompassDone(),
+      compassDoneToday,
     );
   }
 
@@ -177,7 +185,7 @@ async function doScheduleAllNotifications() {
       REMINDER_IDS.reading,
       { title: "Today's reading is ready", body: 'A passage chosen for this day. Read it before the noise begins.', sound: false },
       settings.readingHour, settings.readingMinute,
-      await isTodayReadingDone(),
+      readingDoneToday,
     );
   }
 
@@ -193,17 +201,25 @@ async function doScheduleAllNotifications() {
         sound: false,
       },
       settings.morningHour, settings.morningMinute,
-      await isTodayJournalDone('morning'),
+      morningDoneToday,
     );
   }
 
-  // Evening journal
+  // Evening journal. When three of four practices are already done, the
+  // reminder names the gap — completion bias, in the house register. The
+  // count reflects the last foreground re-sync, which is when this runs.
   if (settings.eveningEnabled) {
     await scheduleDailyReminder(
       REMINDER_IDS.evening,
-      { title: 'The day closes', body: 'Time to examine it before you sleep.', sound: false },
+      {
+        title: 'The day closes',
+        body: doneCount === 3 && !eveningDoneToday
+          ? 'One step remains. The day is nearly sealed.'
+          : 'Time to examine it before you sleep.',
+        sound: false,
+      },
       settings.eveningHour, settings.eveningMinute,
-      await isTodayJournalDone('evening'),
+      eveningDoneToday,
     );
   }
 
@@ -257,6 +273,35 @@ export async function cancelJournalNotification(_type) {
   await scheduleAllNotifications();
 }
 
+
+// ─── TRIAL-END NOTICE ────────────────────────────────────────────────────────
+// Honest heads-up two days before the trial converts: no surprise charges.
+// Called from useEntitlement whenever RevenueCat reports an active trial;
+// the stable identifier makes rescheduling idempotent. Surprise charges are
+// refund requests and one-star reviews — the notice converts better than
+// silence and is the registers' kind of honesty anyway.
+
+const TRIAL_NOTICE_ID = 'trial-ending-notice';
+
+export async function scheduleTrialEndingNotice(trialDaysLeft) {
+  try {
+    // Needs at least 3 days left so "in two days" lands on a future morning.
+    // RevenueCat's own day-7 charge handles the final boundary.
+    if (!trialDaysLeft || trialDaysLeft < 3) return;
+    const t = new Date();
+    t.setDate(t.getDate() + (trialDaysLeft - 2));
+    t.setHours(10, 0, 0, 0);
+    await Notifications.scheduleNotificationAsync({
+      identifier: TRIAL_NOTICE_ID,
+      content: {
+        title: 'Your trial ends in two days',
+        body: 'If the practice has earned its place, do nothing. If not, cancel anytime in iOS Settings.',
+        sound: false,
+      },
+      trigger: { type: 'date', date: t },
+    });
+  } catch {}
+}
 
 // ─── RE-ENGAGEMENT NOTIFICATIONS ─────────────────────────────────────────────
 // Pre-armed win-back ladder. Every app open (and every sealed day) re-arms

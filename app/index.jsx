@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image, Animated, ActivityIndicator,
-  Dimensions, AppState,
+  Dimensions, AppState, Alert,
 } from 'react-native';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
@@ -30,6 +30,7 @@ import { getTodayJournal, getStreak, getTodayReading, getCompassDone, getReviews
 import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
 import { FOUNDATIONS_LETTERS } from '../constants/foundations';
 import { getFoundationsState } from '../lib/foundations';
+import { exportBackup } from '../lib/backup';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
 import { track } from '../lib/analytics';
@@ -103,6 +104,9 @@ export default function PracticeScreen() {
   // and killed the "tomorrow:" anticipation hook), the card stays for the
   // rest of the day in a quiet read state pointing at tomorrow's letter.
   const [foundations, setFoundationsState] = useState(null);
+  // True when the one-day grace window is what's keeping the streak alive
+  // (last credited day was the day before yesterday).
+  const [graceActive, setGraceActive] = useState(false);
   const [todayDate, setTodayDate] = useState(new Date());
   const [reviewDay, setReviewDay] = useState(0);
   const [reviewDone, setReviewDone] = useState(false);
@@ -175,6 +179,10 @@ export default function PracticeScreen() {
     setReadingDone(!!reading);
     setCompassDone(compassToday);
     setStreak(s);
+    setGraceActive(
+      s.current > 0 &&
+      s.lastDate === new Date(Date.now() - 172800000).toDateString()
+    );
     // Foundations card: lives through the unlock week (and a grace window
     // for users with unread letters), then retires to the Library for good.
     try {
@@ -241,6 +249,7 @@ export default function PracticeScreen() {
         // Lazy require: expo-store-review resolves its native module at
         // import time, which crashes the bundle on builds that don't ship
         // it yet (a static import here took the whole app down over Metro).
+        let ratingJustAsked = false;
         try {
           const asked = await AsyncStorage.getItem('rating_prompt_shown');
           if (!asked) {
@@ -248,9 +257,41 @@ export default function PracticeScreen() {
             const StoreReview = require('expo-store-review');
             if ((s.sealedDays || 0) >= 3 && await StoreReview.hasAction()) {
               await AsyncStorage.setItem('rating_prompt_shown', 'true');
+              ratingJustAsked = true;
               // Let the seal moment land first; the sheet interrupts less
               // when the reveal animation has finished.
               setTimeout(() => { StoreReview.requestReview().catch(() => {}); }, 2500);
+            }
+          }
+        } catch {}
+        // Backup nudge once ever, after the first sealed week. Device-only
+        // data means a lost phone is a lost practice — the most catastrophic
+        // silent-churn event there is. Skipped on a day the rating sheet
+        // fired (migrating users can hit both thresholds at once); the next
+        // sealed day picks it up.
+        try {
+          if (!ratingJustAsked) {
+            const nudged = await AsyncStorage.getItem('backup_nudge_shown');
+            if (!nudged) {
+              const s = await getStreak();
+              if ((s.sealedDays || 0) >= 7) {
+                await AsyncStorage.setItem('backup_nudge_shown', 'true');
+                setTimeout(() => {
+                  Alert.alert(
+                    'Guard your practice',
+                    'A week of practice is sealed on this device, and only this device. Export a backup so a lost phone never means a lost practice.',
+                    [
+                      { text: 'Later', style: 'cancel' },
+                      {
+                        text: 'Export backup',
+                        onPress: async () => {
+                          try { await exportBackup(); } catch {}
+                        },
+                      },
+                    ],
+                  );
+                }, 2500);
+              }
             }
           }
         } catch {}
@@ -627,6 +668,12 @@ export default function PracticeScreen() {
           />
           <Text style={s.heroDate}>{dateStr}</Text>
           <Text style={s.heroStreak}>{streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}</Text>
+          {graceActive && (
+            // The grace day is holding the streak (yesterday went unmarked,
+            // today not yet credited). Saying so quietly builds trust in the
+            // mechanic — silent mercy reads as a broken counter.
+            <Text style={s.heroGrace}>Yesterday passed unmarked. The flame holds.</Text>
+          )}
           <Text style={s.quoteText}>“{quote.text}”</Text>
           <Text style={s.quoteAttr}>— {quote.author}, {quote.source}</Text>
         </View>
@@ -750,6 +797,7 @@ const s = StyleSheet.create({
   heroDate: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
   // Gold "Day N" — identical treatment to the sealed hero's sealedStreak.
   heroStreak: { fontSize: 48, fontFamily: font.display, color: colors.accent, letterSpacing: -0.5, textAlign: 'center' },
+  heroGrace: { fontSize: 13, fontFamily: font.bodyLightItalic, fontStyle: 'italic', color: colors.textSecondary, textAlign: 'center', marginTop: 4 },
 
   // Sealed hero — contains a looping background video + dark overlay
   // sitting behind the skull/text content. No overflow:hidden because
