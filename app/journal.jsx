@@ -91,11 +91,7 @@ export default function JournalScreen() {
 
   const [answers, setAnswers] = useState({});
   const [openPrompt, setOpenPrompt] = useState(-1);
-  // True when the user is on the landing screen. Out-of-range openPrompt
-  // values are treated as landing too — that catches the race when the
-  // user switches morning <-> evening while openPrompt was set deeper
-  // than the new flow's prompt count (morning has 5 prompts, evening 4).
-  const onLanding = openPrompt < 0 || openPrompt >= prompts.length;
+  // onLanding is defined below, after wizardPrompts.
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
   const scrollRef = useRef(null);
@@ -114,28 +110,53 @@ export default function JournalScreen() {
     return () => clearTimeout(t);
   }, [openPrompt, hasAccess]);
   const [alreadySaved, setAlreadySaved] = useState(false);
-  // Loop-closure: the evening landing surfaces what the user committed to
-  // this morning (III · Name, falling back to II · Brace) so the nightly
-  // examination audits the morning's intention — Seneca's whole point.
-  // { lead, text } or null when there's nothing to surface.
+  // Loop-closure: what the user committed to this morning (III · Name,
+  // falling back to II · Brace). Seeds the Reckoning — a conditional first
+  // step in the evening wizard where the nightly examination audits the
+  // morning's intention — Seneca's whole point. { lead, text, question }
+  // or null when there's nothing to reckon with.
   const [morningEcho, setMorningEcho] = useState(null);
 
-  // Loads the evening landing's loop-closure callout from today's morning
-  // entry. Called on mount/session-switch AND on every focus — the screen
-  // stays mounted in the tab navigator, so without the focus refresh the
-  // echo could miss a just-written morning entry or show yesterday's after
-  // midnight.
+  // Loads the morning commitment that seeds the evening's conditional first
+  // wizard step (the Reckoning). Called on mount/session-switch AND on every
+  // focus — the screen stays mounted in the tab navigator, so without the
+  // focus refresh it could miss a just-written morning entry or show
+  // yesterday's after midnight.
   const loadMorningEcho = useCallback(async () => {
     if (isMorning) { setMorningEcho(null); return; }
     const morning = await getTodayJournal('morning');
     const named = morning?.answers?.[2]?.trim();
     const braced = morning?.answers?.[1]?.trim();
-    // The ask line is what makes this a reckoning rather than a mirror:
-    // the echo poses the question the evening examination exists to answer.
-    if (named) setMorningEcho({ lead: 'You named what you were postponing:', text: named, ask: 'Tonight asks: did you move toward it?' });
-    else if (braced) setMorningEcho({ lead: 'You braced for:', text: braced, ask: 'Tonight asks: how did you meet it?' });
+    if (named) setMorningEcho({ lead: 'You named what you were postponing:', text: named, question: 'Did you move toward it?' });
+    else if (braced) setMorningEcho({ lead: 'You braced for:', text: braced, question: 'How did you meet it?' });
     else setMorningEcho(null);
   }, [isMorning]);
+
+  // Wizard step list. The four standard prompts keep their historical
+  // numeric answer keys (0-3) so saved entries stay shape-stable; the
+  // Reckoning, when present, is a guest first step with its own eyebrow
+  // (no Roman numeral, so Examine stays I in every archive) and a stable
+  // 'reckon' answer key.
+  const wizardPrompts = React.useMemo(() => {
+    const base = prompts.map((p, i) => ({ ...p, answerKey: i }));
+    if (!isMorning && morningEcho) {
+      return [{
+        reckon: true,
+        answerKey: 'reckon',
+        num: 'This morning',
+        q: morningEcho.question,
+        echoLead: morningEcho.lead,
+        echoText: morningEcho.text,
+      }, ...base];
+    }
+    return base;
+  }, [prompts, isMorning, morningEcho]);
+
+  // True when the user is on the landing screen. Out-of-range openPrompt
+  // values are treated as landing too — that catches the race when the
+  // user switches morning <-> evening while openPrompt was set deeper
+  // than the new flow's step count.
+  const onLanding = openPrompt < 0 || openPrompt >= wizardPrompts.length;
 
   useEffect(() => {
     async function reload() {
@@ -175,7 +196,7 @@ export default function JournalScreen() {
     return () => { cancelled = true; };
   }, [sessionType, loadMorningEcho]));
 
-  const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, prompts.length);
+  const answeredCount = Math.min(Object.values(answers).filter(v => v && v.trim().length > 0).length, wizardPrompts.length);
   // Gate completion on at least one prompt having content. An empty
   // "completion" defeats the purpose of journaling and pollutes the
   // archive with no-op entries. The caption swaps to a prompt asking
@@ -190,6 +211,11 @@ export default function JournalScreen() {
       date: new Date().toISOString(),
       answers,
     };
+    // Preserve what the reckoning was ABOUT — the answer alone ("yes,
+    // finally") is meaningless in the archive without the morning's words.
+    if (answers.reckon?.trim() && morningEcho) {
+      entry.reckonOf = morningEcho.text;
+    }
     const ok = await saveJournal(entry);
     if (ok) {
       track('journal_saved', { type: isMorning ? 'morning' : 'evening' });
@@ -213,7 +239,7 @@ export default function JournalScreen() {
         <WizardHeader
           title={isMorning ? 'Morning Journal' : 'Evening Journal'}
           step={openPrompt}
-          total={prompts.length}
+          total={wizardPrompts.length}
           onBack={() => {
             haptics.tap();
             if (openPrompt > 0) {
@@ -285,22 +311,6 @@ export default function JournalScreen() {
               </View>
 
               <View style={s.body}>
-                {morningEcho && (
-                  <TouchableOpacity
-                    style={s.echoBox}
-                    activeOpacity={0.8}
-                    onPress={() => { haptics.tap(); setOpenPrompt(0); }}
-                    accessibilityRole="button"
-                    accessibilityLabel="Begin the evening journal with this morning's commitment"
-                  >
-                    <Text style={s.echoEyebrow}>This morning</Text>
-                    <Text style={s.echoLead}>{morningEcho.lead}</Text>
-                    <Text style={s.echoQuote} numberOfLines={4}>
-                      “{morningEcho.text.length > 180 ? `${morningEcho.text.slice(0, 180)}…` : morningEcho.text}”
-                    </Text>
-                    <Text style={s.echoAsk}>{morningEcho.ask}</Text>
-                  </TouchableOpacity>
-                )}
                 {(() => {
                   const journalMed = MEDITATIONS[isMorning ? 'premeditatio' : 'evening-examination'];
                   const isCurrent = journalMedPlayer.currentMedId === journalMed.id;
@@ -370,7 +380,7 @@ export default function JournalScreen() {
                   </Text>
                 </GoldPrimary>
                 <Text style={s.saveBtnSub}>
-                  {prompts.length} steps · about 5 minutes
+                  {wizardPrompts.length} steps · about 5 minutes
                 </Text>
               </View>
             </>
@@ -383,7 +393,7 @@ export default function JournalScreen() {
             // PracticeHeader at the top owns the practice-level progress.
             <View style={s.body}>
               {(() => {
-                const prompt = prompts[openPrompt];
+                const prompt = wizardPrompts[openPrompt];
                 return (
                   <View style={[s.promptCard, s.promptCardOpen]}>
                     <View style={s.promptTopRow}>
@@ -397,7 +407,17 @@ export default function JournalScreen() {
                         </TouchableOpacity>
                       )}
                     </View>
-                    <Text style={s.promptQ}>{prompt.q}</Text>
+                    {/* The Reckoning carries the morning's own words above
+                        its question — the user answers their morning self. */}
+                    {prompt.reckon && (
+                      <>
+                        <Text style={s.echoLead}>{prompt.echoLead}</Text>
+                        <Text style={s.echoQuote} numberOfLines={4}>
+                          “{prompt.echoText.length > 180 ? `${prompt.echoText.slice(0, 180)}…` : prompt.echoText}”
+                        </Text>
+                      </>
+                    )}
+                    <Text style={[s.promptQ, prompt.reckon && { marginTop: 12 }]}>{prompt.q}</Text>
                     {prompt.info && prompt.hint && (
                       <Text style={s.promptSub}>{prompt.hint}</Text>
                     )}
@@ -428,8 +448,8 @@ export default function JournalScreen() {
                         multiline
                         placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
                         placeholderTextColor={colors.textSecondary}
-                        value={answers[openPrompt] || ''}
-                        onChangeText={text => setAnswers(prev => ({ ...prev, [openPrompt]: text }))}
+                        value={answers[prompt.answerKey] || ''}
+                        onChangeText={text => setAnswers(prev => ({ ...prev, [prompt.answerKey]: text }))}
                         editable={hasAccess}
                         scrollEnabled={false}
                         keyboardAppearance="dark"
@@ -455,7 +475,7 @@ export default function JournalScreen() {
                   >
                     <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
                   </GoldSecondary>
-                  {openPrompt < prompts.length - 1 ? (
+                  {openPrompt < wizardPrompts.length - 1 ? (
                     <GoldPrimary
                       style={s.editBtn}
                       onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
@@ -497,7 +517,7 @@ export default function JournalScreen() {
             >
               <Text style={s.editBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Back</Text>
             </GoldSecondary>
-            {openPrompt < prompts.length - 1 ? (
+            {openPrompt < wizardPrompts.length - 1 ? (
               <GoldPrimary
                 style={s.editBtn}
                 onPress={() => { haptics.tap(); setOpenPrompt(openPrompt + 1); }}
@@ -563,26 +583,11 @@ const s = StyleSheet.create({
   // every quote reads as one unified component. Was Inter 13 gray title-case.
   mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
 
-  // Loop-closure callout: the user's own morning commitment, surfaced on the
-  // evening landing. Gold-dim stroke distinguishes "your words" from the
-  // gray-stroked memento (the philosopher's words).
-  echoBox: {
-    borderWidth: 0.5,
-    borderColor: colors.accentDim,
-    borderRadius: radius.md,
-    backgroundColor: colors.bg,
-    padding: spacing.xl,
-    paddingVertical: 18,
-    marginBottom: 20,
-  },
-  echoEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  // The Reckoning step: the morning's own words, quoted inside the wizard
+  // card above the question. 20px Light Italic per the unified quote
+  // treatment (V).
   echoLead: { fontSize: 13, color: colors.textSecondary, fontFamily: font.body, marginBottom: 6 },
-  // 20px Light Italic — the unified quote treatment (per V), matching the
-  // memento strip adjacent on this screen.
-  echoQuote: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
-  // The reckoning question — gold, so the box reads as a door into the
-  // examination rather than a display of the morning's words.
-  echoAsk: { fontSize: 13, color: colors.accent, fontFamily: font.bodyMedium, marginTop: 12, letterSpacing: 0.3 },
+  echoQuote: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic', marginBottom: 4 },
 
   // Light writing surface
   body: { padding: spacing.md, backgroundColor: colors.bgCard },

@@ -238,7 +238,20 @@ export default function JournalHistoryScreen() {
                             <Text style={s.editBtnText}>Edit</Text>
                           </GoldSecondary>
                         </View>
+                        {/* The Reckoning (evening entries that audited a
+                            morning commitment) leads, with the morning's
+                            words as context. */}
+                        {entry.answers?.reckon?.trim() ? (
+                          <View style={s.histAnswerBlock}>
+                            <Text style={s.histPromptNum}>This morning</Text>
+                            {entry.reckonOf ? (
+                              <Text style={s.histReckonOf}>“{entry.reckonOf}”</Text>
+                            ) : null}
+                            <Text style={s.histAnswer}>{entry.answers.reckon}</Text>
+                          </View>
+                        ) : null}
                         {Object.entries(entry.answers || {}).map(([idx, answer]) => {
+                          if (idx === 'reckon') return null;
                           if (!answer || !answer.trim()) return null;
                           const prompt = prompts[parseInt(idx)];
                           return (
@@ -306,4 +319,6 @@ const s = StyleSheet.create({
   histAnswerBlock: { marginTop: 8 },
   histPromptNum: { fontSize: 9, letterSpacing: 1.5, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
   histAnswer: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
+  // The morning commitment a reckoning answered — quoted context line.
+  histReckonOf: { fontSize: 13, color: colors.textPrimary, fontFamily: font.bodyLightItalic, fontStyle: 'italic', lineHeight: 19, marginBottom: 4 },
 });
