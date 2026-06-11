@@ -112,6 +112,13 @@ const HERO_ENTRIES = [
     work: 'Two Men Contemplating the Moon (1819–20)',
     why: 'The Weekly Review is the Sunday reckoning — looking back at the week, examining what was done. Two figures standing in solitude under the moon, contemplating together, is the visual exact of that practice.',
   },
+  {
+    image: require('../assets/heroes/foundations.jpg'),
+    title: 'The Foundations',
+    artist: 'Valentin de Boulogne',
+    work: 'Saint Paul Writing His Epistles (c. 1618, Museum of Fine Arts, Houston)',
+    why: 'The Foundations are seven letters, and the epistle is the oldest form of Stoic teaching — Seneca wrote his philosophy as letters to Lucilius. A man with a quill, pages spread across the desk, deep tenebrist dark: letters on how to live, being written.',
+  },
 ];
 
 function GalleryEntry({ image, title, artist, work, why }) {
