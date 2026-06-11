@@ -184,7 +184,9 @@ export default function ReadArchiveScreen() {
                   <View key={entry.id} style={s.archiveRow}>
                     <View style={s.archiveTop}>
                       <View style={{ flex: 1 }}>
-                        <Text style={s.archiveDate}>{entry.date}</Text>
+                        <Text style={s.archiveDate}>
+                          {new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </Text>
                         {entry.reading?.virtue && (
                           <Text style={[s.archiveVirtue, { color: virtueColor[entry.reading.virtue] || colors.textSecondary, marginTop: 2 }]}>
                             {entry.reading.virtue}
@@ -208,7 +210,9 @@ export default function ReadArchiveScreen() {
                       <Text style={s.archiveTheme}>{entry.reading.theme}</Text>
                     )}
                     {entry.reading?.quote && (
-                      <Text style={s.archiveQuote}>"{entry.reading.quote.slice(0, 100)}..."</Text>
+                      <Text style={s.archiveQuote}>
+                        "{entry.reading.quote.length > 100 ? `${entry.reading.quote.slice(0, 100)}…` : entry.reading.quote}"
+                      </Text>
                     )}
                     {isEditing ? (
                       <View style={s.archiveInsightBlock}>
@@ -302,7 +306,7 @@ const s = StyleSheet.create({
   archiveRow: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24, borderBottomWidth: 0.5, borderBottomColor: colors.border, backgroundColor: colors.bgCard },
   archiveTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   archiveDate: { fontSize: 14, color: colors.textPrimary, fontFamily: font.bodyMedium },
-  archiveVirtue: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
+  archiveVirtue: { fontSize: 12, fontFamily: font.bodySemiBold, letterSpacing: 0.5 },
   archiveTheme: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.3, marginBottom: 8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   archiveQuote: { fontSize: 14, color: colors.textSecondary, fontFamily: font.bodyLightItalic, fontStyle: 'italic', lineHeight: 22, marginBottom: 10 },
   archiveInsightBlock: { borderLeftWidth: 1.5, borderLeftColor: colors.border, paddingLeft: 12, marginTop: 8 },

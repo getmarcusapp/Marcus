@@ -247,7 +247,7 @@ const s = StyleSheet.create({
   playerHeroText: { position: 'absolute', left: spacing.lg, right: spacing.lg, bottom: 14 },
   playerBody: { padding: spacing.lg },
   playerSubtitle: { fontSize: font.labelSize, color: colors.accent, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
-  playerTitle: { fontSize: 22, fontWeight: '600', color: colors.textPrimary },
+  playerTitle: { fontSize: 22, fontFamily: font.bodySemiBold, color: colors.textPrimary },
   playerDesc: { fontSize: 14, color: colors.textSecondary, lineHeight: 20, marginBottom: spacing.lg },
 
   progressBar: {

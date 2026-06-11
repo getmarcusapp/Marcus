@@ -213,7 +213,7 @@ export default function EmotionsHistoryScreen() {
                           />
                           <View style={s.editDivider} />
                           <Text style={s.editFieldLabel}>Cognitive distortions</Text>
-                          <Text style={[s.editFieldLabel, { fontSize: 12, color: colors.textSecondary, fontWeight: '400', marginTop: -8, marginBottom: 12 }]}>Tap to add or remove</Text>
+                          <Text style={[s.editFieldLabel, { fontSize: 12, color: colors.textSecondary, fontFamily: font.body, marginTop: -8, marginBottom: 12 }]}>Tap to add or remove</Text>
                           <View style={s.distortionGrid}>
                             {DISTORTIONS.map(d => {
                               const isSelected = (editingEntry.distortions || []).includes(d.id);
@@ -363,12 +363,12 @@ const s = StyleSheet.create({
   histEditBtnText: { fontSize: 12, color: colors.accent, letterSpacing: 0.3 },
   editCard: { borderWidth: 1, borderRadius: radius.md, marginBottom: 12, marginHorizontal: 16, overflow: 'hidden' },
   editCardHeader: { padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  editCardTitle: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  editCardTitle: { fontSize: 13, letterSpacing: 0.8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   editCardDate: { fontSize: 12, color: colors.textSecondary },
   // Header "Done" tap — saves + closes when keyboard is down (e.g. user
   // only tweaked distortion pills). Keyboard-up exits go through the
   // accessory bar's Cancel/Save changes pair below.
-  editCardDone: { fontSize: 13, fontWeight: '600', letterSpacing: 0.8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  editCardDone: { fontSize: 13, letterSpacing: 0.8, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   editCardBody: { padding: 16, backgroundColor: colors.inputBg },
   editFieldLabel: { fontSize: font.labelSize, letterSpacing: 2, color: colors.textSecondary, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 10 },
   editFieldInput: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, minHeight: 48, textAlignVertical: 'top', marginBottom: 4, fontFamily: font.body },

@@ -12,10 +12,11 @@ const SHARE_BG = require('../assets/heroes/review.jpg');
 export const SHARE_CARD_WIDTH = 1080;
 export const SHARE_CARD_HEIGHT = 1920;
 
-function virtueLabel(id) {
+export function virtueLabel(id) {
   if (!id) return null;
   // Map id -> display name without importing the full virtues array
-  // (avoids accidental coupling on order changes).
+  // (avoids accidental coupling on order changes). Exported so other
+  // surfaces (review archive) render the same display names.
   const names = { wisdom: 'Wisdom', courage: 'Courage', moderation: 'Temperance', justice: 'Justice' };
   return names[id] || id;
 }
@@ -61,7 +62,7 @@ export function ReviewShareCard({ weekOf, bestVirtue, intention, stats }) {
           <>
             <View style={s.divider} />
             <Text style={s.intentionLabel}>Intention for the week ahead</Text>
-            <Text style={s.intentionText}>"{truncated}"</Text>
+            <Text style={s.intentionText}>“{truncated}”</Text>
           </>
         ) : null}
       </View>

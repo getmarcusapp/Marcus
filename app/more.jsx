@@ -194,7 +194,7 @@ const s = StyleSheet.create({
     overflow: 'hidden',
   },
   statItem: { flex: 1, alignItems: 'center', paddingVertical: 16 },
-  statNum: { fontSize: 26, fontWeight: '600', color: colors.textSecondary, marginBottom: 4 },
+  statNum: { fontSize: 26, fontFamily: font.bodySemiBold, color: colors.textSecondary, marginBottom: 4 },
   statLabel: { fontSize: 11, color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   statDivider: { width: 0.5, backgroundColor: colors.border },
   // Quote + attribution — same treatment as the practice hero.

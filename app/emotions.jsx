@@ -65,7 +65,7 @@ const iss = StyleSheet.create({
   btnText: { fontSize: 24, color: colors.textSecondary },
   track: { flex: 1, height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' },
   fill: { height: '100%', backgroundColor: colors.textSecondary, borderRadius: 2 },
-  value: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, minWidth: 48, textAlign: 'right' },
+  value: { fontSize: 18, fontFamily: font.bodyBold, color: colors.textPrimary, minWidth: 48, textAlign: 'right' },
 });
 
 export default function EmotionsScreen() {
@@ -285,7 +285,7 @@ export default function EmotionsScreen() {
                     activeOpacity={0.7}
                   >
                     <View style={[s.eAccent, { backgroundColor: ec.border, opacity: isSelected ? 1 : 0.55 }]} />
-                    <Text style={[s.ePillName, isSelected && { color: ec.border, fontWeight: '600' }]}>
+                    <Text style={[s.ePillName, isSelected && { color: ec.border, fontFamily: font.bodySemiBold }]}>
                       {e.label}
                     </Text>
                   </TouchableOpacity>
@@ -541,7 +541,7 @@ const s = StyleSheet.create({
   // did this happen?", "What are you feeling?"). Match the wizard's
   // promptQ — sentence case body text, not uppercase chrome. Valeriya's
   // rule: questions should look like questions, not eyebrow labels.
-  secQuestion: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400', marginTop: 8, marginBottom: 12 },
+  secQuestion: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontFamily: font.body, marginTop: 8, marginBottom: 12 },
   stageLabel: { fontSize: 11, letterSpacing: 1.8, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 36, marginBottom: 14 },
   feelingHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, marginBottom: 12 },
   hintBtn: { padding: 6, marginTop: -6 },
@@ -551,14 +551,14 @@ const s = StyleSheet.create({
   timingRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   timingBtn: { flex: 1, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, backgroundColor: colors.bgElevated },
   timingBtnActive: { borderColor: colors.textSecondary, backgroundColor: colors.bgElevated },
-  timingBtnText: { fontSize: 14, fontWeight: '400', color: colors.textSecondary, marginBottom: 4 },
+  timingBtnText: { fontSize: 14, fontFamily: font.body, color: colors.textSecondary, marginBottom: 4 },
   timingBtnTextActive: { color: colors.textPrimary, fontFamily: font.bodyMedium },
   timingBtnSub: { fontSize: 12, color: colors.textSecondary, lineHeight: 18 },
   timingBtnSubActive: { color: colors.textSecondary },
   emotionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginBottom: 16 },
   ePill: { width: '31%', borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, paddingVertical: 18, alignItems: 'center', backgroundColor: colors.bgElevated, overflow: 'hidden' },
   eAccent: { position: 'absolute', top: 0, left: 0, right: 0, height: 3 },
-  ePillName: { fontSize: 13, color: colors.textSecondary, fontWeight: '400' },
+  ePillName: { fontSize: 13, color: colors.textSecondary, fontFamily: font.body },
   // Input field treatment per Valeriya's library: subtle elevation above
   // screen bg, with stroke shifting between non-active (#474747) and
   // active (#878787) focus states.
@@ -568,7 +568,7 @@ const s = StyleSheet.create({
   // case, weight 400). Replaces the uppercase fieldLabel so questions read as
   // questions, not eyebrow chrome (Valeriya's rule). Tuned for in-card use:
   // no marginTop (the card's padding handles it), marginBottom to the input.
-  fieldQuestion: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontWeight: '400', marginBottom: 14 },
+  fieldQuestion: { fontSize: 15, color: colors.textPrimary, lineHeight: 24, fontFamily: font.body, marginBottom: 14 },
   fieldInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', fontFamily: font.body },
   // Non-focused state: dim the typed text per Valeriya's library (grey body text).
   fieldInputDim: { color: colors.textSecondary },

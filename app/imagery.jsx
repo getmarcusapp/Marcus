@@ -285,7 +285,7 @@ const s = StyleSheet.create({
   image: { width: '100%', height: '100%' },
   cardBody: { padding: 18 },
   cardEyebrow: { fontSize: font.labelSize, letterSpacing: 2, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 6 },
-  work: { fontSize: 17, fontWeight: '400', color: colors.textPrimary, fontFamily: font.body, marginBottom: 4, lineHeight: 24 },
+  work: { fontSize: 17, color: colors.textPrimary, fontFamily: font.body, marginBottom: 4, lineHeight: 24 },
   artist: { fontSize: 12, color: colors.textSecondary, letterSpacing: 0.5, marginBottom: 12, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   why: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
   virtueName: { fontSize: 22, color: colors.textPrimary, fontFamily: font.display, marginBottom: 8 },

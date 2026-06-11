@@ -9,7 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { getReviews, updateReview } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { captureRef } from 'react-native-view-shot';
-import { ReviewShareCard } from '../components/ReviewShareCard';
+import { ReviewShareCard, virtueLabel } from '../components/ReviewShareCard';
 import { ReviewEntryEditor } from '../components/ReviewEntryEditor';
 import { useEntitlement } from '../lib/useEntitlement';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
@@ -184,10 +184,12 @@ export default function ReviewArchiveScreen() {
                     <Text style={s.editBtnText}>Edit</Text>
                   </GoldSecondary>
                 </View>
-                {entry.bestVirtue && <Text style={s.histBest}>{entry.bestVirtue} · most embodied</Text>}
-                {entry.worstVirtue && <Text style={s.histWorst}>{entry.worstVirtue} · least embodied</Text>}
+                {entry.bestVirtue && <Text style={s.histBest}>{virtueLabel(entry.bestVirtue)} · most embodied</Text>}
+                {entry.worstVirtue && <Text style={s.histWorst}>{virtueLabel(entry.worstVirtue)} · least embodied</Text>}
                 {entry.answers?.wentWell && (
-                  <Text style={s.histPreview}>"{entry.answers.wentWell.slice(0, 140)}..."</Text>
+                  <Text style={s.histPreview}>
+                    "{entry.answers.wentWell.length > 140 ? `${entry.answers.wentWell.slice(0, 140)}…` : entry.answers.wentWell}"
+                  </Text>
                 )}
                 <TouchableOpacity
                   style={s.histShareBtn}

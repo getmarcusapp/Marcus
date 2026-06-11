@@ -105,7 +105,7 @@ const s = StyleSheet.create({
   },
   primaryBtnText: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: font.bodyBold,
     color: '#000',
     letterSpacing: 0.3,
   },

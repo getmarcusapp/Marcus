@@ -31,8 +31,11 @@ export function ReadingShareCard({ quote, author, work }) {
       <View style={s.content}>
         <Text style={s.eyebrow}>From Marcus</Text>
 
-        <Text style={s.quote} numberOfLines={14}>
-          "{quote}"
+        {/* adjustsFontSizeToFit: long quotes scale down instead of getting
+            ellipsized mid-sentence on a shareable artifact. Curly quotes
+            match the in-app reading card. */}
+        <Text style={s.quote} numberOfLines={14} adjustsFontSizeToFit minimumFontScale={0.55}>
+          “{quote}”
         </Text>
 
         <View style={s.divider} />

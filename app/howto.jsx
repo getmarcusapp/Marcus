@@ -4,6 +4,7 @@ import {
   StyleSheet, SafeAreaView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -95,7 +96,14 @@ export default function HowToScreen() {
             >
               <View style={s.sectionHeader}>
                 <Text style={s.sectionTitle}>{section.title}</Text>
-                <Text style={s.sectionChev}>{openSection === idx ? '∨' : '›'}</Text>
+                {/* Ionicons chevrons read as a rotation pair; the old text
+                    glyphs (› / ∨ logical-or) didn't match and the ∨ rendered
+                    inconsistently across fonts. */}
+                <Ionicons
+                  name={openSection === idx ? 'chevron-down' : 'chevron-forward'}
+                  size={16}
+                  color={colors.accent}
+                />
               </View>
               {openSection === idx && (
                 <View style={s.sectionBody}>
@@ -140,7 +148,6 @@ const s = StyleSheet.create({
     padding: 18, backgroundColor: colors.bgCard,
   },
   sectionTitle: { fontSize: 16, fontFamily: font.bodyMedium, color: colors.textSecondary, flex: 1 },
-  sectionChev: { fontSize: 20, color: colors.textSecondary, marginLeft: 12 },
   sectionBody: { padding: 18, borderTopWidth: 0.5, borderTopColor: colors.border, backgroundColor: colors.bgDeep },
   sectionContent: { fontSize: 15, color: colors.textSecondary, lineHeight: 26 },
   footer: { padding: spacing.xl, paddingBottom: 36, alignItems: 'center' },

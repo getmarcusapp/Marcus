@@ -294,7 +294,7 @@ const s = StyleSheet.create({
   emptyCta: { borderWidth: 0.5, borderColor: colors.accentDim, borderRadius: radius.md, paddingVertical: 12, paddingHorizontal: 22, backgroundColor: colors.bg },
   emptyCtaText: { fontSize: 13, color: colors.accent, letterSpacing: 0.5, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   monthHeader: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
-  monthHeaderText: { fontSize: 11, letterSpacing: 1.5, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', fontWeight: '600' },
+  monthHeaderText: { fontSize: 11, letterSpacing: 1.5, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   histEntry: { borderTopWidth: 0.5, borderTopColor: colors.border, padding: 16, backgroundColor: colors.bgCard },
   histEntryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
   histEntryDate: { fontSize: 13, color: colors.textSecondary, fontFamily: font.bodyMedium },

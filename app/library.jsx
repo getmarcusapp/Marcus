@@ -310,7 +310,7 @@ const s = StyleSheet.create({
   chipText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.3, fontFamily: font.bodyMedium },
   chipTextActive: { color: colors.accent },
   chipTextDim: { color: colors.textSecondary },
-  chipCount: { fontSize: 12, color: colors.textSecondary, fontWeight: '400' },
+  chipCount: { fontSize: 12, color: colors.textSecondary, fontFamily: font.body },
   chipCountActive: { color: colors.accentDim },
 
   body: { padding: spacing.md, paddingTop: spacing.lg },

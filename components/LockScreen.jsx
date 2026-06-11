@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, Image, ImageBackground, TouchableOpacity, StyleSheet, SafeAreaView, Animated, Easing,
+  View, Text, Image, ImageBackground, TouchableOpacity, StyleSheet, SafeAreaView,
 } from 'react-native';
 import { authenticate } from '../lib/appLock';
 import { colors, radius, spacing, font } from '../constants/theme';
@@ -33,8 +33,11 @@ export function LockScreen() {
 
   return (
     <View style={s.root}>
+      {/* bg-svg4 matches every other threshold screen (welcome/ready/paywall)
+          and is ~1.5MB lighter than the old bg.png, which only this screen
+          still required. */}
       <ImageBackground
-        source={require('../assets/bg.png')}
+        source={require('../assets/bg-svg4.png')}
         style={StyleSheet.absoluteFillObject}
         resizeMode="cover"
       />

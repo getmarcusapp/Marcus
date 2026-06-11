@@ -37,6 +37,8 @@ export function PracticeHeader({ current }) {
           style={[s.arrowBtn, !prevStep && s.arrowBtnDisabled]}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={prevStep ? `Previous step: ${prevStep.title}` : 'Previous step'}
         >
           <Ionicons name="arrow-back" size={22} color={prevStep ? colors.accent : colors.textSecondary} />
         </TouchableOpacity>
@@ -49,6 +51,8 @@ export function PracticeHeader({ current }) {
           style={[s.arrowBtn, !nextStep && s.arrowBtnDisabled]}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={nextStep ? `Next step: ${nextStep.title}` : 'Next step'}
         >
           <Ionicons name="arrow-forward" size={22} color={nextStep ? colors.accent : colors.textSecondary} />
         </TouchableOpacity>

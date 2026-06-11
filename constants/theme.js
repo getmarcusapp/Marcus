@@ -81,6 +81,12 @@ export const font = {
   display: 'Cinzel_400Regular',
   body: 'Inter_400Regular',
   bodyMedium: 'Inter_500Medium',
+  // Real semibold/bold faces. Use these instead of fontWeight overrides —
+  // a bare fontWeight without fontFamily renders San Francisco, not Inter
+  // (the brand rule is Inter/Cinzel only).
+  bodySemiBold: 'Inter_600SemiBold',
+  bodyBold: 'Inter_700Bold',
+  bodyLight: 'Inter_300Light',
   bodyLightItalic: 'Inter_300Light_Italic',
 };
 

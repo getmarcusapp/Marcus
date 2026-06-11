@@ -38,10 +38,11 @@ const s = StyleSheet.create({
   },
   chipText: {
     fontSize: 12,
-    fontWeight: '600',
+    // bodyMedium matches the EDIT-button library token this chip mirrors
+    // (the old fontWeight '600' was ignored — the family has one face).
+    fontFamily: font.bodyMedium,
     color: colors.accent,
     letterSpacing: 1,
-    fontFamily: font.bodyMedium,
     textTransform: 'uppercase',
   },
 });
