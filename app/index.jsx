@@ -28,7 +28,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
-import * as StoreReview from 'expo-store-review';
 import { FOUNDATIONS_LETTERS } from '../constants/foundations';
 import { getFoundationsState } from '../lib/foundations';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -235,10 +234,14 @@ export default function PracticeScreen() {
         // Ask for a rating once ever, on the third sealed day — deep enough
         // that the habit is real, early enough to catch peak goodwill. iOS
         // decides whether the sheet actually shows, so this stays polite.
+        // Lazy require: expo-store-review resolves its native module at
+        // import time, which crashes the bundle on builds that don't ship
+        // it yet (a static import here took the whole app down over Metro).
         try {
           const asked = await AsyncStorage.getItem('rating_prompt_shown');
           if (!asked) {
             const s = await getStreak();
+            const StoreReview = require('expo-store-review');
             if ((s.sealedDays || 0) >= 3 && await StoreReview.hasAction()) {
               await AsyncStorage.setItem('rating_prompt_shown', 'true');
               // Let the seal moment land first; the sheet interrupts less
