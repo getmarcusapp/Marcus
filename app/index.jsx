@@ -356,7 +356,7 @@ export default function PracticeScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[s.routineRow, nextItem === 'evening' && s.routineRowNext]}
+        style={[s.routineRow, foundations !== null && s.routineRowBorder, nextItem === 'evening' && s.routineRowNext]}
         onPress={() => router.push({ pathname: '/journal', params: { type: 'evening' } })}
         activeOpacity={0.7}
       >
@@ -371,6 +371,52 @@ export default function PracticeScreen() {
           </View>
         )}
       </TouchableOpacity>
+
+      {/* The day's Foundations letter rides inside the practice card during
+          the unlock week — it's part of today's practice while the series
+          runs. Mail icon (not a completion dot) and exclusion from the
+          "X of 4" count keep it a guest, not a fifth requirement: the seal
+          stays defined by the four practices. Gone after the series. */}
+      {foundations !== null && (() => {
+        const caughtUp = foundations.nextUnread === null;
+        const letterNum = caughtUp ? foundations.unlockedCount : foundations.nextUnread;
+        const letter = FOUNDATIONS_LETTERS[letterNum - 1];
+        if (!letter) return null;
+        const nextLetter = FOUNDATIONS_LETTERS[foundations.unlockedCount];
+        return (
+          <TouchableOpacity
+            style={s.routineRow}
+            onPress={() => {
+              haptics.tap();
+              router.push(`/foundations?letter=${letterNum}&from=/&fromLabel=Practice`);
+            }}
+            activeOpacity={0.7}
+          >
+            {caughtUp ? (
+              <View style={[s.dot, s.dotDone]}>
+                <Ionicons name="checkmark" size={13} color={colors.bg} />
+              </View>
+            ) : (
+              <Ionicons name="mail-outline" size={18} color={colors.accent} style={{ width: 18 }} />
+            )}
+            <View style={s.routineContent}>
+              <Text style={[s.routineTitle, caughtUp && s.titleDone]}>
+                Letter {letter.num} · {letter.title}
+              </Text>
+              <Text style={s.routineSub}>
+                {caughtUp
+                  ? (nextLetter ? `Letter ${nextLetter.num} arrives tomorrow` : 'The foundations are laid')
+                  : 'The Foundations · two minutes'}
+              </Text>
+            </View>
+            {!caughtUp && (
+              <View style={[s.tag, s.tagAccent]}>
+                <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        );
+      })()}
     </View>
   );
 
@@ -416,59 +462,6 @@ export default function PracticeScreen() {
               </View>
             )}
             {today && (
-              <View style={[s.tag, s.tagAccent]}>
-                <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-      </>
-    );
-  })();
-
-  // Foundations card — the seven-letter teaching arc for the first week.
-  // Two states: an unread letter today (TODAY tag), or caught-up (quiet
-  // read state that re-opens today's letter and teases tomorrow's). Shared
-  // between the in-progress and sealed renders.
-  const foundationsBlock = foundations !== null && (() => {
-    const caughtUp = foundations.nextUnread === null;
-    // Caught up: the card points back at today's (latest unlocked) letter.
-    const letterNum = caughtUp ? foundations.unlockedCount : foundations.nextUnread;
-    const letter = FOUNDATIONS_LETTERS[letterNum - 1];
-    if (!letter) return null;
-    const nextLetter = FOUNDATIONS_LETTERS[foundations.unlockedCount]; // undefined after VII
-    return (
-      <>
-        <View style={s.weeklyHeader}>
-          <Text style={s.secLabel}>The Foundations</Text>
-        </View>
-        <View style={s.routineCard}>
-          <TouchableOpacity
-            style={s.routineRow}
-            onPress={() => {
-              haptics.tap();
-              router.push(`/foundations?letter=${letterNum}&from=/&fromLabel=Practice`);
-            }}
-            activeOpacity={0.7}
-          >
-            {caughtUp ? (
-              <View style={[s.dot, s.dotDone]}>
-                <Ionicons name="checkmark" size={13} color={colors.bg} />
-              </View>
-            ) : (
-              <Ionicons name="mail-outline" size={18} color={colors.accent} />
-            )}
-            <View style={s.routineContent}>
-              <Text style={[s.routineTitle, caughtUp && s.titleDone]}>
-                Letter {letter.num} · {letter.title}
-              </Text>
-              <Text style={s.routineSub}>
-                {caughtUp
-                  ? (nextLetter ? `Letter ${nextLetter.num} arrives tomorrow` : 'The foundations are laid')
-                  : 'Two minutes. One tool.'}
-              </Text>
-            </View>
-            {!caughtUp && (
               <View style={[s.tag, s.tagAccent]}>
                 <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
               </View>
@@ -596,7 +589,6 @@ export default function PracticeScreen() {
               is still surfaced when today is also review day. */}
           <Animated.View style={[s.body, sealedAnimStyle(3)]}>
             {dailyTiles}
-            {foundationsBlock}
             {weeklyTileBlock}
           </Animated.View>
 
@@ -684,8 +676,6 @@ export default function PracticeScreen() {
           </View>
 
           {dailyTiles}
-
-          {foundationsBlock}
 
           {weeklyTileBlock}
 
