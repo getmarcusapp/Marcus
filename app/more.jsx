@@ -80,18 +80,25 @@ export default function MoreScreen() {
 
         <View style={s.statsCard}>
           <View style={s.statItem}>
-            <Text style={s.statNum}>{streak.current}</Text>
+            <Text style={s.statNum} numberOfLines={1} adjustsFontSizeToFit>{streak.current}</Text>
             <Text style={s.statLabel}>Active run</Text>
           </View>
           <View style={s.statDivider} />
           <View style={s.statItem}>
-            <Text style={s.statNum}>{streak.longest || 0}</Text>
+            <Text style={s.statNum} numberOfLines={1} adjustsFontSizeToFit>{streak.longest || 0}</Text>
             <Text style={s.statLabel}>Longest</Text>
           </View>
           <View style={s.statDivider} />
           <View style={s.statItem}>
-            <Text style={s.statNum}>{streak.totalDays || 0}</Text>
+            <Text style={s.statNum} numberOfLines={1} adjustsFontSizeToFit>{streak.totalDays || 0}</Text>
             <Text style={s.statLabel}>Active days</Text>
+          </View>
+          <View style={s.statDivider} />
+          {/* The seal: days where all four practices were completed — the
+              rarer mark now that any single practice keeps the flame. */}
+          <View style={s.statItem}>
+            <Text style={s.statNum} numberOfLines={1} adjustsFontSizeToFit>{streak.sealedDays || 0}</Text>
+            <Text style={s.statLabel}>Days sealed</Text>
           </View>
         </View>
 

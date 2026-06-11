@@ -11,6 +11,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { getCompass, saveCompass, getRoles, saveRoles, persistCompassDone, getCompassDone, getHasSeenCompassIntro, setHasSeenCompassIntro } from '../store/db';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
+import { track } from '../lib/analytics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
@@ -174,6 +175,7 @@ export default function CompassScreen() {
     if (compassMarkedRef.current) return;
     compassMarkedRef.current = true;
     await persistCompassDone();
+    track('compass_done');
     cancelJournalNotification('compass');
   }
 

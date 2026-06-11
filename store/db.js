@@ -99,13 +99,22 @@ export async function saveRoles(roles) {
   } catch (e) { return false; }
 }
 
+const EMPTY_STREAK = { current: 0, longest: 0, totalDays: 0, lastDate: null, sealedDays: 0, lastSealedDate: null };
+
 export async function getStreak() {
   try {
     const raw = await AsyncStorage.getItem(KEYS.STREAK);
-    if (!raw) return { current: 0, longest: 0, totalDays: 0, lastDate: null };
-    const streak = JSON.parse(raw);
+    if (!raw) return { ...EMPTY_STREAK };
+    let streak = JSON.parse(raw);
     if (streak.count !== undefined && streak.current === undefined) {
-      return { current: streak.count, longest: streak.count, totalDays: streak.count, lastDate: streak.lastDate };
+      streak = { current: streak.count, longest: streak.count, totalDays: streak.count, lastDate: streak.lastDate };
+    }
+    // Migration for the "any practice keeps the flame" rework: before it,
+    // a day only counted when all four practices were done, so every
+    // pre-rework totalDay was a sealed day. Persisted on the next increment.
+    if (streak.sealedDays === undefined) {
+      streak.sealedDays = streak.totalDays || 0;
+      streak.lastSealedDate = streak.lastDate || null;
     }
     const today = new Date().toDateString();
     const yesterday = new Date(Date.now() - 86400000).toDateString();
@@ -115,29 +124,49 @@ export async function getStreak() {
       return { ...streak, current: 0 };
     }
     return streak;
-  } catch (e) { return { current: 0, longest: 0, totalDays: 0, lastDate: null }; }
+  } catch (e) { return { ...EMPTY_STREAK }; }
 }
 
+// "Any practice keeps the flame": the day is credited on the FIRST completed
+// practice (every completion writer calls this), in the spirit of direction
+// over perfection — Epictetus measures progress by showing up, and the old
+// all-four-or-nothing rule zeroed out genuinely practiced days. A fully
+// examined day (all four practices) is tracked separately as the rarer,
+// earned mark: the seal.
 export async function incrementStreak() {
   try {
     const streak = await getStreak();
     const today = new Date().toDateString();
-    if (streak.lastDate === today) return streak;
-    const morning = await getTodayJournal('morning');
-    const evening = await getTodayJournal('evening');
-    const reading = await getTodayReading();
-    const compass = await getCompassDone();
-    if (!morning || !evening || !reading || !compass) return streak;
-    const newCurrent = streak.current + 1;
-    const updated = {
-      current: newCurrent,
-      longest: Math.max(newCurrent, streak.longest || 0),
-      totalDays: (streak.totalDays || 0) + 1,
-      lastDate: today,
-    };
-    await AsyncStorage.setItem(KEYS.STREAK, JSON.stringify(updated));
-    return updated;
-  } catch (e) { return { current: 0, longest: 0, totalDays: 0, lastDate: null }; }
+    const updated = { ...streak };
+    let changed = false;
+
+    if (streak.lastDate !== today) {
+      const newCurrent = (streak.current || 0) + 1;
+      updated.current = newCurrent;
+      updated.longest = Math.max(newCurrent, streak.longest || 0);
+      updated.totalDays = (streak.totalDays || 0) + 1;
+      updated.lastDate = today;
+      changed = true;
+    }
+
+    if (updated.lastSealedDate !== today) {
+      const morning = await getTodayJournal('morning');
+      const evening = await getTodayJournal('evening');
+      const reading = await getTodayReading();
+      const compass = await getCompassDone();
+      if (morning && evening && reading && compass) {
+        updated.sealedDays = (updated.sealedDays || 0) + 1;
+        updated.lastSealedDate = today;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      await AsyncStorage.setItem(KEYS.STREAK, JSON.stringify(updated));
+      return updated;
+    }
+    return streak;
+  } catch (e) { return { ...EMPTY_STREAK }; }
 }
 
 export async function getTodayReading() {
@@ -518,6 +547,8 @@ export async function seedWeekOfPracticeData() {
     longest: 7,
     totalDays: 7,
     lastDate: yesterday,
+    sealedDays: 7,
+    lastSealedDate: yesterday,
   }));
 
   return { journals: journalsForWeek.length, triggers: triggers.length };

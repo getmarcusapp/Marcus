@@ -13,6 +13,7 @@ import { MiniMeditationPlayer } from '../components/MiniMeditationPlayer';
 import { LockScreen } from '../components/LockScreen';
 import { LaunchSplash } from '../components/LaunchSplash';
 import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
+import { initAnalytics, track } from '../lib/analytics';
 import { useFonts, Inter_300Light, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_300Light_Italic } from '@expo-google-fonts/inter';
 import { Cinzel_400Regular } from '@expo-google-fonts/cinzel';
 
@@ -39,7 +40,7 @@ function HamburgerIcon({ color, size = 26, barWidth = 22, barHeight = 2, gap = 4
 // one of the hidden (href:null) flow screens like /compass or /journal.
 const PRACTICE_ROUTES = new Set([
   '/', '/index', '/compass', '/read', '/journal', '/review', '/meditate',
-  '/journal-history', '/read-archive', '/review-archive',
+  '/journal-history', '/read-archive', '/review-archive', '/foundations',
 ]);
 const EMOTIONS_ROUTES = new Set(['/emotions', '/emotions-history']);
 function useLogicalTabKey() {
@@ -136,6 +137,9 @@ export default function Layout() {
     // cold start if the user enabled it. await isn't needed since the hook
     // subscribes and re-renders when state lands.
     initAppLock();
+
+    initAnalytics();
+    track('app_started');
 
     initializePurchases();
     scheduleReengagementNotifications();
@@ -245,6 +249,7 @@ export default function Layout() {
         <Tabs.Screen name="settings-developer" options={{ href: null }} />
         <Tabs.Screen name="onboarding" options={{ href: null }} />
         <Tabs.Screen name="howto" options={{ href: null }} />
+        <Tabs.Screen name="foundations" options={{ href: null }} />
         <Tabs.Screen name="meditate" options={{ href: null }} />
         <Tabs.Screen name="imagery" options={{ href: null }} />
         <Tabs.Screen name="library" options={{ href: null }} />

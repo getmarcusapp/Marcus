@@ -28,8 +28,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, getReviews } from '../store/db';
 import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
+import * as StoreReview from 'expo-store-review';
+import { FOUNDATIONS_LETTERS } from '../constants/foundations';
+import { getFoundationsState } from '../lib/foundations';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
+import { track } from '../lib/analytics';
 import { useEntitlement } from '../lib/useEntitlement';
 
 
@@ -94,6 +98,9 @@ export default function PracticeScreen() {
   const [compassDone, setCompassDone] = useState(false);
   const [readingDone, setReadingDone] = useState(false);
   const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
+  // 1-based number of the next unlocked-but-unread Foundations letter, or
+  // null when caught up / past the card's window.
+  const [foundationsNext, setFoundationsNext] = useState(null);
   const [todayDate, setTodayDate] = useState(new Date());
   const [reviewDay, setReviewDay] = useState(0);
   const [reviewDone, setReviewDone] = useState(false);
@@ -166,6 +173,15 @@ export default function PracticeScreen() {
     setReadingDone(!!reading);
     setCompassDone(compassToday);
     setStreak(s);
+    // Foundations card: present while there's an unlocked-but-unread letter
+    // in the user's first stretch; self-retires when caught up and caps at
+    // two weeks regardless. The series stays available in the Library.
+    try {
+      const f = await getFoundationsState();
+      setFoundationsNext(f.nextUnread !== null && f.daysSinceStart < 14 ? f.nextUnread : null);
+    } catch {
+      setFoundationsNext(null);
+    }
     // Re-sync notifications against today's done-state
     refreshNotificationsForToday().catch(() => {});
   }, []);
@@ -201,9 +217,9 @@ export default function PracticeScreen() {
     : !eveningDone ? 'evening'
     : null;
 
-  // Cancel re-engagement notifications when practice is sealed; fire a
-  // three-beat haptic rhythm (light → medium → success) once per day on
-  // the first seal. Like a small drumroll into the success notification.
+  // Re-arm the win-back ladder when practice is sealed; fire a three-beat
+  // haptic rhythm (light → medium → success) once per day on the first seal.
+  // Like a small drumroll into the success notification.
   useEffect(() => {
     if (!allDone) return;
     onPracticeSealed();
@@ -215,6 +231,22 @@ export default function PracticeScreen() {
         setTimeout(() => haptics.action(), 160);
         setTimeout(() => haptics.success(), 400);
         await AsyncStorage.setItem('last_sealed_date', today);
+        track('day_sealed');
+        // Ask for a rating once ever, on the third sealed day — deep enough
+        // that the habit is real, early enough to catch peak goodwill. iOS
+        // decides whether the sheet actually shows, so this stays polite.
+        try {
+          const asked = await AsyncStorage.getItem('rating_prompt_shown');
+          if (!asked) {
+            const s = await getStreak();
+            if ((s.sealedDays || 0) >= 3 && await StoreReview.hasAction()) {
+              await AsyncStorage.setItem('rating_prompt_shown', 'true');
+              // Let the seal moment land first; the sheet interrupts less
+              // when the reveal animation has finished.
+              setTimeout(() => { StoreReview.requestReview().catch(() => {}); }, 2500);
+            }
+          }
+        } catch {}
       }
     })();
   }, [allDone]);
@@ -387,6 +419,40 @@ export default function PracticeScreen() {
     );
   })();
 
+  // Foundations card — the seven-letter teaching arc for the first week.
+  // Surfaces the next unread letter; absent once the user is caught up.
+  // Shared between the in-progress and sealed renders.
+  const foundationsBlock = foundationsNext !== null && (() => {
+    const letter = FOUNDATIONS_LETTERS[foundationsNext - 1];
+    if (!letter) return null;
+    return (
+      <>
+        <View style={s.weeklyHeader}>
+          <Text style={s.secLabel}>The Foundations</Text>
+        </View>
+        <View style={s.routineCard}>
+          <TouchableOpacity
+            style={s.routineRow}
+            onPress={() => {
+              haptics.tap();
+              router.push(`/foundations?letter=${foundationsNext}&from=/&fromLabel=Practice`);
+            }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="mail-outline" size={18} color={colors.accent} />
+            <View style={s.routineContent}>
+              <Text style={s.routineTitle}>Letter {letter.num} · {letter.title}</Text>
+              <Text style={s.routineSub}>Two minutes. One tool.</Text>
+            </View>
+            <View style={[s.tag, s.tagAccent]}>
+              <Text style={[s.tagText, s.tagTextAccent]}>TODAY</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </>
+    );
+  })();
+
   // Meditation section — featured contextual pick (big card) followed by a
   // horizontal swipe gallery of the other five. Shared between the in-progress
   // and sealed renders so they stay in sync.
@@ -505,6 +571,7 @@ export default function PracticeScreen() {
           <Animated.View style={[s.body, sealedAnimStyle(3)]}>
             {dailyTiles}
             {weeklyTileBlock}
+            {foundationsBlock}
           </Animated.View>
 
           <Animated.View style={[s.body, sealedAnimStyle(4)]}>
@@ -593,6 +660,8 @@ export default function PracticeScreen() {
           {dailyTiles}
 
           {weeklyTileBlock}
+
+          {foundationsBlock}
 
           {meditationBlock}
 

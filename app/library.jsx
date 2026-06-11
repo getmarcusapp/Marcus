@@ -1,12 +1,14 @@
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, SafeAreaView, Image, Linking,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { READING_LIST, bookshopUrl, amazonUrl } from '../constants/library';
+import { FOUNDATIONS_LETTERS } from '../constants/foundations';
+import { getFoundationsState } from '../lib/foundations';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 
@@ -59,6 +61,12 @@ export default function LibraryScreen() {
   const scrollRef = useRef(null);
   const playerInset = useMiniPlayerInset();
   const [searchQ, setSearchQ] = useState('');
+  // Foundations shelf state — which letters are unlocked/read. The series
+  // lives here permanently once the first-week Practice card retires.
+  const [foundations, setFoundations] = useState({ unlockedCount: FOUNDATIONS_LETTERS.length, read: [] });
+  useFocusEffect(useCallback(() => {
+    getFoundationsState().then(setFoundations).catch(() => {});
+  }, []));
   const [sortMode, setSortMode] = useState('section'); // 'section' | 'title'
   // null = show all sections; otherwise narrow to one section.key
   const [sectionFilter, setSectionFilter] = useState(null);
@@ -114,7 +122,7 @@ export default function LibraryScreen() {
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: playerInset }}
-        stickyHeaderIndices={sortMode === 'section' && !searchQ.trim() ? [2] : []}
+        stickyHeaderIndices={sortMode === 'section' && !searchQ.trim() ? [3] : []}
       >
 
         <View style={s.hero}>
@@ -135,6 +143,34 @@ export default function LibraryScreen() {
               A short shelf, hand-curated. Primary sources, modern interpreters, and a few voices from outside the Greco-Roman tradition the Stoics would have recognized.
             </Text>
           </View>
+        </View>
+
+        {/* The Foundations — the seven-letter teaching arc from the first
+            week, shelved here permanently. Locked letters (still unlocking
+            one per day for new users) render dimmed with their arrival day. */}
+        <View style={s.foundationsWrap}>
+          <Text style={s.foundationsLabel}>The Foundations</Text>
+          <Text style={s.foundationsSub}>Seven letters on the practice. One unlocked each day of your first week.</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 16 }}>
+            {FOUNDATIONS_LETTERS.map((letter, i) => {
+              const n = i + 1;
+              const locked = n > foundations.unlockedCount;
+              const isRead = foundations.read.includes(n);
+              return (
+                <TouchableOpacity
+                  key={n}
+                  style={[s.letterCard, locked && s.letterCardLocked]}
+                  disabled={locked}
+                  onPress={() => router.push(`/foundations?letter=${n}&from=${encodeURIComponent('/library')}&fromLabel=Library`)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[s.letterNum, locked && s.letterTextLocked, isRead && s.letterNumRead]}>{letter.num}</Text>
+                  <Text style={[s.letterTitle, locked && s.letterTextLocked]} numberOfLines={2}>{letter.title}</Text>
+                  <Text style={s.letterMeta}>{locked ? `Day ${n}` : isRead ? 'Read' : 'Unread'}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </View>
 
         {/* Search + sort row (non-sticky) */}
@@ -271,6 +307,27 @@ const s = StyleSheet.create({
   heroSub: { fontSize: 15, color: colors.textSecondary, lineHeight: 23 },
 
   // Search + sort
+  // Foundations shelf — horizontal strip of the seven letters above the
+  // bookshelf controls.
+  foundationsWrap: {
+    paddingLeft: 16, paddingTop: 18, paddingBottom: 18,
+    backgroundColor: colors.bg,
+    borderBottomWidth: 0.5, borderBottomColor: colors.border,
+  },
+  foundationsLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 4 },
+  foundationsSub: { fontSize: 13, color: colors.textSecondary, lineHeight: 19, marginBottom: 14, paddingRight: 16 },
+  letterCard: {
+    width: 120, padding: 12,
+    borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
+    backgroundColor: colors.bgCard,
+  },
+  letterCardLocked: { opacity: 0.45 },
+  letterNum: { fontSize: 20, fontFamily: font.display, color: colors.accent, marginBottom: 4 },
+  letterNumRead: { color: colors.accentDim },
+  letterTitle: { fontSize: 13, fontFamily: font.bodyMedium, color: colors.textPrimary, lineHeight: 18, marginBottom: 8 },
+  letterMeta: { fontSize: 11, color: colors.textSecondary, letterSpacing: 0.5, textTransform: 'uppercase' },
+  letterTextLocked: { color: colors.textSecondary },
+
   controlsWrap: {
     paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6,
     backgroundColor: colors.bg,

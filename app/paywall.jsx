@@ -10,6 +10,7 @@ import { useEntitlement } from '../lib/useEntitlement';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { GoldPrimary } from '../components/GoldButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { track } from '../lib/analytics';
 
 
 export default function PaywallScreen() {
@@ -45,6 +46,8 @@ export default function PaywallScreen() {
 
   useEffect(() => {
     loadOfferings();
+    // Coarse funnel context only: where the paywall was reached from.
+    track('paywall_view', { from: params?.from || 'direct' });
   }, []);
 
   async function loadOfferings() {
@@ -92,6 +95,7 @@ export default function PaywallScreen() {
     setPurchasing(false);
 
     if (result.success) {
+      track('trial_started', { plan: selectedPackage, from: params?.from || 'direct' });
       // Don't write has_premium here — RevenueCat is the source of truth
       // for real subscriptions, and writing it would short-circuit the
       // trial-state detection (the user would never see "X days left").
@@ -99,6 +103,7 @@ export default function PaywallScreen() {
       // at launch for unsigned builds.
       router.replace(successRoute);
     } else if (!result.userCancelled) {
+      track('purchase_failed', { plan: selectedPackage });
       Alert.alert('', 'Something went wrong. Please try again or restore your purchases.');
     }
   }
@@ -185,7 +190,7 @@ export default function PaywallScreen() {
             { icon: '◎', text: 'Fresh Stoic readings every morning' },
             { icon: '◎', text: 'Emotion logger with Stoic reframes' },
             { icon: '◎', text: 'Weekly review with Virtue ledger' },
-            { icon: '◎', text: 'No account. No data harvesting. Fully private.' },
+            { icon: '◎', text: 'Private by design. Your journal never leaves your device.' },
           ].map((f, i) => (
             <View key={i} style={s.featureRow}>
               <Text style={s.featureIcon}>{f.icon}</Text>
@@ -308,6 +313,7 @@ export default function PaywallScreen() {
         <TouchableOpacity
           style={s.skipBtn}
           onPress={() => {
+            if (!alreadySubscribed) track('paywall_declined', { from: params?.from || 'direct' });
             // Prefer the explicit `from` param if the paywall was opened
             // from a specific surface (More · Subscription, locked features,
             // etc.). Falls back to postPaywallRoute for the onboarding flow

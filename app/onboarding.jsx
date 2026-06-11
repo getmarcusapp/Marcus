@@ -18,6 +18,7 @@ import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
 import { MEDITATIONS_LIST, playPreview, stopPreview, useMeditationPlayer } from '../lib/meditationPlayer';
 import { pickAndImportBackup } from '../lib/backup';
+import { track } from '../lib/analytics';
 
 const DEFAULT_NOTIF_SETTINGS = {
   // Compass orients the day, so it fires before the Morning Journal acts
@@ -63,6 +64,7 @@ export default function OnboardingScreen() {
     // migration would mark it true for newly onboarded users too.
     await setHasSeenCompassIntro(false);
     await setHasOnboarded();
+    track('onboarding_completed');
     router.replace('/paywall?from=onboarding');
   }
 
@@ -508,6 +510,7 @@ function RemindersStep({ onNext }) {
     // next foreground re-sync.
     await AsyncStorage.setItem('notification_settings', JSON.stringify(settings));
     const granted = await requestNotificationPermissions();
+    track('notifications_permission', { granted });
     if (granted) {
       await scheduleAllNotifications();
     } else {

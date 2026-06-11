@@ -11,6 +11,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
 import { saveReview, updateReview, getReviews, getJournals, getTriggers, getRoles } from '../store/db';
 import * as haptics from '../lib/haptics';
+import { track } from '../lib/analytics';
 import { useKeyboardVisible } from '../lib/useKeyboardVisible';
 import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
@@ -248,6 +249,7 @@ export default function ReviewScreen() {
         await saveReview(entry);
         setEditingReview(entry);
       }
+      track('review_sealed', { edited: !!editingReview });
       haptics.success();
       const updated = await getReviews();
       setHistory(updated);

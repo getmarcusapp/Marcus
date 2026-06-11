@@ -19,6 +19,7 @@ import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { saveJournal, getTodayJournal, incrementStreak } from '../store/db';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
+import { track } from '../lib/analytics';
 import * as health from '../lib/health';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMindfulSession } from '../lib/useMindfulSession';
@@ -113,12 +114,27 @@ export default function JournalScreen() {
     return () => clearTimeout(t);
   }, [openPrompt, hasAccess]);
   const [alreadySaved, setAlreadySaved] = useState(false);
+  // Loop-closure: the evening landing surfaces what the user committed to
+  // this morning (III · Name, falling back to II · Brace) so the nightly
+  // examination audits the morning's intention — Seneca's whole point.
+  // { lead, text } or null when there's nothing to surface.
+  const [morningEcho, setMorningEcho] = useState(null);
 
   useEffect(() => {
     async function reload() {
       const existing = await getTodayJournal(isMorning ? 'morning' : 'evening');
       if (existing) { setAnswers(existing.answers || {}); setAlreadySaved(true); }
       else { setAnswers({}); setAlreadySaved(false); }
+      if (!isMorning) {
+        const morning = await getTodayJournal('morning');
+        const named = morning?.answers?.[2]?.trim();
+        const braced = morning?.answers?.[1]?.trim();
+        if (named) setMorningEcho({ lead: 'This morning you named what matters:', text: named });
+        else if (braced) setMorningEcho({ lead: 'This morning you braced for:', text: braced });
+        else setMorningEcho(null);
+      } else {
+        setMorningEcho(null);
+      }
     }
     reload();
     // Reset wizard position when switching morning <-> evening — the two
@@ -167,6 +183,7 @@ export default function JournalScreen() {
     };
     const ok = await saveJournal(entry);
     if (ok) {
+      track('journal_saved', { type: isMorning ? 'morning' : 'evening' });
       haptics.success();
       commitMindfulSession();
       cancelJournalNotification(isMorning ? 'morning' : 'evening');
@@ -259,6 +276,15 @@ export default function JournalScreen() {
               </View>
 
               <View style={s.body}>
+                {morningEcho && (
+                  <View style={s.echoBox}>
+                    <Text style={s.echoEyebrow}>This morning</Text>
+                    <Text style={s.echoLead}>{morningEcho.lead}</Text>
+                    <Text style={s.echoQuote} numberOfLines={4}>
+                      “{morningEcho.text.length > 180 ? `${morningEcho.text.slice(0, 180)}…` : morningEcho.text}”
+                    </Text>
+                  </View>
+                )}
                 {(() => {
                   const journalMed = MEDITATIONS[isMorning ? 'premeditatio' : 'evening-examination'];
                   const isCurrent = journalMedPlayer.currentMedId === journalMed.id;
@@ -520,6 +546,22 @@ const s = StyleSheet.create({
   // Gold uppercase attribution — matches the onboarding welcome screen so
   // every quote reads as one unified component. Was Inter 13 gray title-case.
   mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
+
+  // Loop-closure callout: the user's own morning commitment, surfaced on the
+  // evening landing. Gold-dim stroke distinguishes "your words" from the
+  // gray-stroked memento (the philosopher's words).
+  echoBox: {
+    borderWidth: 0.5,
+    borderColor: colors.accentDim,
+    borderRadius: radius.md,
+    backgroundColor: colors.bg,
+    padding: spacing.xl,
+    paddingVertical: 18,
+    marginBottom: 20,
+  },
+  echoEyebrow: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: 8 },
+  echoLead: { fontSize: 13, color: colors.textSecondary, fontFamily: font.body, marginBottom: 6 },
+  echoQuote: { fontSize: 17, color: colors.textPrimary, lineHeight: 26, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
 
   // Light writing surface
   body: { padding: spacing.md, backgroundColor: colors.bgCard },

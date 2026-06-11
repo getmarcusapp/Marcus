@@ -19,6 +19,7 @@ import {
 } from '../store/db';
 import { cancelJournalNotification } from '../notifications';
 import * as haptics from '../lib/haptics';
+import { track } from '../lib/analytics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { useEntitlement } from '../lib/useEntitlement';
 import { useKeyboardVisible } from '../lib/useKeyboardVisible';
@@ -229,6 +230,7 @@ Return only the JSON object.`;
       // Only count successful generations against the rate limit. Failed
       // API calls don't deduct from the user's budget.
       await incrementReadingCount();
+      track('reading_generated');
       cancelJournalNotification('reading');
       setReading(result);
       setInsight('');

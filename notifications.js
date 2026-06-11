@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DEFAULT_COMPASS } from './constants/compassFields';
 
 // How notifications appear when app is foregrounded. shouldShowBanner /
 // shouldShowList are the current expo-notifications keys; shouldShowAlert is
@@ -53,6 +54,28 @@ async function isTodayCompassDone() {
     const { date } = JSON.parse(raw);
     return date === new Date().toDateString();
   } catch { return false; }
+}
+
+// A short phrase from the user's own Compass for personalized reminder
+// variants. Only the aspirational fields (aspire, then why) — never
+// `overcome`, which is the confessional one and has no place on a lock
+// screen. Returns null when the user hasn't written their own Compass
+// (the onboarding default must not be quoted back as if it were theirs).
+async function getCompassPhrase() {
+  try {
+    const raw = await AsyncStorage.getItem('compass');
+    if (!raw) return null;
+    const compass = JSON.parse(raw);
+    for (const key of ['aspire', 'why']) {
+      const text = (compass?.[key] || '').trim();
+      if (!text || text === DEFAULT_COMPASS[key]) continue;
+      // First sentence, clipped — a fragment of their own voice, not a wall.
+      const sentence = text.split(/(?<=[.!?])\s+/)[0] || text;
+      const phrase = sentence.length > 90 ? `${sentence.slice(0, 90)}…` : sentence;
+      if (phrase.length >= 12) return phrase;
+    }
+    return null;
+  } catch { return null; }
 }
 
 // Schedule one practice reminder. The subtlety: a repeating `daily` trigger
@@ -131,6 +154,13 @@ async function doScheduleAllNotifications() {
     return; // corrupt settings — leave everything unscheduled rather than throw
   }
 
+  // Personalized variants: on odd days of the month, the morning and midday
+  // reminders carry a fragment of the user's own Compass instead of the
+  // standard copy. Deterministic by date so the many re-syncs within a day
+  // agree; alternating keeps either register from going stale.
+  const compassPhrase = await getCompassPhrase();
+  const personalizedDay = compassPhrase && new Date().getDate() % 2 === 1;
+
   // Compass
   if (settings.compassEnabled) {
     await scheduleDailyReminder(
@@ -155,7 +185,13 @@ async function doScheduleAllNotifications() {
   if (settings.morningEnabled) {
     await scheduleDailyReminder(
       REMINDER_IDS.morning,
-      { title: 'Morning practice', body: 'The hourglass turns. Reflect and intend.', sound: false },
+      {
+        title: 'Morning practice',
+        body: personalizedDay
+          ? `“${compassPhrase}” The day is waiting.`
+          : 'The hourglass turns. Reflect and intend.',
+        sound: false,
+      },
       settings.morningHour, settings.morningMinute,
       await isTodayJournalDone('morning'),
     );
@@ -177,7 +213,9 @@ async function doScheduleAllNotifications() {
       identifier: REMINDER_IDS.midday,
       content: {
         title: 'Pause',
-        body: 'How are you meeting the day?',
+        body: personalizedDay
+          ? `“${compassPhrase}” Is that who showed up this morning?`
+          : 'How are you meeting the day?',
         sound: false,
       },
       trigger: { type: 'daily', hour: settings.middayHour, minute: settings.middayMinute },
@@ -221,80 +259,58 @@ export async function cancelJournalNotification(_type) {
 
 
 // ─── RE-ENGAGEMENT NOTIFICATIONS ─────────────────────────────────────────────
-// Called on app load. Checks lastPracticeDate and schedules re-engagement
-// notifications if the user has been inactive. Cancels them if user is active.
+// Pre-armed win-back ladder. Every app open (and every sealed day) re-arms
+// four one-shots at +3 / +7 / +14 / +30 days out, each at 8am. They only
+// ever fire if the user does NOT come back — any return re-arms the ladder
+// from that day. The old model scheduled win-backs only after the user had
+// already lapsed AND reopened the app, which is exactly backwards: the user
+// who never reopens is the one the ladder exists for.
 
-const REENGAGEMENT_IDS = {
-  day2: 'reengagement-day2',
-  day7: 'reengagement-day7',
-};
+const REENGAGEMENT_LADDER = [
+  {
+    id: 'reengagement-day3',
+    days: 3,
+    title: 'Even Marcus missed days',
+    body: 'He always returned. So can you.',
+  },
+  {
+    id: 'reengagement-day7',
+    days: 7,
+    title: "It's been a week",
+    body: 'Begin with one prompt. The rest follows.',
+  },
+  {
+    id: 'reengagement-day14',
+    days: 14,
+    title: 'The page is still open',
+    body: 'Your practice is where you left it. One quiet step back in.',
+  },
+  {
+    id: 'reengagement-day30',
+    days: 30,
+    title: 'The practice does not judge absence',
+    body: 'It waits. Today is as good a day as the first.',
+  },
+];
 
-// Next occurrence of `hour`:00 that is at least a couple of hours away —
-// tomorrow morning in practice. A raw timeInterval ("8 hours from now") fired
-// at 3am for users who opened the app in the evening.
-function nextMorningAt(hour) {
+// 8am, `days` days from now — mornings are when resolve is highest.
+function morningInDays(days, hour = 8) {
   const t = new Date();
-  t.setDate(t.getDate() + 1);
+  t.setDate(t.getDate() + days);
   t.setHours(hour, 0, 0, 0);
   return t;
 }
 
 export async function scheduleReengagementNotifications() {
   try {
-    // Cancel any existing re-engagement notifications first
     await cancelReengagementNotifications();
-
-    const raw = await AsyncStorage.getItem('streak');
-    if (!raw) return;
-    const streak = JSON.parse(raw);
-    if (!streak.lastDate) return;
-
-    const lastPractice = new Date(streak.lastDate);
-    const now = new Date();
-    const daysSince = Math.floor((now - lastPractice) / 86400000);
-
-    // Active today or yesterday — no re-engagement needed
-    if (daysSince <= 1) return;
-
-    // Day 2 miss — soft invite, fires tomorrow morning at 8am
-    if (daysSince === 2) {
+    for (const rung of REENGAGEMENT_LADDER) {
       await Notifications.scheduleNotificationAsync({
-        identifier: REENGAGEMENT_IDS.day2,
-        content: {
-          title: "It's been a day",
-          body: "The practice doesn't judge absence. It just waits.",
-          sound: false,
-        },
-        trigger: { type: 'date', date: nextMorningAt(8) },
+        identifier: rung.id,
+        content: { title: rung.title, body: rung.body, sound: false },
+        trigger: { type: 'date', date: morningInDays(rung.days) },
       });
-      return;
     }
-
-    // Day 7 miss — more direct, fires in 1 hour
-    if (daysSince >= 7) {
-      await Notifications.scheduleNotificationAsync({
-        identifier: REENGAGEMENT_IDS.day7,
-        content: {
-          title: "It's been a week",
-          body: 'Begin with one prompt. The rest follows.',
-          sound: false,
-        },
-        trigger: { type: 'timeInterval', seconds: 60 * 60, repeats: false },
-      });
-      return;
-    }
-
-    // Days 3–6 — general nudge, fires next morning at 7am
-    await Notifications.scheduleNotificationAsync({
-      identifier: REENGAGEMENT_IDS.day2,
-      content: {
-        title: 'Even Marcus missed days',
-        body: 'He always returned. So can you.',
-        sound: false,
-      },
-      trigger: { type: 'date', date: nextMorningAt(7) },
-    });
-
   } catch (e) {
     console.log('scheduleReengagementNotifications error:', e);
   }
@@ -302,17 +318,21 @@ export async function scheduleReengagementNotifications() {
 
 export async function cancelReengagementNotifications() {
   try {
-    for (const id of Object.values(REENGAGEMENT_IDS)) {
-      await Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
+    for (const rung of REENGAGEMENT_LADDER) {
+      await Notifications.cancelScheduledNotificationAsync(rung.id).catch(() => {});
     }
+    // Clean up identifiers from the pre-ladder model so they can't fire.
+    await Notifications.cancelScheduledNotificationAsync('reengagement-day2').catch(() => {});
   } catch (e) {
     console.log('cancelReengagementNotifications error:', e);
   }
 }
 
-// Call this when a practice is sealed — cancels all re-engagement notifications
+// Call this when a practice is sealed — re-arms the ladder from today (the
+// old behavior cancelled it outright, which meant a user who sealed today
+// and never returned got no win-back at all).
 export async function onPracticeSealed() {
-  await cancelReengagementNotifications();
+  await scheduleReengagementNotifications();
 }
 
 export async function cancelAllNotifications() {
