@@ -16,13 +16,15 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_REVENUECAT_KEY": "appl_PLlIRAynMNSYFQFeZZMoQiSsssK",
+        "EXPO_PUBLIC_APTABASE_KEY": "A-US-4615143390",
         "EXPO_PUBLIC_IS_BETA": "true"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_REVENUECAT_KEY": "appl_PLlIRAynMNSYFQFeZZMoQiSsssK"
+        "EXPO_PUBLIC_REVENUECAT_KEY": "appl_PLlIRAynMNSYFQFeZZMoQiSsssK",
+        "EXPO_PUBLIC_APTABASE_KEY": "A-US-4615143390"
       }
     }
   },
