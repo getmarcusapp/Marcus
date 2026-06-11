@@ -374,7 +374,7 @@ export default function CompassScreen() {
                   multiline
                   value={draft}
                   onChangeText={setDraft}
-                  onFocus={() => { setFocusedField('edit'); scrollInputIntoView(editInputRef); }}
+                  onFocus={() => { setFocusedField('edit'); setHintOpen(false); scrollInputIntoView(editInputRef); }}
                   onBlur={() => setFocusedField(null)}
                   placeholder={COMPASS_HINTS[tabKeys[activeTab]]?.placeholder || ''}
                   placeholderTextColor={colors.textSecondary}
@@ -441,7 +441,7 @@ export default function CompassScreen() {
                     style={[s.roleNameInput, focusedField !== 'roleName' && s.roleNameInputDim]}
                     value={roleNameDraft}
                     onChangeText={setRoleNameDraft}
-                    onFocus={() => { setFocusedField('roleName'); scrollInputIntoView(roleNameInputRef); }}
+                    onFocus={() => { setFocusedField('roleName'); setHintOpen(false); scrollInputIntoView(roleNameInputRef); }}
                     onBlur={() => setFocusedField(null)}
                     placeholder="Name (e.g. Parent, Citizen)"
                     placeholderTextColor={colors.textSecondary}
@@ -457,7 +457,7 @@ export default function CompassScreen() {
                     multiline
                     value={roleCommitmentDraft}
                     onChangeText={setRoleCommitmentDraft}
-                    onFocus={() => { setFocusedField('roleCommitment'); scrollInputIntoView(roleCommitmentInputRef); }}
+                    onFocus={() => { setFocusedField('roleCommitment'); setHintOpen(false); scrollInputIntoView(roleCommitmentInputRef); }}
                     onBlur={() => setFocusedField(null)}
                     placeholder={placeholderFor(roleNameDraft)
                       ? `e.g. ${placeholderFor(roleNameDraft)}`

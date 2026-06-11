@@ -495,6 +495,7 @@ export default function ReviewScreen() {
                     placeholder={hasAccess ? "Write here. No judgment, only honesty..." : "Start your 7-day free trial to write."}
                     placeholderTextColor={colors.textSecondary}
                     value={answers[p.key] || ''}
+                    onFocus={() => setOpenHint(null)}
                     onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
                     editable={hasAccess}
                     scrollEnabled={false}
@@ -591,6 +592,7 @@ export default function ReviewScreen() {
                   placeholderTextColor={colors.textSecondary}
                   value={answers.roles || ''}
                   onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
+                  onFocus={() => setOpenHint(null)}
                   editable={hasAccess}
                   scrollEnabled={false}
                   inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewWizardAccessory' : undefined}
@@ -624,6 +626,7 @@ export default function ReviewScreen() {
                 placeholder={hasAccess ? "Write it as a commitment, not a wish..." : "Start your 7-day free trial to write."}
                 placeholderTextColor={colors.textSecondary}
                 value={intention}
+                    onFocus={() => setOpenHint(null)}
                 onChangeText={setIntention}
                 editable={hasAccess}
                 scrollEnabled={false}

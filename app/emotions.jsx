@@ -317,7 +317,7 @@ export default function EmotionsScreen() {
                 placeholderTextColor={colors.textSecondary}
                 value={trigger}
                 onChangeText={setTrigger}
-                onFocus={() => setFocusedField('trigger')}
+                onFocus={() => { setFocusedField('trigger'); setHintOpen(false); }}
                 onBlur={() => setFocusedField(null)}
                 editable={hasAccess}
                 scrollEnabled={false}
@@ -342,7 +342,7 @@ export default function EmotionsScreen() {
                 placeholderTextColor={colors.textSecondary}
                 value={reaction}
                 onChangeText={setReaction}
-                onFocus={() => setFocusedField('reaction')}
+                onFocus={() => { setFocusedField('reaction'); setHintOpen(false); }}
                 onBlur={() => setFocusedField(null)}
                 editable={hasAccess}
                 scrollEnabled={false}
@@ -420,7 +420,7 @@ export default function EmotionsScreen() {
                 placeholderTextColor={colors.textSecondary}
                 value={chosenResponse}
                 onChangeText={setChosenResponse}
-                onFocus={() => { setFocusedField('response'); scrollResponseIntoView(); }}
+                onFocus={() => { setFocusedField('response'); setHintOpen(false); scrollResponseIntoView(); }}
                 onBlur={() => setFocusedField(null)}
                 editable={hasAccess}
                 scrollEnabled={false}

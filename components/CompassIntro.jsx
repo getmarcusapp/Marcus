@@ -112,7 +112,7 @@ export function CompassIntro({ compass, setCompass, onDismiss, onBack }) {
                   multiline
                   value={compass[field.key]}
                   onChangeText={text => setCompass(prev => ({ ...prev, [field.key]: text }))}
-                  onFocus={() => setEditFocused(true)}
+                  onFocus={() => { setEditFocused(true); setHintOpen(false); }}
                   onBlur={() => setEditFocused(false)}
                   placeholder={field.placeholder}
                   placeholderTextColor={colors.textSecondary}

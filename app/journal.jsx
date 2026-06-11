@@ -470,6 +470,7 @@ export default function JournalScreen() {
                         placeholderTextColor={colors.textSecondary}
                         value={answers[prompt.answerKey] || ''}
                         onChangeText={text => setAnswers(prev => ({ ...prev, [prompt.answerKey]: text }))}
+                        onFocus={() => setOpenHint(null)}
                         editable={hasAccess}
                         scrollEnabled={false}
                         keyboardAppearance="dark"

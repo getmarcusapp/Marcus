@@ -436,7 +436,7 @@ Return only the JSON object.`;
                     placeholderTextColor={colors.textSecondary}
                     value={insight}
                     onChangeText={text => setInsight(text)}
-                    onFocus={() => setInsightFocused(true)}
+                    onFocus={() => { setInsightFocused(true); setSourceHintOpen(false); }}
                     onBlur={() => setInsightFocused(false)}
                     scrollEnabled={false}
                     editable={!insightSaved && hasAccess}

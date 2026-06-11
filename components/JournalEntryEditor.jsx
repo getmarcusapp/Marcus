@@ -72,6 +72,7 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
                 placeholderTextColor={colors.textSecondary}
                 value={answers[idx] || ''}
                 onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
+                onFocus={() => setOpenHint(null)}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'journalArchiveEditAccessory' : undefined}
                 keyboardAppearance="dark"
