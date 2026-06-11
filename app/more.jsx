@@ -22,6 +22,7 @@ const menuItems = [
     section: 'App',
     items: [
       { label: 'How Marcus works', sub: 'The practice explained', icon: 'help-circle-outline', route: '/howto' },
+      { label: 'The Foundations', sub: 'Seven letters on the practice', icon: 'mail-outline', route: '/foundations-list' },
       { label: 'Further reading', sub: 'A short shelf of curated Stoic works', icon: 'library-outline', route: '/library' },
       { label: 'Virtues & imagery', sub: 'The four Virtues and the art that holds them', icon: 'images-outline', route: '/imagery' },
       { label: 'Settings', sub: 'Notifications and preferences', icon: 'settings-outline', route: '/settings' },

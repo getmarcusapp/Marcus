@@ -14,7 +14,7 @@ import { track } from '../lib/analytics';
 
 // Reader for the Foundations letters — the seven-day teaching arc. One
 // letter per day; earlier letters stay readable. Reached from the Practice
-// card during the first week and from the Library shelf afterwards.
+// card during the first week and from More · The Foundations afterwards.
 export default function FoundationsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
