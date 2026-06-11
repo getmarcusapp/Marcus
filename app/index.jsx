@@ -596,8 +596,8 @@ export default function PracticeScreen() {
               is still surfaced when today is also review day. */}
           <Animated.View style={[s.body, sealedAnimStyle(3)]}>
             {dailyTiles}
-            {weeklyTileBlock}
             {foundationsBlock}
+            {weeklyTileBlock}
           </Animated.View>
 
           <Animated.View style={[s.body, sealedAnimStyle(4)]}>
@@ -685,9 +685,9 @@ export default function PracticeScreen() {
 
           {dailyTiles}
 
-          {weeklyTileBlock}
-
           {foundationsBlock}
+
+          {weeklyTileBlock}
 
           {meditationBlock}
 
