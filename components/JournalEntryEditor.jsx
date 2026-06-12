@@ -37,7 +37,7 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
             {(prompt.hint || prompt.info) && (
               <TouchableOpacity
                 style={s.hintBtn}
-                onPress={() => setOpenHint(openHint === idx ? null : idx)}
+                onPress={() => { if (openHint !== idx) Keyboard.dismiss(); setOpenHint(openHint === idx ? null : idx); }}
               >
                 <Text style={s.hintBtnText}>ⓘ</Text>
               </TouchableOpacity>

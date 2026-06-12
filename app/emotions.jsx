@@ -82,6 +82,7 @@ export default function EmotionsScreen() {
   // Inline ⓘ bubble holding the emotion-specific Stoic reframe in the
   // III · Reframe "What story…" card. Only shown once an emotion is picked.
   const [reframeInfoOpen, setReframeInfoOpen] = useState(false);
+  const loggingRef = useRef(false);
   // Tracks which input field is currently focused so the wrapping fieldCard
   // can switch between non-active (darker stroke) and active (brighter stroke).
   const [focusedField, setFocusedField] = useState(null);
@@ -90,6 +91,7 @@ export default function EmotionsScreen() {
   const { hasAccess } = useEntitlement();
   function requireAccess(action) {
     if (hasAccess) { action(); return; }
+    if (hasAccess === null) return; // entitlement still loading — swallow the tap rather than misroute a subscriber
     router.push('/paywall');
   }
   const triggerInputRef = useRef(null);
@@ -155,7 +157,11 @@ export default function EmotionsScreen() {
   }
 
   async function handleLog() {
-    if (!selectedEmotion) return;
+    // loggingRef guards rapid double-taps — the accessory Log and body
+    // button both passed the selectedEmotion check before state cleared,
+    // writing duplicate entries and queueing two alerts.
+    if (!selectedEmotion || loggingRef.current) return;
+    loggingRef.current = true;
     const entry = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
@@ -179,6 +185,7 @@ export default function EmotionsScreen() {
     setIntensity(5);
     setTiming('now');
     setReframeInfoOpen(false);
+    loggingRef.current = false;
     Alert.alert('', 'Trigger logged.', [{ text: 'Done' }]);
   }
 
@@ -262,7 +269,7 @@ export default function EmotionsScreen() {
             <View style={[s.fieldCard, selectedEmotion && s.fieldCardActive]}>
               <View style={s.feelingHeader}>
                 <Text style={[s.secQuestion, { marginTop: 0, marginBottom: 0 }]}>What are you feeling?</Text>
-                <TouchableOpacity onPress={() => setHintOpen(!hintOpen)} style={s.hintBtn} activeOpacity={0.7}>
+                <TouchableOpacity onPress={() => { if (!hintOpen) Keyboard.dismiss(); setHintOpen(!hintOpen); }} style={s.hintBtn} activeOpacity={0.7}>
                   <Text style={s.hintBtnText}>ⓘ</Text>
                 </TouchableOpacity>
               </View>
@@ -398,7 +405,7 @@ export default function EmotionsScreen() {
                   {timing === 'now' ? 'How will I respond?' : 'How should I have responded?'}
                 </Text>
                 {selectedEmotion && (
-                  <TouchableOpacity onPress={() => setReframeInfoOpen(!reframeInfoOpen)} style={s.hintBtn} activeOpacity={0.7}>
+                  <TouchableOpacity onPress={() => { if (!reframeInfoOpen) Keyboard.dismiss(); setReframeInfoOpen(!reframeInfoOpen); }} style={s.hintBtn} activeOpacity={0.7}>
                     <Text style={s.hintBtnText}>ⓘ</Text>
                   </TouchableOpacity>
                 )}
@@ -420,7 +427,7 @@ export default function EmotionsScreen() {
                 placeholderTextColor={colors.textSecondary}
                 value={chosenResponse}
                 onChangeText={setChosenResponse}
-                onFocus={() => { setFocusedField('response'); setHintOpen(false); scrollResponseIntoView(); }}
+                onFocus={() => { setFocusedField('response'); setHintOpen(false); setReframeInfoOpen(false); scrollResponseIntoView(); }}
                 onBlur={() => setFocusedField(null)}
                 editable={hasAccess}
                 scrollEnabled={false}

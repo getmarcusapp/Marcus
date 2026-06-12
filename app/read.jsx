@@ -67,6 +67,7 @@ export default function ReadScreen() {
   // Reusable gate — locked actions push to paywall instead of executing.
   function requireAccess(action) {
     if (hasAccess) { action(); return; }
+    if (hasAccess === null) return; // entitlement still loading — swallow the tap rather than misroute a subscriber
     router.push('/paywall');
   }
   const shareCardRef = useRef(null);
@@ -100,7 +101,7 @@ export default function ReadScreen() {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, []));
 
-  async function generateReading() {
+  async function generateReading({ userInitiated = false } = {}) {
     // In-flight guard: the focus effect re-calls this when the user bounces
     // away and back mid-generation; a second concurrent run produced
     // duplicate history entries and double-counted the rate caps. A ref
@@ -111,6 +112,9 @@ export default function ReadScreen() {
     // abuse before unit economics go negative.
     const counts = await getReadingCounts();
     if (counts.dayCount >= READING_DAY_CAP) {
+      // Alert only on explicit taps — the focus effect auto-calls this and a
+      // capped user got the same alert on every tab visit, forever.
+      if (!userInitiated) return;
       Alert.alert(
         '',
         `You've generated ${READING_DAY_CAP} readings today. The daily limit resets at midnight — try again tomorrow.`,
@@ -118,6 +122,7 @@ export default function ReadScreen() {
       return;
     }
     if (counts.monthCount >= READING_MONTH_CAP) {
+      if (!userInitiated) return;
       Alert.alert(
         '',
         `You've reached this month's reading limit (${READING_MONTH_CAP}). It resets on the 1st.`,
@@ -247,7 +252,7 @@ Return only the JSON object.`;
           : 'Could not generate reading right now.',
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Try again', onPress: () => generateReading() },
+          { text: 'Try again', onPress: () => generateReading({ userInitiated: true }) },
         ]
       );
     } finally {
@@ -391,7 +396,7 @@ Return only the JSON object.`;
                       </Text>
                     </View>
                     <TouchableOpacity
-                      onPress={() => setSourceHintOpen(!sourceHintOpen)}
+                      onPress={() => { if (!sourceHintOpen) Keyboard.dismiss(); setSourceHintOpen(!sourceHintOpen); }}
                       style={s.sourceHintBtn}
                       hitSlop={10}
                       activeOpacity={0.7}
@@ -447,7 +452,7 @@ Return only the JSON object.`;
 
               </>
             ) : (
-              <GoldPrimary style={[s.readingBtn, s.readingBtnBody]} onPress={() => requireAccess(() => generateReading())}>
+              <GoldPrimary style={[s.readingBtn, s.readingBtnBody]} onPress={() => requireAccess(() => generateReading({ userInitiated: true }))}>
                 <Text style={[s.readingBtnText, s.readingBtnFilledText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>Generate today's reading</Text>
               </GoldPrimary>
             )}

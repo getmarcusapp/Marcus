@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Image,
-  Platform, InputAccessoryView, Keyboard,
+  Platform, InputAccessoryView, Keyboard, Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect, useNavigation } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -83,6 +83,7 @@ export default function CompassScreen() {
   const { hasAccess } = useEntitlement();
   function requireAccess(action) {
     if (hasAccess) { action(); return; }
+    if (hasAccess === null) return; // entitlement still loading — swallow the tap rather than misroute a subscriber
     router.push('/paywall');
   }
   const params = useLocalSearchParams();
@@ -239,12 +240,40 @@ export default function CompassScreen() {
   // Single-tap add for suggestion pills. Adds the role with empty
   // commitment so the pill flow stays one-tap. User can fill in a
   // commitment later by tapping the role card.
+  // Tab switches used to silently discard an in-progress edit. If the
+  // draft differs from the saved value, confirm before throwing it away.
+  function switchTab(i) {
+    const doSwitch = () => { setActiveTab(i); setEditing(false); setHintOpen(false); markCompassDone(); };
+    const key = tabKeys[activeTab];
+    const original = key ? (compass?.[key] || '') : '';
+    if (editing && draft.trim() !== original.trim()) {
+      Alert.alert(
+        'Discard changes?',
+        'Your edits to this field have not been saved.',
+        [
+          { text: 'Keep editing', style: 'cancel' },
+          { text: 'Discard', style: 'destructive', onPress: doSwitch },
+        ],
+      );
+      return;
+    }
+    doSwitch();
+  }
+
   async function quickAddRole(name) {
-    if (roles.some(r => r.name.toLowerCase() === name.toLowerCase())) return;
-    const next = [...roles, { id: Date.now().toString(), name, commitment: '' }];
-    await saveRoles(next);
-    haptics.tap();
-    setRoles(next);
+    // Functional update: rapid taps on two pills used to capture the same
+    // stale `roles`, so the second save overwrote the first (a role
+    // silently vanished). Compute from prev and persist the result.
+    let next = null;
+    setRoles(prev => {
+      if (prev.some(r => r.name.toLowerCase() === name.toLowerCase())) return prev;
+      next = [...prev, { id: `${Date.now()}-${name.toLowerCase()}`, name, commitment: '' }];
+      return next;
+    });
+    if (next) {
+      haptics.tap();
+      await saveRoles(next);
+    }
   }
 
   async function handleDeleteRole(id) {
@@ -339,7 +368,7 @@ export default function CompassScreen() {
             <TouchableOpacity
               key={t}
               style={[s.navPill, activeTab === i && s.navPillActive]}
-              onPress={() => { setActiveTab(i); setEditing(false); setHintOpen(false); markCompassDone(); }}
+              onPress={() => switchTab(i)}
             >
               <Text
                 style={[s.navPillText, activeTab === i && s.navPillTextActive]}
@@ -359,7 +388,7 @@ export default function CompassScreen() {
               <View>
                 <View style={s.hintRow}>
                   <Text style={s.hintLabel}>{tabs[activeTab]}</Text>
-                  <TouchableOpacity style={s.hintBtn} onPress={() => setHintOpen(!hintOpen)} activeOpacity={0.7}>
+                  <TouchableOpacity style={s.hintBtn} onPress={() => { if (!hintOpen) Keyboard.dismiss(); setHintOpen(!hintOpen); }} activeOpacity={0.7}>
                     <Text style={s.hintBtnText}>ⓘ</Text>
                   </TouchableOpacity>
                 </View>
@@ -387,7 +416,7 @@ export default function CompassScreen() {
               <View>
                 <View style={s.hintRow}>
                   <Text style={s.hintLabel}>{tabs[activeTab]}</Text>
-                  <TouchableOpacity style={s.hintBtn} onPress={() => setHintOpen(!hintOpen)} activeOpacity={0.7}>
+                  <TouchableOpacity style={s.hintBtn} onPress={() => { if (!hintOpen) Keyboard.dismiss(); setHintOpen(!hintOpen); }} activeOpacity={0.7}>
                     <Text style={s.hintBtnText}>ⓘ</Text>
                   </TouchableOpacity>
                 </View>
@@ -408,7 +437,7 @@ export default function CompassScreen() {
             <View>
               <View style={roles.length > 0 ? s.hintRow : s.hintRowRight}>
                 {roles.length > 0 && <Text style={s.hintLabel}>Your roles</Text>}
-                <TouchableOpacity style={s.hintBtn} onPress={() => setHintOpen(!hintOpen)} activeOpacity={0.7}>
+                <TouchableOpacity style={s.hintBtn} onPress={() => { if (!hintOpen) Keyboard.dismiss(); setHintOpen(!hintOpen); }} activeOpacity={0.7}>
                   <Text style={s.hintBtnText}>ⓘ</Text>
                 </TouchableOpacity>
               </View>

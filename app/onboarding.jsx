@@ -57,7 +57,12 @@ export default function OnboardingScreen() {
   // /compass screen — users see it the first time they open Compass, gated
   // by has_seen_compass_intro. Keeps onboarding shorter and lets the
   // walkthrough land in context.
+  const finishingRef = useRef(false);
   async function handleFinish() {
+    // Both terminal buttons (Set reminders / Maybe later) stay tappable
+    // through a long await chain; guard so the finish path runs once.
+    if (finishingRef.current) return;
+    finishingRef.current = true;
     await saveCompass(DEFAULT_COMPASS);
     // Explicitly mark the intro as not-yet-seen so the in-app /compass
     // walkthrough fires on first visit. Without this, the OnboardingGate

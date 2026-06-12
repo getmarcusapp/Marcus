@@ -91,6 +91,7 @@ export default function JournalScreen() {
   const { hasAccess } = useEntitlement();
   function requireAccess(action) {
     if (hasAccess) { action(); return; }
+    if (hasAccess === null) return; // entitlement still loading — swallow the tap rather than misroute a subscriber
     router.push('/paywall');
   }
   const journalMedPlayer = useMeditationPlayer();
@@ -223,8 +224,12 @@ export default function JournalScreen() {
   // the user to answer at least one when the button is disabled.
   const canSave = answeredCount > 0;
 
+  const savingJournalRef = useRef(false);
   async function handleSave() {
-    if (!canSave) return;
+    // In-flight guard: double-tapping Complete ran the whole pipeline twice
+    // (two Health-permission alerts on a first save, double mindful session).
+    if (!canSave || savingJournalRef.current) return;
+    savingJournalRef.current = true;
     const entry = {
       id: Date.now().toString(),
       type: isMorning ? 'morning' : 'evening',
@@ -245,10 +250,14 @@ export default function JournalScreen() {
       maybeAskHealthPermission();
       await incrementStreak();
       setAlreadySaved(true);
+      // Reset the wizard so re-entry lands on the landing ("Edit ... journal"),
+      // not the last step — the screen stays mounted across navigation.
+      setOpenPrompt(-1);
       // Both morning and evening saves return to Practice. On the last day-step,
       // Practice renders the sealed state automatically when everything's done.
       router.replace('/');
     }
+    savingJournalRef.current = false;
   }
 
   return (
@@ -421,7 +430,7 @@ export default function JournalScreen() {
                       {(prompt.hint || prompt.info) && (
                         <TouchableOpacity
                           style={s.hintBtn}
-                          onPress={() => setOpenHint(openHint === openPrompt ? null : openPrompt)}
+                          onPress={() => { if (openHint !== openPrompt) Keyboard.dismiss(); setOpenHint(openHint === openPrompt ? null : openPrompt); }}
                         >
                           <Text style={s.hintBtnText}>ⓘ</Text>
                         </TouchableOpacity>

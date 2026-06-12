@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput, Image,
   TouchableOpacity, StyleSheet, SafeAreaView,
-  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -94,11 +93,10 @@ export default function JournalHistoryScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel="Back" />
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.bgCard }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
-      >
+      {/* Keyboard insets are owned by the ScrollView's
+          automaticallyAdjustKeyboardInsets — a KeyboardAvoidingView stacked
+          on top double-compensated during the keyboard animation. */}
+      <View style={{ flex: 1, backgroundColor: colors.bgCard }}>
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
@@ -269,7 +267,7 @@ export default function JournalHistoryScreen() {
           )}
         </View>
       </ScrollView>
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }

@@ -24,7 +24,7 @@ export function useMiniPlayerInset() {
 
 // Routes where the mini-player should NOT show: the full meditate screen
 // already has its own player, and onboarding/paywall hide the tab bar.
-const HIDDEN_ROUTES = new Set(['/meditate', '/onboarding', '/paywall']);
+const HIDDEN_ROUTES = new Set(['/meditate', '/onboarding', '/paywall', '/ready', '/welcome']);
 
 // Map current pathname -> label shown on the meditate back button when the
 // user expands the mini-player from elsewhere in the app.

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, SafeAreaView, Alert,
-  Platform, InputAccessoryView, Keyboard, Image, Share, Dimensions,
+  Platform, InputAccessoryView, Keyboard, Image, Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,8 +16,6 @@ import { useKeyboardVisible } from '../lib/useKeyboardVisible';
 import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { HeroOverlayChip } from '../components/HeroOverlayChip';
-import { captureRef } from 'react-native-view-shot';
-import { ReviewShareCard } from '../components/ReviewShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { WizardHeader } from '../components/WizardHeader';
@@ -76,13 +74,15 @@ export default function ReviewScreen() {
   const { hasAccess } = useEntitlement();
   function requireAccess(action) {
     if (hasAccess) { action(); return; }
+    if (hasAccess === null) return; // entitlement still loading — swallow the tap rather than misroute a subscriber
     router.push('/paywall');
   }
 
-  useFocusEffect(useCallback(() => {
-    setOpenHint(null);
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, []));
+  // Mirrors openPrompt for use inside the focus-time load() without making
+  // the focus effect re-subscribe on every step change.
+  const openPromptRef = useRef(-1);
+  useEffect(() => { openPromptRef.current = openPrompt; }, [openPrompt]);
+
   const [history, setHistory] = useState([]);
   // The review (if any) already sealed in the current review window. Editing
   // it updates in place — re-opening the wizard used to start blank and seal
@@ -90,9 +90,7 @@ export default function ReviewScreen() {
   const [editingReview, setEditingReview] = useState(null);
   const savingRef = useRef(false);
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
-  const shareCardRef = useRef(null);
   const scrollRef = useRef(null);
-  const [shareEntry, setShareEntry] = useState(null);
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
   const [dailyIntensity, setDailyIntensity] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -149,21 +147,27 @@ export default function ReviewScreen() {
     }
   }
 
-  useEffect(() => {
-    async function load() {
+  const load = useCallback(async () => {
+    {
       const reviews = await getReviews();
       setHistory(reviews);
       // Pre-load this window's review (same 3-day window the Practice
       // screen uses for its done-state) so "Edit this week's review"
-      // actually edits instead of duplicating.
+      // actually edits instead of duplicating. Out-of-window => null,
+      // otherwise a screen alive across a week boundary would silently
+      // overwrite LAST week's entry on the next save.
       const windowMs = 3 * 86400000;
       const current = reviews.find(r => Date.now() - new Date(r.date).getTime() < windowMs);
-      if (current) {
-        setEditingReview(current);
-        setAnswers(current.answers || {});
+      setEditingReview(current || null);
+      // Hydrate wizard fields only when the user isn't mid-wizard and
+      // hasn't typed anything unsaved — same refocus guard as the journal.
+      if (current && openPromptRef.current < 0) {
+        setAnswers(prev =>
+          Object.values(prev).some(v => v && String(v).trim().length > 0) ? prev : (current.answers || {})
+        );
+        setIntention(prev => (prev && prev.trim() ? prev : (current.intention || '')));
         if (current.bestVirtue) setBestVirtue(current.bestVirtue);
         if (current.worstVirtue) setWorstVirtue(current.worstVirtue);
-        setIntention(current.intention || '');
       }
       const journals = await getJournals();
       const triggers = await getTriggers();
@@ -219,8 +223,18 @@ export default function ReviewScreen() {
       }
       setDailyIntensity(daily);
     }
-    load();
   }, []);
+
+  // Reload on every focus, not just mount — the screen stays mounted in the
+  // tab navigator, so mount-only loading froze the week's stats/spark chart
+  // at first visit, never surfaced roles added later (the VI · Account step
+  // silently vanished), and left `sealed` stuck on the terminal page forever.
+  useFocusEffect(useCallback(() => {
+    setOpenHint(null);
+    setSealed(false);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    load();
+  }, [load]));
 
   // Gate sealing on at least one prompt answer OR an intention. Virtue picks
   // alone aren't enough — the textual reflection is what makes a sealed
@@ -255,42 +269,15 @@ export default function ReviewScreen() {
       setHistory(updated);
       // Show the dedicated "Week sealed" moment (independent of the daily
       // practice seal), then the user continues to Practice from there.
+      // Reset the wizard position so the next visit (focus clears `sealed`)
+      // lands on the landing, not the last wizard step.
+      setOpenPrompt(-1);
       setSealed(true);
     } finally {
       savingRef.current = false;
     }
   }
 
-  async function shareReviewEntry(entry) {
-    haptics.tap();
-    setShareEntry(entry);
-    // Let the off-screen card render with the new entry data before capture.
-    await new Promise(r => setTimeout(r, 80));
-    const intentionText = (entry?.intention || '').trim();
-    const message = [
-      intentionText ? `Intention for the week ahead:\n\n${intentionText}` : null,
-      intentionText ? '' : null,
-      '— Marcus · a daily Stoic practice',
-    ].filter(v => v !== null).join('\n');
-    try {
-      const uri = await captureRef(shareCardRef, {
-        format: 'jpg',
-        quality: 0.92,
-        result: 'tmpfile',
-      });
-      await Share.share({ url: uri, message });
-    } catch (e) {
-      console.log('Review share image failed, falling back:', e?.message);
-      const fallback = [
-        `Week of ${entry?.weekOf || ''}`,
-        '',
-        intentionText ? `Intention for the week ahead:\n${intentionText}` : null,
-        intentionText ? '' : null,
-        '— Marcus · a daily Stoic practice',
-      ].filter(Boolean).join('\n');
-      try { await Share.share({ message: fallback }); } catch {}
-    }
-  }
 
   // Dedicated "Week sealed" moment, shown right after the review is saved —
   // independent of the daily practice seal. Mirrors the practice hero's
@@ -330,21 +317,6 @@ export default function ReviewScreen() {
           onBack={wizardBack}
           onClose={wizardClose}
         />
-      )}
-      {/* Off-screen share card. Re-renders when shareEntry changes. */}
-      {shareEntry && (
-        <View
-          ref={shareCardRef}
-          collapsable={false}
-          style={s.shareCardOffscreen}
-        >
-          <ReviewShareCard
-            weekOf={shareEntry.weekOf}
-            bestVirtue={shareEntry.bestVirtue}
-            intention={shareEntry.intention}
-            stats={shareEntry.stats}
-          />
-        </View>
       )}
         <ScrollView
           ref={scrollRef}
@@ -422,7 +394,7 @@ export default function ReviewScreen() {
                   {p.hint && (
                     <TouchableOpacity
                       style={s.hintBtn}
-                      onPress={() => setOpenHint(openHint === idx ? null : idx)}
+                      onPress={() => { if (openHint !== idx) Keyboard.dismiss(); setOpenHint(openHint === idx ? null : idx); }}
                     >
                       <Text style={s.hintBtnText}>ⓘ</Text>
                     </TouchableOpacity>
@@ -514,7 +486,7 @@ export default function ReviewScreen() {
                 <Text style={s.promptNum}>V · Ledger</Text>
                 <TouchableOpacity
                   style={s.hintBtn}
-                  onPress={() => setOpenHint(openHint === 'ledger' ? null : 'ledger')}
+                  onPress={() => { if (openHint !== 'ledger') Keyboard.dismiss(); setOpenHint(openHint === 'ledger' ? null : 'ledger'); }}
                 >
                   <Text style={s.hintBtnText}>ⓘ</Text>
                 </TouchableOpacity>
@@ -566,7 +538,7 @@ export default function ReviewScreen() {
                   <Text style={s.promptNum}>VI · Account</Text>
                   <TouchableOpacity
                     style={s.hintBtn}
-                    onPress={() => setOpenHint(openHint === 'account' ? null : 'account')}
+                    onPress={() => { if (openHint !== 'account') Keyboard.dismiss(); setOpenHint(openHint === 'account' ? null : 'account'); }}
                   >
                     <Text style={s.hintBtnText}>ⓘ</Text>
                   </TouchableOpacity>
@@ -608,7 +580,7 @@ export default function ReviewScreen() {
                 <Text style={s.promptNum}>{roles.length > 0 ? 'VII · Commit' : 'VI · Commit'}</Text>
                 <TouchableOpacity
                   style={s.hintBtn}
-                  onPress={() => setOpenHint(openHint === 'commit' ? null : 'commit')}
+                  onPress={() => { if (openHint !== 'commit') Keyboard.dismiss(); setOpenHint(openHint === 'commit' ? null : 'commit'); }}
                 >
                   <Text style={s.hintBtnText}>ⓘ</Text>
                 </TouchableOpacity>
@@ -714,7 +686,6 @@ const s = StyleSheet.create({
   weekSealedFooter: { paddingHorizontal: 24, paddingBottom: 24 },
   weekSealedBtn: { borderRadius: radius.md, height: 56 },
   weekSealedBtnText: { fontSize: 15, fontFamily: font.bodyBold, color: '#000', letterSpacing: 0.3 },
-  shareCardOffscreen: { position: 'absolute', left: -99999, top: 0 },
   scroll: { flex: 1 },
   hero: {
     backgroundColor: colors.bgDeep,

@@ -113,6 +113,8 @@ export default function LibraryScreen() {
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={{ paddingBottom: playerInset }}
         stickyHeaderIndices={sortMode === 'section' && !searchQ.trim() ? [2] : []}
       >

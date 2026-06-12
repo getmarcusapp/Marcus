@@ -307,7 +307,7 @@ export default function PaywallScreen() {
         )}
 
         {/* Restore */}
-        <TouchableOpacity style={s.restoreBtn} onPress={handleRestore} activeOpacity={0.7}>
+        <TouchableOpacity style={[s.restoreBtn, purchasing && { opacity: 0.4 }]} onPress={handleRestore} disabled={purchasing} activeOpacity={0.7}>
           <Text style={s.restoreText}>Restore purchases</Text>
         </TouchableOpacity>
 
@@ -316,7 +316,8 @@ export default function PaywallScreen() {
             return to the app; new users see "Continue without trial" so
             they can decline the trial and enter in read-only mode. */}
         <TouchableOpacity
-          style={s.skipBtn}
+          style={[s.skipBtn, purchasing && { opacity: 0.4 }]}
+          disabled={purchasing}
           onPress={() => {
             if (!alreadySubscribed) track('paywall_declined', { from: params?.from || 'direct' });
             // Prefer the explicit `from` param if the paywall was opened

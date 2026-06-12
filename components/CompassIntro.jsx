@@ -94,7 +94,7 @@ export function CompassIntro({ compass, setCompass, onDismiss, onBack }) {
               <View style={[s.compassField, editFocused && s.compassFieldFocused]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 4 }}>
                   <TouchableOpacity
-                    onPress={() => setHintOpen(!hintOpen)}
+                    onPress={() => { if (!hintOpen) Keyboard.dismiss(); setHintOpen(!hintOpen); }}
                     style={{ padding: 4 }}
                     activeOpacity={0.7}
                   >

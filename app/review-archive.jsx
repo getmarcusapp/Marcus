@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
-  StyleSheet, SafeAreaView, Share, KeyboardAvoidingView, Platform,
+  StyleSheet, SafeAreaView, Share,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,13 +34,12 @@ export default function ReviewArchiveScreen() {
     setEditingEntry(null);
   }
 
+  // Reload on focus — the screen stays mounted, so a review sealed or
+  // edited in /review never appeared here with mount-only loading.
   useFocusEffect(useCallback(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, []));
-
-  useEffect(() => {
     getReviews().then(setHistory);
-  }, []);
+  }, []));
 
   const filteredHistory = history.filter(e => {
     if (filterRange !== 'all') {
@@ -51,10 +50,16 @@ export default function ReviewArchiveScreen() {
     return true;
   });
 
+  const sharingRef = useRef(false);
   async function shareReviewEntry(entry) {
+    // Guard double-taps (two share sheets) and give the off-screen 1080px
+    // card enough time to lay out before capture — 80ms could capture a
+    // blank card on slower devices.
+    if (sharingRef.current) return;
+    sharingRef.current = true;
     haptics.tap();
     setShareEntry(entry);
-    await new Promise(r => setTimeout(r, 80));
+    await new Promise(r => setTimeout(r, 250));
     const intentionText = (entry?.intention || '').trim();
     const message = [
       intentionText ? `Intention for the week ahead:\n\n${intentionText}` : null,
@@ -78,6 +83,8 @@ export default function ReviewArchiveScreen() {
         '— Marcus · a daily Stoic practice',
       ].filter(Boolean).join('\n');
       try { await Share.share({ message: fallback }); } catch {}
+    } finally {
+      sharingRef.current = false;
     }
   }
 
@@ -103,11 +110,10 @@ export default function ReviewArchiveScreen() {
 
       <ScreenHeader fromPath="/review" fromLabel="Back" />
 
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.bgCard }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
-      >
+      {/* Keyboard insets are owned by the ScrollView's
+          automaticallyAdjustKeyboardInsets — a KeyboardAvoidingView stacked
+          on top double-compensated during the keyboard animation. */}
+      <View style={{ flex: 1, backgroundColor: colors.bgCard }}>
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
@@ -203,7 +209,7 @@ export default function ReviewArchiveScreen() {
           })
         )}
       </ScrollView>
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }

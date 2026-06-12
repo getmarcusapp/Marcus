@@ -51,6 +51,7 @@ export default function MeditateScreen() {
   const { hasAccess } = useEntitlement();
   function requireAccess(action) {
     if (hasAccess) { action(); return; }
+    if (hasAccess === null) return; // entitlement still loading — swallow the tap rather than misroute a subscriber
     router.push('/paywall');
   }
 

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TextInput, Image,
   TouchableOpacity, StyleSheet, SafeAreaView,
-  Platform, InputAccessoryView, Keyboard, KeyboardAvoidingView,
+  Platform, InputAccessoryView, Keyboard,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -88,11 +88,10 @@ export default function ReadArchiveScreen() {
   return (
     <SafeAreaView style={s.safe}>
       <ScreenHeader fromPath={fromPath} fromLabel="Back" />
-      <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.bgCard }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
-      >
+      {/* Keyboard insets are owned by the ScrollView's
+          automaticallyAdjustKeyboardInsets — a KeyboardAvoidingView stacked
+          on top double-compensated during the keyboard animation. */}
+      <View style={{ flex: 1, backgroundColor: colors.bgCard }}>
       <ScrollView
         ref={scrollRef}
         style={[s.scroll, { backgroundColor: colors.bgCard }]}
@@ -244,7 +243,7 @@ export default function ReadArchiveScreen() {
           )}
         </View>
       </ScrollView>
-      </KeyboardAvoidingView>
+      </View>
       {Platform.OS === 'ios' && editingId && (
         <InputAccessoryView nativeID="readArchiveInsightAccessory">
           <View style={s.accessoryBarPair}>
