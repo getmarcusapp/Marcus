@@ -45,7 +45,9 @@ export default function MoreScreen() {
         : `${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left in free trial`)
     : hasAccess
       ? 'Active · manage in iOS Settings'
-      : 'Start your 7-day free trial';
+      // Row label already reads "Start free trial" in this state, so the
+      // sub states the benefit rather than repeating the action.
+      : 'Unlock the full practice';
 
   useEffect(() => {
     getStreak().then(s => setStreak(s || { current: 0, longest: 0, totalDays: 0 }));
@@ -112,7 +114,7 @@ export default function MoreScreen() {
                 activeOpacity={0.7}
               >
                 <View style={s.rowContent}>
-                  <Text style={s.rowLabel}>Subscription</Text>
+                  <Text style={s.rowLabel}>{hasAccess ? 'Subscription' : 'Start free trial'}</Text>
                   <Text style={s.rowSub}>{subSub}</Text>
                 </View>
                 <Ionicons name="diamond-outline" size={20} color={colors.accent} style={{ marginLeft: 12 }} />

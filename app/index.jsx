@@ -696,16 +696,24 @@ export default function PracticeScreen() {
 
         <View style={s.body}>
 
-          {trialDaysLeft !== null && (
+          {/* One gold pill, three states. In-trial users get a countdown;
+              users who chose "continue without trial" get a persistent
+              "start free trial" invitation here on the home screen, so
+              activation isn't buried under More → Subscription. Hidden for
+              paying subscribers and while entitlement is still loading
+              (hasAccess === null). */}
+          {(trialDaysLeft !== null || hasAccess === false) && (
             <TouchableOpacity
               style={s.trialBanner}
               onPress={() => router.push('/paywall')}
               activeOpacity={0.7}
             >
               <Text style={s.trialBannerText}>
-                {trialDaysLeft === 0
-                  ? 'Free trial ends today · Manage subscription'
-                  : `Free trial · ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`}
+                {trialDaysLeft !== null
+                  ? (trialDaysLeft === 0
+                      ? 'Free trial ends today · Manage subscription'
+                      : `Free trial · ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`)
+                  : 'The full practice awaits · Start free trial'}
               </Text>
             </TouchableOpacity>
           )}
