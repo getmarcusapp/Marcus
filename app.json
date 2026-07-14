@@ -41,7 +41,8 @@
           "defaultChannel": "default"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "./plugins/withFmtConsteval"
     ],
     "extra": {
       "router": {},
