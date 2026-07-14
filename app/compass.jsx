@@ -14,6 +14,7 @@ import * as haptics from '../lib/haptics';
 import { track } from '../lib/analytics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { useEntitlement } from '../lib/useEntitlement';
+import { useCaretScroll } from '../lib/useCaretScroll';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { PracticeHeader } from '../components/PracticeHeader';
@@ -110,6 +111,9 @@ export default function CompassScreen() {
   const roleNameInputRef = useRef(null);
   const roleCommitmentInputRef = useRef(null);
   const scrollRef = useRef(null);
+  // Keep the caret above the keyboard + accessory bar as a field grows line
+  // by line (iOS only auto-scrolls on focus, not on caret wrap).
+  const { onScroll, onGrow } = useCaretScroll(scrollRef);
   // Ref so markCompassDone is no-op after the first call per visit, even
   // before async persist completes. Reset on blur via useFocusEffect cleanup.
   const compassMarkedRef = useRef(false);
@@ -344,6 +348,8 @@ export default function CompassScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         automaticallyAdjustKeyboardInsets
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: playerInset }}
       >
 
@@ -405,6 +411,7 @@ export default function CompassScreen() {
                   onChangeText={setDraft}
                   onFocus={() => { setFocusedField('edit'); setHintOpen(false); scrollInputIntoView(editInputRef); }}
                   onBlur={() => setFocusedField(null)}
+                  onContentSizeChange={onGrow('edit')}
                   placeholder={COMPASS_HINTS[tabKeys[activeTab]]?.placeholder || ''}
                   placeholderTextColor={colors.textSecondary}
                   scrollEnabled={false}
@@ -488,6 +495,7 @@ export default function CompassScreen() {
                     onChangeText={setRoleCommitmentDraft}
                     onFocus={() => { setFocusedField('roleCommitment'); setHintOpen(false); scrollInputIntoView(roleCommitmentInputRef); }}
                     onBlur={() => setFocusedField(null)}
+                    onContentSizeChange={onGrow('roleCommitment')}
                     placeholder={placeholderFor(roleNameDraft)
                       ? `e.g. ${placeholderFor(roleNameDraft)}`
                       : DEFAULT_ROLE_PLACEHOLDER}

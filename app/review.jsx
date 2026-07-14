@@ -13,6 +13,7 @@ import { saveReview, updateReview, getReviews, getJournals, getTriggers, getRole
 import * as haptics from '../lib/haptics';
 import { track } from '../lib/analytics';
 import { useKeyboardVisible } from '../lib/useKeyboardVisible';
+import { useCaretScroll } from '../lib/useCaretScroll';
 import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { HeroOverlayChip } from '../components/HeroOverlayChip';
@@ -91,6 +92,9 @@ export default function ReviewScreen() {
   const savingRef = useRef(false);
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
   const scrollRef = useRef(null);
+  // Keep the caret above the keyboard + accessory bar as answers grow line
+  // by line (iOS only auto-scrolls on focus, not on caret wrap).
+  const { onScroll, onGrow } = useCaretScroll(scrollRef);
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
   const [dailyIntensity, setDailyIntensity] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -325,6 +329,8 @@ export default function ReviewScreen() {
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           contentContainerStyle={{ paddingBottom: playerInset }}
           scrollIndicatorInsets={{ bottom: 36 }}
         >
@@ -469,6 +475,7 @@ export default function ReviewScreen() {
                     value={answers[p.key] || ''}
                     onFocus={() => setOpenHint(null)}
                     onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
+                    onContentSizeChange={onGrow(`prompt-${p.key}`)}
                     editable={hasAccess}
                     scrollEnabled={false}
                     keyboardAppearance="dark"
@@ -565,6 +572,7 @@ export default function ReviewScreen() {
                   value={answers.roles || ''}
                   onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
                   onFocus={() => setOpenHint(null)}
+                  onContentSizeChange={onGrow('account')}
                   editable={hasAccess}
                   scrollEnabled={false}
                   inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewWizardAccessory' : undefined}
@@ -600,6 +608,7 @@ export default function ReviewScreen() {
                 value={intention}
                     onFocus={() => setOpenHint(null)}
                 onChangeText={setIntention}
+                onContentSizeChange={onGrow('intention')}
                 editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewWizardAccessory' : undefined}

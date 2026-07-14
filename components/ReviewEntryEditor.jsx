@@ -19,7 +19,9 @@ const PROMPTS = [
   { num: 'IV · Body', key: 'body',        q: 'How did I treat my physical self: sleep, movement, food, restraint?' },
 ];
 
-export function ReviewEntryEditor({ entry, onSave, onCancel }) {
+// `onInputGrow` is the onGrow factory from the host screen's useCaretScroll
+// hook — keeps the caret above the keyboard as an answer grows past one line.
+export function ReviewEntryEditor({ entry, onSave, onCancel, onInputGrow }) {
   const [answers, setAnswers] = useState(entry.answers || {});
   const [intention, setIntention] = useState(entry.intention || '');
   const [openPrompt, setOpenPrompt] = useState(-1);
@@ -51,6 +53,7 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
                 placeholderTextColor={colors.textSecondary}
                 value={answers[prompt.key] || ''}
                 onChangeText={text => setAnswers(prev => ({ ...prev, [prompt.key]: text }))}
+                onContentSizeChange={onInputGrow && onInputGrow(`prompt-${prompt.key}`)}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewArchiveEditAccessory' : undefined}
                 keyboardAppearance="dark"
@@ -77,6 +80,7 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
                 placeholderTextColor={colors.textSecondary}
                 value={answers.roles || ''}
                 onChangeText={text => setAnswers(prev => ({ ...prev, roles: text }))}
+                onContentSizeChange={onInputGrow && onInputGrow('account')}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewArchiveEditAccessory' : undefined}
                 keyboardAppearance="dark"
@@ -102,6 +106,7 @@ export function ReviewEntryEditor({ entry, onSave, onCancel }) {
               placeholderTextColor={colors.textSecondary}
               value={intention}
               onChangeText={setIntention}
+              onContentSizeChange={onInputGrow && onInputGrow('intention')}
               scrollEnabled={false}
               inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewArchiveEditAccessory' : undefined}
               keyboardAppearance="dark"

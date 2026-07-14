@@ -12,6 +12,7 @@ import { EMOTION_COLORS, DISTORTIONS } from '../constants/emotionsData';
 import { getTriggers, updateTriggerEntry } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { useEntitlement } from '../lib/useEntitlement';
+import { useCaretScroll } from '../lib/useCaretScroll';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
@@ -33,6 +34,9 @@ export default function EmotionsHistoryScreen() {
   const { hasAccess } = useEntitlement();
   const playerInset = useMiniPlayerInset();
   const scrollRef = useRef(null);
+  // Keep the caret above the keyboard + accessory bar as an edited field
+  // grows line by line (iOS only auto-scrolls on focus, not on caret wrap).
+  const { onScroll, onGrow } = useCaretScroll(scrollRef);
 
   const [history, setHistory] = useState([]);
   const [searchQ, setSearchQ] = useState('');
@@ -87,6 +91,8 @@ export default function EmotionsHistoryScreen() {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       >
         <View style={s.hero}>
           <Text style={s.eyebrow}>Emotional mastery</Text>
@@ -180,6 +186,7 @@ export default function EmotionsHistoryScreen() {
                             inputAccessoryViewID={Platform.OS === 'ios' ? 'emoHistEditAccessory' : undefined}
                             value={editingEntry.trigger}
                             onChangeText={text => setEditingEntry(prev => ({ ...prev, trigger: text }))}
+                            onContentSizeChange={onGrow('trigger')}
                             placeholderTextColor={colors.textSecondary}
                             scrollEnabled={false}
                             keyboardAppearance="dark"
@@ -192,6 +199,7 @@ export default function EmotionsHistoryScreen() {
                             inputAccessoryViewID={Platform.OS === 'ios' ? 'emoHistEditAccessory' : undefined}
                             value={editingEntry.reaction || ''}
                             onChangeText={text => setEditingEntry(prev => ({ ...prev, reaction: text }))}
+                            onContentSizeChange={onGrow('reaction')}
                             placeholderTextColor={colors.textSecondary}
                             scrollEnabled={false}
                             keyboardAppearance="dark"
@@ -206,6 +214,7 @@ export default function EmotionsHistoryScreen() {
                             inputAccessoryViewID={Platform.OS === 'ios' ? 'emoHistEditAccessory' : undefined}
                             value={editingEntry.chosenResponse || ''}
                             onChangeText={text => setEditingEntry(prev => ({ ...prev, chosenResponse: text }))}
+                            onContentSizeChange={onGrow('response')}
                             placeholderTextColor={colors.textSecondary}
                             scrollEnabled={false}
                             keyboardAppearance="dark"

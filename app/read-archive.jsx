@@ -11,6 +11,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getReadingLog, updateReadingInsight } from '../store/db';
 import { useEntitlement } from '../lib/useEntitlement';
+import { useCaretScroll } from '../lib/useCaretScroll';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 
 const virtueColor = {
@@ -49,6 +50,9 @@ export default function ReadArchiveScreen() {
   const [editingId, setEditingId] = useState(null);
   const [editDraft, setEditDraft] = useState('');
   const scrollRef = useRef(null);
+  // Keep the caret above the keyboard + accessory bar as the edited insight
+  // grows line by line (iOS only auto-scrolls on focus, not on caret wrap).
+  const { onScroll, onGrow } = useCaretScroll(scrollRef);
 
   async function handleEditSave() {
     if (!editingId) return;
@@ -100,6 +104,8 @@ export default function ReadArchiveScreen() {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       >
         <View style={s.hero}>
           <Text style={s.eyebrow}>Daily Reading</Text>
@@ -221,6 +227,7 @@ export default function ReadArchiveScreen() {
                           multiline
                           value={editDraft}
                           onChangeText={setEditDraft}
+                          onContentSizeChange={onGrow('insight')}
                           placeholder="Write your reflection..."
                           placeholderTextColor={colors.textSecondary}
                           scrollEnabled={false}

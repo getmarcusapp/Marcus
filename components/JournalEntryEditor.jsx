@@ -11,7 +11,10 @@ import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
 // Past Entries view (app/journal-history.jsx). Rebuilds the same prompt
 // card UI as the live Journal write flow, but pre-populates with the
 // stored answers.
-export function JournalEntryEditor({ entry, onSave, onCancel }) {
+// `onInputGrow` is the onGrow factory from the host screen's useCaretScroll
+// hook (the editor renders inside that screen's ScrollView). Wiring it keeps
+// the caret above the keyboard as an answer grows past one line.
+export function JournalEntryEditor({ entry, onSave, onCancel, onInputGrow }) {
   const isMorning = entry.type === 'morning';
   const prompts = isMorning ? morningPrompts : eveningPrompts;
   const [answers, setAnswers] = useState(entry.answers || {});
@@ -73,6 +76,7 @@ export function JournalEntryEditor({ entry, onSave, onCancel }) {
                 value={answers[idx] || ''}
                 onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
                 onFocus={() => setOpenHint(null)}
+                onContentSizeChange={onInputGrow && onInputGrow(`prompt-${idx}`)}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'journalArchiveEditAccessory' : undefined}
                 keyboardAppearance="dark"

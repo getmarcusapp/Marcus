@@ -14,6 +14,7 @@ import { saveTrigger } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { useKeyboardVisible } from '../lib/useKeyboardVisible';
+import { useCaretScroll } from '../lib/useCaretScroll';
 import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { HeroOverlayChip } from '../components/HeroOverlayChip';
@@ -98,6 +99,9 @@ export default function EmotionsScreen() {
   const reactionInputRef = useRef(null);
   const responseInputRef = useRef(null);
   const scrollRef = useRef(null);
+  // Keep the caret above the keyboard + accessory bar as a field grows line
+  // by line (iOS only auto-scrolls on focus, not on caret wrap).
+  const { onScroll, onGrow } = useCaretScroll(scrollRef);
   // Anchors the "III · Reframe" stage label so tapping "Pick patterns" from
   // the Reaction accessory scrolls to just above it (not deeper into the
   // reframe card itself).
@@ -200,6 +204,8 @@ export default function EmotionsScreen() {
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
+          onScroll={onScroll}
+          scrollEventThrottle={16}
         >
 
           <View style={s.hero}>
@@ -326,6 +332,7 @@ export default function EmotionsScreen() {
                 onChangeText={setTrigger}
                 onFocus={() => { setFocusedField('trigger'); setHintOpen(false); }}
                 onBlur={() => setFocusedField(null)}
+                onContentSizeChange={onGrow('trigger')}
                 editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoTriggerAccessory' : undefined}
@@ -351,6 +358,7 @@ export default function EmotionsScreen() {
                 onChangeText={setReaction}
                 onFocus={() => { setFocusedField('reaction'); setHintOpen(false); }}
                 onBlur={() => setFocusedField(null)}
+                onContentSizeChange={onGrow('reaction')}
                 editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoReactionAccessory' : undefined}
@@ -429,6 +437,7 @@ export default function EmotionsScreen() {
                 onChangeText={setChosenResponse}
                 onFocus={() => { setFocusedField('response'); setHintOpen(false); setReframeInfoOpen(false); scrollResponseIntoView(); }}
                 onBlur={() => setFocusedField(null)}
+                onContentSizeChange={onGrow('response')}
                 editable={hasAccess}
                 scrollEnabled={false}
                 inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}

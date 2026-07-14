@@ -12,6 +12,7 @@ import { captureRef } from 'react-native-view-shot';
 import { ReviewShareCard, virtueLabel } from '../components/ReviewShareCard';
 import { ReviewEntryEditor } from '../components/ReviewEntryEditor';
 import { useEntitlement } from '../lib/useEntitlement';
+import { useCaretScroll } from '../lib/useCaretScroll';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { GoldSecondary } from '../components/GoldButton';
@@ -26,6 +27,9 @@ export default function ReviewArchiveScreen() {
   const shareCardRef = useRef(null);
   const [shareEntry, setShareEntry] = useState(null);
   const scrollRef = useRef(null);
+  // Keep the caret above the keyboard + accessory bar as an edited answer
+  // grows line by line (iOS only auto-scrolls on focus, not on caret wrap).
+  const { onScroll, onGrow } = useCaretScroll(scrollRef);
 
   async function handleEditSave(updated) {
     await updateReview(updated);
@@ -122,6 +126,8 @@ export default function ReviewArchiveScreen() {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       >
         <View style={s.hero}>
           <Text style={s.eyebrow}>Weekly Review</Text>
@@ -169,6 +175,7 @@ export default function ReviewArchiveScreen() {
                   entry={editingEntry}
                   onSave={handleEditSave}
                   onCancel={() => setEditingEntry(null)}
+                  onInputGrow={onGrow}
                 />
               );
             }

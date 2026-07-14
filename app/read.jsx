@@ -23,6 +23,7 @@ import { track } from '../lib/analytics';
 import { useMindfulSession } from '../lib/useMindfulSession';
 import { useEntitlement } from '../lib/useEntitlement';
 import { useKeyboardVisible } from '../lib/useKeyboardVisible';
+import { useCaretScroll } from '../lib/useCaretScroll';
 import { captureRef } from 'react-native-view-shot';
 import { ReadingShareCard } from '../components/ReadingShareCard';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
@@ -72,6 +73,9 @@ export default function ReadScreen() {
   }
   const shareCardRef = useRef(null);
   const scrollRef = useRef(null);
+  // Keep the caret above the keyboard + accessory bar as the insight grows
+  // line by line (iOS only auto-scrolls on focus, not on caret wrap).
+  const { onScroll, onGrow } = useCaretScroll(scrollRef);
   const generatingRef = useRef(false);
   const commitMindfulSession = useMindfulSession();
   const playerInset = useMiniPlayerInset();
@@ -337,6 +341,8 @@ Return only the JSON object.`;
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         // Extra paddingBottom while the keyboard is up so the insight input
         // (last element on the page) has scroll room to clear the keyboard
         // + accessory bar. Without it, iOS auto-adjust can't move the input
@@ -443,6 +449,7 @@ Return only the JSON object.`;
                     onChangeText={text => setInsight(text)}
                     onFocus={() => { setInsightFocused(true); setSourceHintOpen(false); }}
                     onBlur={() => setInsightFocused(false)}
+                    onContentSizeChange={onGrow('insight')}
                     scrollEnabled={false}
                     editable={!insightSaved && hasAccess}
                     keyboardAppearance="dark"

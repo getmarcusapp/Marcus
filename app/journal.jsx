@@ -10,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { useCaretScroll } from '../lib/useCaretScroll';
 import { PracticeHeader } from '../components/PracticeHeader';
 import { WizardHeader } from '../components/WizardHeader';
 import { HeroOverlayChip } from '../components/HeroOverlayChip';
@@ -110,6 +111,9 @@ export default function JournalScreen() {
   const [openHint, setOpenHint] = useState(null);
   const promptInputRefs = useRef({});
   const scrollRef = useRef(null);
+  // Keep the caret above the keyboard + accessory bar as an answer grows
+  // line by line (iOS only auto-scrolls on focus, not on caret wrap).
+  const { onScroll, onGrow } = useCaretScroll(scrollRef);
 
   useEffect(() => {
     if (openPrompt < 0) return;
@@ -294,6 +298,8 @@ export default function JournalScreen() {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       >
           {onLanding ? (
             // Landing — pre-writing context: date hero, past entries link, the
@@ -480,6 +486,7 @@ export default function JournalScreen() {
                         value={answers[prompt.answerKey] || ''}
                         onChangeText={text => setAnswers(prev => ({ ...prev, [prompt.answerKey]: text }))}
                         onFocus={() => setOpenHint(null)}
+                        onContentSizeChange={onGrow(`prompt-${openPrompt}`)}
                         editable={hasAccess}
                         scrollEnabled={false}
                         keyboardAppearance="dark"

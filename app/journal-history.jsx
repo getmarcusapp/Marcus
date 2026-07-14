@@ -10,6 +10,7 @@ import { virtues } from '../constants/virtues';
 import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
 import { JournalEntryEditor } from '../components/JournalEntryEditor';
 import { useEntitlement } from '../lib/useEntitlement';
+import { useCaretScroll } from '../lib/useCaretScroll';
 import { getJournals, updateJournalEntry } from '../store/db';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -47,6 +48,9 @@ export default function JournalHistoryScreen() {
   const [sortMode, setSortMode] = useState('date');
   const [editingEntry, setEditingEntry] = useState(null);
   const scrollRef = useRef(null);
+  // Keep the caret above the keyboard + accessory bar as an edited answer
+  // grows line by line (iOS only auto-scrolls on focus, not on caret wrap).
+  const { onScroll, onGrow } = useCaretScroll(scrollRef);
 
   useFocusEffect(useCallback(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
@@ -105,6 +109,8 @@ export default function JournalHistoryScreen() {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       >
         <View style={s.hero}>
           <Text style={s.eyebrow}>{isMorning ? 'Morning Journal' : 'Evening Journal'}</Text>
@@ -186,6 +192,7 @@ export default function JournalHistoryScreen() {
               entry={editingEntry}
               onSave={handleEditSave}
               onCancel={() => setEditingEntry(null)}
+              onInputGrow={onGrow}
             />
           ) : filteredHistory.length === 0 && history.length > 0 ? (
             <View style={s.empty}>
