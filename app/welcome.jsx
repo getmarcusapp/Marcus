@@ -70,7 +70,9 @@ const s = StyleSheet.create({
     paddingHorizontal: 36,
     paddingBottom: 40,
   },
-  skull: { width: 130, height: 130, marginBottom: 28, opacity: 1 },
+  // 150 to match ready.jsx + the Practice/sealed hero — the logo holds the
+  // same size across every threshold screen (per V), never resizing between them.
+  skull: { width: 150, height: 150, marginBottom: 28, opacity: 1 },
   eyebrow: {
     fontSize: font.labelSize,
     letterSpacing: font.sectionTracking,
@@ -84,12 +86,17 @@ const s = StyleSheet.create({
   // explicit width+height at that aspect so it never crops to "ARC". Enlarged
   // to match the onboarding welcome hero.
   titleWordmark: { width: 232, height: 41, marginBottom: 10 },
-  titleTagline: { fontSize: 32, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1, textAlign: 'center', marginBottom: 16 },
-  // Matches the Practice/More hero sub: Inter 20, #AAAAAA, centered.
+  // 36 Cinzel — matches the onboarding stepTitle/previewTitle heading size
+  // (toned to 36 per V, since Cinzel all-caps reads larger than its point size).
+  titleTagline: { fontSize: 36, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1, textAlign: 'center', marginBottom: 16 },
+  // Hero subline — Inter regular on the app's standard secondary-text token.
+  // (Was hardcoded #AAAAAA to match an old More-hero sub that has since been
+  // redesigned; that grey was the last off-token text color in the app and
+  // rendered dimmer than the sibling onboarding screens.)
   sub: {
     fontSize: 20,
     fontFamily: font.body,
-    color: '#AAAAAA',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 28,
     paddingHorizontal: 8,
