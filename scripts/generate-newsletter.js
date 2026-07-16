@@ -367,6 +367,25 @@ function saveDraftToDisk(html, edition, dateStr, reason) {
   console.log('  Next:   open in a browser, copy the rendered HTML into Beehiiv’s editor.');
 }
 
+// Edition number = how many editions have been published (one JSON per day).
+// saveEditionRecord() runs before the email, so today's file is already counted.
+// This is the growing "constant" in the subject line — signals cadence/longevity
+// without a date, which the inbox already stamps.
+function editionNumber() {
+  try {
+    return fs.readdirSync(path.join(__dirname, '..', 'content', 'editions'))
+      .filter(f => f.endsWith('.json')).length || null;
+  } catch (e) { return null; }
+}
+
+// The subject we suggest Gio use in Beehiiv. The theme is already in "On ___"
+// form (a recurring, recognizable pattern); the edition number is the explicit
+// daily constant. No date — the inbox timestamps it, and dates don't drive opens.
+function suggestedSubject(edition) {
+  const n = editionNumber();
+  return n ? edition.theme + ' · №' + n : edition.theme;
+}
+
 // Email the rendered draft to Gio as the daily review prompt. Best-effort: a
 // mail failure is logged but never fails the run — the Beehiiv draft is the
 // real deliverable, this is just the nudge. `beehiivNote` describes where the
@@ -386,16 +405,18 @@ async function emailDraft(html, edition, dateStr, beehiivNote) {
       host: 'smtp.gmail.com', port: 465, secure: true,
       auth: { user: MAIL_USER, pass: MAIL_PASS },
     });
+    const subject = suggestedSubject(edition);
     const banner =
       '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:0 auto 20px;padding:16px 18px;background:#f7f5f2;border-radius:10px;color:#1a1a1a;">'
-      + '<div style="font-weight:600;margin-bottom:4px;">Today\'s Daily Meditations draft is ready to review.</div>'
+      + '<div style="font-weight:600;margin-bottom:6px;">Today\'s Daily Meditations draft is ready to review.</div>'
+      + '<div style="font-size:14px;color:#1a1a1a;margin-bottom:6px;">Suggested subject: <strong>' + escapeHtmlText(subject) + '</strong></div>'
       + '<div style="font-size:14px;color:#555;">' + escapeHtmlText(beehiivNote) + ' Open Beehiiv to edit and schedule: '
       + '<a href="https://app.beehiiv.com/" style="color:#8a7254;">app.beehiiv.com</a>. The rendered edition is below.</div>'
       + '</div>';
     await transporter.sendMail({
       from: '"Daily Meditations" <' + MAIL_USER + '>',
       to: MAIL_TO,
-      subject: 'Draft: ' + edition.theme + ' — ' + dateStr,
+      subject: 'Draft: ' + subject,
       html: banner + html,
     });
     console.log('Draft emailed to ' + MAIL_TO + '.');
