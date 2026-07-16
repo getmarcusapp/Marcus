@@ -258,6 +258,13 @@ function build() {
   }).filter(Boolean).sort((a, b) => (a.isoDate < b.isoDate ? 1 : -1));
 
   fs.mkdirSync(OUT_DIR, { recursive: true });
+  // Clean stale pages first, so a vetoed edition (its JSON deleted) or a
+  // renamed slug (theme changed on a same-day re-run) can't linger as an
+  // orphaned, unlinked URL. index.html and every edition page are regenerated
+  // from content/editions below, so a clean slate is correct and idempotent.
+  for (const f of fs.readdirSync(OUT_DIR)) {
+    if (f.endsWith('.html')) fs.unlinkSync(path.join(OUT_DIR, f));
+  }
   fs.writeFileSync(path.join(OUT_DIR, 'archive.css'), CSS.trim() + '\n', 'utf8');
   fs.writeFileSync(path.join(OUT_DIR, 'index.html'), renderIndex(records), 'utf8');
   for (const rec of records) {
