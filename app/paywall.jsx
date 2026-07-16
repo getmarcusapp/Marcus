@@ -22,10 +22,16 @@ export default function PaywallScreen() {
   // Practice on cancel / restore. On a successful first-time purchase the
   // welcome screen acknowledges the threshold (see handlePurchase below).
   const postPaywallRoute = params?.from === 'onboarding' ? '/ready' : '/';
-  // Successful purchases from non-onboarding contexts route through /welcome
-  // first so the moment is acknowledged. From onboarding we keep the
-  // existing /ready path which already carries the Day-1 threshold copy.
-  const successRoute = params?.from === 'onboarding' ? '/ready' : '/welcome';
+  // Every successful purchase lands on /ready ("Your practice begins now ·
+  // Day 1"). /welcome ("Marcus is yours") is no longer routed to.
+  //
+  // Day 1 is literal on /ready, and it's accurate here: a free user can't
+  // seal a day (index.jsx bounces them to the paywall), so anyone converting
+  // really is starting. The exception is a LAPSED subscriber who re-buys with
+  // practice history behind them — they'd be told their practice begins now
+  // when it doesn't. Nobody is in that state at launch; revisit if /ready
+  // ever needs to greet a returning subscriber.
+  const successRoute = '/ready';
   const [offerings, setOfferings] = useState(null);
   const [loading, setLoading] = useState(true);
   // Surface current trial state so a user who's already trialing sees
@@ -94,7 +100,7 @@ export default function PaywallScreen() {
     const result = await purchasePackage(pkg);
     setPurchasing(false);
 
-    if (result.success) {
+    if (result.success && result.entitled) {
       track('trial_started', { plan: selectedPackage, from: params?.from || 'direct' });
       // Don't write has_premium here — RevenueCat is the source of truth
       // for real subscriptions, and writing it would short-circuit the
@@ -102,6 +108,16 @@ export default function PaywallScreen() {
       // The dev/beta override in _layout.jsx still sets has_premium=true
       // at launch for unsigned builds.
       router.replace(successRoute);
+    } else if (result.success && !result.entitled) {
+      // Charged, but no entitlement came through. Routing to the success
+      // screen here would drop a paying user into a locked app with no
+      // explanation — the exact failure this branch exists to prevent.
+      // Say what's true and give them the one action that can fix it.
+      track('purchase_unconfirmed', { plan: selectedPackage });
+      Alert.alert(
+        '',
+        "Your purchase went through, but we couldn't confirm it on this device yet. Give it a moment, then tap Restore Purchases below.",
+      );
     } else if (!result.userCancelled) {
       track('purchase_failed', { plan: selectedPackage });
       Alert.alert('', 'Something went wrong. Please try again or restore your purchases.');
