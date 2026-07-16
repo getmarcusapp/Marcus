@@ -1,0 +1,54 @@
+name: Daily Meditations
+
+# Generates one edition of the Daily Meditations newsletter each morning,
+# stages it as a DRAFT in Beehiiv, and emails the rendered draft to Gio as the
+# review prompt. It never auto-sends — you edit and schedule in Beehiiv.
+#
+# The generation time is set so the draft is waiting before the review window.
+# 13:30 UTC is ~6:30am Pacific (PDT) / ~5:30am (PST). Adjust the cron below to
+# taste. Cron is UTC and does not shift with daylight saving.
+
+on:
+  schedule:
+    - cron: '30 13 * * *'   # daily, ~6:30am PT
+  workflow_dispatch: {}       # manual run from the Actions tab
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: scripts
+        run: npm ci || npm install
+
+      - name: Generate edition
+        working-directory: scripts
+        env:
+          ANTHROPIC_KEY: ${{ secrets.NEWSLETTER_ANTHROPIC_KEY }}
+          BEEHIIV_KEY: ${{ secrets.BEEHIIV_KEY }}
+          BEEHIIV_PUB_ID: ${{ secrets.BEEHIIV_PUB_ID }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: node generate-newsletter.js
+
+      # If Beehiiv staging failed, the generator writes the HTML to
+      # scripts/out/. Capture it so a produced-but-unstaged edition is never
+      # lost — download it from the run and paste into Beehiiv by hand.
+      - name: Save edition on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newsletter-edition
+          path: scripts/out/
+          if-no-files-found: ignore
+          retention-days: 14

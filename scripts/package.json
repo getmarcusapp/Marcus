@@ -1,0 +1,16 @@
+{
+  "name": "marcus-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Daily Meditations newsletter generator. Generates one edition, stages a Beehiiv draft, and emails it to Gio for review.",
+  "type": "commonjs",
+  "scripts": {
+    "newsletter": "node generate-newsletter.js"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.14"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1107,13 +1107,13 @@
   </div>
 
   <div style="margin-top: 48px; width: 100%; max-width: 480px;" id="hero-email">
-    <p style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 14px;">Or get the weekly Stoic dispatch</p>
+    <p style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 14px;">Or get the daily Stoic dispatch</p>
     <div class="email-form">
       <div class="email-row">
         <input class="email-input" id="hero-email-input" type="email" placeholder="your@email.com" autocomplete="email">
         <button class="email-submit" onclick="submitEmail('hero-email-input', 'hero-email-success')">Subscribe →</button>
       </div>
-      <p class="email-note">Weekly. No noise. Unsubscribe anytime.</p>
+      <p class="email-note">Daily. No noise. Unsubscribe anytime.</p>
       <p class="email-success" id="hero-email-success">You're in. Check your inbox.</p>
     </div>
   </div>
@@ -1388,6 +1388,49 @@
 </section>
 
 
+<!-- DAILY MEDITATIONS (newsletter) -->
+<style>
+  .newsletter { background: var(--bg-deep); padding: 96px 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .newsletter-inner { max-width: 620px; margin: 0 auto; text-align: center; }
+  .newsletter-eyebrow { font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 16px; }
+  .newsletter-title { font-family: var(--font-display); font-size: clamp(34px, 6vw, 48px); color: var(--text-primary); letter-spacing: 0.5px; margin-bottom: 18px; }
+  .newsletter-sub { font-size: 17px; line-height: 1.65; color: var(--text-secondary); margin: 0 auto 44px; max-width: 520px; }
+  .newsletter-specimen { text-align: left; background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 14px; padding: 32px 30px; margin-bottom: 40px; }
+  .specimen-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 18px; }
+  .specimen-theme { font-family: var(--font-display); font-size: 22px; color: var(--accent); margin-bottom: 20px; }
+  .specimen-quote { font-family: var(--font-serif); font-style: italic; font-size: 21px; line-height: 1.5; color: var(--text-primary); margin: 0 0 8px; }
+  .specimen-attr { font-size: 13px; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 22px; }
+  .specimen-body { font-size: 15.5px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 22px; }
+  .specimen-q { font-size: 15.5px; line-height: 1.6; color: var(--text-primary); font-style: italic; border-top: 1px solid var(--border); padding-top: 20px; }
+  .newsletter .email-form { margin: 0 auto; }
+</style>
+<section class="newsletter" id="newsletter">
+  <div class="newsletter-inner">
+    <p class="newsletter-eyebrow">The newsletter</p>
+    <h2 class="newsletter-title">Daily Meditations</h2>
+    <p class="newsletter-sub">One edition each morning: a verified passage from the Stoics, the moment in history that produced it, and an unforced line to the world as it is today. Two minutes to read. No productivity gospel, no wellness clichés, no noise. Free.</p>
+
+    <div class="newsletter-specimen">
+      <p class="specimen-label">A sample edition</p>
+      <p class="specimen-theme">On beginning again</p>
+      <blockquote class="specimen-quote">"Confine yourself to the present."</blockquote>
+      <p class="specimen-attr">Marcus Aurelius &middot; Meditations VIII.7</p>
+      <p class="specimen-body">Marcus wrote this in his private notebooks during the Marcomannic Wars, a campaign that dragged on for years with no clean resolution. He was emperor of Rome and commander of a frontier war that kept not ending. The present was all he had reliable access to.</p>
+      <p class="specimen-q">What are you carrying into today that belongs to a different day entirely?</p>
+    </div>
+
+    <div class="email-form">
+      <div class="email-row">
+        <input class="email-input" id="nl-email-input" type="email" placeholder="your@email.com" autocomplete="email">
+        <button class="email-submit" onclick="submitEmail('nl-email-input', 'nl-email-success')">Subscribe →</button>
+      </div>
+      <p class="email-note">Daily. Unsubscribe anytime.</p>
+      <p class="email-success" id="nl-email-success">You're in. Check your inbox.</p>
+    </div>
+  </div>
+</section>
+
+
 <!-- PRICING -->
 <section class="pricing" id="pricing">
   <div class="pricing-inner">
@@ -1578,7 +1621,7 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
 
 <!-- FOOTER -->
 <footer>
-  <p>Marcus &middot; A Stoic Practice App &middot; <a href="https://getmarcus.app">getmarcus.app</a></p>
+  <p>Marcus &middot; A Stoic Practice App &middot; <a href="https://getmarcus.app">getmarcus.app</a> &middot; <a href="#newsletter">Daily Meditations</a></p>
   <p style="margin-top:8px;">"The mind adapts and converts to its own purposes the obstacle to our acting." — Marcus Aurelius, Meditations</p>
 </footer>
 

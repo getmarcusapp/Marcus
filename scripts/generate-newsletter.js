@@ -11,6 +11,16 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
 const BEEHIIV_KEY = process.env.BEEHIIV_KEY;
 const BEEHIIV_PUB_ID = process.env.BEEHIIV_PUB_ID;
 
+// Optional: email the rendered draft to Gio each run as a review prompt — the
+// nudge to go into Beehiiv and edit/schedule it. All three must be set to send;
+// if any is missing, emailing is skipped silently (the Beehiiv draft + disk
+// fallback still happen). MAIL_PASS is a Gmail App Password, not the account
+// password. Requires nodemailer (see scripts/package.json), loaded lazily so
+// the generator still runs for anyone who doesn't email.
+const MAIL_USER = process.env.MAIL_USER;
+const MAIL_PASS = process.env.MAIL_PASS;
+const MAIL_TO = process.env.MAIL_TO || MAIL_USER;
+
 if (!ANTHROPIC_KEY) { console.error('Missing ANTHROPIC_KEY'); process.exit(1); }
 
 const RESERVE_PATH = path.join(__dirname, 'reserve-editions.json');
@@ -302,10 +312,15 @@ async function generateEdition(dateStr) {
     'api.anthropic.com', '/v1/messages',
     { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
     {
-      model: 'claude-opus-4-6',
-      max_tokens: 2048,
+      // opus-4-8 with the current web-search tool. web_search_20260209 has
+      // built-in dynamic filtering (it runs code server-side to filter results
+      // before they hit context) — do NOT also declare code_execution, that
+      // confuses the model. max_tokens has headroom over the ~350-token output;
+      // you only pay for what's generated, so it's free insurance vs truncation.
+      model: 'claude-opus-4-8',
+      max_tokens: 4096,
       system: SYSTEM_PROMPT,
-      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+      tools: [{ type: 'web_search_20260209', name: 'web_search' }],
       messages: [{ role: 'user', content: 'Generate today\'s edition. Today is ' + dateStr + '. Search for a current event first.' }],
     }
   );
@@ -333,11 +348,55 @@ function saveDraftToDisk(html, edition, dateStr, reason) {
   console.log('  Next:   open in a browser, copy the rendered HTML into Beehiiv’s editor.');
 }
 
+// Email the rendered draft to Gio as the daily review prompt. Best-effort: a
+// mail failure is logged but never fails the run — the Beehiiv draft is the
+// real deliverable, this is just the nudge. `beehiivNote` describes where the
+// draft ended up (staged in Beehiiv, or saved to disk) so the email tells Gio
+// what to do next.
+async function emailDraft(html, edition, dateStr, beehiivNote) {
+  if (!(MAIL_USER && MAIL_PASS)) return;
+  let nodemailer;
+  try {
+    nodemailer = require('nodemailer');
+  } catch (e) {
+    console.warn('nodemailer not installed — skipping draft email. (npm install in scripts/)');
+    return;
+  }
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com', port: 465, secure: true,
+      auth: { user: MAIL_USER, pass: MAIL_PASS },
+    });
+    const banner =
+      '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:0 auto 20px;padding:16px 18px;background:#f7f5f2;border-radius:10px;color:#1a1a1a;">'
+      + '<div style="font-weight:600;margin-bottom:4px;">Today\'s Daily Meditations draft is ready to review.</div>'
+      + '<div style="font-size:14px;color:#555;">' + escapeHtmlText(beehiivNote) + ' Open Beehiiv to edit and schedule: '
+      + '<a href="https://app.beehiiv.com/" style="color:#8a7254;">app.beehiiv.com</a>. The rendered edition is below.</div>'
+      + '</div>';
+    await transporter.sendMail({
+      from: '"Daily Meditations" <' + MAIL_USER + '>',
+      to: MAIL_TO,
+      subject: 'Draft: ' + edition.theme + ' — ' + dateStr,
+      html: banner + html,
+    });
+    console.log('Draft emailed to ' + MAIL_TO + '.');
+  } catch (e) {
+    console.warn('Draft email failed (non-fatal): ' + e.message);
+  }
+}
+
+// Minimal HTML-escape for the plain-text banner strings (theme/note), so a
+// stray < or & in an edition theme can't break the email markup.
+function escapeHtmlText(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 async function postToBeehiiv(edition, dateStr) {
   const html = buildHtml(edition, dateStr);
 
   if (!(BEEHIIV_KEY && BEEHIIV_PUB_ID)) {
     saveDraftToDisk(html, edition, dateStr, 'Beehiiv credentials not set.');
+    await emailDraft(html, edition, dateStr, 'Beehiiv credentials were not set, so it was saved to disk instead.');
     return;
   }
 
@@ -349,12 +408,14 @@ async function postToBeehiiv(edition, dateStr) {
   );
   if (bRes.status === 201 || bRes.status === 200) {
     console.log('Draft created in Beehiiv.');
+    await emailDraft(html, edition, dateStr, 'A draft was staged in Beehiiv.');
     return;
   }
   // Non-2xx — log the failure verbatim and fall back to disk so we always
   // leave the user with something to publish manually.
   console.error('Beehiiv error:', bRes.status, JSON.stringify(bRes.body));
   saveDraftToDisk(html, edition, dateStr, 'Beehiiv returned HTTP ' + bRes.status + '.');
+  await emailDraft(html, edition, dateStr, 'Beehiiv staging failed (HTTP ' + bRes.status + '), so paste the edition below into Beehiiv by hand.');
 }
 
 async function run() {
