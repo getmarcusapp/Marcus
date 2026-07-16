@@ -9,7 +9,13 @@ const path = require('path');
 
 const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
 const BEEHIIV_KEY = process.env.BEEHIIV_KEY;
-const BEEHIIV_PUB_ID = process.env.BEEHIIV_PUB_ID;
+// Beehiiv publication IDs are always `pub_<uuid>`. The dashboard sometimes shows
+// the bare UUID, and the API rejects it (400 INVALID_PATTERN). Normalize so
+// either form works, whether set here or as a CI secret.
+const BEEHIIV_PUB_ID_RAW = process.env.BEEHIIV_PUB_ID;
+const BEEHIIV_PUB_ID = (BEEHIIV_PUB_ID_RAW && !BEEHIIV_PUB_ID_RAW.startsWith('pub_'))
+  ? 'pub_' + BEEHIIV_PUB_ID_RAW
+  : BEEHIIV_PUB_ID_RAW;
 
 // Optional: email the rendered draft to Gio each run as a review prompt — the
 // nudge to go into Beehiiv and edit/schedule it. All three must be set to send;
@@ -109,10 +115,19 @@ function hostnameFromUrl(url) {
   catch (e) { return url; }
 }
 
+// Convert stray markdown emphasis (*title* / _title_) to real <em>. opus-4-8
+// sometimes italicizes work titles in markdown; without this the asterisks
+// render literally in the email (e.g. "*On the Shortness of Life*").
+function md(s) {
+  return String(s || '')
+    .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+    .replace(/_([^_\n]+)_/g, '<em>$1</em>');
+}
+
 function buildHtml(edition, dateStr) {
   const parts = edition.context.split('\n\n');
-  const para1 = parts[0] || '';
-  const para2 = parts[1] || '';
+  const para1 = md(parts[0] || '');
+  const para2 = md(parts[1] || '');
   // Footer source line — rendered only for current-event editions (those
   // with a verified SOURCE_URL). Timeless editions skip it cleanly. The
   // link gives readers the option to verify the hook for themselves,
@@ -125,10 +140,10 @@ function buildHtml(edition, dateStr) {
     '<body style="font-family:Georgia,serif;max-width:560px;margin:0 auto;padding:40px 20px;color:#1a1a1a;line-height:1.7;background:#fff;">' +
     '<p style="font-size:11px;color:#999;letter-spacing:2px;text-transform:uppercase;margin-bottom:32px;">Daily Meditations &middot; ' + dateStr + '</p>' +
     '<h2 style="font-size:12px;font-weight:400;color:#999;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;">' + edition.theme + '</h2>' +
-    '<blockquote style="border-left:2px solid #c9a84c;margin:0 0 28px;padding-left:20px;font-style:italic;font-size:17px;color:#2a2a2a;line-height:1.8;">' + edition.quote + '</blockquote>' +
+    '<blockquote style="border-left:2px solid #c9a84c;margin:0 0 28px;padding-left:20px;font-style:italic;font-size:17px;color:#2a2a2a;line-height:1.8;">' + md(edition.quote) + '</blockquote>' +
     '<p style="font-size:15px;margin-bottom:16px;">' + para1 + '</p>' +
     '<p style="font-size:15px;margin-bottom:28px;">' + para2 + '</p>' +
-    '<p style="font-size:14px;color:#666;font-style:italic;border-top:1px solid #eee;padding-top:20px;">' + edition.question + '</p>' +
+    '<p style="font-size:14px;color:#666;font-style:italic;border-top:1px solid #eee;padding-top:20px;">' + md(edition.question) + '</p>' +
     sourceFooter +
     brandFooter +
     '</body></html>';
@@ -321,7 +336,11 @@ async function generateEdition(dateStr) {
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       tools: [{ type: 'web_search_20260209', name: 'web_search' }],
-      messages: [{ role: 'user', content: 'Generate today\'s edition. Today is ' + dateStr + '. Search for a current event first.' }],
+      // The final instruction suppresses opus-4-8's tendency (with thinking off)
+      // to narrate its search process in the visible text. parseEdition already
+      // discards anything before THEME:, so this is about clean logs and not
+      // wasting output tokens, not correctness.
+      messages: [{ role: 'user', content: 'Generate today\'s edition. Today is ' + dateStr + '. Search for a current event first. Output ONLY the edition, beginning with "THEME:" — no search narration, reasoning, or preamble before it, and no commentary after. Do not use markdown formatting such as *asterisks* or _underscores_ for emphasis; render work titles in plain text.' }],
     }
   );
   if (res.status !== 200) {
@@ -411,8 +430,18 @@ async function postToBeehiiv(edition, dateStr) {
     await emailDraft(html, edition, dateStr, 'A draft was staged in Beehiiv.');
     return;
   }
-  // Non-2xx — log the failure verbatim and fall back to disk so we always
-  // leave the user with something to publish manually.
+  // Beehiiv's post-creation API is Enterprise-only. On lower plans it 403s with
+  // SEND_API_NOT_ENTERPRISE_PLAN — expected, not a failure. Say so plainly and
+  // fall through to email/disk, which is the intended delivery on those plans.
+  const notEnterprise = bRes.status === 403
+    && JSON.stringify(bRes.body || '').includes('SEND_API_NOT_ENTERPRISE_PLAN');
+  if (notEnterprise) {
+    console.log('Beehiiv post API needs an Enterprise plan — delivering via email/disk instead (expected on your plan).');
+    saveDraftToDisk(html, edition, dateStr, 'Beehiiv API is Enterprise-only; paste the edition below into Beehiiv by hand.');
+    await emailDraft(html, edition, dateStr, 'Beehiiv auto-staging needs Enterprise, so paste the edition below into Beehiiv by hand.');
+    return;
+  }
+  // Any other non-2xx — log verbatim and fall back so nothing is lost.
   console.error('Beehiiv error:', bRes.status, JSON.stringify(bRes.body));
   saveDraftToDisk(html, edition, dateStr, 'Beehiiv returned HTTP ' + bRes.status + '.');
   await emailDraft(html, edition, dateStr, 'Beehiiv staging failed (HTTP ' + bRes.status + '), so paste the edition below into Beehiiv by hand.');
