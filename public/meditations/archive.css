@@ -1,0 +1,46 @@
+:root{--bg:#080808;--bg-deep:#040404;--bg-card:#0f0f0f;--border:#252525;--border-mid:#2a2a2a;
+--text-primary:#F0F0F0;--text-secondary:#C0C0C0;--text-muted:#888;--text-dim:#7A7A7A;--accent:#FFCE82;--accent-dim:#B38B5B;
+--display:'Cinzel',Georgia,serif;--body:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text-primary);font-family:var(--body);line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.dm-header{display:flex;gap:16px;align-items:center;padding:22px 24px;border-bottom:1px solid var(--border);max-width:760px;margin:0 auto}
+.dm-word{font-family:var(--display);font-size:20px;letter-spacing:1px;color:var(--text-primary)}
+.dm-link{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-dim)}
+.dm-main{max-width:640px;margin:0 auto;padding:0 24px}
+.dm-eyebrow{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent-dim);margin:56px 0 16px}
+.dm-hero{text-align:center;padding-top:20px}
+.dm-hero-title{font-family:var(--display);font-size:clamp(38px,8vw,58px);letter-spacing:.5px;margin-bottom:20px}
+.dm-hero-copy{font-size:17px;color:var(--text-secondary);max-width:520px;margin:0 auto 36px}
+.dm-article{padding-bottom:8px}
+.dm-theme{font-family:var(--display);font-size:clamp(30px,6vw,44px);color:var(--accent);letter-spacing:.5px;margin-bottom:28px;line-height:1.15}
+.dm-quote{font-style:italic;font-size:22px;line-height:1.55;color:var(--text-primary);border-left:2px solid var(--accent);padding-left:22px;margin:0 0 32px}
+.dm-context p{font-size:17px;color:var(--text-secondary);margin-bottom:20px}
+.dm-question{font-style:italic;font-size:18px;color:var(--text-primary);border-top:1px solid var(--border);padding-top:24px;margin-top:8px}
+.dm-source{font-size:13px;color:var(--text-dim);margin-top:20px}
+.dm-source a{color:var(--accent-dim)}
+.dm-back{margin:40px 0 8px}.dm-back a{font-size:14px;color:var(--accent-dim);letter-spacing:.5px}
+.dm-timeline{margin-top:24px;padding-bottom:20px}
+.dm-item{display:block;padding:26px 0;border-top:1px solid var(--border);transition:opacity .15s}
+.dm-item:hover{opacity:.72}
+.dm-item-date{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim)}
+.dm-item-theme{font-family:var(--display);font-size:24px;color:var(--accent);margin:8px 0 8px}
+.dm-item-quote{font-style:italic;font-size:16px;color:var(--text-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dm-empty{padding:60px 0;text-align:center;color:var(--text-muted)}
+.dm-subscribe{background:var(--bg-card);border:1px solid var(--border-mid);border-radius:14px;padding:32px 28px;margin:56px 0 40px;text-align:center}
+.dm-sub-eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-dim);margin-bottom:12px}
+.dm-sub-title{font-family:var(--display);font-size:26px;margin-bottom:10px}
+.dm-sub-copy{font-size:15px;color:var(--text-secondary);margin-bottom:22px}
+.dm-form{display:flex;border:1px solid var(--border-mid);border-radius:12px;overflow:hidden;max-width:440px;margin:0 auto}
+.dm-input{flex:1;background:#111;color:var(--text-primary);font-size:16px;padding:16px 18px;border:none;outline:none;font-family:inherit}
+.dm-input::placeholder{color:var(--text-dim)}
+.dm-submit{background:var(--accent);color:#000;font-size:15px;font-weight:700;padding:16px 24px;border:none;cursor:pointer;font-family:inherit;white-space:nowrap}
+.dm-submit:hover{opacity:.9}
+.dm-note{font-size:13px;color:var(--text-dim);margin-top:12px}
+.dm-app{border-top:1px solid var(--border);padding:36px 0;margin-top:20px;text-align:center}
+.dm-app-copy{font-size:15px;color:var(--text-secondary);max-width:480px;margin:0 auto 18px}
+.dm-app-btn{display:inline-block;color:var(--accent);border:1px solid var(--accent-dim);border-radius:10px;padding:12px 24px;font-size:14px;letter-spacing:.3px}
+.dm-app-btn:hover{background:var(--accent);color:#000}
+.dm-footer{border-top:1px solid var(--border);margin-top:40px;padding:28px 24px;text-align:center;font-size:13px;color:var(--text-dim)}
+.dm-footer a{color:var(--accent-dim)}
+@media(max-width:500px){.dm-form{flex-direction:column}.dm-submit{padding:14px}}

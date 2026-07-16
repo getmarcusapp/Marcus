@@ -410,7 +410,35 @@ function escapeHtmlText(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function slugify(s) {
+  return String(s || 'edition').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'edition';
+}
+
+// Persist the structured edition to content/editions/<date>.json. The archive
+// builder renders these into SEO pages at getmarcus.app/meditations. This is the
+// auto-publish half of the "auto-publish + veto" model: every delivered edition
+// is archived. To veto one, delete its JSON and rebuild the archive.
+function saveEditionRecord(edition, dateStr) {
+  const iso = new Date().toISOString().slice(0, 10);
+  const dir = path.join(__dirname, '..', 'content', 'editions');
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const record = {
+    isoDate: iso,
+    displayDate: dateStr,
+    slug: iso + '-' + slugify(edition.theme),
+    theme: edition.theme,
+    quote: edition.quote,
+    context: edition.context,
+    question: edition.question,
+    sourceUrl: edition.sourceUrl || null,
+  };
+  fs.writeFileSync(path.join(dir, iso + '.json'), JSON.stringify(record, null, 2) + '\n', 'utf8');
+  console.log('Edition record saved: content/editions/' + iso + '.json');
+}
+
 async function postToBeehiiv(edition, dateStr) {
+  saveEditionRecord(edition, dateStr);
   const html = buildHtml(edition, dateStr);
 
   if (!(BEEHIIV_KEY && BEEHIIV_PUB_ID)) {

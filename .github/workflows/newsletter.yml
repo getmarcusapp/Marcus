@@ -1,17 +1,23 @@
 name: Daily Meditations
 
-# Generates one edition of the Daily Meditations newsletter each morning,
-# stages it as a DRAFT in Beehiiv, and emails the rendered draft to Gio as the
-# review prompt. It never auto-sends — you edit and schedule in Beehiiv.
+# Generates one edition of the Daily Meditations newsletter each morning:
+#   1. writes a structured record to content/editions/<date>.json
+#   2. emails the rendered draft to Gio as the review prompt (Beehiiv send API is
+#      Enterprise-only, so email is the delivery; you edit + schedule in Beehiiv)
+#   3. rebuilds the public archive at /meditations and commits it, so the edition
+#      auto-publishes to getmarcus.app (Vercel redeploys on push). Veto an edition
+#      by deleting its content/editions/<date>.json and letting the next build run.
 #
-# The generation time is set so the draft is waiting before the review window.
-# 13:30 UTC is ~6:30am Pacific (PDT) / ~5:30am (PST). Adjust the cron below to
-# taste. Cron is UTC and does not shift with daylight saving.
+# 13:30 UTC is ~6:30am Pacific (PDT) / ~5:30am (PST). Cron is UTC and does not
+# shift with daylight saving.
 
 on:
   schedule:
     - cron: '30 13 * * *'   # daily, ~6:30am PT
   workflow_dispatch: {}       # manual run from the Actions tab
+
+permissions:
+  contents: write             # the archive commit pushes back to main
 
 jobs:
   generate:
@@ -40,6 +46,22 @@ jobs:
           MAIL_PASS: ${{ secrets.MAIL_PASS }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
         run: node generate-newsletter.js
+
+      - name: Build archive
+        working-directory: scripts
+        run: node build-archive.js
+
+      - name: Publish archive
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/editions public/meditations
+          if git diff --cached --quiet; then
+            echo "No archive changes to publish."
+          else
+            git commit -m "Daily Meditations: publish $(date -u +%Y-%m-%d) edition"
+            git push origin HEAD:main
+          fi
 
       # If Beehiiv staging failed, the generator writes the HTML to
       # scripts/out/. Capture it so a produced-but-unstaged edition is never
