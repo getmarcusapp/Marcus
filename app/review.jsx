@@ -92,6 +92,10 @@ export default function ReviewScreen() {
   const savingRef = useRef(false);
   const [stats, setStats] = useState({ journaled: 0, triggers: 0, reframed: 0 });
   const scrollRef = useRef(null);
+  // Where the wizard's card sits inside the scroll content (measured, not
+  // assumed — the hero is minHeight, so it can grow with Dynamic Type).
+  // Used by the keyboardDidShow scroll below.
+  const cardTopRef = useRef(0);
   // Keep the caret above the keyboard + accessory bar as answers grow line
   // by line (iOS only auto-scrolls on focus, not on caret wrap).
   const { onScroll, onGrow } = useCaretScroll(scrollRef);
@@ -126,6 +130,32 @@ export default function ReviewScreen() {
     }, 200);
     return () => clearTimeout(t);
   }, [openPrompt, hasAccess, roles.length]);
+
+  // Pull the active wizard card into view when the keyboard RISES.
+  //
+  // automaticallyAdjustKeyboardInsets fixes contentInset when the keyboard
+  // appears; it does not scroll the focused input into view. Stepping from a
+  // no-input step to a text step focuses an input while the keyboard is still
+  // rising, so the viewport shrinks under an input nobody repositioned and it
+  // lands behind the accessory bar. Only two transitions can do this, and they
+  // are exactly the two that were broken: landing → I · Honor, and
+  // V · Ledger → IV · Body (Ledger is a virtue picker with no input, so
+  // arriving there unmounts the focused TextInput and drops the keyboard).
+  //
+  // Consecutive text steps never hit it: the keyboard is already up and each
+  // card renders at the same Y, so the input is already where the last one was.
+  // Hooking keyboardDidShow (not the step change) keeps this scoped to the
+  // hidden → visible transition and leaves those working cases untouched.
+  //
+  // useCaretScroll can't cover this: it only fires when an input's OWN content
+  // grows, and a freshly mounted input has no previous height to compare to.
+  useEffect(() => {
+    const sub = Keyboard.addListener('keyboardDidShow', () => {
+      if (openPromptRef.current < 0) return;
+      scrollRef.current?.scrollTo({ y: cardTopRef.current, animated: true });
+    });
+    return () => sub.remove();
+  }, []);
 
   function wizardBack() {
     haptics.tap();
@@ -386,7 +416,11 @@ export default function ReviewScreen() {
         ) : (
           // Wizard — one step per page. Renders text prompt / Ledger picker /
           // roles input / Commit input depending on stepKind(openPrompt).
-          <View style={s.body}>
+          // onLayout records the card's offset for the keyboard-rise scroll.
+          <View
+            style={s.body}
+            onLayout={e => { cardTopRef.current = e.nativeEvent.layout.y; }}
+          >
             {stepKind(openPrompt) === 'text' && (() => {
               const idx = openPrompt;
               const p = reviewPrompts[idx];
