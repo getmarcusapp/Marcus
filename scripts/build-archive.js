@@ -5,7 +5,7 @@
 // generator) and renders a static, SEO-optimized archive into public/meditations:
 //   - index.html         a timeline of every edition
 //   - <slug>.html        one page per edition (canonical, OG, JSON-LD Article)
-//   - archive.css        shared styles, matching the main site's tokens
+//   - archive.css        shared styles, carrying over the main site's brand
 //
 // Idempotent: re-run any time to rebuild from the current set of editions.
 // To veto an edition, delete its content/editions/<date>.json and rebuild.
@@ -69,14 +69,19 @@ function pageHead(title, description, canonical, jsonLd, extraOg) {
     '</head>';
 }
 
-function siteHeader() {
-  return '<header class="dm-header"><a href="/" class="dm-word">Marcus</a>' +
-    '<a href="/meditations" class="dm-link">Daily Meditations</a></header>';
+// Fixed nav matching the main site: skull-gold wordmark + gold pill CTA.
+function nav() {
+  return '<nav class="dm-nav">' +
+    '<a class="dm-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
+    '<div class="dm-nav-right">' +
+    '<a class="dm-nav-link" href="/meditations">Daily Meditations</a>' +
+    '<a class="dm-nav-cta" href="/">Get the app →</a>' +
+    '</div></nav>';
 }
 
 function subscribeBlock(id) {
   return '<section class="dm-subscribe">' +
-    '<p class="dm-sub-eyebrow">The newsletter</p>' +
+    '<p class="dm-eyebrow">The newsletter</p>' +
     '<h2 class="dm-sub-title">Get tomorrow\'s edition</h2>' +
     '<p class="dm-sub-copy">One short Stoic reflection each morning. Free. Unsubscribe anytime.</p>' +
     '<div class="dm-form">' +
@@ -88,10 +93,11 @@ function subscribeBlock(id) {
 }
 
 function appCta() {
-  return '<section class="dm-app"><p class="dm-app-copy">Daily Meditations is a companion to ' +
-    '<strong>Marcus</strong>, a Stoic practice app for iOS: daily journaling, guided meditation, ' +
-    'and a structured evening reckoning.</p>' +
-    '<a class="dm-app-btn" href="/">Explore the app →</a></section>';
+  return '<section class="dm-app">' +
+    '<img class="dm-app-skull" src="/skull-gold.png" alt="" width="72" height="72">' +
+    '<p class="dm-app-copy">Daily Meditations is a companion to <strong>Marcus</strong>, a Stoic practice ' +
+    'app for iOS: daily journaling, guided meditation, and a structured evening reckoning.</p>' +
+    '<a class="dm-nav-cta" href="/">Explore the app →</a></section>';
 }
 
 function footer() {
@@ -134,7 +140,7 @@ function renderEditionPage(rec) {
     ? '<p class="dm-source">Source: <a href="' + esc(rec.sourceUrl) + '" rel="nofollow noopener" target="_blank">' + esc(hostname(rec.sourceUrl)) + ' →</a></p>'
     : '';
   return pageHead(title, desc, canonical, jsonLd, '<meta property="og:type" content="article">') +
-    '<body>' + siteHeader() +
+    '<body>' + nav() +
     '<main class="dm-main">' +
     '<article class="dm-article">' +
     '<p class="dm-eyebrow">Daily Meditations &middot; ' + esc(rec.displayDate) + '</p>' +
@@ -177,18 +183,19 @@ function renderIndex(records) {
         '</a>').join('')
     : '<p class="dm-empty">The first edition arrives soon.</p>';
   return pageHead(title, desc, canonical, jsonLd, '<meta property="og:type" content="website">') +
-    '<body>' + siteHeader() +
-    '<main class="dm-main">' +
-    '<section class="dm-hero">' +
-    '<p class="dm-eyebrow">The newsletter</p>' +
+    '<body>' + nav() +
+    '<header class="dm-hero"><div class="dm-hero-inner">' +
+    '<img class="dm-hero-skull" src="/skull-gold.png" alt="Marcus" width="132" height="132">' +
+    '<p class="dm-eyebrow dm-eyebrow-accent">The newsletter</p>' +
     '<h1 class="dm-hero-title">Daily Meditations</h1>' +
     '<p class="dm-hero-copy">One edition each morning: a verified passage from the Stoics, the moment in ' +
     'history that produced it, and an unforced line to the world as it is today. Two minutes. Free.</p>' +
-    '<div class="dm-form">' +
+    '<div class="dm-form dm-form-hero">' +
     '<input class="dm-input" id="hero" type="email" placeholder="your@email.com" autocomplete="email">' +
     '<button class="dm-submit" onclick="dmSubscribe(\'hero\')">Subscribe →</button>' +
     '</div><p class="dm-note" id="hero-note">Daily. No noise. Unsubscribe anytime.</p>' +
-    '</section>' +
+    '</div></header>' +
+    '<main class="dm-main">' +
     '<section class="dm-timeline">' + items + '</section>' +
     appCta() +
     '</main>' + footer() + subscribeScript() +
@@ -200,45 +207,73 @@ const CSS = `
 --text-primary:#F0F0F0;--text-secondary:#C0C0C0;--text-muted:#888;--text-dim:#7A7A7A;--accent:#FFCE82;--accent-dim:#B38B5B;
 --display:'Cinzel',Georgia,serif;--body:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text-primary);font-family:var(--body);line-height:1.7;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--text-primary);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-.dm-header{display:flex;gap:16px;align-items:center;padding:22px 24px;border-bottom:1px solid var(--border);max-width:760px;margin:0 auto}
-.dm-word{font-family:var(--display);font-size:20px;letter-spacing:1px;color:var(--text-primary)}
-.dm-link{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-dim)}
+/* NAV — matches the main site: fixed, blurred, skull + Cinzel wordmark, gold pill CTA */
+.dm-nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;background:rgba(4,4,4,.94);
+backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);
+display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20px,5vw,40px)}
+.dm-brand{display:flex;align-items:center;gap:10px}
+.dm-brand img{width:40px;height:40px;object-fit:contain;opacity:.9}
+.dm-brand span{font-family:var(--display);font-size:24px;font-weight:400;letter-spacing:.5px;color:var(--text-primary)}
+.dm-nav-right{display:flex;align-items:center;gap:22px}
+.dm-nav-link{font-size:13px;letter-spacing:.3px;color:var(--text-muted);transition:color .15s}
+.dm-nav-link:hover{color:var(--text-secondary)}
+.dm-nav-cta{background:var(--accent);color:#000;font-size:13px;font-weight:700;letter-spacing:.3px;
+padding:10px 20px;border-radius:8px;transition:opacity .15s}
+.dm-nav-cta:hover{opacity:.85}
+@media(max-width:560px){.dm-nav-link{display:none}}
+/* HERO — dark with the amber radial glow + skull, like the site hero */
+.dm-hero{position:relative;overflow:hidden;background:var(--bg-deep);border-bottom:1px solid var(--border);
+text-align:center;padding:140px 24px 72px}
+.dm-hero::before{content:'';position:absolute;inset:0;pointer-events:none;
+background:radial-gradient(ellipse 65% 55% at 50% 40%,rgba(255,206,130,.28) 0%,rgba(255,206,130,.08) 42%,transparent 74%)}
+.dm-hero-inner{position:relative;max-width:600px;margin:0 auto}
+.dm-hero-skull{width:132px;height:132px;object-fit:contain;opacity:.92;margin-bottom:28px;
+filter:drop-shadow(0 0 40px rgba(255,206,130,.18))}
+.dm-hero-title{font-family:var(--display);font-size:clamp(40px,9vw,72px);font-weight:400;color:#fff;letter-spacing:1px;line-height:1;margin-bottom:22px}
+.dm-hero-copy{font-size:clamp(16px,2.4vw,19px);color:var(--text-secondary);max-width:520px;margin:0 auto 34px;line-height:1.6}
+/* shared eyebrow — uppercase, tracked, matching the site's section eyebrows */
+.dm-eyebrow{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--accent-dim);margin-bottom:16px}
+.dm-eyebrow-accent{color:var(--accent)}
 .dm-main{max-width:640px;margin:0 auto;padding:0 24px}
-.dm-eyebrow{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent-dim);margin:56px 0 16px}
-.dm-hero{text-align:center;padding-top:20px}
-.dm-hero-title{font-family:var(--display);font-size:clamp(38px,8vw,58px);letter-spacing:.5px;margin-bottom:20px}
-.dm-hero-copy{font-size:17px;color:var(--text-secondary);max-width:520px;margin:0 auto 36px}
-.dm-article{padding-bottom:8px}
-.dm-theme{font-family:var(--display);font-size:clamp(30px,6vw,44px);color:var(--accent);letter-spacing:.5px;margin-bottom:28px;line-height:1.15}
-.dm-quote{font-style:italic;font-size:22px;line-height:1.55;color:var(--text-primary);border-left:2px solid var(--accent);padding-left:22px;margin:0 0 32px}
-.dm-context p{font-size:17px;color:var(--text-secondary);margin-bottom:20px}
-.dm-question{font-style:italic;font-size:18px;color:var(--text-primary);border-top:1px solid var(--border);padding-top:24px;margin-top:8px}
-.dm-source{font-size:13px;color:var(--text-dim);margin-top:20px}
+/* ARTICLE */
+.dm-article{padding-top:104px}
+.dm-article .dm-eyebrow{margin-top:0}
+.dm-theme{font-family:var(--display);font-size:clamp(30px,6vw,44px);color:var(--accent);letter-spacing:.5px;margin-bottom:30px;line-height:1.15}
+.dm-quote{font-family:var(--body);font-style:italic;font-size:22px;line-height:1.55;color:var(--text-primary);border-left:2px solid var(--accent);padding-left:22px;margin:0 0 32px}
+.dm-context p{font-size:17px;color:var(--text-secondary);line-height:1.75;margin-bottom:20px}
+.dm-question{font-style:italic;font-size:18px;color:var(--text-primary);border-top:1px solid var(--border);padding-top:24px;margin-top:8px;line-height:1.6}
+.dm-source{font-size:13px;color:var(--text-dim);margin-top:22px}
 .dm-source a{color:var(--accent-dim)}
-.dm-back{margin:40px 0 8px}.dm-back a{font-size:14px;color:var(--accent-dim);letter-spacing:.5px}
-.dm-timeline{margin-top:24px;padding-bottom:20px}
-.dm-item{display:block;padding:26px 0;border-top:1px solid var(--border);transition:opacity .15s}
+.dm-back{margin:40px 0 8px}.dm-back a{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--accent-dim)}
+/* TIMELINE */
+.dm-timeline{padding:8px 0}
+.dm-item{display:block;padding:28px 0;border-top:1px solid var(--border);transition:opacity .15s}
+.dm-item:first-child{border-top:none}
 .dm-item:hover{opacity:.72}
 .dm-item-date{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim)}
-.dm-item-theme{font-family:var(--display);font-size:24px;color:var(--accent);margin:8px 0 8px}
+.dm-item-theme{font-family:var(--display);font-size:25px;color:var(--accent);margin:8px 0 8px;line-height:1.2}
 .dm-item-quote{font-style:italic;font-size:16px;color:var(--text-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .dm-empty{padding:60px 0;text-align:center;color:var(--text-muted)}
-.dm-subscribe{background:var(--bg-card);border:1px solid var(--border-mid);border-radius:14px;padding:32px 28px;margin:56px 0 40px;text-align:center}
-.dm-sub-eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-dim);margin-bottom:12px}
-.dm-sub-title{font-family:var(--display);font-size:26px;margin-bottom:10px}
+/* SUBSCRIBE CARD */
+.dm-subscribe{background:var(--bg-card);border:1px solid var(--border-mid);border-radius:14px;padding:36px 28px;margin:56px 0 40px;text-align:center}
+.dm-subscribe .dm-eyebrow{margin-bottom:12px}
+.dm-sub-title{font-family:var(--display);font-size:26px;font-weight:400;margin-bottom:10px}
 .dm-sub-copy{font-size:15px;color:var(--text-secondary);margin-bottom:22px}
 .dm-form{display:flex;border:1px solid var(--border-mid);border-radius:12px;overflow:hidden;max-width:440px;margin:0 auto}
+.dm-form-hero{margin:0 auto}
 .dm-input{flex:1;background:#111;color:var(--text-primary);font-size:16px;padding:16px 18px;border:none;outline:none;font-family:inherit}
 .dm-input::placeholder{color:var(--text-dim)}
-.dm-submit{background:var(--accent);color:#000;font-size:15px;font-weight:700;padding:16px 24px;border:none;cursor:pointer;font-family:inherit;white-space:nowrap}
+.dm-submit{background:var(--accent);color:#000;font-size:15px;font-weight:700;padding:16px 24px;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;transition:opacity .15s}
 .dm-submit:hover{opacity:.9}
 .dm-note{font-size:13px;color:var(--text-dim);margin-top:12px}
-.dm-app{border-top:1px solid var(--border);padding:36px 0;margin-top:20px;text-align:center}
-.dm-app-copy{font-size:15px;color:var(--text-secondary);max-width:480px;margin:0 auto 18px}
-.dm-app-btn{display:inline-block;color:var(--accent);border:1px solid var(--accent-dim);border-radius:10px;padding:12px 24px;font-size:14px;letter-spacing:.3px}
-.dm-app-btn:hover{background:var(--accent);color:#000}
+/* APP CTA */
+.dm-app{border-top:1px solid var(--border);padding:48px 0 12px;margin-top:20px;text-align:center}
+.dm-app-skull{width:72px;height:72px;object-fit:contain;opacity:.85;margin-bottom:18px;filter:drop-shadow(0 0 26px rgba(255,206,130,.15))}
+.dm-app-copy{font-size:15px;color:var(--text-secondary);max-width:480px;margin:0 auto 22px;line-height:1.65}
+.dm-app .dm-nav-cta{display:inline-block;padding:13px 26px;font-size:14px}
+/* FOOTER */
 .dm-footer{border-top:1px solid var(--border);margin-top:40px;padding:28px 24px;text-align:center;font-size:13px;color:var(--text-dim)}
 .dm-footer a{color:var(--accent-dim)}
 @media(max-width:500px){.dm-form{flex-direction:column}.dm-submit{padding:14px}}
