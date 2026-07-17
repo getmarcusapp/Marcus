@@ -1397,7 +1397,10 @@
   .specimen-body { font-size: 15.5px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 22px; }
   .specimen-q { font-size: 15.5px; line-height: 1.6; color: var(--text-primary); font-style: italic; border-top: 1px solid var(--border); padding-top: 20px; }
   .newsletter .email-form { margin: 0 auto; }
-  .beehiiv-embed { margin: 0 auto; min-height: 64px; display: flex; justify-content: center; }
+  /* Constrain to the Beehiiv form's own width (~400px) and center the box, so
+     it reads centered regardless of how Beehiiv aligns the form internally. */
+  .beehiiv-embed { max-width: 420px; margin: 0 auto; min-height: 64px; display: flex; justify-content: center; }
+  .beehiiv-embed iframe, .beehiiv-embed > div { margin: 0 auto !important; max-width: 100%; }
 </style>
 <section class="newsletter" id="newsletter">
   <div class="newsletter-inner">
