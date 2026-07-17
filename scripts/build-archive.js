@@ -17,7 +17,7 @@ const ROOT = path.join(__dirname, '..');
 const EDITIONS_DIR = path.join(ROOT, 'content', 'editions');
 const OUT_DIR = path.join(ROOT, 'public', 'meditations');
 const SITE = 'https://getmarcus.app';
-const BEEHIIV_CREATE = 'https://marcusapp.beehiiv.com/create';
+const BEEHIIV_CREATE = 'https://daily-meditations.beehiiv.com/create';
 
 const FONT_LINKS =
   '<link rel="preconnect" href="https://fonts.googleapis.com">' +

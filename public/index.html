@@ -1649,7 +1649,7 @@ async function submitEmail(inputId, successId) {
     fd.append('sent_from_orchid', 'true');
     fd.append('double_opt', 'false');
     fd.append('fallback_path', '/');
-    await fetch('https://marcusapp.beehiiv.com/create', {
+    await fetch('https://daily-meditations.beehiiv.com/create', {
       method: 'POST',
       body: fd,
       mode: 'no-cors'
@@ -1671,7 +1671,7 @@ function goSubscribe(inputId) {
     input.focus();
     return;
   }
-  window.location.href = 'https://marcusapp.beehiiv.com/subscribe?email=' + encodeURIComponent(email);
+  window.location.href = 'https://daily-meditations.beehiiv.com/subscribe?email=' + encodeURIComponent(email);
 }
 </script>
 <script>
