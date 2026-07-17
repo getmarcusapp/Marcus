@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Marcus — A Stoic Practice App</title>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" href="/favicon.png">
@@ -44,7 +45,6 @@
     font-family: var(--font-body);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
   }
 
   /* All section display headlines use Cinzel — matches the app's
@@ -63,70 +63,34 @@
     background: var(--bg-deep);
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(36px, 6vw, 92px);
-    padding: 128px 32px 88px;
+    text-align: center;
+    padding: 80px 24px;
     border-bottom: 1px solid var(--border);
     position: relative;
     overflow: hidden;
-    flex-wrap: wrap;
   }
 
   .hero::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 60% 60% at 68% 45%, rgba(255, 206, 130, 0.26) 0%, rgba(255, 206, 130, 0.08) 42%, transparent 72%);
+    background: radial-gradient(ellipse 65% 55% at 50% 50%, rgba(255, 206, 130, 0.32) 0%, rgba(255, 206, 130, 0.10) 40%, transparent 75%);
     pointer-events: none;
   }
 
-  .hero-copy {
-    position: relative;
-    z-index: 1;
-    max-width: 500px;
-    min-width: 0;
-    text-align: left;
+  .skull-wrap {
+    margin-bottom: 40px;
+    opacity: 0.9;
   }
 
-  .hero-brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 34px;
-  }
-  .hero-brand img {
-    width: 52px;
-    height: 52px;
+  .skull-wrap img {
+    width: 160px;
+    height: 160px;
     object-fit: contain;
-    filter: drop-shadow(0 0 22px rgba(255, 206, 130, 0.28));
-  }
-  .hero-brand span {
-    font-family: var(--font-wordmark);
-    font-size: 26px;
-    letter-spacing: 3px;
-    color: #FFFFFF;
-    text-transform: uppercase;
-  }
-
-  /* Phone product shot */
-  .hero-phone {
-    position: relative;
-    z-index: 1;
-    flex-shrink: 0;
-  }
-  .phone-frame {
-    width: clamp(232px, 27vw, 292px);
-    padding: 9px;
-    border-radius: 42px;
-    background: linear-gradient(158deg, #2c2c2c 0%, #0b0b0b 60%);
-    border: 1px solid #343434;
-    box-shadow: 0 44px 100px rgba(0, 0, 0, 0.62), 0 0 64px rgba(255, 206, 130, 0.10);
-  }
-  .phone-frame img {
-    width: 100%;
-    display: block;
-    border-radius: 34px;
+    filter: drop-shadow(0 0 40px rgba(255, 206, 130, 0.18));
   }
 
   .hero-eyebrow {
@@ -139,40 +103,23 @@
 
   .hero-title {
     font-family: var(--font-wordmark);
-    font-size: clamp(40px, 5.6vw, 62px);
+    font-size: clamp(52px, 10vw, 88px);
     font-weight: 400;
     color: #FFFFFF;
-    letter-spacing: 0.5px;
-    line-height: 1.08;
-    margin-bottom: 22px;
+    letter-spacing: 1px;
+    line-height: 1;
+    margin-bottom: 24px;
   }
 
   .hero-sub {
     font-family: var(--font-serif);
-    font-size: clamp(17px, 2.2vw, 20px);
+    font-size: clamp(18px, 3vw, 22px);
     font-weight: 300;
     color: var(--text-secondary);
     font-style: italic;
-    max-width: 460px;
-    line-height: 1.66;
-    margin-bottom: 38px;
-  }
-
-  .hero-copy .appstore-note { text-align: left; }
-
-  @media (max-width: 860px) {
-    .hero { flex-direction: column; text-align: center; padding: 116px 24px 72px; }
-    .hero-copy { text-align: center; max-width: 520px; order: 1; }
-    .hero-title { font-size: clamp(30px, 8vw, 52px); }
-    .hero-br { display: none; }
-    .hero-brand { justify-content: center; }
-    .hero-brand img { width: 46px; height: 46px; }
-    .hero-brand span { font-size: 23px; }
-    .hero-sub { margin-left: auto; margin-right: auto; }
-    .hero-phone { order: 2; margin-top: 8px; }
-    .hero-cta-wrap { align-items: center; }
-    .hero-cta-wrap .appstore-btn { align-self: center; }
-    .hero-copy .appstore-note { text-align: center; }
+    max-width: 540px;
+    line-height: 1.7;
+    margin-bottom: 52px;
   }
 
   /* ─── EMAIL CAPTURE ──────────────────────────────────── */
@@ -1125,7 +1072,7 @@
     <a href="#diff">What's different</a>
     <a href="#philosophy">The foundation</a>
     <a href="#pricing">Pricing</a>
-    <a class="nav-cta" href="https://apps.apple.com/app/id6789749038" target="_blank" rel="noopener">Download on the App Store →</a>
+    <a class="nav-cta" href="#hero-email">Download on the App Store →</a>
   </div>
 </nav>
 <div class="mobile-menu" id="mobile-menu">
@@ -1133,34 +1080,37 @@
   <a href="#diff" onclick="closeMenu()">What's different</a>
   <a href="#philosophy" onclick="closeMenu()">The foundation</a>
   <a href="#pricing" onclick="closeMenu()">Pricing</a>
-  <a href="https://apps.apple.com/app/id6789749038" class="mob-cta" target="_blank" rel="noopener" onclick="closeMenu()">Download on the App Store →</a>
+  <a href="#hero-email" class="mob-cta" onclick="closeMenu()">Download on the App Store →</a>
 </div>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-copy">
-    <h1 class="hero-title">Become someone <br class="hero-br">you respect.</h1>
-    <p class="hero-sub">
-      A daily Stoic practice, built on the private journal Marcus Aurelius used to govern himself. Set your intention each morning. Examine your conduct each night.
-    </p>
-    <div class="hero-cta-wrap" style="display:flex;flex-direction:column;gap:14px;">
-      <a href="https://apps.apple.com/app/id6789749038" class="appstore-btn" target="_blank" rel="noopener" style="align-self:flex-start;">
-        <svg class="appstore-svg" viewBox="0 0 165 49" xmlns="http://www.w3.org/2000/svg">
-          <rect width="165" height="49" rx="8" fill="#000"/>
-          <rect width="165" height="49" rx="8" fill="none" stroke="#A6A6A6" stroke-width="1"/>
-          <text x="56" y="16" font-family="-apple-system, SF Pro Display, Helvetica, sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="0.3">Download on the</text>
-          <text x="53" y="34" font-family="-apple-system, SF Pro Display, Helvetica, sans-serif" font-size="19" font-weight="600" fill="#FFFFFF" letter-spacing="-0.3">App Store</text>
-          <path d="M26 10.8c3.8-4.7 9.8-4 9.8-4s.9 5.4-2.9 10.5c-4 5.4-8.6 4.5-8.6 4.5s-1-4.4 1.7-11z" fill="#FFFFFF"/>
-          <path d="M23.8 22.5c1.9 0 5.3-2.6 9.8-2.6 7.7 0 10.8 5.5 10.8 5.5s-5.9 3-5.9 10.4c0 8.3 7.4 11.2 7.4 11.2s-5.2 14.6-12.2 14.6c-3.2 0-5.7-2.2-9.1-2.2-3.4 0-6.8 2.2-9.1 2.2-6.5 0-14.7-13.8-14.7-24.9 0-10.9 6.8-16.6 13.2-16.6 4.1 0 7.3 2.4 9.8 2.4z" fill="#FFFFFF"/>
-        </svg>
-      </a>
-      <p class="appstore-note">7-day free trial &middot; $7.99/mo or $39.99/yr &middot; No account required</p>
-    </div>
+  <div class="skull-wrap">
+    <img src="skull-gold.png" alt="Marcus" />
   </div>
-  <div class="hero-phone">
-    <div class="phone-frame">
-      <img src="screenshots/complete.png" alt="The Marcus app showing a completed daily Stoic practice." />
-    </div>
+  <h1 class="hero-title">Marcus</h1>
+  <p class="hero-sub">
+    "Waste no more time arguing about what a good man should be.<br>Be one."
+    <br><br>— Marcus Aurelius, Meditations X.16
+  </p>
+  <div style="text-align:center;">
+    <a href="https://apps.apple.com/app/id6762488316" class="appstore-btn" target="_blank" rel="noopener">
+    <svg class="appstore-svg" viewBox="0 0 165 49" xmlns="http://www.w3.org/2000/svg">
+      <rect width="165" height="49" rx="8" fill="#000"/>
+      <rect width="165" height="49" rx="8" fill="none" stroke="#A6A6A6" stroke-width="1"/>
+      <text x="56" y="16" font-family="-apple-system, SF Pro Display, Helvetica, sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="0.3">Download on the</text>
+      <text x="53" y="34" font-family="-apple-system, SF Pro Display, Helvetica, sans-serif" font-size="19" font-weight="600" fill="#FFFFFF" letter-spacing="-0.3">App Store</text>
+      <path d="M26 10.8c3.8-4.7 9.8-4 9.8-4s.9 5.4-2.9 10.5c-4 5.4-8.6 4.5-8.6 4.5s-1-4.4 1.7-11z" fill="#FFFFFF"/>
+      <path d="M23.8 22.5c1.9 0 5.3-2.6 9.8-2.6 7.7 0 10.8 5.5 10.8 5.5s-5.9 3-5.9 10.4c0 8.3 7.4 11.2 7.4 11.2s-5.2 14.6-12.2 14.6c-3.2 0-5.7-2.2-9.1-2.2-3.4 0-6.8 2.2-9.1 2.2-6.5 0-14.7-13.8-14.7-24.9 0-10.9 6.8-16.6 13.2-16.6 4.1 0 7.3 2.4 9.8 2.4z" fill="#FFFFFF"/>
+    </svg>
+  </a>
+    <p class="appstore-note">7-day free trial &middot; $7.99/month or $39.99/year &middot; iOS &middot; No account required</p>
+  </div>
+
+  <div style="margin-top: 48px;" id="hero-email">
+    <p style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 14px;">Or read Daily Meditations</p>
+    <a href="#newsletter" class="email-submit" style="display:inline-block;text-decoration:none;border-radius:10px;">Subscribe free →</a>
+    <p class="email-note" style="margin-top:12px;">Daily. No noise. Unsubscribe anytime.</p>
   </div>
 </section>
 
@@ -1186,7 +1136,7 @@
         <span class="agitation-num">01</span>
         <div>
           <p class="agitation-item-title">They treat you like a machine</p>
-          <p class="agitation-item-body">Habit trackers optimize for the checkmark, not the character. Break a streak because life happened, and you feel shame instead of growth. The motivation was rooted in a number, not in who you are.</p>
+          <p class="agitation-item-body">Habit trackers optimize for the checkmark, not the character. Break a streak — because life happened — and you feel shame instead of growth. Then you abandon the habit, proving the motivation was rooted in a number, not in who you are.</p>
         </div>
       </div>
 
@@ -1194,15 +1144,23 @@
         <span class="agitation-num">02</span>
         <div>
           <p class="agitation-item-title">They reward the wrong thing</p>
-          <p class="agitation-item-body">Checking off twenty small tasks feels like progress. But it's productive procrastination. The one difficult, character-building thing remains undone, and the app gave you a badge for avoiding it.</p>
+          <p class="agitation-item-body">Checking off twenty small tasks feels like progress. But you've done it again. Productive procrastination. The one difficult, character-building thing you were supposed to do remains undone. The app gave you a badge for avoiding it.</p>
         </div>
       </div>
 
       <div class="agitation-item">
         <span class="agitation-num">03</span>
         <div>
-          <p class="agitation-item-title">They taught you to feel good, not be good</p>
-          <p class="agitation-item-body">Affirmations. Gratitude journals. "You are enough." The promise is that if you feel good enough about who you are, the gap stops hurting. The Stoics held the opposite: self-respect is not given. It is earned.</p>
+          <p class="agitation-item-title">Meditation apps make you passive</p>
+          <p class="agitation-item-body">Most meditation apps make you calmer, not better. There's a difference between a tranquilized mind and a disciplined one. Stoicism was never passive. It was a system for war.</p>
+        </div>
+      </div>
+
+      <div class="agitation-item">
+        <span class="agitation-num">04</span>
+        <div>
+          <p class="agitation-item-title">Self-help taught you to feel good, not be good</p>
+          <p class="agitation-item-body">Affirmations. Gratitude journals. "You are enough." The implicit promise: feel good enough about who you are, and the gap stops hurting. The Stoics held the opposite. Self-respect is not given. It is earned.</p>
         </div>
       </div>
 
@@ -1226,7 +1184,8 @@
   </div>
 
   <div class="mechanism-body">
-    <p>This is what Marcus is built on: not habit tracking, not gamification, but a daily system of honest self-examination. Two thousand years without becoming irrelevant is not a coincidence. It's evidence.</p>
+    <p>This is the practice Marcus is built on. Not habit tracking. Not gamification. A daily system of honest self-examination, rooted in the four Virtues Stoic philosophy identified as the only reliable path to a life you can respect.</p>
+    <p>Two thousand years without becoming irrelevant is not a coincidence. It's evidence.</p>
   </div>
 </section>
 
@@ -1283,6 +1242,24 @@
         <p class="feature-body">Once a week, examine the whole. A 7-day intensity trendline shows whether the storm is getting smaller. The Virtue ledger surfaces which Virtues you actually embodied — and where you fell short. If you've named your roles in the Compass, an Account prompt asks how you served each one. End with a single Commit prompt: one thing you will do differently next week. Over time, this becomes a mirror — who you're actually becoming, not who you imagine yourself to be.</p>
       </div>
 
+      <div class="feature">
+        <p class="feature-label">Guided meditations</p>
+        <p class="feature-title">Six Stoic meditations</p>
+        <p class="feature-body">The View From Above. Premeditatio Malorum. The Evening Examination. Negative Visualization. The Present Moment. Memento Mori. Six guided audio sessions, less than five minutes each, voiced. Ancient attention training surfaced at the right moment in your day, with the right one auto-picked for the time.</p>
+      </div>
+
+      <div class="feature">
+        <p class="feature-label">Apple Health</p>
+        <p class="feature-title">Mindful Minutes, synced</p>
+        <p class="feature-body">Each practice you complete is recorded as a Mindful Session in Apple Health: your Stoic reflection time counted alongside meditation and breathwork. Opt-in, privacy-first: only timestamps cross over, never the content of your journals.</p>
+      </div>
+
+      <div class="feature">
+        <p class="feature-label">Private by default</p>
+        <p class="feature-title">Optional FaceID lock</p>
+        <p class="feature-body">Your journal entries, reflections, and emotion logs are personal. Enable an optional FaceID (or device passcode) lock and Marcus requires authentication before opening, re-locking automatically thirty seconds after you leave the app. Off by default. Your call. Your practice stays yours.</p>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1298,10 +1275,10 @@
       <p class="diff-card-label">Every other app</p>
       <ul>
         <li><span class="icon">✕</span> Break your streak, lose everything</li>
-        <li><span class="icon">✕</span> Gamified to keep you engaged</li>
-        <li><span class="icon">✕</span> Your journal lives on their servers</li>
-        <li><span class="icon">✕</span> Features, but no philosophy behind them</li>
-        <li><span class="icon">✕</span> Optimized to retain you, not change you</li>
+        <li><span class="icon">✕</span> Badges for checking boxes</li>
+        <li><span class="icon">✕</span> Optimized for engagement</li>
+        <li><span class="icon">✕</span> Feels good over being good</li>
+        <li><span class="icon">✕</span> Shame when life gets in the way</li>
       </ul>
     </div>
     <div class="diff-card good">
@@ -1406,36 +1383,45 @@
 </section>
 
 
-<!-- SOCIAL PROOF — real beta-tester reviews (used with permission) -->
+<!-- DAILY MEDITATIONS (newsletter) -->
 <style>
-  .social { background: var(--bg-deep); padding: 100px 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .social-inner { max-width: 1080px; margin: 0 auto; text-align: center; }
-  .social-eyebrow { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 16px; }
-  .social-title { font-family: var(--font-display); font-size: clamp(30px, 5vw, 44px); color: var(--text-primary); letter-spacing: 0.5px; line-height: 1.15; margin-bottom: 52px; }
-  .social-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; text-align: left; }
-  .social-card { background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 14px; padding: 32px 28px; display: flex; flex-direction: column; }
-  .social-quote { font-family: var(--font-serif); font-style: italic; font-size: 17px; line-height: 1.62; color: var(--text-primary); margin: 0 0 24px; }
-  .social-attr { margin-top: auto; font-size: 13px; letter-spacing: 0.5px; color: var(--accent-dim); text-transform: uppercase; }
-  @media (max-width: 800px) { .social-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } }
+  .newsletter { background: var(--bg-deep); padding: 96px 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .newsletter-inner { max-width: 620px; margin: 0 auto; text-align: center; }
+  .newsletter-eyebrow { font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 16px; }
+  .newsletter-title { font-family: var(--font-display); font-size: clamp(34px, 6vw, 48px); color: var(--text-primary); letter-spacing: 0.5px; margin-bottom: 18px; }
+  .newsletter-sub { font-size: 17px; line-height: 1.65; color: var(--text-secondary); margin: 0 auto 44px; max-width: 520px; }
+  .newsletter-specimen { text-align: left; background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 14px; padding: 32px 30px; margin-bottom: 22px; }
+  .specimen-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 18px; }
+  .specimen-theme { font-family: var(--font-display); font-size: 22px; color: var(--accent); margin-bottom: 20px; }
+  .specimen-quote { font-family: var(--font-serif); font-style: italic; font-size: 21px; line-height: 1.5; color: var(--text-primary); margin: 0 0 8px; }
+  .specimen-attr { font-size: 13px; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 22px; }
+  .specimen-body { font-size: 15.5px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 22px; }
+  .specimen-q { font-size: 15.5px; line-height: 1.6; color: var(--text-primary); font-style: italic; border-top: 1px solid var(--border); padding-top: 20px; }
+  .newsletter .email-form { margin: 0 auto; }
+  /* Constrain to the Beehiiv form's own width (~400px) and center the box, so
+     it reads centered regardless of how Beehiiv aligns the form internally. */
+  .beehiiv-embed { max-width: 420px; margin: 0 auto; min-height: 64px; display: flex; justify-content: center; }
+  .beehiiv-embed iframe, .beehiiv-embed > div { margin: 0 auto !important; max-width: 100%; }
 </style>
-<section class="social">
-  <div class="social-inner">
-    <p class="social-eyebrow">From the first practitioners</p>
-    <h2 class="social-title">The people who tested it<br>didn't want to give it back.</h2>
-    <div class="social-grid">
-      <div class="social-card">
-        <p class="social-quote">“The morning journal prompt about impressions caught me on day four. I realized I’d been walking into every conversation with my boss braced for criticism no one had actually given me. That’s the whole app in one question.”</p>
-        <p class="social-attr">— Frank O. · TestFlight beta</p>
-      </div>
-      <div class="social-card">
-        <p class="social-quote">“I almost stopped after three days, but the evening journal on day four kept me going. It’s basically Seneca’s three questions, and answering the last one honestly before bed changed the next morning. Forty-seven days later, I still open it.”</p>
-        <p class="social-attr">— Travis M. · TestFlight beta</p>
-      </div>
-      <div class="social-card">
-        <p class="social-quote">“Six weeks in, the daily reading hasn’t fumbled a fact once, and the one I got the morning after election week engaged with what was happening honestly and without picking a side. It’s the reason I’d tell someone to try Marcus.”</p>
-        <p class="social-attr">— Claire V. · TestFlight beta</p>
-      </div>
+<section class="newsletter" id="newsletter">
+  <div class="newsletter-inner">
+    <p class="newsletter-eyebrow">The newsletter</p>
+    <h2 class="newsletter-title">Daily Meditations</h2>
+    <p class="newsletter-sub">One edition each morning: a verified passage from the Stoics, the moment in history that produced it, and an unforced line to the world as it is today. Two minutes to read. No productivity gospel, no wellness clichés, no noise. Free.</p>
+
+    <div class="newsletter-specimen">
+      <p class="specimen-label">A sample edition</p>
+      <p class="specimen-theme">On beginning again</p>
+      <blockquote class="specimen-quote">"Confine yourself to the present."</blockquote>
+      <p class="specimen-attr">Marcus Aurelius &middot; Meditations VIII.7</p>
+      <p class="specimen-body">Marcus wrote this in his private notebooks during the Marcomannic Wars, a campaign that dragged on for years with no clean resolution. He was emperor of Rome and commander of a frontier war that kept not ending. The present was all he had reliable access to.</p>
+      <p class="specimen-q">What are you carrying into today that belongs to a different day entirely?</p>
     </div>
+
+    <!-- Beehiiv v3 subscribe form (daily-meditations publication). Style it in
+         Beehiiv → Grow → Subscribe Forms so it matches the gold/serif brand. -->
+    <div class="beehiiv-embed"><script async src="https://subscribe-forms.beehiiv.com/v3/loader.js" data-beehiiv-form="eb49b3c4-275e-419f-af73-fbde10987dc9"></script></div>
+    <p style="margin-top:24px;"><a href="/meditations" style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--accent-dim);">Browse all past editions →</a></p>
   </div>
 </section>
 
@@ -1452,7 +1438,7 @@
         <p class="price-amount">$7.99</p>
         <p class="price-unit">per month</p>
         <p class="price-note">Cancel anytime. Your data stays on your device regardless.</p>
-        <a class="price-cta" href="https://apps.apple.com/app/id6789749038" target="_blank">Download free trial</a>
+        <a class="price-cta" href="https://apps.apple.com/app/id6762488316" target="_blank">Download free trial</a>
       </div>
       <div class="price-card featured">
         <div class="price-badge">Best value</div>
@@ -1460,7 +1446,7 @@
         <p class="price-amount">11&cent;</p>
         <p class="price-unit">per day</p>
         <p class="price-note">Billed $39.99/year &middot; Save 58% vs monthly. 77&cent; a week for a daily practice that compounds over years.</p>
-        <a class="price-cta" href="https://apps.apple.com/app/id6789749038" target="_blank">Download free trial</a>
+        <a class="price-cta" href="https://apps.apple.com/app/id6762488316" target="_blank">Download free trial</a>
       </div>
     </div>
     <p class="pricing-note">7-day free trial &middot; iOS &middot; No account required &middot; Your data never leaves your device</p>
@@ -1613,7 +1599,7 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
     <h2 class="final-title">Become someone<br>you respect.</h2>
     <p class="final-sub">Not by feeling better about yourself.<br>By being better. Starting today.</p>
     <div style="text-align:center;">
-      <a href="https://apps.apple.com/app/id6789749038" class="appstore-btn" target="_blank" rel="noopener">
+      <a href="https://apps.apple.com/app/id6762488316" class="appstore-btn" target="_blank" rel="noopener">
     <svg class="appstore-svg" viewBox="0 0 165 49" xmlns="http://www.w3.org/2000/svg">
       <rect width="165" height="49" rx="8" fill="#000"/>
       <rect width="165" height="49" rx="8" fill="none" stroke="#A6A6A6" stroke-width="1"/>
@@ -1628,57 +1614,60 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
 </section>
 
 
-<!-- DAILY MEDITATIONS (newsletter) -->
-<style>
-  .newsletter { background: var(--bg-deep); padding: 96px 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .newsletter-inner { max-width: 620px; margin: 0 auto; text-align: center; }
-  .newsletter-eyebrow { font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 16px; }
-  .newsletter-title { font-family: var(--font-display); font-size: clamp(34px, 6vw, 48px); color: var(--text-primary); letter-spacing: 0.5px; margin-bottom: 18px; }
-  .newsletter-sub { font-size: 17px; line-height: 1.65; color: var(--text-secondary); margin: 0 auto 44px; max-width: 520px; }
-  .newsletter-specimen { text-align: left; background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 14px; padding: 32px 30px; margin-bottom: 22px; }
-  .specimen-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 18px; }
-  .specimen-theme { font-family: var(--font-display); font-size: 22px; color: var(--accent); margin-bottom: 20px; }
-  .specimen-quote { font-family: var(--font-serif); font-style: italic; font-size: 21px; line-height: 1.5; color: var(--text-primary); margin: 0 0 8px; }
-  .specimen-attr { font-size: 13px; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 22px; }
-  .specimen-body { font-size: 15.5px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 22px; }
-  .specimen-q { font-size: 15.5px; line-height: 1.6; color: var(--text-primary); font-style: italic; border-top: 1px solid var(--border); padding-top: 20px; }
-  .newsletter .email-form { margin: 0 auto; }
-  /* Constrain to the Beehiiv form's own width (~400px) and center the box, so
-     it reads centered regardless of how Beehiiv aligns the form internally. */
-  .beehiiv-embed { max-width: 420px; margin: 0 auto; min-height: 64px; display: flex; justify-content: center; }
-  .beehiiv-embed iframe, .beehiiv-embed > div { margin: 0 auto !important; max-width: 100%; }
-</style>
-<section class="newsletter" id="newsletter">
-  <div class="newsletter-inner">
-    <p class="newsletter-eyebrow">The newsletter</p>
-    <h2 class="newsletter-title">Daily Meditations</h2>
-    <p class="newsletter-sub">One edition each morning: a verified passage from the Stoics, the moment in history that produced it, and an unforced line to the world as it is today. Two minutes to read. No productivity gospel, no wellness clichés, no noise. Free.</p>
-
-    <div class="newsletter-specimen">
-      <p class="specimen-label">A sample edition</p>
-      <p class="specimen-theme">On beginning again</p>
-      <blockquote class="specimen-quote">"Confine yourself to the present."</blockquote>
-      <p class="specimen-attr">Marcus Aurelius &middot; Meditations VIII.7</p>
-      <p class="specimen-body">Marcus wrote this in his private notebooks during the Marcomannic Wars, a campaign that dragged on for years with no clean resolution. He was emperor of Rome and commander of a frontier war that kept not ending. The present was all he had reliable access to.</p>
-      <p class="specimen-q">What are you carrying into today that belongs to a different day entirely?</p>
-    </div>
-
-    <!-- Beehiiv v3 subscribe form (daily-meditations publication). Style it in
-         Beehiiv → Grow → Subscribe Forms so it matches the gold/serif brand. -->
-    <div class="beehiiv-embed"><script async src="https://subscribe-forms.beehiiv.com/v3/loader.js" data-beehiiv-form="eb49b3c4-275e-419f-af73-fbde10987dc9"></script></div>
-    <p style="margin-top:24px;"><a href="/meditations" style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--accent-dim);">Browse all past editions →</a></p>
-  </div>
-</section>
-
-
 <!-- FOOTER -->
 <footer>
   <p>Marcus &middot; A Stoic Practice App &middot; <a href="https://getmarcus.app">getmarcus.app</a> &middot; <a href="/meditations">Daily Meditations</a></p>
   <p style="margin-top:8px;">"The mind adapts and converts to its own purposes the obstacle to our acting." — Marcus Aurelius, Meditations</p>
 </footer>
 
+<script>
+async function submitEmail(inputId, successId) {
+  const input = document.getElementById(inputId);
+  const success = document.getElementById(successId);
+  const email = input ? input.value.trim() : '';
+
+  if (!email || !email.includes('@')) {
+    input.style.outline = '2px solid #a05050';
+    input.focus();
+    return;
+  }
+
+  const btn = input.parentElement.querySelector('.email-submit');
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  try {
+    const fd = new FormData();
+    fd.append('email', email);
+    fd.append('is_js_enabled', 'true');
+    fd.append('sent_from_orchid', 'true');
+    fd.append('double_opt', 'false');
+    fd.append('fallback_path', '/');
+    await fetch('https://daily-meditations.beehiiv.com/create', {
+      method: 'POST',
+      body: fd,
+      mode: 'no-cors'
+    });
+  } catch(e) {}
+
+  input.parentElement.style.display = 'none';
+  if (success) success.style.display = 'block';
+}
+</script>
 
 
+<script>
+function goSubscribe(inputId) {
+  const input = document.getElementById(inputId);
+  const email = input ? input.value.trim() : '';
+  if (!email || !email.includes('@')) {
+    input.style.outline = '2px solid #a05050';
+    input.focus();
+    return;
+  }
+  window.location.href = 'https://daily-meditations.beehiiv.com/subscribe?email=' + encodeURIComponent(email);
+}
+</script>
 <script>
 
 function toggleFaq(el) {
