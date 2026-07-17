@@ -41,6 +41,11 @@ function md(s) {
     .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
     .replace(/_([^_\n]+)_/g, '<em>$1</em>');
 }
+// Strip whitespace before sentence punctuation ("weeks\n." -> "weeks."). Defensive:
+// normalizes any already-stored edition whose text has the opus-4-8 newline quirk.
+function cleanText(s) {
+  return String(s || '').replace(/[ \t\n\r]+([.,;:!?])/g, '$1');
+}
 function hostname(url) {
   try { return new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return url; }
 }
@@ -273,8 +278,16 @@ function build() {
     ? fs.readdirSync(EDITIONS_DIR).filter(f => f.endsWith('.json'))
     : [];
   const records = files.map(f => {
-    try { return JSON.parse(fs.readFileSync(path.join(EDITIONS_DIR, f), 'utf8')); }
-    catch (e) { console.warn('Skipping unparseable ' + f + ': ' + e.message); return null; }
+    try {
+      const r = JSON.parse(fs.readFileSync(path.join(EDITIONS_DIR, f), 'utf8'));
+      // Normalize the text fields (fixes the space-before-period quirk in any
+      // already-stored edition; new editions are cleaned at generation).
+      r.theme = cleanText(r.theme);
+      r.quote = cleanText(r.quote);
+      r.context = cleanText(r.context);
+      r.question = cleanText(r.question);
+      return r;
+    } catch (e) { console.warn('Skipping unparseable ' + f + ': ' + e.message); return null; }
   }).filter(Boolean).sort((a, b) => (a.isoDate < b.isoDate ? 1 : -1));
 
   fs.mkdirSync(OUT_DIR, { recursive: true });

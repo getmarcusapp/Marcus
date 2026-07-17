@@ -93,15 +93,24 @@ function extractText(content) {
   return content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
 }
 
+// Normalize whitespace before sentence punctuation. opus-4-8 occasionally emits
+// a stray newline (or space) right before a period, especially in the fact-dense
+// current-event sentence (e.g. "two weeks\n."). HTML collapses that to a visible
+// "two weeks .". This strips whitespace before .,;:!? without touching the \n\n
+// paragraph breaks (those are followed by a letter, not punctuation).
+function cleanText(s) {
+  return String(s || '').replace(/[ \t\n\r]+([.,;:!?])/g, '$1');
+}
+
 function parseEdition(text) {
   return {
-    theme:    (text.match(/THEME:\s*(.+)/)?.[1] || '').trim(),
-    quote:    (text.match(/QUOTE:\s*([\s\S]+?)(?=\n\nCONTEXT:)/)?.[1] || '').trim(),
-    context:  (text.match(/CONTEXT:\s*([\s\S]+?)(?=\n\nTHE QUESTION:)/)?.[1] || '').trim(),
+    theme:    cleanText((text.match(/THEME:\s*(.+)/)?.[1] || '').trim()),
+    quote:    cleanText((text.match(/QUOTE:\s*([\s\S]+?)(?=\n\nCONTEXT:)/)?.[1] || '').trim()),
+    context:  cleanText((text.match(/CONTEXT:\s*([\s\S]+?)(?=\n\nTHE QUESTION:)/)?.[1] || '').trim()),
     // Stop THE QUESTION at SOURCE_URL if present so the URL doesn't leak
     // into the question text. Falls back to end-of-text when no SOURCE_URL
     // line follows (timeless editions).
-    question: (text.match(/THE QUESTION:\s*([\s\S]+?)(?=\n\nSOURCE_URL:|$)/)?.[1] || '').trim(),
+    question: cleanText((text.match(/THE QUESTION:\s*([\s\S]+?)(?=\n\nSOURCE_URL:|$)/)?.[1] || '').trim()),
     // SOURCE_URL is optional. A timeless edition (no current-event hook)
     // legitimately omits it — verifySource() treats null as TIMELESS.
     sourceUrl: (text.match(/SOURCE_URL:\s*(\S+)/)?.[1] || '').trim() || null,
