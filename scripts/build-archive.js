@@ -145,8 +145,8 @@ function renderEditionPage(rec) {
 
 function renderIndex(records) {
   const canonical = SITE + '/meditations';
-  const title = 'Daily Meditations — a daily Stoic newsletter';
-  const desc = 'A daily Stoic reflection: a verified passage from Marcus Aurelius, Seneca, or Epictetus, the moment in history that produced it, and a line to the world today. Free.';
+  const title = 'Daily Meditations: a daily newsletter on Stoic philosophy';
+  const desc = 'One Stoic reflection each morning: a verified passage from Marcus Aurelius, Seneca, or Epictetus, the moment in history that produced it, and a line to the world today. Free.';
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
