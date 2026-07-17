@@ -395,6 +395,19 @@ function suggestedSubject(edition) {
   return n ? edition.theme + ' · №' + n : edition.theme;
 }
 
+// Preview text (the inbox preheader after the subject). The subject names the
+// theme; the preview delivers the actual quote, so the inbox pair reads
+// "On perspective / Constantly regard the universe as one living being…". Strips
+// the attribution tail and surrounding quotes, and trims to a preview-friendly
+// length (inboxes show ~90-140 chars).
+function suggestedPreview(edition) {
+  let q = (edition.quote || '').trim();
+  q = q.replace(/\s+[—–]\s+[^—–]*$/, '').trim();      // drop " — Author, Work"
+  q = q.replace(/^["'“”‘’]+|["'“”‘’]+$/g, '').trim();  // strip surrounding quotes
+  if (q.length > 140) q = q.slice(0, 137).replace(/\s+\S*$/, '') + '…';
+  return q;
+}
+
 // Email the rendered draft to Gio as the daily review prompt. Best-effort: a
 // mail failure is logged but never fails the run — the Beehiiv draft is the
 // real deliverable, this is just the nudge. `beehiivNote` describes where the
@@ -415,10 +428,12 @@ async function emailDraft(html, edition, dateStr, beehiivNote) {
       auth: { user: MAIL_USER, pass: MAIL_PASS },
     });
     const subject = suggestedSubject(edition);
+    const preview = suggestedPreview(edition);
     const banner =
       '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:0 auto 20px;padding:16px 18px;background:#f7f5f2;border-radius:10px;color:#1a1a1a;">'
       + '<div style="font-weight:600;margin-bottom:6px;">Today\'s Daily Meditations draft is ready to review.</div>'
       + '<div style="font-size:14px;color:#1a1a1a;margin-bottom:6px;">Suggested subject: <strong>' + escapeHtmlText(subject) + '</strong></div>'
+      + '<div style="font-size:14px;color:#1a1a1a;margin-bottom:6px;">Suggested preview: <strong>' + escapeHtmlText(preview) + '</strong></div>'
       + '<div style="font-size:14px;color:#555;">' + escapeHtmlText(beehiivNote) + ' Open Beehiiv to edit and schedule: '
       + '<a href="https://app.beehiiv.com/" style="color:#8a7254;">app.beehiiv.com</a>. The rendered edition is below.</div>'
       + '</div>';
