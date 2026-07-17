@@ -1,19 +1,23 @@
 name: Daily Meditations
 
-# Generates one edition of the Daily Meditations newsletter each morning:
-#   1. writes a structured record to content/editions/<date>.json
+# Generates TOMORROW's edition each evening, so Gio can review, build, and
+# schedule it in Beehiiv the night before (a calm, regular time) and let Beehiiv
+# send it the next morning. EDITION_LEAD_DAYS=1 makes the generator date the
+# edition for the next day (computed in Pacific time). Each run:
+#   1. writes a structured record to content/editions/<tomorrow>.json
 #   2. emails the rendered draft to Gio as the review prompt (Beehiiv send API is
 #      Enterprise-only, so email is the delivery; you edit + schedule in Beehiiv)
 #   3. rebuilds the public archive at /meditations and commits it, so the edition
 #      auto-publishes to getmarcus.app (Vercel redeploys on push). Veto an edition
 #      by deleting its content/editions/<date>.json and letting the next build run.
 #
-# 13:30 UTC is ~6:30am Pacific (PDT) / ~5:30am (PST). Cron is UTC and does not
-# shift with daylight saving.
+# 03:00 UTC is ~8pm Pacific (PDT) / ~7pm (PST) the evening before. Cron is UTC and
+# does not shift with daylight saving; the edition DATE is correct regardless
+# because the generator computes it in Pacific time with the 1-day lead.
 
 on:
   schedule:
-    - cron: '30 13 * * *'   # daily, ~6:30am PT
+    - cron: '0 3 * * *'    # daily, ~7-8pm PT (the evening before)
   workflow_dispatch: {}       # manual run from the Actions tab
 
 permissions:
@@ -45,6 +49,7 @@ jobs:
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASS: ${{ secrets.MAIL_PASS }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
+          EDITION_LEAD_DAYS: '1'   # generate tomorrow's edition, the evening before
         run: node generate-newsletter.js
 
       - name: Build archive

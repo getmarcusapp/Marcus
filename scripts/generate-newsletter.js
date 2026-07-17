@@ -27,7 +27,27 @@ const MAIL_USER = process.env.MAIL_USER;
 const MAIL_PASS = process.env.MAIL_PASS;
 const MAIL_TO = process.env.MAIL_TO || MAIL_USER;
 
+// How many days ahead this edition is for. 0 = today (generate + send same day);
+// 1 = tomorrow (generate the evening before, review + schedule it in Beehiiv for
+// the next morning). The workflow sets this to 1.
+const EDITION_LEAD_DAYS = parseInt(process.env.EDITION_LEAD_DAYS || '0', 10);
+
 if (!ANTHROPIC_KEY) { console.error('Missing ANTHROPIC_KEY'); process.exit(1); }
+
+// The edition's target date, computed in Pacific time so the calendar date is
+// correct no matter when (in UTC) the CI job runs — an evening-PT cron fires in
+// the early-UTC hours of the next day, so we can't rely on the runner's UTC date.
+// With EDITION_LEAD_DAYS=1 this returns tomorrow-in-Pacific. { iso, display }.
+function editionDate() {
+  const inst = new Date(Date.now() + EDITION_LEAD_DAYS * 86400000);
+  const iso = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(inst);
+  const display = inst.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/Los_Angeles',
+  });
+  return { iso, display };
+}
 
 const RESERVE_PATH = path.join(__dirname, 'reserve-editions.json');
 
@@ -349,7 +369,7 @@ async function generateEdition(dateStr) {
       // to narrate its search process in the visible text. parseEdition already
       // discards anything before THEME:, so this is about clean logs and not
       // wasting output tokens, not correctness.
-      messages: [{ role: 'user', content: 'Generate today\'s edition. Today is ' + dateStr + '. Search for a current event first. Output ONLY the edition, beginning with "THEME:" — no search narration, reasoning, or preamble before it, and no commentary after. Do not use markdown formatting such as *asterisks* or _underscores_ for emphasis; render work titles in plain text.' }],
+      messages: [{ role: 'user', content: 'Generate the edition for ' + dateStr + ' — the date the reader receives it. Search for a current event first. It will usually be from the day or two before ' + dateStr + ', so refer to its timing as "this week" or "yesterday," not "today," unless the event is literally dated ' + dateStr + '. Output ONLY the edition, beginning with "THEME:" — no search narration, reasoning, or preamble before it, and no commentary after. Do not use markdown formatting such as *asterisks* or _underscores_ for emphasis; render work titles in plain text.' }],
     }
   );
   if (res.status !== 200) {
@@ -367,8 +387,7 @@ async function generateEdition(dateStr) {
 function saveDraftToDisk(html, edition, dateStr, reason) {
   const outDir = path.join(__dirname, 'out');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-  const filePath = path.join(outDir, today + '.html');
+  const filePath = path.join(outDir, editionDate().iso + '.html');
   fs.writeFileSync(filePath, html, 'utf8');
   console.log('Draft saved to: ' + filePath);
   console.log('  Title:  ' + edition.theme + ' — ' + dateStr);
@@ -465,7 +484,7 @@ function slugify(s) {
 // auto-publish half of the "auto-publish + veto" model: every delivered edition
 // is archived. To veto one, delete its JSON and rebuild the archive.
 function saveEditionRecord(edition, dateStr) {
-  const iso = new Date().toISOString().slice(0, 10);
+  const iso = editionDate().iso;
   const dir = path.join(__dirname, '..', 'content', 'editions');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const record = {
@@ -521,9 +540,7 @@ async function postToBeehiiv(edition, dateStr) {
 }
 
 async function run() {
-  const dateStr = new Date().toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
-  });
+  const dateStr = editionDate().display;
   console.log('Generating edition for', dateStr, '...\n');
 
   // Two attempts max: initial generation + one automatic regeneration on
