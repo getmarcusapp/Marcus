@@ -1106,16 +1106,10 @@
     <p class="appstore-note">7-day free trial &middot; $7.99/month or $39.99/year &middot; iOS &middot; No account required</p>
   </div>
 
-  <div style="margin-top: 48px; width: 100%; max-width: 480px;" id="hero-email">
+  <div style="margin-top: 48px;" id="hero-email">
     <p style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 14px;">Or get the daily Stoic dispatch</p>
-    <div class="email-form">
-      <div class="email-row">
-        <input class="email-input" id="hero-email-input" type="email" placeholder="your@email.com" autocomplete="email">
-        <button class="email-submit" onclick="submitEmail('hero-email-input', 'hero-email-success')">Subscribe →</button>
-      </div>
-      <p class="email-note">Daily. No noise. Unsubscribe anytime.</p>
-      <p class="email-success" id="hero-email-success">You're in. Check your inbox.</p>
-    </div>
+    <a href="#newsletter" class="email-submit" style="display:inline-block;text-decoration:none;border-radius:10px;">Subscribe free →</a>
+    <p class="email-note" style="margin-top:12px;">Daily. No noise. Unsubscribe anytime.</p>
   </div>
 </section>
 
@@ -1403,6 +1397,7 @@
   .specimen-body { font-size: 15.5px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 22px; }
   .specimen-q { font-size: 15.5px; line-height: 1.6; color: var(--text-primary); font-style: italic; border-top: 1px solid var(--border); padding-top: 20px; }
   .newsletter .email-form { margin: 0 auto; }
+  .beehiiv-embed { margin: 0 auto; min-height: 64px; display: flex; justify-content: center; }
 </style>
 <section class="newsletter" id="newsletter">
   <div class="newsletter-inner">
@@ -1419,14 +1414,9 @@
       <p class="specimen-q">What are you carrying into today that belongs to a different day entirely?</p>
     </div>
 
-    <div class="email-form">
-      <div class="email-row">
-        <input class="email-input" id="nl-email-input" type="email" placeholder="your@email.com" autocomplete="email">
-        <button class="email-submit" onclick="submitEmail('nl-email-input', 'nl-email-success')">Subscribe →</button>
-      </div>
-      <p class="email-note">Daily. Unsubscribe anytime.</p>
-      <p class="email-success" id="nl-email-success">You're in. Check your inbox.</p>
-    </div>
+    <!-- Beehiiv v3 subscribe form (daily-meditations publication). Style it in
+         Beehiiv → Grow → Subscribe Forms so it matches the gold/serif brand. -->
+    <div class="beehiiv-embed"><script async src="https://subscribe-forms.beehiiv.com/v3/loader.js" data-beehiiv-form="eb49b3c4-275e-419f-af73-fbde10987dc9"></script></div>
     <p style="margin-top:24px;"><a href="/meditations" style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--accent-dim);">Browse all past editions →</a></p>
   </div>
 </section>

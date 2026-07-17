@@ -71,4 +71,5 @@ filter:drop-shadow(0 0 40px rgba(255,206,130,.18))}
 /* FOOTER */
 .dm-footer{border-top:1px solid var(--border);margin-top:40px;padding:28px 24px;text-align:center;font-size:13px;color:var(--text-dim)}
 .dm-footer a{color:var(--accent-dim)}
+.dm-embed{margin:0 auto;min-height:64px;display:flex;justify-content:center}
 @media(max-width:500px){.dm-form{flex-direction:column}.dm-submit{padding:14px}}

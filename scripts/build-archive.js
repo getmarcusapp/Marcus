@@ -17,7 +17,9 @@ const ROOT = path.join(__dirname, '..');
 const EDITIONS_DIR = path.join(ROOT, 'content', 'editions');
 const OUT_DIR = path.join(ROOT, 'public', 'meditations');
 const SITE = 'https://getmarcus.app';
-const BEEHIIV_CREATE = 'https://daily-meditations.beehiiv.com/create';
+// Beehiiv v3 subscribe form (daily-meditations publication). Renders inline,
+// on-site, CSRF-handled. Style it in Beehiiv → Grow → Subscribe Forms.
+const BEEHIIV_FORM = '<div class="dm-embed"><script async src="https://subscribe-forms.beehiiv.com/v3/loader.js" data-beehiiv-form="eb49b3c4-275e-419f-af73-fbde10987dc9"></script></div>';
 
 const FONT_LINKS =
   '<link rel="preconnect" href="https://fonts.googleapis.com">' +
@@ -79,16 +81,12 @@ function nav() {
     '</div></nav>';
 }
 
-function subscribeBlock(id) {
+function subscribeBlock() {
   return '<section class="dm-subscribe">' +
     '<p class="dm-eyebrow">The newsletter</p>' +
     '<h2 class="dm-sub-title">Get tomorrow\'s edition</h2>' +
     '<p class="dm-sub-copy">One short Stoic reflection each morning. Free. Unsubscribe anytime.</p>' +
-    '<div class="dm-form">' +
-    '<input class="dm-input" id="' + id + '" type="email" placeholder="your@email.com" autocomplete="email">' +
-    '<button class="dm-submit" onclick="dmSubscribe(\'' + id + '\')">Subscribe →</button>' +
-    '</div>' +
-    '<p class="dm-note" id="' + id + '-note">Daily. No noise.</p>' +
+    BEEHIIV_FORM +
     '</section>';
 }
 
@@ -105,18 +103,6 @@ function footer() {
     '<a href="/">getmarcus.app</a> &middot; <a href="/meditations">Daily Meditations</a></p></footer>';
 }
 
-function subscribeScript() {
-  // Mirrors the main site's Beehiiv POST (no-cors form post).
-  return '<script>function dmSubscribe(id){var i=document.getElementById(id);' +
-    'var e=(i.value||"").trim();var n=document.getElementById(id+"-note");' +
-    'if(!e||e.indexOf("@")<0){i.style.outline="2px solid #a05050";i.focus();return;}' +
-    'var b=i.parentElement.querySelector(".dm-submit");b.textContent="...";b.disabled=true;' +
-    'var f=new FormData();f.append("email",e);f.append("is_js_enabled","true");' +
-    'f.append("double_opt","false");f.append("fallback_path","/");' +
-    'fetch("' + BEEHIIV_CREATE + '",{method:"POST",body:f,mode:"no-cors"}).catch(function(){});' +
-    'i.parentElement.style.display="none";if(n){n.textContent="You\'re in. Check your inbox.";n.style.color="#FFCE82";}}' +
-    '</script>';
-}
 
 function renderEditionPage(rec) {
   const canonical = SITE + '/meditations/' + rec.slug;
@@ -151,9 +137,9 @@ function renderEditionPage(rec) {
     source +
     '</article>' +
     '<p class="dm-back"><a href="/meditations">← All editions</a></p>' +
-    subscribeBlock('e-' + rec.isoDate) +
+    subscribeBlock() +
     appCta() +
-    '</main>' + footer() + subscribeScript() +
+    '</main>' + footer() +
     '</body></html>';
 }
 
@@ -190,15 +176,12 @@ function renderIndex(records) {
     '<h1 class="dm-hero-title">Daily Meditations</h1>' +
     '<p class="dm-hero-copy">One edition each morning: a verified passage from the Stoics, the moment in ' +
     'history that produced it, and an unforced line to the world as it is today. Two minutes. Free.</p>' +
-    '<div class="dm-form dm-form-hero">' +
-    '<input class="dm-input" id="hero" type="email" placeholder="your@email.com" autocomplete="email">' +
-    '<button class="dm-submit" onclick="dmSubscribe(\'hero\')">Subscribe →</button>' +
-    '</div><p class="dm-note" id="hero-note">Daily. No noise. Unsubscribe anytime.</p>' +
+    BEEHIIV_FORM +
     '</div></header>' +
     '<main class="dm-main">' +
     '<section class="dm-timeline">' + items + '</section>' +
     appCta() +
-    '</main>' + footer() + subscribeScript() +
+    '</main>' + footer() +
     '</body></html>';
 }
 
@@ -276,6 +259,7 @@ filter:drop-shadow(0 0 40px rgba(255,206,130,.18))}
 /* FOOTER */
 .dm-footer{border-top:1px solid var(--border);margin-top:40px;padding:28px 24px;text-align:center;font-size:13px;color:var(--text-dim)}
 .dm-footer a{color:var(--accent-dim)}
+.dm-embed{margin:0 auto;min-height:64px;display:flex;justify-content:center}
 @media(max-width:500px){.dm-form{flex-direction:column}.dm-submit{padding:14px}}
 `;
 
