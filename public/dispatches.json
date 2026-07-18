@@ -7,6 +7,14 @@
       "pinned": true,
       "title": "Welcome to the practice",
       "body": "This is where Marcus reaches you: word when a new letter arrives in your first week, the occasional notice, nothing more.\n\nEverything here is meant to be seen once, then it clears. No noise. Reminders live in your notifications, and only if you ask for them.\n\nThe practice is simple. Show up, set your intention, examine your day. Begin when you are ready."
+    },
+    {
+      "id": "meditation-inner-citadel-2026-07",
+      "date": "2026-07-18",
+      "type": "new meditation",
+      "title": "New meditation: The Inner Citadel",
+      "body": "A new guided session has joined the practice. The Inner Citadel is Marcus Aurelius's retreat into the one place no one can reach, drawn from Meditations IV.3. Just under five minutes.\n\nYou can find it anytime among the guided meditations.",
+      "cta": { "label": "Listen now", "route": "/meditate" }
     }
   ]
 }
