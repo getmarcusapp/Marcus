@@ -16,6 +16,16 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { useEntitlement } from '../lib/useEntitlement';
 import { getUnreadCount, subscribeDispatches, refreshDispatches } from '../lib/dispatches';
+import { getPracticeTimeMs, seedPracticeTimeIfNeeded } from '../lib/practiceTime';
+
+// Total time invested, minutes rolling up to hours as it grows.
+function formatPracticeTime(ms) {
+  const totalMin = Math.floor((ms || 0) / 60000);
+  if (totalMin < 60) return `${totalMin}m`;
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return m ? `${h}h ${m}m` : `${h}h`;
+}
 
 
 const menuItems = [
@@ -36,6 +46,7 @@ export default function MoreScreen() {
   const router = useRouter();
   const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
   const [dispatchUnread, setDispatchUnread] = useState(0);
+  const [practiceMs, setPracticeMs] = useState(0);
   const playerInset = useMiniPlayerInset();
   const scrollRef = useRef(null);
   const { hasAccess, trialDaysLeft } = useEntitlement();
@@ -54,6 +65,11 @@ export default function MoreScreen() {
 
   useEffect(() => {
     getStreak().then(s => setStreak(s || { current: 0, longest: 0, totalDays: 0 }));
+    // Seed the historical estimate once (existing users), then load the total.
+    (async () => {
+      await seedPracticeTimeIfNeeded();
+      setPracticeMs(await getPracticeTimeMs());
+    })();
   }, []);
 
   // Keep the Dispatches unread dot live: seed it, and re-read whenever read
@@ -69,6 +85,8 @@ export default function MoreScreen() {
     // Pull the latest feed when the user lands on More, then refresh the dot.
     refreshDispatches().catch(() => {});
     getUnreadCount().then(setDispatchUnread).catch(() => {});
+    // Refresh the total so it reflects practices done since this screen mounted.
+    getPracticeTimeMs().then(setPracticeMs).catch(() => {});
   }, []));
 
   return (
@@ -96,6 +114,11 @@ export default function MoreScreen() {
         </View>
 
         <View style={s.statsCard}>
+          <View style={s.timeBand}>
+            <Text style={s.timeBandLabel}>Time in practice</Text>
+            <Text style={s.timeBandValue}>{formatPracticeTime(practiceMs)}</Text>
+          </View>
+          <View style={s.statsRow}>
           <View style={s.statItem}>
             <Text style={s.statNum} numberOfLines={1} adjustsFontSizeToFit>{streak.current}</Text>
             <Text style={s.statLabel}>Active run</Text>
@@ -116,6 +139,7 @@ export default function MoreScreen() {
           <View style={s.statItem}>
             <Text style={s.statNum} numberOfLines={1} adjustsFontSizeToFit>{streak.sealedDays || 0}</Text>
             <Text style={s.statLabel}>Days sealed</Text>
+          </View>
           </View>
         </View>
 
@@ -209,7 +233,6 @@ const s = StyleSheet.create({
   // Gold eyebrow — matches the practice hero's "Memento mori" treatment.
   sub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', textAlign: 'center' },
   statsCard: {
-    flexDirection: 'row',
     marginHorizontal: spacing.lg,
     marginBottom: spacing.md,
     borderWidth: 0.5,
@@ -218,6 +241,18 @@ const s = StyleSheet.create({
     backgroundColor: colors.bgCard,
     overflow: 'hidden',
   },
+  timeBand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+  },
+  timeBandLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.textSecondary, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  timeBandValue: { fontSize: 20, fontFamily: font.bodySemiBold, color: colors.accent, letterSpacing: 0.3 },
+  statsRow: { flexDirection: 'row' },
   statItem: { flex: 1, alignItems: 'center', paddingVertical: 16 },
   statNum: { fontSize: 26, fontFamily: font.bodySemiBold, color: colors.textSecondary, marginBottom: 4 },
   statLabel: { fontSize: 11, color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
