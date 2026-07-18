@@ -6,15 +6,7 @@
       "type": "notice",
       "pinned": true,
       "title": "Welcome to the practice",
-      "body": "This is where Marcus reaches you: a new feature now and then, an occasional notice, nothing more.\n\nNo daily nudges live here, and no noise. Reminders stay in your notifications, and only if you ask for them. Check this page whenever you like. There will rarely be much.\n\nThe practice itself is simple. Show up, set your intention, examine your day. Begin when you are ready."
-    },
-    {
-      "id": "daily-meditations-intro",
-      "date": "2026-07-17",
-      "type": "news",
-      "title": "Daily Meditations, if you want it",
-      "body": "A short letter runs alongside the app: one verified passage from the Stoics, the moment in history that produced it, and a single question to carry into the day. Two minutes to read, free, and easy to leave.",
-      "cta": { "label": "Read a few editions", "url": "https://www.getmarcus.app/meditations" }
+      "body": "This is where Marcus reaches you: word when a new letter arrives in your first week, the occasional notice, nothing more.\n\nEverything here is meant to be seen once, then it clears. No noise. Reminders live in your notifications, and only if you ask for them.\n\nThe practice is simple. Show up, set your intention, examine your day. Begin when you are ready."
     }
   ]
 }
