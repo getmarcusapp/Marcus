@@ -553,3 +553,26 @@ export async function seedWeekOfPracticeData() {
 
   return { journals: journalsForWeek.length, triggers: triggers.length };
 }
+
+// Dev seed: a year-scale scenario for comparing the Practice Time / streak
+// display at a large horizon. Counters ONLY — no bulk journal/emotion entries
+// (that would bloat storage and isn't the point). Clears detailed history so the
+// state reads coherently: a long-running practice with big totals, empty logs.
+// The caller (dev tools) sets the matching Time-in-Practice total separately.
+export async function seedYearOfPracticeData() {
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  await AsyncStorage.multiSet([
+    [KEYS.JOURNALS, '[]'],
+    [KEYS.TRIGGERS, '[]'],
+    [KEYS.REVIEWS, '[]'],
+    [KEYS.STREAK, JSON.stringify({
+      current: 47,
+      longest: 214,
+      totalDays: 330,
+      lastDate: yesterday,
+      sealedDays: 280,
+      lastSealedDate: yesterday,
+    })],
+  ]);
+  return { activeDays: 330 };
+}

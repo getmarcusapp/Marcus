@@ -7,7 +7,12 @@ import { useRouter, useFocusEffect, Redirect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { cancelAllNotifications } from '../notifications';
-import { clearTodayPractice, sealTodayPractice, seedWeekOfPracticeData } from '../store/db';
+import { clearTodayPractice, sealTodayPractice, seedWeekOfPracticeData, seedYearOfPracticeData } from '../store/db';
+import { setPracticeTimeMs } from '../lib/practiceTime';
+
+// Estimated Time-in-Practice totals for the scenario seeds (dev-only).
+const WEEK_PRACTICE_MS = 150 * 60 * 1000;        // ~2h 30m for a seeded week
+const YEAR_PRACTICE_MS = 90 * 60 * 60 * 1000;    // ~90h for a seeded year
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { devToolsUnlocked } from '../lib/devGate';
@@ -131,7 +136,26 @@ function DeveloperSettingsInner() {
           text: 'Seed',
           onPress: async () => {
             const r = await seedWeekOfPracticeData();
-            Alert.alert('', `Seeded ${r.journals} journal entries and ${r.triggers} emotion logs across the past 7 days. Open the Weekly Review to see the spread.`);
+            await setPracticeTimeMs(WEEK_PRACTICE_MS);
+            Alert.alert('', `Seeded ${r.journals} journal entries and ${r.triggers} emotion logs across the past 7 days, and set Time in Practice to ~2h 30m. Open the Weekly Review, or More for the total.`);
+          },
+        },
+      ]
+    );
+  }
+
+  function handleSeedYear() {
+    Alert.alert(
+      'Seed a year of practice?',
+      'Sets a year-scale streak (≈330 active days, 214-day longest) and Time in Practice to ≈90h, for comparing the numbers at a large horizon. Counters only — clears detailed journals and emotion logs (no bulk entries).',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Seed',
+          onPress: async () => {
+            const r = await seedYearOfPracticeData();
+            await setPracticeTimeMs(YEAR_PRACTICE_MS);
+            Alert.alert('', `Seeded a year-scale streak (${r.activeDays} active days) and set Time in Practice to ~90h. Check More.`);
           },
         },
       ]
@@ -212,7 +236,13 @@ function DeveloperSettingsInner() {
             <Text style={s.resetBtnText}>Seed week of practice data</Text>
           </TouchableOpacity>
           <Text style={s.helperText}>
-            Fills the past 7 days with morning + evening journals and 12 emotion logs trending down from high to low intensity. Sets streak to 7. Use this to preview the Weekly Review and trend visualizations.
+            Fills the past 7 days with morning + evening journals and 12 emotion logs trending down from high to low intensity. Sets streak to 7 and Time in Practice to ~2h 30m. Use this to preview the Weekly Review and trend visualizations.
+          </Text>
+          <TouchableOpacity style={s.resetBtn} onPress={handleSeedYear} activeOpacity={0.8}>
+            <Text style={s.resetBtnText}>Seed year of practice data</Text>
+          </TouchableOpacity>
+          <Text style={s.helperText}>
+            Counters only, for comparison at a large horizon: a year-scale streak (≈330 active days, 214-day longest) and Time in Practice ≈90h. Clears detailed journals and emotion logs — no bulk entries.
           </Text>
 
           <Text style={s.secLabel}>Onboarding</Text>
