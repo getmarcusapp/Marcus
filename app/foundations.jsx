@@ -6,6 +6,7 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { FOUNDATIONS_LETTERS } from '../constants/foundations';
 import { getFoundationsState, markLetterRead } from '../lib/foundations';
+import { notifyDispatchesChanged } from '../lib/dispatches';
 import { GoldPrimary } from '../components/GoldButton';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -37,9 +38,11 @@ export default function FoundationsScreen() {
     getFoundationsState().then(s => setUnlockedCount(s.unlockedCount));
   }, [letterNum]));
 
-  // Opening a letter is reading it — no scroll-depth ceremony.
+  // Opening a letter is reading it — no scroll-depth ceremony. Reading it also
+  // clears that letter's Dispatches nudge; notify once the read is persisted so
+  // the More tab dot updates immediately.
   useEffect(() => {
-    markLetterRead(letterNum);
+    markLetterRead(letterNum).then(() => notifyDispatchesChanged());
     track('letter_read', { letter: letterNum });
   }, [letterNum]);
 

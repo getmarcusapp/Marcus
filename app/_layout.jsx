@@ -14,6 +14,7 @@ import { LockScreen } from '../components/LockScreen';
 import { LaunchSplash } from '../components/LaunchSplash';
 import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
 import { initAnalytics, track } from '../lib/analytics';
+import { getUnreadCount, subscribeDispatches, refreshDispatches } from '../lib/dispatches';
 import { useFonts, Inter_300Light, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_300Light_Italic } from '@expo-google-fonts/inter';
 import { Cinzel_400Regular } from '@expo-google-fonts/cinzel';
 
@@ -58,7 +59,24 @@ function ManagedTabIcon({ iconName, tabKey, size }) {
 
 function ManagedHamburgerIcon({ tabKey }) {
   const active = useLogicalTabKey() === tabKey;
-  return <HamburgerIcon color={active ? colors.accent : colors.textSecondary} />;
+  // Subtle unread dot for Dispatches. Self-subscribes so it clears the moment
+  // the inbox marks things read; no prop threading through Tabs options.
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    const refresh = () => getUnreadCount().then(n => { if (alive) setUnread(n); }).catch(() => {});
+    refresh();
+    const unsub = subscribeDispatches(refresh);
+    return () => { alive = false; unsub(); };
+  }, []);
+  return (
+    <View style={{ width: 26, height: 26, alignItems: 'center', justifyContent: 'center' }}>
+      <HamburgerIcon color={active ? colors.accent : colors.textSecondary} />
+      {unread > 0 && (
+        <View style={{ position: 'absolute', top: 0, right: 0, width: 7, height: 7, borderRadius: 3.5, backgroundColor: colors.accent }} />
+      )}
+    </View>
+  );
 }
 
 function ManagedTabLabel({ label, tabKey }) {
@@ -144,6 +162,10 @@ export default function Layout() {
     initializePurchases();
     scheduleReengagementNotifications();
     scheduleAllNotifications();
+    // Pull the announcements feed on cold start so the More tab dot is
+    // accurate before the user ever opens More. Fire-and-forget; cached feed
+    // covers offline.
+    refreshDispatches().catch(() => {});
     // Re-init HealthKit if user previously granted, so writes work this session.
     // No iOS prompt is shown — initHealthKit is a no-op once iOS has the answer cached.
     (async () => {
@@ -170,6 +192,7 @@ export default function Layout() {
         setAppBlurred(false);
         scheduleAllNotifications();
         handleForeground();
+        refreshDispatches().catch(() => {});
       } else if (state === 'background' || state === 'inactive') {
         setAppBlurred(true);
         handleBackground();
@@ -249,6 +272,7 @@ export default function Layout() {
         <Tabs.Screen name="settings-developer" options={{ href: null }} />
         <Tabs.Screen name="onboarding" options={{ href: null }} />
         <Tabs.Screen name="howto" options={{ href: null }} />
+        <Tabs.Screen name="dispatches" options={{ href: null }} />
         <Tabs.Screen name="foundations" options={{ href: null }} />
         <Tabs.Screen name="foundations-list" options={{ href: null }} />
         <Tabs.Screen name="meditate" options={{ href: null }} />

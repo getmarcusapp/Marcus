@@ -15,12 +15,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { useEntitlement } from '../lib/useEntitlement';
+import { getUnreadCount, subscribeDispatches, refreshDispatches } from '../lib/dispatches';
 
 
 const menuItems = [
   {
     section: 'App',
     items: [
+      { label: 'Dispatches', sub: 'News, updates, and notices', icon: 'newspaper-outline', route: '/dispatches', id: 'dispatches' },
       { label: 'How Marcus works', sub: 'The practice explained', icon: 'help-circle-outline', route: '/howto' },
       { label: 'The Foundations', sub: 'Seven letters on the practice', icon: 'mail-outline', route: '/foundations-list' },
       { label: 'Further reading', sub: 'A short shelf of curated Stoic works', icon: 'library-outline', route: '/library' },
@@ -33,6 +35,7 @@ const menuItems = [
 export default function MoreScreen() {
   const router = useRouter();
   const [streak, setStreak] = useState({ current: 0, longest: 0, totalDays: 0 });
+  const [dispatchUnread, setDispatchUnread] = useState(0);
   const playerInset = useMiniPlayerInset();
   const scrollRef = useRef(null);
   const { hasAccess, trialDaysLeft } = useEntitlement();
@@ -53,8 +56,19 @@ export default function MoreScreen() {
     getStreak().then(s => setStreak(s || { current: 0, longest: 0, totalDays: 0 }));
   }, []);
 
+  // Keep the Dispatches unread dot live: seed it, and re-read whenever read
+  // state changes anywhere (e.g. the inbox screen marking things read).
+  useEffect(() => {
+    const refresh = () => getUnreadCount().then(setDispatchUnread).catch(() => {});
+    refresh();
+    return subscribeDispatches(refresh);
+  }, []);
+
   useFocusEffect(useCallback(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
+    // Pull the latest feed when the user lands on More, then refresh the dot.
+    refreshDispatches().catch(() => {});
+    getUnreadCount().then(setDispatchUnread).catch(() => {});
   }, []));
 
   return (
@@ -143,6 +157,7 @@ export default function MoreScreen() {
                     <Text style={s.rowLabel}>{item.label}</Text>
                     <Text style={s.rowSub}>{item.sub}</Text>
                   </View>
+                  {item.id === 'dispatches' && dispatchUnread > 0 && <View style={s.unreadDot} />}
                   <Ionicons name={item.icon} size={20} color={colors.accent} style={{ marginLeft: 12 }} />
                 </TouchableOpacity>
               ))}
@@ -229,4 +244,5 @@ const s = StyleSheet.create({
   rowContent: { flex: 1 },
   rowLabel: { fontSize: 16, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 2 },
   rowSub: { fontSize: 13, color: colors.textSecondary },
+  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent },
 });
