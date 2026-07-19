@@ -55,7 +55,7 @@ const SYSTEM_PROMPT = `You are the editor of Daily Meditations, a daily newslett
 
 THEME: [2–4 words. e.g. "On anger" or "On impermanence"]
 
-QUOTE: [A real, verified quote from a Stoic philosopher or a thinker whose work carries genuine Stoic insight. Include the author and source. Never fabricate quotes or attribute paraphrases as direct quotes.]
+QUOTE: [Exactly ONE real, verified quote with its author and source, on a single line, formatted "the quote" — Author, Work. Never fabricate quotes or present a paraphrase as a direct quote. Decide the quote privately: the output must contain only the final chosen quote — never list alternatives, show your selection process, second-guess an attribution, or write phrases like "I'll use...", "attribution disputed", or "let me choose one I can render exactly".]
 
 CONTEXT: [Two short paragraphs. The first situates the quote historically — what was happening in the life of the person who wrote it, what world they were navigating, what problem they were solving. The second draws a direct, unforced connection to contemporary life. No forced analogies. No corporate wellness language. No productivity framing. Write as a scholar who cares about ideas, not as a self-help author.]
 
@@ -126,10 +126,24 @@ function cleanText(s) {
   return String(s || '').replace(/[ \t\n\r]+([.,;:!?])/g, '$1');
 }
 
+// Backstop for the QUOTE field: if the model ever dumps its quote-selection
+// reasoning (multiple candidates, repeated "QUOTE:"/"THEME:" labels, "I'll
+// use..." asides) instead of one line, keep only the final chosen quote — the
+// text after the LAST "QUOTE:" label, with any leftover field-label lines
+// stripped. The prompt forbids this, but model output is unpredictable and a
+// garbled/wrong quote is the one failure this newsletter must never ship.
+function cleanQuote(s) {
+  let q = String(s || '');
+  const i = q.lastIndexOf('QUOTE:');
+  if (i >= 0) q = q.slice(i + 'QUOTE:'.length);
+  q = q.replace(/^\s*(THEME|QUOTE|CONTEXT|THE QUESTION|SOURCE_URL)\s*:.*$/gim, '');
+  return q.trim();
+}
+
 function parseEdition(text) {
   return {
     theme:    cleanText((text.match(/THEME:\s*(.+)/)?.[1] || '').trim()),
-    quote:    cleanText((text.match(/QUOTE:\s*([\s\S]+?)(?=\n\nCONTEXT:)/)?.[1] || '').trim()),
+    quote:    cleanText(cleanQuote((text.match(/QUOTE:\s*([\s\S]+?)(?=\n\nCONTEXT:)/)?.[1] || '').trim())),
     context:  cleanText((text.match(/CONTEXT:\s*([\s\S]+?)(?=\n\nTHE QUESTION:)/)?.[1] || '').trim()),
     // Stop THE QUESTION at SOURCE_URL if present so the URL doesn't leak
     // into the question text. Falls back to end-of-text when no SOURCE_URL
@@ -403,7 +417,7 @@ async function generateEdition(dateStr) {
       // to narrate its search process in the visible text. parseEdition already
       // discards anything before THEME:, so this is about clean logs and not
       // wasting output tokens, not correctness.
-      messages: [{ role: 'user', content: 'Generate the edition for ' + dateStr + ' — the date the reader receives it. Search for a current event first. It will usually be from the day or two before ' + dateStr + ', so refer to its timing as "this week" or "yesterday," not "today," unless the event is literally dated ' + dateStr + '. Output ONLY the edition, beginning with "THEME:" — no search narration, reasoning, or preamble before it, and no commentary after. Do not use markdown formatting such as *asterisks* or _underscores_ for emphasis; render work titles in plain text.' + recentBlock }],
+      messages: [{ role: 'user', content: 'Generate the edition for ' + dateStr + ' — the date the reader receives it. Search for a current event first. It will usually be from the day or two before ' + dateStr + ', so refer to its timing as "this week" or "yesterday," not "today," unless the event is literally dated ' + dateStr + '. Output ONLY the edition, beginning with "THEME:" — no search narration, reasoning, or preamble before it, and no commentary after. Do not use markdown formatting such as *asterisks* or _underscores_ for emphasis; render work titles in plain text. Each field label (THEME, QUOTE, CONTEXT, THE QUESTION, SOURCE_URL) must appear exactly once, and each field must contain only its final content — never alternatives, selection reasoning, or self-correction.' + recentBlock }],
     }
   );
   if (res.status !== 200) {
