@@ -85,8 +85,12 @@ Style rules:
 - Total word count: 200–250 words.
 
 POLITICAL / SENSITIVE-CONTENT GUARDRAIL:
-- Avoid active military conflicts, wars, partisan political fights, elections, and contested foreign policy as the hook, even when they dominate the day's headlines. They invite a "hot take" the newsletter must never produce, and they alienate readers across the spectrum.
-- Strongly prefer apolitical hooks: science and discovery, space, history, sport, technology, the natural world, human-interest stories. When the day's news is dominated by conflict, fall back to a timeless edition.`;
+- Avoid active military conflicts, wars, partisan political fights, elections, and contested foreign policy as the hook, even when they dominate the day's headlines. They invite a "hot take" the newsletter must never produce, and they alienate readers across the spectrum. When the day's news is dominated by conflict, fall back to a timeless edition.
+
+TOPIC VARIETY (important):
+- Draw hooks from the full breadth of human life, and vary the domain from one day to the next. Strong territory: arts and culture, literature and publishing, music, film and theatre, sport, business and economics, history and anniversaries, human-interest stories, notable lives and deaths, architecture and design, food, travel, law, medicine and public health, education, and real developments in ideas.
+- Do NOT default to astronomy, space, deep-sea or ocean discovery, or generic "new study finds" science hooks. That lane has been badly overused. Reach for space or science only when it is clearly the most resonant option that day AND the recent editions listed in the prompt have not already used it; otherwise choose a more human, cultural, or historical event.
+- A grounded human hook (a book, a performance, an anniversary, a life, a decision in the culture) is almost always a better vehicle for Stoic reflection than another cosmic-scale science headline.`;
 
 function httpsPost(hostname, path, headers, body) {
   return new Promise((resolve, reject) => {
@@ -349,9 +353,39 @@ function loadReserveBank() {
   }
 }
 
+// Load the most recent published editions (newest first) so the generator can
+// steer away from angles and news domains it just used — the fix for the feed
+// feeling repetitive. Reads content/editions/*.json.
+function loadRecentEditions(n) {
+  try {
+    const dir = path.join(__dirname, '..', 'content', 'editions');
+    if (!fs.existsSync(dir)) return [];
+    const recs = fs.readdirSync(dir)
+      .filter(f => f.endsWith('.json'))
+      .map(f => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { return null; } })
+      .filter(r => r && r.isoDate);
+    recs.sort((a, b) => String(b.isoDate).localeCompare(String(a.isoDate)));
+    return recs.slice(0, n);
+  } catch { return []; }
+}
+
+// Compact digest of recent editions for the prompt: date, theme, and the source
+// host — a clean domain signal (sciencedaily.com / space.com reveal the
+// science/space lane to avoid). Empty string when there's no history yet.
+function recentEditionsBlock(recent) {
+  if (!recent.length) return '';
+  const lines = recent.map(r => {
+    let host = 'timeless (no current-event hook)';
+    try { if (r.sourceUrl) host = new URL(r.sourceUrl).hostname.replace(/^www\./, ''); } catch {}
+    return `- ${r.isoDate}: "${r.theme}" (${host})`;
+  }).join('\n');
+  return '\n\nRECENT EDITIONS — do not repeat these themes, angles, or news domains; deliberately pick a different lane today:\n' + lines;
+}
+
 // ─── Generation + Beehiiv helpers (extracted from run() for retry support) ──
 
 async function generateEdition(dateStr) {
+  const recentBlock = recentEditionsBlock(loadRecentEditions(10));
   const res = await httpsPost(
     'api.anthropic.com', '/v1/messages',
     { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
@@ -369,7 +403,7 @@ async function generateEdition(dateStr) {
       // to narrate its search process in the visible text. parseEdition already
       // discards anything before THEME:, so this is about clean logs and not
       // wasting output tokens, not correctness.
-      messages: [{ role: 'user', content: 'Generate the edition for ' + dateStr + ' — the date the reader receives it. Search for a current event first. It will usually be from the day or two before ' + dateStr + ', so refer to its timing as "this week" or "yesterday," not "today," unless the event is literally dated ' + dateStr + '. Output ONLY the edition, beginning with "THEME:" — no search narration, reasoning, or preamble before it, and no commentary after. Do not use markdown formatting such as *asterisks* or _underscores_ for emphasis; render work titles in plain text.' }],
+      messages: [{ role: 'user', content: 'Generate the edition for ' + dateStr + ' — the date the reader receives it. Search for a current event first. It will usually be from the day or two before ' + dateStr + ', so refer to its timing as "this week" or "yesterday," not "today," unless the event is literally dated ' + dateStr + '. Output ONLY the edition, beginning with "THEME:" — no search narration, reasoning, or preamble before it, and no commentary after. Do not use markdown formatting such as *asterisks* or _underscores_ for emphasis; render work titles in plain text.' + recentBlock }],
     }
   );
   if (res.status !== 200) {

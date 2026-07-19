@@ -11,13 +11,19 @@ name: Daily Meditations
 #      auto-publishes to getmarcus.app (Vercel redeploys on push). Veto an edition
 #      by deleting its content/editions/<date>.json and letting the next build run.
 #
-# 03:00 UTC is ~8pm Pacific (PDT) / ~7pm (PST) the evening before. Cron is UTC and
-# does not shift with daylight saving; the edition DATE is correct regardless
-# because the generator computes it in Pacific time with the 1-day lead.
+# 22:23 UTC is ~3:23pm Pacific (PDT) / ~2:23pm (PST) — mid-afternoon the day
+# before, so the draft lands with plenty of daylight to review and schedule (the
+# old 03:00 UTC slot drifted to ~11pm because on-the-hour crons are the most
+# oversubscribed / delayed on GitHub Actions; an odd minute dodges that queue).
+# Cron is UTC and does not shift with daylight saving, so local time moves ±1h
+# across the year; the edition DATE stays correct regardless because the
+# generator computes it in Pacific time with the 1-day lead.
 
 on:
   schedule:
-    - cron: '0 3 * * *'    # daily, ~7-8pm PT (the evening before)
+    - cron: '23 22 * * *'  # 22:23 UTC ≈ 3:23pm PDT / 2:23pm PST — early enough to
+                           # land by ~5pm PT even with GitHub's queue delay, and
+                           # off the top of the hour to dodge the worst of it.
   workflow_dispatch: {}       # manual run from the Actions tab
 
 permissions:
