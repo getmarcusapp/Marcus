@@ -287,6 +287,7 @@ Return only the JSON object.`;
       reading.reflection,
       '',
       '— Marcus · a daily Stoic practice',
+      'https://getmarcus.app',
     ].filter(Boolean).join('\n');
     try {
       const uri = await captureRef(shareCardRef, {
@@ -304,6 +305,7 @@ Return only the JSON object.`;
         reading.reflection,
         '',
         '— Marcus · a daily Stoic practice',
+        'https://getmarcus.app',
       ];
       try {
         await Share.share({ message: lines.filter(Boolean).join('\n') });
