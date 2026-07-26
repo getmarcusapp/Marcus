@@ -92,6 +92,7 @@ function nav() {
     '<a class="dm-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
     '<div class="dm-nav-right">' +
     '<a class="dm-nav-link" href="/meditations">Daily Meditations</a>' +
+    '<a class="dm-nav-link" href="/library">Library</a>' +
     '<a class="dm-nav-cta" href="/">Get the app →</a>' +
     '</div></nav>';
 }
@@ -297,6 +298,7 @@ function buildSitemap(records) {
   );
   add(SITE + '/', newest, 'weekly', '1.0');
   add(SITE + '/meditations', newest, 'daily', '0.9');
+  add(SITE + '/library', null, 'monthly', '0.8');
   add(SITE + '/privacy', null, 'yearly', '0.3');
   for (const r of records) {
     add(SITE + '/meditations/' + r.slug, r.isoDate, 'monthly', '0.7');
