@@ -16,6 +16,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const EDITIONS_DIR = path.join(ROOT, 'content', 'editions');
 const OUT_DIR = path.join(ROOT, 'public', 'meditations');
+const PUBLIC_DIR = path.join(ROOT, 'public');
 const SITE = 'https://getmarcus.app';
 // Beehiiv v3 subscribe form (daily-meditations publication). Renders inline,
 // on-site, CSRF-handled. Style it in Beehiiv → Grow → Subscribe Forms.
@@ -269,6 +270,35 @@ filter:drop-shadow(0 0 40px rgba(255,206,130,.18))}
 @media(max-width:500px){.dm-form{flex-direction:column}.dm-submit{padding:14px}}
 `;
 
+// sitemap.xml — the canonical list of every indexable URL. Regenerated here so
+// it stays in sync as editions publish daily. Static pages carry a fixed set;
+// the meditations index + every edition page are added from the built records.
+// lastmod uses each edition's ISO date; static pages use the newest edition
+// date (a reasonable "site last changed" proxy) or today's build isn't stamped
+// to keep the file deterministic across rebuilds.
+function buildSitemap(records) {
+  const newest = records.length ? records[0].isoDate : null;
+  const urls = [];
+  const add = (loc, lastmod, changefreq, priority) => urls.push(
+    '  <url>\n    <loc>' + loc + '</loc>' +
+    (lastmod ? '\n    <lastmod>' + lastmod + '</lastmod>' : '') +
+    (changefreq ? '\n    <changefreq>' + changefreq + '</changefreq>' : '') +
+    (priority ? '\n    <priority>' + priority + '</priority>' : '') +
+    '\n  </url>'
+  );
+  add(SITE + '/', newest, 'weekly', '1.0');
+  add(SITE + '/meditations', newest, 'daily', '0.9');
+  add(SITE + '/privacy', null, 'yearly', '0.3');
+  for (const r of records) {
+    add(SITE + '/meditations/' + r.slug, r.isoDate, 'monthly', '0.7');
+  }
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    urls.join('\n') + '\n</urlset>\n';
+  fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap.xml'), xml, 'utf8');
+  console.log('Built sitemap: ' + urls.length + ' URL(s) → public/sitemap.xml');
+}
+
 function build() {
   if (!fs.existsSync(EDITIONS_DIR)) {
     console.log('No editions dir yet (' + EDITIONS_DIR + '). Nothing to build.');
@@ -305,6 +335,7 @@ function build() {
   }
   console.log('Built archive: ' + records.length + ' edition(s) → public/meditations/');
   records.slice(0, 5).forEach(r => console.log('  ' + r.isoDate + '  ' + r.slug + '.html  (' + r.theme + ')'));
+  buildSitemap(records);
 }
 
 build();

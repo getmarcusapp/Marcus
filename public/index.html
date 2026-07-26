@@ -10,6 +10,121 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+
+<!-- SEO / discoverability -->
+<meta name="description" content="A daily Stoic practice app for iOS, built on the private journal Marcus Aurelius used to govern himself. Set your intention each morning; examine your conduct each night. 7-day free trial, no account required.">
+<meta name="author" content="Harvana LLC">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="theme-color" content="#080808">
+<link rel="canonical" href="https://getmarcus.app/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Marcus">
+<meta property="og:title" content="Marcus — A Stoic Practice App">
+<meta property="og:description" content="A daily Stoic practice built on the private journal Marcus Aurelius used to govern himself. Set your intention each morning; examine your conduct each night.">
+<meta property="og:url" content="https://getmarcus.app/">
+<meta property="og:image" content="https://getmarcus.app/skull-gold.png">
+<meta property="og:image:alt" content="Marcus — a Stoic practice app for iOS">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Marcus — A Stoic Practice App">
+<meta name="twitter:description" content="A daily Stoic practice built on the private journal Marcus Aurelius used to govern himself. Set your intention each morning; examine your conduct each night.">
+<meta name="twitter:image" content="https://getmarcus.app/skull-gold.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://getmarcus.app/#organization",
+      "name": "Marcus",
+      "legalName": "Harvana LLC",
+      "url": "https://getmarcus.app/",
+      "logo": "https://getmarcus.app/skull-gold.png",
+      "sameAs": ["https://apps.apple.com/app/id6789749038"]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://getmarcus.app/#website",
+      "url": "https://getmarcus.app/",
+      "name": "Marcus — A Stoic Practice App",
+      "publisher": { "@id": "https://getmarcus.app/#organization" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://getmarcus.app/#app",
+      "name": "Marcus: Stoic Practice Journal",
+      "operatingSystem": "iOS",
+      "applicationCategory": "LifestyleApplication",
+      "url": "https://getmarcus.app/",
+      "downloadUrl": "https://apps.apple.com/app/id6789749038",
+      "installUrl": "https://apps.apple.com/app/id6789749038",
+      "description": "A daily Stoic practice app built on the private journal Marcus Aurelius used to govern himself. A morning compass, a daily reading, structured morning and evening journaling, and a weekly review measured against the four cardinal Virtues. Journal data is stored locally; no account required.",
+      "screenshot": "https://getmarcus.app/screenshots/complete.png",
+      "publisher": { "@id": "https://getmarcus.app/#organization" },
+      "author": { "@id": "https://getmarcus.app/#organization" },
+      "offers": [
+        { "@type": "Offer", "price": "7.99", "priceCurrency": "USD", "category": "monthly subscription" },
+        { "@type": "Offer", "price": "39.99", "priceCurrency": "USD", "category": "annual subscription" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://getmarcus.app/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is this just another journaling app?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. Journaling apps give you a blank page. Marcus gives you a structured daily examination rooted in a two-thousand-year-old philosophical system: the same one Marcus Aurelius actually used. The prompts are specific, sequential, and philosophically grounded. They are designed to surface what other apps let you avoid." }
+        },
+        {
+          "@type": "Question",
+          "name": "I've tried habit trackers and they never stick. Why would this be different?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Because Marcus is not a habit tracker. It does not optimize for the checkmark. It optimizes for character, and character does not disappear when you miss a day. If you break a three-week streak, your history is intact, your data is safe, and the Stoic response is the same one it has always been: begin again. Shame is not part of the practice. Resumption is." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to know anything about Stoicism?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No prior knowledge is required. The app teaches the philosophy through the practice itself. Each prompt, each reflection, each weekly review is grounded in the four cardinal Virtues (Wisdom, Courage, Temperance, and Justice), which the app explains in context. You can begin with no background and the practice will make sense from day one." }
+        },
+        {
+          "@type": "Question",
+          "name": "How much time does it actually take?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The full daily practice (compass, daily reading with insight, morning journal, evening journal) takes between fifteen and thirty minutes total, split across morning and evening. The compass takes sixty seconds. The daily reading takes five minutes. Each journal session takes ten to fifteen minutes if you engage honestly." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my data private? Does Marcus collect anything?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Your journal entries, emotion logs, and practice data are stored locally on your device. Marcus does not have a backend server. Your data never leaves your phone unless you choose to export it yourself. No account is required to use the app. For an additional layer, you can enable an optional Face ID (or device passcode) lock in Settings." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Marcus integrate with Apple Health?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes, opt-in. With your permission, each practice you complete is recorded as a Mindful Session in Apple Health, so your Stoic reflection time is counted alongside meditation and breathwork in the Mindful Minutes view. Only the start and end timestamps are written, never the content of your journal entries. Marcus does not read any health data from your device." }
+        },
+        {
+          "@type": "Question",
+          "name": "What happens if I cancel? Do I lose my data?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Your data stays on your device regardless of your subscription status. Cancelling removes access to premium features going forward. It does not delete anything. Your journal entries, your emotion log, your compass, and your streak history all remain on your phone, yours to keep." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the 7-day trial actually free? Do I need a credit card?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. It is a genuine free trial through Apple. You download the app, begin the practice, and are not charged until the trial ends. Apple handles billing. You can cancel before the trial ends and will not be charged anything. No credit card details are entered anywhere other than your existing Apple ID." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is $7.99/month worth it?",
+          "acceptedAnswer": { "@type": "Answer", "text": "At $7.99/month you are paying about 26 cents a day. The annual plan brings that to roughly 16 cents a day for a structured daily system that compounds over years. The question is not whether it is expensive; it is whether you will use it. The free trial answers that." }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 

@@ -1,0 +1,33 @@
+# Marcus — A Stoic Practice App
+
+> Marcus is a daily Stoic practice app for iOS, built on the private journal Marcus Aurelius used to govern himself. It guides a structured daily examination: set an intention each morning, examine your conduct each night, and review the week against the four cardinal Virtues (Wisdom, Courage, Temperance, Justice). No account is required; journal data is stored locally on the device.
+
+## About
+
+- Platform: iOS (iPhone). Download on the App Store: https://apps.apple.com/app/id6789749038
+- Pricing: 7-day free trial, then $7.99/month or $39.99/year. No account required.
+- Privacy: journal entries, emotion logs, and practice data are stored locally on the device. There is no backend server; data never leaves the phone unless the user exports it. Optional Face ID / passcode lock. Apple Health integration is opt-in and write-only (Mindful Sessions); Marcus reads no health data.
+- Publisher: Harvana LLC.
+
+## What the practice includes
+
+- A morning Compass to set intention (about sixty seconds).
+- A daily reading: a verified passage from Marcus Aurelius, Seneca, or Epictetus with a short personalized reflection.
+- Morning and evening journaling with specific, sequential Stoic prompts.
+- A structured weekly review measured against the four cardinal Virtues.
+- Guided meditation and an emotion log.
+- Dispatches: an in-app inbox for occasional notes and new meditations.
+
+## Daily Meditations (free newsletter and archive)
+
+> One Stoic reflection each morning: a verified passage from the Stoics, the moment in history that produced it, and an unforced line to the world today. Free.
+
+- Archive index: https://getmarcus.app/meditations
+- Each edition is a standalone article with the passage, its historical context, and a reflective question.
+
+## Key pages
+
+- Home: https://getmarcus.app
+- Daily Meditations archive: https://getmarcus.app/meditations
+- Privacy policy: https://getmarcus.app/privacy
+- Sitemap: https://getmarcus.app/sitemap.xml
