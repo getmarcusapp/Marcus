@@ -65,17 +65,32 @@ const DISCLOSURE =
   'at no additional cost to you. We link to Bookshop.org first (which supports independent ' +
   'bookstores) and Amazon as a fallback. We only list books we genuinely recommend.';
 
+function slug(s) {
+  return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+// Free cover thumbnails by ISBN from Open Library. ?default=false makes it
+// 404 on a missing cover so onerror can gracefully collapse the column.
+function coverUrl(b) {
+  return 'https://covers.openlibrary.org/b/isbn/' + encodeURIComponent(b.isbn) + '-M.jpg?default=false';
+}
+
 function bookCard(b, bookshopUrl, amazonUrl) {
   const bs = bookshopUrl(b.isbn);
   const az = amazonUrl(b.asin);
+  const pill = /start here/i.test(b.why) ? '<span class="lib-pill">Start here</span>' : '';
   return '<article class="lib-book">' +
-    '<h3 class="lib-book-title">' + esc(b.title) + '</h3>' +
+    '<div class="lib-cover-wrap">' +
+    '<img class="lib-cover" src="' + esc(coverUrl(b)) + '" alt="' + esc(b.title) + ' cover" ' +
+    'loading="lazy" width="96" height="146" ' +
+    'onerror="this.closest(\'.lib-cover-wrap\').classList.add(\'lib-cover-missing\')"></div>' +
+    '<div class="lib-book-body">' +
+    '<h3 class="lib-book-title">' + esc(b.title) + pill + '</h3>' +
     '<p class="lib-book-meta">' + esc(metaLine(b)) + '</p>' +
     '<p class="lib-book-why">' + esc(b.why) + '</p>' +
     '<div class="lib-actions">' +
     '<a class="lib-btn lib-btn-primary" href="' + esc(bs) + '" rel="sponsored nofollow noopener" target="_blank">Bookshop.org</a>' +
     '<a class="lib-btn lib-btn-secondary" href="' + esc(az) + '" rel="sponsored nofollow noopener" target="_blank">Amazon</a>' +
-    '</div></article>';
+    '</div></div></article>';
 }
 
 function jsonLd(list) {
@@ -106,15 +121,23 @@ function build() {
   const desc = 'A curated reading list for Stoic practice: the best translations of Marcus Aurelius, Epictetus, and Seneca, plus modern interpreters and adjacent thinkers. Annotated, no fluff.';
   const canonical = SITE + '/library';
 
-  const sectionsHtml = SECTIONS.map(sec => {
+  const liveSections = SECTIONS.filter(sec => READING_LIST.some(b => b.section === sec.key));
+  const jumpNav = '<nav class="lib-jump">' +
+    liveSections.map(sec => '<a href="#' + slug(sec.key) + '">' + esc(sec.key) + '</a>').join('') +
+    '</nav>';
+  const sectionsHtml = liveSections.map(sec => {
     const books = READING_LIST.filter(b => b.section === sec.key);
-    if (!books.length) return '';
-    return '<section class="lib-section">' +
+    return '<section class="lib-section" id="' + slug(sec.key) + '">' +
       '<h2 class="lib-section-title">' + esc(sec.key) + '</h2>' +
       '<p class="lib-section-intro">' + esc(sec.intro) + '</p>' +
       books.map(b => bookCard(b, bookshopUrl, amazonUrl)).join('') +
       '</section>';
   }).join('');
+  const introHtml = '<section class="lib-intro"><p>Stoicism has three core voices, ' +
+    'Marcus Aurelius, Epictetus, and Seneca, and a long line of interpreters and kindred ' +
+    'thinkers around them. This is where to start and where to go next: ' + READING_LIST.length +
+    ' books, each in the translation worth reading, with a note on why it matters. ' +
+    'No affiliate padding, no filler, only the books behind the practice.</p></section>';
 
   const html = '<!doctype html><html lang="en"><head>' +
     '<meta charset="utf-8">' +
@@ -158,8 +181,9 @@ function build() {
     'the modern interpreters who make them legible, and the adjacent thinkers working the same ground. ' +
     'Every entry is one we actually recommend.</p>' +
     '<p class="lib-disclosure-top">Some links below are affiliate links. <a href="#disclosure">How this works →</a></p>' +
+    jumpNav +
     '</div></header>' +
-    '<main class="lib-main">' + sectionsHtml +
+    '<main class="lib-main">' + introHtml + sectionsHtml +
     '<section class="lib-app">' +
     '<img class="lib-app-skull" src="/skull-gold.png" alt="" width="64" height="64">' +
     '<p class="lib-app-copy">Marcus turns these sources into a daily practice: a morning compass, a daily reading, ' +
@@ -204,15 +228,26 @@ display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20
 .lib-eyebrow{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
 .lib-disclosure-top{font-size:13px;color:var(--text-dim)}
 .lib-disclosure-top a{color:var(--accent-dim)}
+.lib-jump{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+.lib-jump a{font-size:12px;letter-spacing:.4px;color:var(--text-secondary);border:1px solid var(--border-mid);border-radius:999px;padding:7px 15px;transition:border-color .15s,color .15s}
+.lib-jump a:hover{border-color:var(--accent-dim);color:var(--text-primary)}
 .lib-main{max-width:720px;margin:0 auto;padding:0 24px}
-.lib-section{padding:56px 0 8px}
+.lib-intro{padding:44px 0 4px}
+.lib-intro p{font-size:16px;color:var(--text-secondary);line-height:1.75}
+.lib-section{padding:52px 0 8px;scroll-margin-top:80px}
 .lib-section-title{font-family:var(--display);font-size:clamp(24px,4vw,32px);color:var(--accent);letter-spacing:.5px;margin-bottom:8px}
 .lib-section-intro{font-size:15px;color:var(--text-muted);margin-bottom:12px;line-height:1.6}
-.lib-book{padding:26px 0;border-top:1px solid var(--border)}
+.lib-book{display:flex;gap:24px;align-items:flex-start;padding:28px 0;border-top:1px solid var(--border)}
+.lib-cover-wrap{flex:0 0 auto;width:96px}
+.lib-cover{width:96px;height:auto;border-radius:4px;display:block;background:#141414;box-shadow:0 6px 22px rgba(0,0,0,.5)}
+.lib-cover-missing{display:none}
+.lib-book-body{flex:1;min-width:0}
 .lib-book-title{font-family:var(--display);font-size:22px;color:var(--text-primary);line-height:1.25;margin-bottom:6px}
+.lib-pill{display:inline-block;vertical-align:middle;margin-left:12px;font-family:var(--body);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#000;background:var(--accent);border-radius:999px;padding:3px 10px}
 .lib-book-meta{font-size:12.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px}
 .lib-book-why{font-size:16px;color:var(--text-secondary);line-height:1.72;margin-bottom:18px}
 .lib-actions{display:flex;gap:12px;flex-wrap:wrap}
+@media(max-width:520px){.lib-book{gap:16px}.lib-cover-wrap{width:66px}.lib-cover{width:66px}}
 .lib-btn{display:inline-block;font-size:13px;font-weight:600;letter-spacing:.3px;padding:10px 20px;border-radius:8px;transition:opacity .15s,background .15s}
 .lib-btn-primary{background:var(--accent);color:#000}
 .lib-btn-primary:hover{opacity:.85}
