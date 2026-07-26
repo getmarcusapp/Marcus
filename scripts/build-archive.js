@@ -30,6 +30,14 @@ const ICON_LINKS =
   '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
   '<link rel="icon" type="image/png" href="/favicon.png">' +
   '<link rel="apple-touch-icon" href="/apple-touch-icon.png">';
+// Shared 1200x630 brand social card (same one the landing page uses), so
+// shared meditation links render a full-width preview instead of a bare card.
+const OG_IMAGE =
+  '<meta property="og:image" content="' + SITE + '/og-image.png">' +
+  '<meta property="og:image:width" content="1200">' +
+  '<meta property="og:image:height" content="630">' +
+  '<meta property="og:image:type" content="image/png">' +
+  '<meta name="twitter:image" content="' + SITE + '/og-image.png">';
 
 function esc(s) {
   return String(s == null ? '' : s)
@@ -67,8 +75,9 @@ function pageHead(title, description, canonical, jsonLd, extraOg) {
     '<meta property="og:description" content="' + esc(description) + '">' +
     '<meta property="og:url" content="' + esc(canonical) + '">' +
     '<meta property="og:site_name" content="Daily Meditations">' +
+    OG_IMAGE +
     (extraOg || '') +
-    '<meta name="twitter:card" content="summary">' +
+    '<meta name="twitter:card" content="summary_large_image">' +
     '<meta name="twitter:title" content="' + esc(title) + '">' +
     '<meta name="twitter:description" content="' + esc(description) + '">' +
     ICON_LINKS + FONT_LINKS +
