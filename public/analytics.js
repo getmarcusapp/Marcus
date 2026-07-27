@@ -67,8 +67,8 @@
     box.setAttribute('role', 'dialog');
     box.setAttribute('aria-label', 'Analytics consent');
     box.innerHTML =
-      '<p>We use privacy-friendly analytics to see what\'s useful on this site. ' +
-      'No ads, and we never sell your data. See our <a href="/privacy">privacy policy</a>.</p>' +
+      '<p>We use analytics to understand what\'s useful on this site. ' +
+      'See our <a href="/privacy">privacy policy</a>.</p>' +
       '<div class="mc-btns"><button type="button" class="mc-decline">Decline</button>' +
       '<button type="button" class="mc-accept">Accept</button></div>';
     document.body.appendChild(box);
