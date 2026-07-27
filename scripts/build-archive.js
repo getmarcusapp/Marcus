@@ -18,6 +18,10 @@ const EDITIONS_DIR = path.join(ROOT, 'content', 'editions');
 const OUT_DIR = path.join(ROOT, 'public', 'meditations');
 const PUBLIC_DIR = path.join(ROOT, 'public');
 const SITE = 'https://getmarcus.app';
+// Google Analytics (GA4) — injected into every generated page's <head>.
+const GA = '<script async src="https://www.googletagmanager.com/gtag/js?id=G-10SNPQGSRS"></script>' +
+  '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
+  "gtag('js',new Date());gtag('config','G-10SNPQGSRS');</script>";
 // Beehiiv v3 subscribe form (daily-meditations publication). Renders inline,
 // on-site, CSRF-handled. Style it in Beehiiv → Grow → Subscribe Forms.
 const BEEHIIV_FORM = '<div class="dm-embed"><script async src="https://subscribe-forms.beehiiv.com/v3/loader.js" data-beehiiv-form="eb49b3c4-275e-419f-af73-fbde10987dc9"></script></div>';
@@ -68,6 +72,7 @@ function pageHead(title, description, canonical, jsonLd, extraOg) {
   return '<!doctype html><html lang="en"><head>' +
     '<meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+    GA +
     '<title>' + esc(title) + '</title>' +
     '<meta name="description" content="' + esc(description) + '">' +
     '<link rel="canonical" href="' + esc(canonical) + '">' +

@@ -19,6 +19,10 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
 const OUT = path.join(ROOT, 'public', 'library.html');
+// Google Analytics (GA4) — injected into the page <head>.
+const GA = '<script async src="https://www.googletagmanager.com/gtag/js?id=G-10SNPQGSRS"></script>' +
+  '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
+  "gtag('js',new Date());gtag('config','G-10SNPQGSRS');</script>";
 
 // Load constants/library.js (an ES module of pure data + helpers) into this
 // CommonJS script: strip the `export` keywords and evaluate. Safe because the
@@ -142,6 +146,7 @@ function build() {
   const html = '<!doctype html><html lang="en"><head>' +
     '<meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+    GA +
     '<title>' + esc(title) + '</title>' +
     '<meta name="description" content="' + esc(desc) + '">' +
     '<meta name="robots" content="index, follow, max-image-preview:large">' +
