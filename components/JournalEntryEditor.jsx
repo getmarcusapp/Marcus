@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { colors, radius, font } from '../constants/theme';
 import { GoldPrimary, GoldSecondary } from './GoldButton';
-import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
+import { morningPrompts, eveningPromptsInOrder } from '../constants/journalPrompts';
 
 // Inline editor for editing a saved journal entry. Used from the
 // Past Entries view (app/journal-history.jsx). Rebuilds the same prompt
@@ -16,7 +16,11 @@ import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
 // the caret above the keyboard as an answer grows past one line.
 export function JournalEntryEditor({ entry, onSave, onCancel, onInputGrow }) {
   const isMorning = entry.type === 'morning';
-  const prompts = isMorning ? morningPrompts : eveningPrompts;
+  // Evening renders in display order (III · Undone sits at storage index 4);
+  // `answerKey` carries the storage index so edits land on the right answer.
+  const prompts = isMorning
+    ? morningPrompts.map((p, i) => ({ ...p, answerKey: i }))
+    : eveningPromptsInOrder;
   const [answers, setAnswers] = useState(entry.answers || {});
   const [openPrompt, setOpenPrompt] = useState(-1);
   const [openHint, setOpenHint] = useState(null);
@@ -47,6 +51,7 @@ export function JournalEntryEditor({ entry, onSave, onCancel, onInputGrow }) {
             )}
           </View>
           <Text style={s.promptQ}>{prompt.q}</Text>
+          {prompt.sub ? <Text style={s.promptSub}>{prompt.sub}</Text> : null}
           {prompt.info && prompt.hint && (
             <Text style={s.promptSub}>{prompt.hint}</Text>
           )}
@@ -73,8 +78,8 @@ export function JournalEntryEditor({ entry, onSave, onCancel, onInputGrow }) {
                 multiline
                 placeholder="Write here..."
                 placeholderTextColor={colors.textSecondary}
-                value={answers[idx] || ''}
-                onChangeText={text => setAnswers(prev => ({ ...prev, [idx]: text }))}
+                value={answers[prompt.answerKey] || ''}
+                onChangeText={text => setAnswers(prev => ({ ...prev, [prompt.answerKey]: text }))}
                 onFocus={() => setOpenHint(null)}
                 onContentSizeChange={onInputGrow && onInputGrow(`prompt-${idx}`)}
                 scrollEnabled={false}

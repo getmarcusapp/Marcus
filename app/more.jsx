@@ -33,6 +33,7 @@ const menuItems = [
     section: 'App',
     items: [
       { label: 'Dispatches', sub: 'News, updates, and notices', icon: 'newspaper-outline', route: '/dispatches', id: 'dispatches' },
+      { label: 'Mid-day pause', sub: 'Prosoche, the Stoic discipline of attention', icon: 'eye-outline', route: '/prosoche' },
       { label: 'How Marcus works', sub: 'The practice explained', icon: 'help-circle-outline', route: '/howto' },
       { label: 'The Foundations', sub: 'Seven letters on the practice', icon: 'mail-outline', route: '/foundations-list' },
       { label: 'Further reading', sub: 'A short shelf of curated Stoic works', icon: 'library-outline', route: '/library' },

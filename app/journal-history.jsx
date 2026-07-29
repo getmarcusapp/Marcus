@@ -7,7 +7,7 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
-import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
+import { morningPrompts, eveningPrompts, UNDONE_KEY } from '../constants/journalPrompts';
 import { JournalEntryEditor } from '../components/JournalEntryEditor';
 import { useEntitlement } from '../lib/useEntitlement';
 import { useCaretScroll } from '../lib/useCaretScroll';
@@ -243,9 +243,10 @@ export default function JournalHistoryScreen() {
                             <Text style={s.editBtnText}>Edit</Text>
                           </GoldSecondary>
                         </View>
-                        {/* The Reckoning (evening entries that audited a
-                            morning commitment) leads, with the morning's
-                            words as context. */}
+                        {/* LEGACY: entries written before the Reckoning was
+                            merged into III · Undone stored their answer under
+                            a 'reckon' key and have no prompt in the array.
+                            Kept so those entries still render. */}
                         {entry.answers?.reckon?.trim() ? (
                           <View style={s.histAnswerBlock}>
                             <Text style={s.histPromptNum}>This morning</Text>
@@ -255,17 +256,29 @@ export default function JournalHistoryScreen() {
                             <Text style={s.histAnswer}>{entry.answers.reckon}</Text>
                           </View>
                         ) : null}
-                        {Object.entries(entry.answers || {}).map(([idx, answer]) => {
-                          if (idx === 'reckon') return null;
-                          if (!answer || !answer.trim()) return null;
-                          const prompt = prompts[parseInt(idx)];
-                          return (
-                            <View key={idx} style={s.histAnswerBlock}>
-                              {prompt && <Text style={s.histPromptNum}>{prompt.num}</Text>}
-                              <Text style={s.histAnswer}>{answer}</Text>
-                            </View>
-                          );
-                        })}
+                        {Object.entries(entry.answers || {})
+                          .filter(([idx, answer]) => idx !== 'reckon' && answer && answer.trim())
+                          // Answers are stored by prompt index; sort to the
+                          // prompts' display order so the archive reads in the
+                          // same sequence the user wrote in. Morning prompts
+                          // carry no `order`, so they fall back to the index.
+                          .sort(([a], [b]) =>
+                            (prompts[parseInt(a)]?.order ?? parseInt(a)) -
+                            (prompts[parseInt(b)]?.order ?? parseInt(b))
+                          )
+                          .map(([idx, answer]) => {
+                            const prompt = prompts[parseInt(idx)];
+                            const showsEcho = !isMorning && parseInt(idx) === UNDONE_KEY && entry.reckonOf;
+                            return (
+                              <View key={idx} style={s.histAnswerBlock}>
+                                {prompt && <Text style={s.histPromptNum}>{prompt.num}</Text>}
+                                {showsEcho ? (
+                                  <Text style={s.histReckonOf}>“{entry.reckonOf}”</Text>
+                                ) : null}
+                                <Text style={s.histAnswer}>{answer}</Text>
+                              </View>
+                            );
+                          })}
                       </View>
                   </View>
                 ))}

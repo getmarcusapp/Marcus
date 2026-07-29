@@ -106,7 +106,7 @@ export default function MeditateScreen() {
             </>
           )}
           <View style={s.headerContent}>
-            <Text style={s.eyebrow}>Six guided meditations</Text>
+            <Text style={s.eyebrow}>Seven guided meditations</Text>
             <Text style={s.title}>{`Ancient attention\ntraining`}</Text>
           </View>
         </View>

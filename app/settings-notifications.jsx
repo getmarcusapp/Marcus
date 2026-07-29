@@ -35,6 +35,7 @@ const DEFAULT_SETTINGS = {
 };
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function formatTime(hour, minute) {
   const h = hour % 12 || 12;
@@ -206,7 +207,7 @@ export default function NotificationsSettingsScreen() {
             <View style={s.rowBetween}>
               <View>
                 <Text style={s.rowTitle}>Mid-day pause</Text>
-                <Text style={s.rowSub}>Daily · examine before the afternoon</Text>
+                <Text style={s.rowSub}>Daily · a checkpoint for your attention</Text>
               </View>
               <Switch
                 value={settings.middayEnabled}
@@ -277,6 +278,30 @@ export default function NotificationsSettingsScreen() {
                 thumbColor={colors.textPrimary}
               />
             </View>
+
+            {/* Day is always shown: it sets when the review happens and
+                surfaces in Practice, independent of whether the reminder
+                is on. Time (below) is gated by the reminder toggle. */}
+            <View style={s.timeSection}>
+              <Text style={s.timeLabel}>Which day</Text>
+              <View style={s.dayRow}>
+                {DAYS.map((day, idx) => (
+                  <TouchableOpacity
+                    key={day}
+                    style={[s.dayBtn, settings.reviewDay === idx && s.dayBtnActive]}
+                    onPress={() => update('reviewDay', idx)}
+                  >
+                    <Text style={[s.dayBtnText, settings.reviewDay === idx && s.dayBtnTextActive]}>
+                      {day}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={[s.rowSub, { marginTop: 12, textAlign: 'center' }]}>
+                Your review appears in Practice on this day.
+              </Text>
+            </View>
+
             {settings.reviewEnabled && (
               <View style={s.timeSection}>
                 <Text style={s.timeLabel}>Remind me at</Text>
@@ -288,28 +313,10 @@ export default function NotificationsSettingsScreen() {
                 />
                 <Text style={s.timePreview}>{formatTime(settings.reviewHour, settings.reviewMinute)}</Text>
                 <View style={s.sampleMsg}>
-                  <Text style={s.sampleText}>"A week has passed. Seal it with intention."</Text>
+                  <Text style={s.sampleText}>"{DAY_NAMES[settings.reviewDay] || 'Weekly'} reckoning. Five questions. The week is yours to close."</Text>
                 </View>
               </View>
             )}
-          </View>
-
-          <Text style={s.secLabel}>Review day</Text>
-          <View style={s.card}>
-            <Text style={s.rowSub}>Your weekly review appears in Practice on this day</Text>
-            <View style={s.dayRow}>
-              {DAYS.map((day, idx) => (
-                <TouchableOpacity
-                  key={day}
-                  style={[s.dayBtn, settings.reviewDay === idx && s.dayBtnActive]}
-                  onPress={() => update('reviewDay', idx)}
-                >
-                  <Text style={[s.dayBtnText, settings.reviewDay === idx && s.dayBtnTextActive]}>
-                    {day}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
           </View>
 
           <GoldPrimary

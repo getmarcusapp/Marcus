@@ -55,6 +55,28 @@ const reviewPrompts = [
   },
 ];
 
+// Weekly-review landing memento, rotated by local day like the journal
+// mementos. Themed for the long view: time, retrospection, the passage of
+// things. Seen ~weekly, so a smaller rotation is plenty; add entries to extend.
+const WEEKLY_MEMENTOS = [
+  {
+    text: '"Look back over the past, with its changing empires that rose and fell, and you can foresee the future too."',
+    attr: 'Marcus Aurelius · Meditations VII.49',
+  },
+  {
+    text: '"It is not that we have a short time to live, but that we waste much of it. Life is long enough if you know how to use it."',
+    attr: 'Seneca · On the Shortness of Life',
+  },
+  {
+    text: '"Reflect often upon the rapidity with which all existing things pass away and are carried out of sight."',
+    attr: 'Marcus Aurelius · Meditations V.23',
+  },
+  {
+    text: '"Hold every hour in your grasp. Lay hold of today, and you will depend less upon tomorrow."',
+    attr: 'Seneca · Letters 1',
+  },
+];
+
 export default function ReviewScreen() {
   const playerInset = useMiniPlayerInset();
   const router = useRouter();
@@ -394,12 +416,17 @@ export default function ReviewScreen() {
           // wizard at step 0.
           <View style={s.body}>
             <View style={s.reviewMementoStrip}>
-              <Text style={s.reviewMementoText}>
-                "Look back over the past, with its changing empires that rose and fell, and you can foresee the future too."
-              </Text>
-              <Text style={s.reviewMementoSub}>
-                Marcus Aurelius · Meditations VII.49
-              </Text>
+              {(() => {
+                const now = new Date();
+                const localDay = Math.floor((now.getTime() - now.getTimezoneOffset() * 60000) / 86400000);
+                const memento = WEEKLY_MEMENTOS[localDay % WEEKLY_MEMENTOS.length];
+                return (
+                  <>
+                    <Text style={s.reviewMementoText}>{memento.text}</Text>
+                    <Text style={s.reviewMementoSub}>{memento.attr}</Text>
+                  </>
+                );
+              })()}
             </View>
             <GoldPrimary
               style={[s.editBtn, s.sealBtn]}

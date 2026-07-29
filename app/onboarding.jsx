@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Image,
+  StyleSheet, SafeAreaView, Image, Switch,
   KeyboardAvoidingView, Platform, Alert,
   useWindowDimensions, AccessibilityInfo,
 } from 'react-native';
@@ -269,7 +269,7 @@ function PhilosophyStep({ onNext }) {
           {[
             { title: 'Stoic Compass', desc: 'Your personal North Star: why you practice, what you want to overcome, who you aspire to be.' },
             { title: 'Daily Reading', desc: 'A real Stoic quote chosen for you each day, drawn from the canon and grounded in your Compass.' },
-            { title: 'Guided Meditations', desc: 'Six Stoic meditations, less than five minutes each. Voiced. Surfaced contextually for the time of day.' },
+            { title: 'Guided Meditations', desc: 'Seven Stoic meditations, less than five minutes each. Voiced. Surfaced contextually for the time of day.' },
             { title: 'Morning Journal', desc: 'Reflect on what is in your control, foresee what may come, and prepare for what the day requires.' },
             { title: 'Evening Journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
             { title: 'Emotion logger', desc: 'When strong emotions arise, log the trigger, examine your thinking, and choose your response.' },
@@ -405,7 +405,7 @@ function MeditationsStep({ onNext }) {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.medOnbHeroText}>
-            <Text style={s.previewEyebrow}>Six guided meditations</Text>
+            <Text style={s.previewEyebrow}>Seven guided meditations</Text>
             <Text style={s.previewTitle}>{`Ancient attention\ntraining`}</Text>
           </View>
         </View>
@@ -492,9 +492,15 @@ function ReminderTimeAdjuster({ hour, minute, onHourChange, onMinuteChange }) {
   );
 }
 
+// Rows without an `enabledKey` are always on — this step is "set your times",
+// not "pick your reminders". Mid-day Pause is the one opt-in: it carries an
+// enabledKey so it renders a switch and starts OFF, keeping the out-of-the-box
+// cadence at three daily reminders while still being discoverable during setup
+// rather than buried in Settings.
 const REMINDER_ROWS = [
   { name: 'Stoic Compass', hourKey: 'compassHour', minuteKey: 'compassMinute' },
   { name: 'Morning Journal', hourKey: 'morningHour', minuteKey: 'morningMinute' },
+  { name: 'Mid-day Pause', hourKey: 'middayHour', minuteKey: 'middayMinute', enabledKey: 'middayEnabled' },
   { name: 'Evening Journal', hourKey: 'eveningHour', minuteKey: 'eveningMinute' },
   { name: 'Weekly Review', hourKey: 'reviewHour', minuteKey: 'reviewMinute', weekdayKey: 'reviewDay' },
 ];
@@ -559,28 +565,48 @@ function RemindersStep({ onNext }) {
               const minute = settings[r.minuteKey];
               const weekday = r.weekdayKey !== undefined ? settings[r.weekdayKey] : undefined;
               const isEditing = editingRow === r.name;
+              // Opt-in rows (Mid-day Pause) carry an enabledKey: they show a
+              // switch, and their time + Edit only appear once switched on.
+              const isOptional = r.enabledKey !== undefined;
+              const isOn = isOptional ? !!settings[r.enabledKey] : true;
               return (
                 <View key={r.name} style={[s.reminderRow, i < arr.length - 1 && s.reminderRowBorder]}>
                   <View style={s.reminderRowTop}>
-                    <Text style={s.reminderTime}>{formatReminderTime(hour, minute, weekday)}</Text>
+                    <Text style={[s.reminderTime, !isOn && s.reminderTimeOff]}>
+                      {isOn ? formatReminderTime(hour, minute, weekday) : 'Off'}
+                    </Text>
                     <Text style={s.reminderName}>{r.name}</Text>
-                    <GoldSecondary
-                      onPress={() => setEditingRow(isEditing ? null : r.name)}
-                      style={s.compassPreviewEdit}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                      contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-                      borderWidth={0.5}
-                      flatStroke
-                    >
-                      <Ionicons
-                        name={isEditing ? 'checkmark-outline' : 'create-outline'}
-                        size={12}
-                        color={colors.accent}
+                    {isOn && (
+                      <GoldSecondary
+                        onPress={() => setEditingRow(isEditing ? null : r.name)}
+                        style={s.compassPreviewEdit}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                        borderWidth={0.5}
+                        flatStroke
+                      >
+                        <Ionicons
+                          name={isEditing ? 'checkmark-outline' : 'create-outline'}
+                          size={12}
+                          color={colors.accent}
+                        />
+                        <Text style={s.compassPreviewEditText}>{isEditing ? 'Done' : 'Edit'}</Text>
+                      </GoldSecondary>
+                    )}
+                    {isOptional && (
+                      <Switch
+                        value={isOn}
+                        onValueChange={v => {
+                          update(r.enabledKey, v);
+                          if (!v && isEditing) setEditingRow(null);
+                        }}
+                        trackColor={{ false: colors.border, true: colors.accent }}
+                        thumbColor={colors.textPrimary}
+                        style={s.reminderSwitch}
                       />
-                      <Text style={s.compassPreviewEditText}>{isEditing ? 'Done' : 'Edit'}</Text>
-                    </GoldSecondary>
+                    )}
                   </View>
-                  {isEditing && (
+                  {isOn && isEditing && (
                     <ReminderTimeAdjuster
                       hour={hour}
                       minute={minute}
@@ -588,13 +614,16 @@ function RemindersStep({ onNext }) {
                       onMinuteChange={v => update(r.minuteKey, v)}
                     />
                   )}
+                  {isOptional && isOn && (
+                    <Text style={s.reminderRowNote}>Prosoche, a Stoic checkpoint for your attention.</Text>
+                  )}
                 </View>
               );
             })}
           </View>
 
           <Text style={s.reminderNote}>
-            Adjust times or add a midday check-in anytime in Settings.
+            Adjust or turn off any of these anytime in Settings.
           </Text>
         </View>
       </ScrollView>
@@ -910,6 +939,17 @@ const s = StyleSheet.create({
     color: colors.accent,
     letterSpacing: 0.5,
     minWidth: 96,
+  },
+  reminderTimeOff: { color: colors.textSecondary },
+  // Shrunk so the switch sits inside the row's rhythm rather than dominating
+  // it; iOS switches render large relative to 15pt row text.
+  reminderSwitch: { transform: [{ scale: 0.8 }], marginVertical: -6, marginRight: -4 },
+  reminderRowNote: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+    marginTop: 8,
+    lineHeight: 18,
   },
   reminderName: {
     fontSize: 15,
