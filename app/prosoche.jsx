@@ -32,59 +32,75 @@ const PROMPTS = [
 // Matches the scholarly register of the journal prompts' info cards, and
 // gives the Greek word on the eyebrow somewhere to be explained.
 const PROSOCHE_INFO = {
-  title: 'Prosoche',
+  title: 'Prosochē',
   source: 'Epictetus, Discourses 4.12',
-  body: "Prosoche (προσοχή) is the Stoic discipline of attention, and Epictetus gave it an entire discourse. Relax your attention for a little, he warned, and do not imagine you will recover it whenever you please.\n\nIt is often called Stoic mindfulness, but the aim is not calm. It is vigilance. You are watching what you assent to: the impression that arrived uninvited, the judgment made before you noticed making it, the story already running in the background.\n\nThere is no timer and nothing to achieve. One question, held for the length of a breath or two, is the whole of it. Then you return to the day, having caught yourself once.",
+  body: "Prosochē is the Stoic discipline of attention, and Epictetus gave it an entire discourse. Relax your attention for a little, he warned, and do not imagine you will recover it whenever you please.\n\nIt is often called Stoic mindfulness, but the aim is not calm. It is vigilance. You are watching what you assent to: the impression that arrived uninvited, the judgment made before you noticed making it, the story already running in the background.\n\nThere is no timer and nothing to achieve. One question, held for the length of a breath or two, is the whole of it. Then you return to the day, having caught yourself once.",
 };
 
-// How long "Noted." stays on screen before the checkpoint closes. Long enough
-// to catch a mis-tap via Undo, short enough that a deliberate Noted still
-// feels like it closes the moment rather than lingering.
-const UNDO_WINDOW_MS = 4000;
+// Brief confirmation beat after Noted before the screen closes. Deliberately
+// short: undo does NOT depend on catching this window. Reopening the
+// checkpoint on a day you already noted shows the noted state with an Undo,
+// so the recovery path is "come back", not "react fast".
+const CONFIRM_MS = 800;
+
+const STAMP_KEY = 'prosoche_last';
+
+function isToday(iso) {
+  if (!iso) return false;
+  const d = new Date(iso);
+  return !Number.isNaN(d.getTime()) && d.toDateString() === new Date().toDateString();
+}
 
 export default function ProsocheScreen() {
   const router = useRouter();
   const [prompt] = useState(() => PROMPTS[Math.floor(Math.random() * PROMPTS.length)]);
-  const [done, setDone] = useState(false);
+  // null while loading, so the question never flashes before we know whether
+  // today was already noted.
+  const [notedToday, setNotedToday] = useState(null);
+  // Distinguishes "just noted in this session" (auto-closes) from "was already
+  // noted earlier today" (stays put, offering Undo).
+  const [justNoted, setJustNoted] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const dismissTimer = useRef(null);
-  const committedRef = useRef(false);
 
   const leave = useCallback(() => {
     if (router.canGoBack()) router.back();
     else router.replace('/');
   }, [router]);
 
-  // Nothing is written or tracked until the undo window closes, so Undo has
-  // no state to roll back and there's no race between the write and the undo.
-  // Idempotent: the timer and an early close can both reach it.
-  const commit = useCallback(() => {
-    if (committedRef.current) return;
-    committedRef.current = true;
-    track('prosoche_checkpoint');
-    // Lightweight last-done stamp for possible future surfacing. No streak,
-    // no counter — the app deliberately avoids gamifying the practice.
-    AsyncStorage.setItem('prosoche_last', new Date().toISOString()).catch(() => {});
+  useEffect(() => {
+    let alive = true;
+    AsyncStorage.getItem(STAMP_KEY)
+      .then(v => { if (alive) setNotedToday(isToday(v)); })
+      .catch(() => { if (alive) setNotedToday(false); });
+    return () => { alive = false; };
   }, []);
 
   const onNoted = useCallback(() => {
     haptics.success();
-    setDone(true);
-    dismissTimer.current = setTimeout(() => { commit(); leave(); }, UNDO_WINDOW_MS);
-  }, [commit, leave]);
+    track('prosoche_checkpoint');
+    // Written immediately rather than deferred to a timer. The old deferred
+    // write could commit while this screen was still mounted (it lives in the
+    // tab navigator), leaving a live Undo button over already-saved state.
+    // Lightweight last-done stamp. No streak, no counter — the app
+    // deliberately avoids gamifying the practice.
+    AsyncStorage.setItem(STAMP_KEY, new Date().toISOString()).catch(() => {});
+    setNotedToday(true);
+    setJustNoted(true);
+    dismissTimer.current = setTimeout(leave, CONFIRM_MS);
+  }, [leave]);
 
+  // Authoritative: removes the stamp, so it reverses the mark whether it was
+  // made a second ago or earlier today. This is what makes reopening a valid
+  // recovery path.
   const onUndo = useCallback(() => {
     haptics.tap();
     track('prosoche_undo');
     if (dismissTimer.current) { clearTimeout(dismissTimer.current); dismissTimer.current = null; }
-    setDone(false);
+    AsyncStorage.removeItem(STAMP_KEY).catch(() => {});
+    setNotedToday(false);
+    setJustNoted(false);
   }, []);
-
-  // Closing during the undo window is still a deliberate Noted — honor it.
-  const onClose = useCallback(() => {
-    if (done) commit();
-    leave();
-  }, [done, commit, leave]);
 
   useEffect(() => () => {
     if (dismissTimer.current) clearTimeout(dismissTimer.current);
@@ -93,7 +109,7 @@ export default function ProsocheScreen() {
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.topRow}>
-        <Pressable onPress={onClose} hitSlop={14} style={s.closeBtn}>
+        <Pressable onPress={leave} hitSlop={14} style={s.closeBtn}>
           <Ionicons name="close" size={24} color={colors.textSecondary} />
         </Pressable>
       </View>
@@ -107,22 +123,24 @@ export default function ProsocheScreen() {
             app (promptTopRow). Centered as a group rather than pushed apart,
             since this screen's composition is centered. */}
         <View style={s.eyebrowRow}>
-          <Text style={s.eyebrow}>Prosoche · Mid-day</Text>
+          <Text style={s.eyebrow}>Prosochē · Mid-day</Text>
           <TouchableOpacity style={s.hintBtn} onPress={() => setShowInfo(v => !v)} hitSlop={10}>
             <Text style={s.hintBtnText}>ⓘ</Text>
           </TouchableOpacity>
         </View>
-        {done ? (
+        {notedToday === null ? null : (
           <>
-            <Text style={s.prompt}>Noted.</Text>
-            <TouchableOpacity style={s.undoBtn} onPress={onUndo} hitSlop={12}>
-              <Text style={s.undoText}>Undo</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
-            <Text style={s.prompt}>{prompt}</Text>
-            <Text style={s.guidance}>Sit with it a moment.{'\n'}Notice, without fixing.</Text>
+            <Text style={s.prompt}>
+              {notedToday ? (justNoted ? 'Noted.' : 'Noted today.') : prompt}
+            </Text>
+            <Text style={s.guidance}>
+              {notedToday
+                ? 'You have already paused today.'
+                : 'Sit with it a moment.\nNotice, without fixing.'}
+            </Text>
+            {/* Rendered for BOTH states: the explanation of prosochē is worth
+                reading whether or not today is already marked, and hiding it
+                behind the not-yet-noted state made the ⓘ look broken. */}
             {showInfo && (
               <View style={s.hintBox}>
                 <Text style={s.hintTitle}>{PROSOCHE_INFO.title}</Text>
@@ -133,11 +151,16 @@ export default function ProsocheScreen() {
                 ))}
               </View>
             )}
+            {notedToday && (
+              <TouchableOpacity style={s.undoBtn} onPress={onUndo} hitSlop={12}>
+                <Text style={s.undoText}>Undo</Text>
+              </TouchableOpacity>
+            )}
           </>
         )}
       </ScrollView>
 
-      {!done && (
+      {notedToday === false && (
         <View style={s.footer}>
           <GoldPrimary style={s.btn} onPress={onNoted}>
             <Text style={s.btnText}>Noted</Text>

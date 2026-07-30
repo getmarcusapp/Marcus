@@ -274,7 +274,9 @@ export default function EmotionsScreen() {
 
             <View style={[s.fieldCard, selectedEmotion && s.fieldCardActive]}>
               <View style={s.feelingHeader}>
-                <Text style={[s.secQuestion, { marginTop: 0, marginBottom: 0 }]}>What are you feeling?</Text>
+                <Text style={[s.secQuestion, { marginTop: 0, marginBottom: 0 }]}>
+                  {timing === 'now' ? 'What are you feeling?' : 'What did you feel?'}
+                </Text>
                 <TouchableOpacity onPress={() => { if (!hintOpen) Keyboard.dismiss(); setHintOpen(!hintOpen); }} style={s.hintBtn} activeOpacity={0.7}>
                   <Text style={s.hintBtnText}>ⓘ</Text>
                 </TouchableOpacity>

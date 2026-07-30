@@ -28,17 +28,31 @@ function formatPracticeTime(ms) {
 }
 
 
+// Ordered by frequency of return, not by when each screen was built, and
+// grouped by kind: recurring utility first, then reference. Each section
+// renders as its own card (the section name is a React key, not a visible
+// header), so the grouping is what separates them.
+//
+// Settings leads because over a lifetime it is the most-returned-to screen
+// here (reminder times, app lock, export, subscription), whereas the
+// reference items below are heavy in week one and archival after. The
+// mid-day pause deliberately lives on the Practice tab instead of here: it
+// is something you DO daily, not reference material.
 const menuItems = [
   {
     section: 'App',
     items: [
+      { label: 'Settings', sub: 'Notifications and preferences', icon: 'settings-outline', route: '/settings' },
       { label: 'Dispatches', sub: 'News, updates, and notices', icon: 'newspaper-outline', route: '/dispatches', id: 'dispatches' },
-      { label: 'Mid-day pause', sub: 'Prosoche, the Stoic discipline of attention', icon: 'eye-outline', route: '/prosoche' },
+    ],
+  },
+  {
+    section: 'Learn',
+    items: [
       { label: 'How Marcus works', sub: 'The practice explained', icon: 'help-circle-outline', route: '/howto' },
       { label: 'The Foundations', sub: 'Seven letters on the practice', icon: 'mail-outline', route: '/foundations-list' },
       { label: 'Further reading', sub: 'A short shelf of curated Stoic works', icon: 'library-outline', route: '/library' },
       { label: 'Virtues & imagery', sub: 'The four Virtues and the art that holds them', icon: 'images-outline', route: '/imagery' },
-      { label: 'Settings', sub: 'Notifications and preferences', icon: 'settings-outline', route: '/settings' },
     ],
   },
 ];
@@ -162,8 +176,15 @@ export default function MoreScreen() {
           </View>
         )}
 
-        {menuItems.map(section => (
-          <View key={section.section} style={s.section}>
+        {/* Only the LAST section keeps s.section's paddingBottom (trailing
+            scroll space). Suppressing it on the others makes every card gap
+            equal to paddingTop alone, matching the subscription card above,
+            which overrides paddingBottom to 0 for the same reason. */}
+        {menuItems.map((section, sIdx) => (
+          <View
+            key={section.section}
+            style={[s.section, sIdx < menuItems.length - 1 && { paddingBottom: 0 }]}
+          >
             <View style={s.card}>
               {section.items.map((item, idx) => (
                 <TouchableOpacity

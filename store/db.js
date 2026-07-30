@@ -354,6 +354,10 @@ export async function clearTodayPractice() {
   try {
     await AsyncStorage.removeItem('compass_done');
     await AsyncStorage.removeItem('reading_today');
+    // Mid-day pause completion. It is a single "last done" stamp rather than a
+    // list, so removing it outright is correct: an older stamp already renders
+    // as not-done, and today's is what a reset is meant to clear.
+    await AsyncStorage.removeItem('prosoche_last');
     const raw = await AsyncStorage.getItem(KEYS.JOURNALS);
     const journals = raw ? JSON.parse(raw) : [];
     const today = new Date().toDateString();

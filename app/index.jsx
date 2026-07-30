@@ -110,6 +110,7 @@ export default function PracticeScreen() {
   const [todayDate, setTodayDate] = useState(new Date());
   const [reviewDay, setReviewDay] = useState(0);
   const [reviewDone, setReviewDone] = useState(false);
+  const [prosocheDone, setProsocheDone] = useState(false);
   const [totalDays, setTotalDays] = useState(0);
 
   // Inline meditation player — backed by a module-level singleton in
@@ -178,6 +179,15 @@ export default function PracticeScreen() {
     setEveningDone(!!evening);
     setReadingDone(!!reading);
     setCompassDone(compassToday);
+    // Mid-day pause. Shown as done for today so its tile matches the others'
+    // dot/checkmark treatment. Deliberately NOT part of `completed` above —
+    // it must not affect daily progress, sealing, or the streak.
+    try {
+      const prosocheLast = await AsyncStorage.getItem('prosoche_last');
+      setProsocheDone(!!prosocheLast && new Date(prosocheLast).toDateString() === now.toDateString());
+    } catch {
+      setProsocheDone(false);
+    }
     setStreak(s);
     setGraceActive(
       s.current > 0 &&
@@ -461,6 +471,34 @@ export default function PracticeScreen() {
     </View>
   );
 
+  // Mid-day pause (Prosoche). Lives on Practice rather than More because it is
+  // something you DO, not reference material. Sits between the daily flow and
+  // Weekly since it belongs to the middle of the day. The row is titled just
+  // "Pause": the section eyebrow already says Mid-day, so repeating it reads as
+  // a stutter. Same reason Weekly's row is "Review", not "Weekly review".
+  const middayTileBlock = (
+    <>
+      <View style={s.weeklyHeader}>
+        <Text style={s.secLabel}>Mid-day</Text>
+      </View>
+      <View style={s.routineCard}>
+        <TouchableOpacity
+          style={s.routineRow}
+          onPress={() => router.push('/prosoche')}
+          activeOpacity={0.7}
+        >
+          <View style={[s.dot, prosocheDone && s.dotDone]}>
+            {prosocheDone && <Ionicons name="checkmark" size={13} color={colors.bg} />}
+          </View>
+          <View style={s.routineContent}>
+            <Text style={[s.routineTitle, prosocheDone && s.titleDone]}>Pause</Text>
+            <Text style={s.routineSub}>One question, held for a breath</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+
   const weeklyTileBlock = (() => {
     const hasEnough = totalDays >= 3;
     const sealed = reviewDone;
@@ -493,7 +531,7 @@ export default function PracticeScreen() {
             </View>
             <View style={s.routineContent}>
               <Text style={[s.routineTitle, locked && s.titleLocked, sealed && s.titleDone]}>
-                Weekly review
+                Review
               </Text>
               <Text style={s.routineSub}>{sub}</Text>
             </View>
@@ -630,7 +668,8 @@ export default function PracticeScreen() {
               is still surfaced when today is also review day. */}
           <Animated.View style={[s.body, sealedAnimStyle(3)]}>
             {dailyTiles}
-            {weeklyTileBlock}
+            {middayTileBlock}
+          {weeklyTileBlock}
           </Animated.View>
 
           <Animated.View style={[s.body, sealedAnimStyle(4)]}>
@@ -732,6 +771,7 @@ export default function PracticeScreen() {
 
           {dailyTiles}
 
+          {middayTileBlock}
           {weeklyTileBlock}
 
           {meditationBlock}
