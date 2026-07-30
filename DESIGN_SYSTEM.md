@@ -5,6 +5,12 @@ A working reference for the app's look-and-feel after the Valeriya brand pass: t
 Source of truth for tokens: `constants/theme.js`.
 Source of truth for the gradient-button system: `components/GoldButton.jsx`.
 
+> **Corrected 2026-07-29.** The typography sections below previously described a
+> three-family system (Didot / Inter / Cormorant). Didot and Cormorant were both
+> retired in favour of **Cinzel + Inter**, and the quote voice moved from
+> Cormorant Regular italic to **Inter Light Italic at 20/30**. If this file and
+> `constants/theme.js` ever disagree again, `theme.js` wins.
+
 ---
 
 ## 1. Tokens
@@ -49,25 +55,28 @@ Applied on Practice / Ready / Paywall / Journal / Onboarding-Welcome / More hero
 
 ### Typography
 
-#### Brand fonts (three families)
+#### Brand fonts (two families)
 
 | Family | Source | Weights used | Role in the app |
 |---|---|---|---|
-| **Didot** | iOS / macOS system (no load required) | Regular | Marquee headlines, screen titles, declarative type |
-| **Inter** | Google Fonts (`@expo-google-fonts/inter`) | Regular (400), Medium (500) | All body copy, buttons, eyebrows, UI labels |
-| **Cormorant** | Google Fonts (`@expo-google-fonts/cormorant`) | Regular (400), Bold (700) | "Marcus" wordmark + literary quotes |
+| **Cinzel** | Google Fonts (`@expo-google-fonts/cinzel`) | Regular (400) | Marquee headlines, screen titles, dates, the wordmark. Roman inscriptional caps — no true lowercase and no italic, so display-only |
+| **Inter** | Google Fonts (`@expo-google-fonts/inter`) | Light (300), Light Italic (300), Regular (400), Medium (500), SemiBold (600), Bold (700) | Everything else: body copy, buttons, eyebrows, UI labels, and the italic quote voice |
 
-Inter and Cormorant are both free for commercial use via Google Fonts (Open Font License). Didot ships with iOS / macOS — Figma users will see it natively under macOS; for Figma on web, install [Didot from Linotype](https://www.fonts.com/font/linotype/linotype-didot) or use the system "Didot" if it's available.
+Both are free for commercial use via Google Fonts (Open Font License), and both are bundled — nothing relies on a system font.
+
+*Retired: Didot (marquee) and Cormorant (wordmark + quotes). Do not reintroduce either.*
 
 #### Token map (technical reference)
 
 | Token | Resolves to | Use |
 |---|---|---|
-| `font.display` | `'Didot'` | Marquee headlines, screen titles |
+| `font.display` | `'Cinzel_400Regular'` | Marquee headlines, screen titles, dates, virtue names, the share-card wordmark. ALL-CAPS by nature |
 | `font.body` | `'Inter_400Regular'` | All body copy, default text |
 | `font.bodyMedium` | `'Inter_500Medium'` | Buttons, eyebrows, uppercase labels |
-| `font.wordmark` | `'Cormorant_700Bold'` | The "Marcus" wordmark on Welcome + More tab. Nowhere else. |
-| `font.serif` | `'Cormorant_400Regular'` | Quotes, philosophical passages, the literary voice |
+| `font.bodyLight` | `'Inter_300Light'` | Light-weight body, used sparingly |
+| `font.bodySemiBold` | `'Inter_600SemiBold'` | Emphasis inside UI text, active states |
+| `font.bodyBold` | `'Inter_700Bold'` | Strongest UI emphasis |
+| `font.bodyLightItalic` | `'Inter_300Light_Italic'` | **The quote voice.** Every memento strip, the daily reading, sealed-state quotes, the Prosoche question. Canonically **20pt / lineHeight 30** |
 
 #### Size tokens (kept for legacy / non-screen-title uses)
 
@@ -81,7 +90,9 @@ Inter and Cormorant are both free for commercial use via Google Fonts (Open Font
 | `microSize` | 10 |
 | `sectionTracking` | 1.8 |
 
-**Font loading.** `app/_layout.jsx` runs `useFonts({ Inter_400Regular, Inter_500Medium, Cormorant_400Regular, Cormorant_500Medium, Cormorant_700Bold })` and blocks first paint until fonts resolve. After load, `Text.defaultProps.style` is set to `{ fontFamily: 'Inter_400Regular' }` so any `<Text>` without an explicit `fontFamily` inherits Inter Regular.
+**Font loading.** `app/_layout.jsx` runs `useFonts({ Inter_300Light, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_300Light_Italic, Cinzel_400Regular })`. A `LaunchSplash` covers the app until they resolve, and a font-loading error falls through to system fallbacks rather than hanging on the splash.
+
+**There is no inherited default font.** A `Text.defaultProps` mutation used to set Inter globally, but React 19 / RN 0.81 stopped reading `defaultProps` on function components, making it a silent no-op. **Every `<Text>` must set `fontFamily` explicitly** (`font.body` et al.) or it renders in the system face.
 
 ### Radii
 
@@ -114,15 +125,15 @@ Inter and Cormorant are both free for commercial use via Google Fonts (Open Font
 
 ## 2. Typography hierarchy
 
-The single most important rule: **three fonts, three lanes, never cross-applied**.
+The single most important rule: **two families, three lanes, never cross-applied**.
 
 | Lane | Font | Used on |
 |---|---|---|
-| Marquee | Didot | 44pt onboarding step titles, paywall hero, ready screen, meditate header, practice-tab date (`heroDate`), sealed-state streak, paywall plan prices, empty-state titles |
-| Voice | Cormorant | "Marcus" wordmark (Welcome + More) at Cormorant Bold 700; all italic quote bodies + pulled quotes + sealed-state quote in Cormorant Regular 400 |
-| Utility | Inter | All body paragraphs (`Text.defaultProps` default), all button labels (Medium), all eyebrows / uppercase section labels (Medium), all tab labels (Medium) |
+| Marquee | Cinzel | 44pt onboarding step titles, paywall hero, ready screen, meditate header, practice-tab date (`heroDate`), sealed-state streak, paywall plan prices, empty-state titles |
+| Voice | Inter Light Italic | All quote bodies, pulled quotes, sealed-state quotes, memento strips — canonically **20pt / lineHeight 30**. The "Marcus" wordmark (Welcome + More) is Cinzel |
+| Utility | Inter | All body paragraphs (set explicitly — there is no default), all button labels (Medium), all eyebrows / uppercase section labels (Medium), all tab labels (Medium) |
 
-**Marquee tracking:** Didot has wider proportions than system sans. Relaxed letter-spacing on titles — `-0.5` rather than the `-1.5` that worked for system sans. Same logic for Cormorant Bold on the wordmark (`-1` at 64pt, `-0.5` at 44pt). When changing title sizes, re-tune tracking.
+**Marquee tracking:** Cinzel has wider proportions than system sans. Relaxed letter-spacing on titles — `-0.5` rather than the `-1.5` that worked for system sans. When changing title sizes, re-tune tracking.
 
 **Hero title shadow.** Titles overlaying images carry `textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8` for legibility against bright painting areas. Eyebrows get a stronger shadow (`rgba(0,0,0,0.85)`, radius 6).
 
@@ -280,7 +291,7 @@ Six-step flow, every step art-directed. No more text-on-black screens.
 
 | Step | Treatment |
 |---|---|
-| 1. Welcome | Warm-ember gradient bg + skull + "Marcus" wordmark (Cormorant Bold 64pt, tracking `-1`) + welcome quote ("Be one.") + GoldPrimary "Continue" |
+| 1. Welcome | Warm-ember gradient bg + skull + "Marcus" wordmark (Cinzel 64pt, tracking `-1`) + welcome quote ("Be one.") + GoldPrimary "Continue" |
 | 2. Philosophy ("A daily Stoic practice") | `compass.jpg` painting hero |
 | 3. Practice preview ("The shape of your day") | `journal-morning.jpg` painting hero + 4 daily steps + "Also in your kit" (Guided meditations, Weekly Review, Emotion log, FaceID lock) |
 | 4. Meditations ("Ancient attention training") | `view-from-above.jpg` painting hero + 6 meditation cards with painting thumbnails + audio previews |
@@ -301,7 +312,7 @@ All four archives (read-archive, journal-history, review-archive, emotions-histo
 
 - 180×108 painting thumbnail at top (rounded 12pt), each pulling its in-app hero (`read.jpg` / `journal-morning|evening.jpg` / `review.jpg` / `emotions.jpg`)
 - Eyebrow in Inter Medium uppercase
-- Title in Didot 26pt with `letterSpacing: -0.5, lineHeight: 32`
+- Title in Cinzel 26pt with `letterSpacing: -0.5, lineHeight: 32`
 - Body copy in Inter Regular (default)
 - Optional CTA below
 
@@ -338,7 +349,7 @@ Used on all non-practice-flow screens (settings, archives, weekly review, paywal
 
 ## 11. Conventions
 
-- **Three fonts, three lanes.** Didot for marquee, Inter for utility, Cormorant for voice. If you find yourself reaching for a fourth, the system is breaking.
+- **Two families, three lanes.** Cinzel for marquee, Inter for utility, Inter Light Italic for voice. If you find yourself reaching for a third family, the system is breaking.
 - **No periods on hero headlines.** Applied across all `title` / `stepTitle` / `previewTitle` sites.
 - **Avoid em-dashes in user-facing copy** unless they earn it (per user feedback).
 - **Scroll-to-top on focus** — every screen resets to top via `useFocusEffect` on tab/route re-entry.
@@ -376,8 +387,8 @@ Per-screen `StyleSheet` blocks are the operational layer — most visual changes
 | `expo-linear-gradient` | All hero gradients + GoldButton gradient stops |
 | `react-native-svg` | Procedural noise on GoldPrimary via `<feTurbulence>` |
 | `@react-native-masked-view/masked-view` | GoldSecondary gradient text + icon |
-| `@expo-google-fonts/inter` | `Inter_400Regular` + `Inter_500Medium` |
-| `@expo-google-fonts/cormorant` | `Cormorant_400Regular` + `Cormorant_500Medium` + `Cormorant_700Bold` |
+| `@expo-google-fonts/inter` | `Inter_300Light` + `Inter_300Light_Italic` + `Inter_400Regular` + `Inter_500Medium` + `Inter_600SemiBold` + `Inter_700Bold` |
+| `@expo-google-fonts/cinzel` | `Cinzel_400Regular` |
 | `expo-font` | Font loading helper |
 
-Didot is iOS/macOS-system. No load needed.
+Both families are bundled via `@expo-google-fonts`. Nothing depends on a system font.
