@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, Image,
-  StyleSheet, SafeAreaView, ScrollView, Dimensions,
+  StyleSheet, SafeAreaView, ScrollView, Dimensions, Linking,
 } from 'react-native';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
@@ -14,6 +14,7 @@ import { getStreak } from '../store/db';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { track } from '../lib/analytics';
 import { useEntitlement } from '../lib/useEntitlement';
 import { getUnreadCount, subscribeDispatches, refreshDispatches } from '../lib/dispatches';
 import { getPracticeTimeMs, seedPracticeTimeIfNeeded } from '../lib/practiceTime';
@@ -44,6 +45,12 @@ const menuItems = [
     items: [
       { label: 'Settings', sub: 'Notifications and preferences', icon: 'settings-outline', route: '/settings' },
       { label: 'Dispatches', sub: 'News, updates, and notices', icon: 'newspaper-outline', route: '/dispatches', id: 'dispatches' },
+      // `url` rows open externally instead of navigating. This one deep-links
+      // straight to the App Store review composer (?action=write-review), which
+      // is the only reliable way to ask: SKStoreReviewController (the in-app
+      // prompt in index.jsx) is rate-limited by Apple to ~3 asks per user per
+      // year and cannot be triggered on demand.
+      { label: 'Rate Marcus', sub: 'A minute in the App Store helps others find the practice', icon: 'star-outline', url: 'https://apps.apple.com/app/id6789749038?action=write-review' },
     ],
   },
   {
@@ -191,6 +198,12 @@ export default function MoreScreen() {
                   key={item.label}
                   style={[s.row, idx < section.items.length - 1 && s.rowBorder]}
                   onPress={() => {
+                    // `url` rows leave the app instead of navigating.
+                    if (item.url) {
+                      track('rate_tapped');
+                      Linking.openURL(item.url).catch(() => {});
+                      return;
+                    }
                     // Pass from/fromLabel so destination screens with
                     // back buttons land us back on More instead of the
                     // active tab.
