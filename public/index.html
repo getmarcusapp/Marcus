@@ -1316,6 +1316,22 @@
   }
   .filmsec-frame video { width: 100%; height: auto; display: block; }
   .filmsec-note { margin-top: 20px; font-size: 14px; color: var(--text-muted, #8A8A8A); }
+
+  /* Two cuts of the same film: 16:9 for desktop, 9:16 for phones, where a
+     letterboxed landscape video leaves the app UI too small to read.
+     Swapped with CSS rather than <source media="...">, which looks like the
+     right tool but is not: Chrome dropped support for the media attribute on
+     <source> inside <video>, so it fails silently.
+     The hidden element costs nothing — preload="none" means no video bytes
+     are fetched until play, and display:none suppresses the poster request. */
+  .filmsec-frame .film-tall { display: none; }
+  @media (max-width: 680px) {
+    .filmsec-frame .film-wide { display: none; }
+    .filmsec-frame .film-tall { display: block; }
+    /* A 9:16 video at full width is very tall; cap it so the section still
+       reads as part of a page rather than swallowing the viewport. */
+    .filmsec-frame .film-tall { max-height: 78vh; width: auto; margin: 0 auto; }
+  }
 </style>
 <section class="filmsec">
   <div class="filmsec-inner">
@@ -1323,6 +1339,7 @@
     <h2 class="filmsec-title">Under two minutes on<br>what the practice is.</h2>
     <div class="filmsec-frame">
       <video
+        class="film-wide"
         controls
         playsinline
         preload="none"
@@ -1330,6 +1347,16 @@
         width="1920" height="1080">
         <source src="/video/marcus-film.mp4" type="video/mp4">
         Your browser does not support video. <a href="/video/marcus-film.mp4">Download the film</a>.
+      </video>
+      <video
+        class="film-tall"
+        controls
+        playsinline
+        preload="none"
+        poster="/video/marcus-poster-vertical.jpg"
+        width="1080" height="1920">
+        <source src="/video/marcus-film-vertical.mp4" type="video/mp4">
+        Your browser does not support video. <a href="/video/marcus-film-vertical.mp4">Download the film</a>.
       </video>
     </div>
     <p class="filmsec-note">1 min 46 sec &middot; Sound on</p>
