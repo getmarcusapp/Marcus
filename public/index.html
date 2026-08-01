@@ -1287,6 +1287,56 @@
 </section>
 
 
+<!-- VIDEO — the 106s film. Placed directly after the hero so it is a fast
+     alternative to reading the long-form page below, not a reward for
+     reaching the bottom. preload="none" means nothing downloads until a
+     visitor presses play, so the 9MB file costs the page nothing. -->
+<style>
+  .filmsec {
+    background: var(--bg-deep);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 100px 24px;
+  }
+  .filmsec-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+  .filmsec-eyebrow {
+    font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 20px;
+  }
+  .filmsec-title {
+    font-size: clamp(26px, 4vw, 38px); font-weight: 700;
+    color: #FFFFFF; letter-spacing: -1px; line-height: 1.15; margin-bottom: 40px;
+  }
+  .filmsec-frame {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    line-height: 0;
+  }
+  .filmsec-frame video { width: 100%; height: auto; display: block; }
+  .filmsec-note { margin-top: 20px; font-size: 14px; color: var(--text-muted, #8A8A8A); }
+</style>
+<section class="filmsec">
+  <div class="filmsec-inner">
+    <p class="filmsec-eyebrow">Watch</p>
+    <h2 class="filmsec-title">Ninety seconds on<br>what the practice is.</h2>
+    <div class="filmsec-frame">
+      <video
+        controls
+        playsinline
+        preload="none"
+        poster="/video/marcus-poster.jpg"
+        width="1920" height="1080">
+        <source src="/video/marcus-90.mp4" type="video/mp4">
+        Your browser does not support video. <a href="/video/marcus-90.mp4">Download the film</a>.
+      </video>
+    </div>
+    <p class="filmsec-note">1 min 46 sec &middot; Sound on</p>
+  </div>
+</section>
+
+
 <!-- PAIN -->
 <section class="pain">
   <p class="pain-eyebrow">The real problem</p>
@@ -1384,13 +1434,13 @@
       <div class="feature">
         <p class="feature-label">Morning practice</p>
         <p class="feature-title">Morning Journal</p>
-        <p class="feature-body">Four Stoic prompts including premeditatio malorum: negative visualization. Modern research confirms what the Stoics already knew: anticipating difficulty reduces anxiety and sharpens decision-making. Begin with clarity instead of noise.</p>
+        <p class="feature-body">Five Stoic prompts including premeditatio malorum: negative visualization. Modern research confirms what the Stoics already knew: anticipating difficulty reduces anxiety and sharpens decision-making. Begin with clarity instead of noise.</p>
       </div>
 
       <div class="feature">
         <p class="feature-label">Evening practice</p>
         <p class="feature-title">Evening Journal</p>
-        <p class="feature-body">The nightly Examen: Marcus Aurelius's actual practice. Examine where you acted with Virtue. Confess where you fell short. Release what you're carrying before sleep. The gap between who you are and who you admire only closes when you look at it honestly.</p>
+        <p class="feature-body">The nightly Examen, the practice Seneca described and Epictetus set to three questions: what did I do well, what did I do badly, what did I leave undone. Then release what you are carrying before sleep, and name one thing that deserves your thanks. The gap between who you are and who you admire only closes when you look at it honestly.</p>
       </div>
 
       <div class="feature">
@@ -1495,9 +1545,9 @@
   <div class="meditations-bg"></div>
   <div class="meditations-overlay"></div>
   <div class="meditations-inner">
-    <p class="meditations-eyebrow">Six guided meditations</p>
+    <p class="meditations-eyebrow">Seven guided meditations</p>
     <h2 class="meditations-title">Ancient attention training,<br>voiced.</h2>
-    <p class="meditations-sub">Six Stoic meditations, less than five minutes each. The right one surfaces at the right moment of your day: preparation in the morning, perspective at midday, accounting in the evening. Listen on the way to work, before journaling, or anytime you need to return to yourself.</p>
+    <p class="meditations-sub">Seven Stoic meditations, less than five minutes each. The right one surfaces at the right moment of your day: preparation in the morning, perspective at midday, accounting in the evening. Listen on the way to work, before journaling, or anytime you need to return to yourself.</p>
     <div class="meditations-grid">
       <div class="meditation-item">
         <p class="meditation-tag">Perspective</p>
@@ -1522,6 +1572,10 @@
       <div class="meditation-item">
         <p class="meditation-tag">Mortality</p>
         <p class="meditation-title">Memento Mori</p>
+      </div>
+      <div class="meditation-item">
+        <p class="meditation-tag">Control</p>
+        <p class="meditation-title">The Dichotomy of Control</p>
       </div>
     </div>
   </div>
@@ -1707,7 +1761,7 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
 
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">Does Marcus integrate with Apple Health?</div>
-      <div class="faq-answer">Yes, opt-in. With your permission, each practice you complete (compass, daily reading, morning or evening journal, emotion log) is recorded as a Mindful Session in Apple Health. Your Stoic reflection time is then counted alongside meditation and breathwork in the Mindful Minutes view. Only the start and end timestamps are written, never the content of your journal entries. Marcus does not read any health data from your device.</div>
+      <div class="faq-answer">Yes, opt-in. With your permission, each practice you complete (compass, daily reading, morning or evening journal, emotion log, guided meditation) is recorded as a Mindful Session in Apple Health. Your Stoic reflection time is then counted alongside meditation and breathwork in the Mindful Minutes view. Only the start and end timestamps are written, never the content of your journal entries. Marcus does not read any health data from your device.</div>
     </div>
 
     <div class="faq-item">

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Tabs, useRouter, useSegments, usePathname } from 'expo-router';
+import * as Notifications from 'expo-notifications';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, AppState, Platform, StyleSheet, Image } from 'react-native';
@@ -42,7 +43,30 @@ function HamburgerIcon({ color, size = 26, barWidth = 22, barHeight = 2, gap = 4
 const PRACTICE_ROUTES = new Set([
   '/', '/index', '/compass', '/read', '/journal', '/review', '/meditate',
   '/journal-history', '/read-archive', '/review-archive', '/foundations',
+  '/prosoche',
 ]);
+
+// Routes a notification tap to the screen named in its content.data.route.
+// Nothing else deep-links today; the midday Prosoche reminder is the first
+// consumer. useLastNotificationResponse covers both the cold-start launch
+// (app opened by tapping the notification) and warm taps while running. A
+// ref guards against re-navigating for the same response on re-render, and
+// a short defer lets the router + OnboardingGate settle on cold start.
+function NotificationRouter() {
+  const router = useRouter();
+  const response = Notifications.useLastNotificationResponse();
+  const handledRef = useRef(null);
+  useEffect(() => {
+    const route = response?.notification?.request?.content?.data?.route;
+    if (!route) return;
+    const key = response.notification?.request?.identifier ?? route;
+    if (handledRef.current === key) return;
+    handledRef.current = key;
+    const t = setTimeout(() => { try { router.push(route); } catch {} }, 400);
+    return () => clearTimeout(t);
+  }, [response]);
+  return null;
+}
 const EMOTIONS_ROUTES = new Set(['/emotions', '/emotions-history']);
 function useLogicalTabKey() {
   const pathname = usePathname();
@@ -209,6 +233,7 @@ export default function Layout() {
       {appReady && (
       <SafeAreaProvider>
       <OnboardingGate />
+      <NotificationRouter />
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,
@@ -276,6 +301,7 @@ export default function Layout() {
         <Tabs.Screen name="foundations" options={{ href: null }} />
         <Tabs.Screen name="foundations-list" options={{ href: null }} />
         <Tabs.Screen name="meditate" options={{ href: null }} />
+        <Tabs.Screen name="prosoche" options={{ href: null }} />
         <Tabs.Screen name="imagery" options={{ href: null }} />
         <Tabs.Screen name="library" options={{ href: null }} />
         <Tabs.Screen name="paywall" options={{ href: null }} />

@@ -7,6 +7,15 @@
       "pinned": true,
       "title": "Welcome to the practice",
       "body": "This is where Marcus reaches you: word when a new letter arrives in your first week, the occasional notice, nothing more.\n\nEverything here is meant to be seen once, then it clears. No noise. Reminders live in your notifications, and only if you ask for them.\n\nThe practice is simple. Show up, set your intention, examine your day. Begin when you are ready."
+    },
+    {
+      "id": "midday-pause-2026-07",
+      "date": "2026-07-29",
+      "type": "notice",
+      "minVersion": "1.2.0",
+      "title": "A mid-day pause",
+      "body": "The Stoics had a name for the discipline of attention: prosoche. Epictetus gave it an entire discourse. It is sometimes called Stoic mindfulness, though the aim is not calm. It is vigilance, noticing what you have assented to before it hardens into a judgment.\n\nMarcus now has a mid-day pause. One question, held for a breath or two, then back to your day. No timer, nothing to finish, nothing to keep score of.\n\nIt is off by default, because attention you choose is the point. Turn it on in Settings under Notifications, and pick your hour.",
+      "cta": { "label": "Try it now", "route": "/prosoche" }
     }
   ]
 }

@@ -44,6 +44,11 @@ const MEDITATION_NOTES = {
     work: 'Young Man with a Skull (c. 1626–28, National Gallery, London)',
     why: 'A young man holding a skull, eyes meeting the viewer\'s. Memento mori without the cliché of the old monk contemplating death — a young person looking right at it. That\'s the spirit of the practice: not deathbed wisdom, but living wisdom.',
   },
+  'dichotomy-of-control': {
+    artist: 'Annibale Carracci',
+    work: 'The Choice of Hercules (c. 1596, Museo di Capodimonte, Naples)',
+    why: 'Hercules at the crossroads, seated between the steep path of Virtue and the easy path of Pleasure. The choice is the one thing entirely his — exactly what the dichotomy of control isolates: not the outcome, not the road, but which way he turns. Carracci paints the moment of decision itself.',
+  },
 };
 
 const VIRTUE_NOTES = {
@@ -230,7 +235,7 @@ export default function ImageryScreen() {
           ))}
 
           <SectionHeader
-            eyebrow="The six meditations"
+            eyebrow="The seven meditations"
             title="One artwork per meditation"
             sub="Surfaced contextually based on the time of day."
           />

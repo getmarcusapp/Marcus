@@ -122,6 +122,11 @@ const REMINDER_IDS = {
   review: 'reminder-review',
 };
 
+// reviewDay is 0=Sunday..6=Saturday (matches Date.getDay() used in index.jsx
+// and the DAYS picker in settings). The review reminder names the chosen day
+// so a user who picks Wednesday isn't told "Sunday reckoning".
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 // Re-entrancy guard: boot and the AppState foreground listener can both call
 // this in quick succession (FaceID prompts cause inactive→active blips). Two
 // interleaved runs would each cancel-all then schedule, duplicating every
@@ -231,8 +236,11 @@ async function doScheduleAllNotifications() {
         title: 'Pause',
         body: personalizedDay
           ? `“${compassPhrase}” Is that who showed up this morning?`
-          : 'How are you meeting the day?',
+          : 'How has the morning gone? Have you acted in accordance with your values?',
         sound: false,
+        // Tapping the midday reminder deep-links to the Prosoche checkpoint
+        // (routed in app/_layout.jsx via the notification-response listener).
+        data: { route: '/prosoche' },
       },
       trigger: { type: 'daily', hour: settings.middayHour, minute: settings.middayMinute },
     });
@@ -240,10 +248,11 @@ async function doScheduleAllNotifications() {
 
   // Weekly review
   if (settings.reviewEnabled) {
+    const reviewDayName = DAY_NAMES[(settings.reviewDay ?? 0) % 7] || 'Weekly';
     await Notifications.scheduleNotificationAsync({
       identifier: REMINDER_IDS.review,
       content: {
-        title: 'Sunday reckoning',
+        title: `${reviewDayName} reckoning`,
         body: 'Five questions. The week is yours to close.',
         sound: false,
       },

@@ -55,7 +55,7 @@ async function maybeAskHealthPermission() {
 // Morning + Evening prompts live in constants/journalPrompts.js so the
 // Past Entries view can render the same prompt copy when displaying or
 // editing past entries.
-import { morningPrompts, eveningPrompts } from '../constants/journalPrompts';
+import { morningPrompts, eveningPromptsInOrder, UNDONE_KEY } from '../constants/journalPrompts';
 
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
@@ -64,19 +64,64 @@ const virtuePronunciations = {
   dikaiosyne: 'dee-KAY-oh-sih-nee',
 };
 
-// Info sheet for the Reckoning step — matches the scholarly register of the
-// other prompts' info cards.
-const RECKON_INFO = {
-  title: 'The Reckoning',
-  source: 'Seneca, On Anger 3.36',
-  body: "Every night, before sleep, Seneca put his day on trial: 'I examine my entire day and go back over what I have done and said, hiding nothing from myself, passing nothing by.' The examination begins where the morning began.\n\nEach morning you name what you are postponing, or brace for a difficulty ahead. This step holds you to it. The question is not whether you succeeded. It is whether you moved: a step taken, a call made, an avoidance noticed and named.\n\nAnswer plainly. 'I did not touch it' is a complete and honest answer, and writing it down is how the pattern becomes visible. The Stoics did not grade the day. They learned from it.",
-};
+// Morning memento quotes rotate day to day so the pre-writing landing does not
+// go stale. The Serenity Prayer earns its place: it is the dichotomy of control
+// compressed to three lines (Epictetus in later dress), and its Courage/Wisdom
+// name two of the four cardinal virtues the app is built around. Kept in its
+// secular "Give me" form, not "God grant me", to hold Marcus's non-religious
+// register. Add more entries here to extend the rotation.
+const MORNING_MEMENTOS = [
+  {
+    text: '"When you wake, expect to meet people who are difficult: meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."',
+    attr: 'Marcus Aurelius · Meditations II.1',
+  },
+  {
+    text: '"Give me the Serenity to accept the things I cannot change,\nThe Courage to change the things I can,\nAnd the Wisdom to know the difference."',
+    attr: 'The Serenity Prayer',
+  },
+  {
+    text: '"Some things are within our control and some are not. Within our control are opinion, desire, aversion, and, in a word, whatever is our own doing. Not within our control are the body, property, and reputation, whatever is not our own doing."',
+    attr: 'Epictetus · Enchiridion 1',
+  },
+  {
+    text: '"Begin at once to live, and count each separate day as a separate life."',
+    attr: 'Seneca · Letters 101',
+  },
+  {
+    text: '"At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work, as a human being. What do I have to complain of, if I\'m going to do what I was born for, the things I was brought into the world to do?"',
+    attr: 'Marcus Aurelius · Meditations V.1',
+  },
+  {
+    text: '"Men are disturbed not by things, but by the views which they take of them."',
+    attr: 'Epictetus · Enchiridion 5',
+  },
+];
 
-// Display numerals when the Reckoning joins the evening sequence — the
-// night renumbers as one flow (I · Morning, II · Examine, ...). Archive
-// rendering keeps the constants' numbering; the reckoning appears there
-// as its own labeled block.
-const ROMANS = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+// Evening mementos rotate the same way. Themed for day's-end: examination,
+// acceptance, retreat, release. Seen daily (like morning), so it carries a
+// full rotation. Add {text, attr} entries to extend.
+const EVENING_MEMENTOS = [
+  {
+    text: '"Ask yourself at day\'s end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn."',
+    attr: 'Epictetus · Discourses III.10',
+  },
+  {
+    text: '"Let us go to our sleep with joy and gladness; let us say, I have lived, and have run the course that Fortune set for me."',
+    attr: 'Seneca · Letters 12',
+  },
+  {
+    text: '"Nowhere can you find a more peaceful or untroubled retreat than in your own soul. Give yourself this retreat, and renew yourself."',
+    attr: 'Marcus Aurelius · Meditations IV.3',
+  },
+  {
+    text: '"Do not seek to have events happen as you want them to, but wish them to happen as they do, and your life will go well."',
+    attr: 'Epictetus · Enchiridion 8',
+  },
+  {
+    text: '"You could leave life right now. Let that determine what you do and say and think."',
+    attr: 'Marcus Aurelius · Meditations II.11',
+  },
+];
 
 export default function JournalScreen() {
   const router = useRouter();
@@ -103,8 +148,6 @@ export default function JournalScreen() {
       setSessionType(params.type);
     }
   }, [params?.type]);
-  const prompts = isMorning ? morningPrompts : eveningPrompts;
-
   const [answers, setAnswers] = useState({});
   const [openPrompt, setOpenPrompt] = useState(-1);
   // onLanding is defined below, after wizardPrompts.
@@ -146,36 +189,27 @@ export default function JournalScreen() {
     const morning = await getTodayJournal('morning');
     const named = morning?.answers?.[2]?.trim();
     const braced = morning?.answers?.[1]?.trim();
-    if (named) setMorningEcho({ lead: 'You named what you were postponing:', text: named, question: 'Did you move toward it?' });
-    else if (braced) setMorningEcho({ lead: 'You braced for:', text: braced, question: 'How did you meet it?' });
+    // No `question` here — III · Undone supplies it now.
+    if (named) setMorningEcho({ lead: 'You named what you were postponing:', text: named });
+    else if (braced) setMorningEcho({ lead: 'You braced for:', text: braced });
     else setMorningEcho(null);
   }, [isMorning]);
 
-  // Wizard step list. The four standard prompts keep their historical
-  // numeric answer keys (0-3) so saved entries stay shape-stable; the
-  // Reckoning, when present, leads as I · Morning and the rest renumber
-  // for display so the night reads as one sequence.
+  // Wizard step list. Evening always runs the same five steps, rendered in
+  // display order (see the storage-contract note in constants/journalPrompts).
+  // When the user journaled this morning, the commitment they named is merged
+  // into III · Undone as context above its question — the nightly examination
+  // auditing the morning's intention, which was Seneca's whole point. It rides
+  // on that prompt rather than adding a step, so the evening length is
+  // constant whether or not a morning entry exists.
   const wizardPrompts = React.useMemo(() => {
-    if (!isMorning && morningEcho) {
-      return [
-        {
-          reckon: true,
-          answerKey: 'reckon',
-          num: 'I · Morning',
-          q: morningEcho.question,
-          echoLead: morningEcho.lead,
-          echoText: morningEcho.text,
-          info: RECKON_INFO,
-        },
-        ...prompts.map((p, i) => ({
-          ...p,
-          answerKey: i,
-          num: `${ROMANS[i + 1]} · ${p.num.split(' · ')[1]}`,
-        })),
-      ];
-    }
-    return prompts.map((p, i) => ({ ...p, answerKey: i }));
-  }, [prompts, isMorning, morningEcho]);
+    if (isMorning) return morningPrompts.map((p, i) => ({ ...p, answerKey: i }));
+    return eveningPromptsInOrder.map(p =>
+      p.answerKey === UNDONE_KEY && morningEcho
+        ? { ...p, reckon: true, echoLead: morningEcho.lead, echoText: morningEcho.text }
+        : p
+    );
+  }, [isMorning, morningEcho]);
 
   // True when the user is on the landing screen. Out-of-range openPrompt
   // values are treated as landing too — that catches the race when the
@@ -242,7 +276,8 @@ export default function JournalScreen() {
     };
     // Preserve what the reckoning was ABOUT — the answer alone ("yes,
     // finally") is meaningless in the archive without the morning's words.
-    if (answers.reckon?.trim() && morningEcho) {
+    // Keyed to III · Undone, which the morning echo now rides on.
+    if (answers[UNDONE_KEY]?.trim() && morningEcho) {
       entry.reckonOf = morningEcho.text;
     }
     const ok = await saveJournal(entry);
@@ -335,14 +370,21 @@ export default function JournalScreen() {
               </View>
 
               <View style={s.mementoStrip}>
-                <Text style={s.mementoText}>
-                  {isMorning
-                    ? '"When you wake, expect to meet people who are difficult: meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."'
-                    : '"Ask yourself at day\'s end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn."'}
-                </Text>
-                <Text style={s.mementoSub}>
-                  {isMorning ? 'Marcus Aurelius · Meditations II.1' : 'Epictetus · Discourses III.10'}
-                </Text>
+                {(() => {
+                  // Rotate the morning memento at the user's local midnight
+                  // (not UTC), so each new day the landing shows the next quote.
+                  const now = new Date();
+                  const localDay = Math.floor((now.getTime() - now.getTimezoneOffset() * 60000) / 86400000);
+                  const memento = isMorning
+                    ? MORNING_MEMENTOS[localDay % MORNING_MEMENTOS.length]
+                    : EVENING_MEMENTOS[localDay % EVENING_MEMENTOS.length];
+                  return (
+                    <>
+                      <Text style={s.mementoText}>{memento.text}</Text>
+                      <Text style={s.mementoSub}>{memento.attr}</Text>
+                    </>
+                  );
+                })()}
               </View>
 
               <View style={s.body}>
@@ -453,6 +495,7 @@ export default function JournalScreen() {
                       </>
                     )}
                     <Text style={[s.promptQ, prompt.reckon && { marginTop: 12 }]}>{prompt.q}</Text>
+                    {prompt.sub ? <Text style={s.promptSub}>{prompt.sub}</Text> : null}
                     {prompt.info && prompt.hint && (
                       <Text style={s.promptSub}>{prompt.hint}</Text>
                     )}
