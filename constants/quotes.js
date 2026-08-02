@@ -204,6 +204,18 @@ export const morningQuotes = [
   { text: "Some things are within our control and some are not. Within our control are opinion, desire, aversion, and, in a word, whatever is our own doing. Not within our control are the body, property, and reputation, whatever is not our own doing.", author: "Epictetus", source: "Enchiridion", ref: "Enchiridion 1" },
   { text: "At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work, as a human being. What do I have to complain of, if I'm going to do what I was born for, the things I was brought into the world to do?", author: "Marcus Aurelius", source: "Meditations", ref: "Meditations V.1" },
   { text: "Lay down for yourself, at the outset, a certain stamp and type of character, which you are to maintain whether you are by yourself or meeting with people.", author: "Epictetus", source: "Enchiridion", ref: "Enchiridion 33" },
+  { text: "The mark of a moderate man is freedom from his own ideas.", author: "Lao Tzu", source: "Tao Te Ching" },
+  { text: "Fortune favors the bold.", author: "Virgil", source: "Aeneid" },
+  { text: "Be kind, for everyone you meet is fighting a hard battle.", author: "Ian Maclaren", source: "attributed" },
+  { text: "One must cultivate one's garden.", author: "Voltaire", source: "Candide" },
+  { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Will Durant", source: "The Story of Philosophy" },
+  { text: "Courage is the first of human qualities because it is the quality which guarantees the others.", author: "Winston Churchill", source: "attributed" },
+  { text: "A person's character is their destiny.", author: "Heraclitus", source: "Fragments" },
+  { text: "Grasp the subject, the words will follow.", author: "Cato the Elder", source: "attributed" },
+  { text: "Know thyself.", author: "Delphic maxim", source: "Temple of Apollo" },
+  { text: "He who is not contented with what he has would not be contented with what he would like to have.", author: "Epicurus", source: "Vatican Sayings" },
+  { text: "Do not do to others what angers you if done to you by others.", author: "Isocrates", source: "To Nicocles" },
+  { text: "Pardon one offense and you encourage the commission of many.", author: "Publilius Syrus", source: "Sentences" },
 ];
 
 export const mementoMoriQuotes = [
