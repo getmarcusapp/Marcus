@@ -9,6 +9,7 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { cancelAllNotifications } from '../notifications';
 import { clearTodayPractice, sealTodayPractice, seedWeekOfPracticeData, seedYearOfPracticeData } from '../store/db';
 import { setPracticeTimeMs } from '../lib/practiceTime';
+import { seedSavedLines, clearSavedLines } from '../lib/saved';
 
 // Estimated Time-in-Practice totals for the scenario seeds (dev-only).
 const WEEK_PRACTICE_MS = 150 * 60 * 1000;        // ~2h 30m for a seeded week
@@ -124,6 +125,37 @@ function DeveloperSettingsInner() {
         },
       ]
     );
+  }
+
+  function handleSeedSaved() {
+    Alert.alert(
+      'Seed saved lines?',
+      'Adds seven passages to Saved with backdated timestamps. That is past the five-line threshold, so the Practice screen will start drawing from your collection roughly one day in three. Existing saved lines are kept.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Seed',
+          onPress: async () => {
+            const r = await seedSavedLines();
+            Alert.alert('', `Added ${r.added} lines (${r.total} total). Check More \u2192 Saved, then watch the Practice quote: on resurfacing days it arrives with the heart already filled.`);
+          },
+        },
+      ],
+    );
+  }
+
+  function handleClearSaved() {
+    Alert.alert('Clear all saved lines?', 'Empties the collection so the empty state can be checked.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Clear',
+        style: 'destructive',
+        onPress: async () => {
+          const n = await clearSavedLines();
+          Alert.alert('', `Removed ${n} saved ${n === 1 ? 'line' : 'lines'}.`);
+        },
+      },
+    ]);
   }
 
   function handleSeedWeek() {

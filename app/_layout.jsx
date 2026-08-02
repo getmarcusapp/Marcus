@@ -304,6 +304,9 @@ export default function Layout() {
         <Tabs.Screen name="prosoche" options={{ href: null }} />
         <Tabs.Screen name="imagery" options={{ href: null }} />
         <Tabs.Screen name="library" options={{ href: null }} />
+        <Tabs.Screen name="saved" options={{ href: null }} />
+        <Tabs.Screen name="stoics" options={{ href: null }} />
+        <Tabs.Screen name="stoic" options={{ href: null }} />
         <Tabs.Screen name="paywall" options={{ href: null }} />
         <Tabs.Screen name="ready" options={{ href: null }} />
         <Tabs.Screen name="welcome" options={{ href: null }} />

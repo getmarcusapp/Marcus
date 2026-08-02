@@ -26,6 +26,7 @@ import { useKeyboardVisible } from '../lib/useKeyboardVisible';
 import { useCaretScroll } from '../lib/useCaretScroll';
 import { captureRef } from 'react-native-view-shot';
 import { ReadingShareCard } from '../components/ReadingShareCard';
+import { SaveHeart } from '../components/SaveHeart';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { PracticeHeader } from '../components/PracticeHeader';
 import { STOIC_QUOTES, selectCandidates } from '../constants/stoicQuotes';
@@ -385,6 +386,17 @@ Return only the JSON object.`;
             ) : reading ? (
               <>
                 <View style={s.quoteCard}>
+                  {/* Heart sits left of the share icon: keeping a line is the
+                      more common act, so it takes the position nearer the text. */}
+                  <View style={s.quoteSaveIcon}>
+                    <SaveHeart
+                      text={reading.quote}
+                      author={reading.author}
+                      work={reading.work}
+                      from="reading"
+                      size={19}
+                    />
+                  </View>
                   <TouchableOpacity
                     style={s.quoteShareIcon}
                     onPress={handleShare}
@@ -595,5 +607,9 @@ const s = StyleSheet.create({
     position: 'absolute', top: 14, right: 14, zIndex: 1,
     padding: 4,
   },
-  quoteTextWithIcon: { paddingRight: 40 },
+  quoteSaveIcon: {
+    position: 'absolute', top: 14, right: 48, zIndex: 1,
+  },
+  // Widened from 40 to clear both icons rather than just the share one.
+  quoteTextWithIcon: { paddingRight: 78 },
 });

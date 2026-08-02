@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { READING_LIST, bookshopUrl, amazonUrl } from '../constants/library';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { BookCover } from '../components/BookCover';
 import { ScreenHeader } from '../components/ScreenHeader';
 
 const SECTIONS = [
@@ -24,10 +25,18 @@ const STICKY_NAV_HEIGHT = 60;
 function BookCard({ book }) {
   return (
     <View style={s.card}>
-      <Text style={s.title}>{book.title}</Text>
-      <View style={s.byline}>
-        <Text style={s.author}>{book.author}</Text>
-        {book.translator ? <Text style={s.translator}>· trans. {book.translator}</Text> : null}
+      {/* Cover beside the title rather than above the card: it breaks up what
+          was an unrelieved column of text, and keeps the "why" paragraph at
+          full width where it reads best. */}
+      <View style={s.headRow}>
+        <BookCover book={book} width={82} />
+        <View style={s.headText}>
+          <Text style={s.title}>{book.title}</Text>
+          <View style={s.byline}>
+            <Text style={s.author}>{book.author}</Text>
+            {book.translator ? <Text style={s.translator}>· trans. {book.translator}</Text> : null}
+          </View>
+        </View>
       </View>
       <Text style={s.why}>{book.why}</Text>
       <View style={s.linksRow}>
@@ -325,8 +334,10 @@ const s = StyleSheet.create({
     borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md,
     backgroundColor: colors.bgCard, marginBottom: 14, padding: 18,
   },
-  title: { fontSize: 19, color: colors.textPrimary, fontFamily: font.bodyMedium, marginBottom: 4, lineHeight: 26 },
-  byline: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', marginBottom: 12 },
+  headRow: { flexDirection: 'row', gap: 14, marginBottom: 14 },
+  headText: { flex: 1, paddingTop: 2 },
+  title: { fontSize: 19, color: colors.textPrimary, fontFamily: font.bodyMedium, marginBottom: 6, lineHeight: 26 },
+  byline: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline' },
   author: { fontSize: 12, color: colors.accent, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginRight: 4 },
   translator: { fontSize: 12, color: colors.textSecondary, fontStyle: 'italic' },
   why: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 16 },

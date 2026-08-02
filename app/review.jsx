@@ -18,6 +18,10 @@ import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { HeroOverlayChip } from '../components/HeroOverlayChip';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { QuoteActions } from '../components/QuoteActions';
+import { useQuoteShare } from '../lib/useQuoteShare';
+import { splitAttribution } from '../lib/saved';
+import { ReadingShareCard } from '../components/ReadingShareCard';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { WizardHeader } from '../components/WizardHeader';
 
@@ -79,6 +83,7 @@ const WEEKLY_MEMENTOS = [
 
 export default function ReviewScreen() {
   const playerInset = useMiniPlayerInset();
+  const { cardRef: shareCardRef, pending: pendingShare, shareQuote } = useQuoteShare('review');
   const router = useRouter();
   const params = useLocalSearchParams();
   const fromPath = params?.from || '/';
@@ -363,6 +368,13 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      {/* Off-screen share card, mounted only while a share is in flight. Kept
+          near the screen root so no ancestor can clip the capture. */}
+      {pendingShare && (
+        <View ref={shareCardRef} collapsable={false} style={s.shareCardOffscreen}>
+          <ReadingShareCard quote={pendingShare.text} author={pendingShare.author} work={pendingShare.work} />
+        </View>
+      )}
       {openPrompt < 0 ? (
         <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
       ) : (
@@ -420,10 +432,20 @@ export default function ReviewScreen() {
                 const now = new Date();
                 const localDay = Math.floor((now.getTime() - now.getTimezoneOffset() * 60000) / 86400000);
                 const memento = WEEKLY_MEMENTOS[localDay % WEEKLY_MEMENTOS.length];
+                const { author, work } = splitAttribution(memento.attr);
                 return (
                   <>
                     <Text style={s.reviewMementoText}>{memento.text}</Text>
-                    <Text style={s.reviewMementoSub}>{memento.attr}</Text>
+                    <View style={s.reviewMementoFooter}>
+                      <Text style={[s.reviewMementoSub, { flexShrink: 1 }]}>{memento.attr}</Text>
+                      <QuoteActions
+                        text={memento.text}
+                        author={author}
+                        work={work}
+                        from="review"
+                        onShare={shareQuote}
+                      />
+                    </View>
                   </>
                 );
               })()}
@@ -870,6 +892,8 @@ const s = StyleSheet.create({
   reviewMementoText: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
   // Gold uppercase attribution — matches the unified treatment across the app
   // (onboarding / journal / emotions / read). Was Inter 13 gray title-case.
+  shareCardOffscreen: { position: 'absolute', left: -9999, top: -9999 },
+  reviewMementoFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   reviewMementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
   // Wizard Back/Next pair shown when the keyboard is dismissed. The
   // InputAccessoryView covers the keyboard-up case.

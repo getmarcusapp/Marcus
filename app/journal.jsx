@@ -10,6 +10,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { QuoteActions } from '../components/QuoteActions';
+import { useQuoteShare } from '../lib/useQuoteShare';
+import { splitAttribution } from '../lib/saved';
+import { ReadingShareCard } from '../components/ReadingShareCard';
 import { useCaretScroll } from '../lib/useCaretScroll';
 import { PracticeHeader } from '../components/PracticeHeader';
 import { WizardHeader } from '../components/WizardHeader';
@@ -141,6 +145,7 @@ export default function JournalScreen() {
     router.push('/paywall');
   }
   const journalMedPlayer = useMeditationPlayer();
+  const { cardRef: shareCardRef, pending: pendingShare, shareQuote } = useQuoteShare('journal');
 
   // Sync sessionType when navigating here explicitly from practice with a type param
   useEffect(() => {
@@ -301,6 +306,13 @@ export default function JournalScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      {/* Off-screen share card, mounted only while a share is in flight. Kept
+          near the screen root so no ancestor can clip the capture. */}
+      {pendingShare && (
+        <View ref={shareCardRef} collapsable={false} style={s.shareCardOffscreen}>
+          <ReadingShareCard quote={pendingShare.text} author={pendingShare.author} work={pendingShare.work} />
+        </View>
+      )}
       {onLanding ? (
         <PracticeHeader current={isMorning ? 'morning' : 'evening'} />
       ) : (
@@ -378,10 +390,20 @@ export default function JournalScreen() {
                   const memento = isMorning
                     ? MORNING_MEMENTOS[localDay % MORNING_MEMENTOS.length]
                     : EVENING_MEMENTOS[localDay % EVENING_MEMENTOS.length];
+                  const { author, work } = splitAttribution(memento.attr);
                   return (
                     <>
                       <Text style={s.mementoText}>{memento.text}</Text>
-                      <Text style={s.mementoSub}>{memento.attr}</Text>
+                      <View style={s.mementoFooter}>
+                        <Text style={[s.mementoSub, s.mementoSubFlex]}>{memento.attr}</Text>
+                        <QuoteActions
+                          text={memento.text}
+                          author={author}
+                          work={work}
+                          from={isMorning ? 'journal-morning' : 'journal-evening'}
+                          onShare={shareQuote}
+                        />
+                      </View>
                     </>
                   );
                 })()}
@@ -661,6 +683,11 @@ const s = StyleSheet.create({
   mementoText: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
   // Gold uppercase attribution — matches the onboarding welcome screen so
   // every quote reads as one unified component. Was Inter 13 gray title-case.
+  // Attribution and the save/share pair share a row. The attribution shrinks
+  // rather than pushing the icons off a narrow screen.
+  shareCardOffscreen: { position: 'absolute', left: -9999, top: -9999 },
+  mementoFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  mementoSubFlex: { flexShrink: 1 },
   mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
 
   // The Reckoning step: the morning's own words, quoted inside the wizard

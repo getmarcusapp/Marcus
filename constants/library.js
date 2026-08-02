@@ -36,6 +36,14 @@ export function amazonUrl(asin) {
 // isbn = 13-digit ISBN (used to search-by-ISBN on Bookshop.org).
 // Where multiple translations exist, the recommended one is named.
 
+// Open Library cover by ISBN. `default=false` makes a missing cover return 404
+// rather than a grey placeholder image, so callers can fall back deliberately.
+// -L is the large size, which is what the in-app cover rows want; the website
+// generator uses -M for its smaller grid.
+export function coverUrl(isbn, size = 'L') {
+  return `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-${size}.jpg?default=false`;
+}
+
 export const READING_LIST = [
   // ─── Primary Sources ─────────────────────────────────────────────────
   {

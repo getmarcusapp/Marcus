@@ -19,6 +19,9 @@ import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { HeroOverlayChip } from '../components/HeroOverlayChip';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
+import { QuoteActions } from '../components/QuoteActions';
+import { useQuoteShare } from '../lib/useQuoteShare';
+import { ReadingShareCard } from '../components/ReadingShareCard';
 
 
 // Situation-agnostic reframes
@@ -69,9 +72,20 @@ const iss = StyleSheet.create({
   value: { fontSize: 18, fontFamily: font.bodyBold, color: colors.textPrimary, minWidth: 48, textAlign: 'right' },
 });
 
+// Hoisted out of JSX so the heart, the share card and the rendered text all
+// use one string. Inline JSX text cannot be handed to the save/share pipeline
+// without duplicating it, and a duplicate would eventually drift.
+const MEMENTO = {
+  text: 'Men are disturbed not by the things which happen, but by the opinions about the things.',
+  attr: 'Epictetus · Enchiridion 5',
+  author: 'Epictetus',
+  work: 'Enchiridion 5',
+};
+
 export default function EmotionsScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
+  const { cardRef: shareCardRef, pending: pendingShare, shareQuote } = useQuoteShare('emotions');
   const [timing, setTiming] = useState('now'); // 'now' or 'past'
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [intensity, setIntensity] = useState(5);
@@ -195,6 +209,11 @@ export default function EmotionsScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      {pendingShare && (
+        <View ref={shareCardRef} collapsable={false} style={s.shareCardOffscreen}>
+          <ReadingShareCard quote={pendingShare.text} author={pendingShare.author} work={pendingShare.work} />
+        </View>
+      )}
         <ScrollView
           ref={scrollRef}
           scrollIndicatorInsets={{ bottom: 36 }}
@@ -231,12 +250,17 @@ export default function EmotionsScreen() {
           </View>
 
           <View style={s.mementoStrip}>
-            <Text style={s.mementoText}>
-              "Men are disturbed not by the things which happen, but by the opinions about the things."
-            </Text>
-            <Text style={s.mementoSub}>
-              Epictetus · Enchiridion 5
-            </Text>
+            <Text style={s.mementoText}>{MEMENTO.text}</Text>
+            <View style={s.mementoFooter}>
+              <Text style={[s.mementoSub, { flexShrink: 1 }]}>{MEMENTO.attr}</Text>
+              <QuoteActions
+                text={MEMENTO.text}
+                author={MEMENTO.author}
+                work={MEMENTO.work}
+                from="emotions"
+                onShare={shareQuote}
+              />
+            </View>
           </View>
 
           <View style={s.body}>
@@ -551,7 +575,9 @@ const s = StyleSheet.create({
   mementoText: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
   // Gold uppercase attribution — matches the onboarding welcome screen so
   // every quote reads as one unified component. Was Inter 13 gray title-case.
-  mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
+  mementoFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 10 },
+  shareCardOffscreen: { position: 'absolute', left: -9999, top: -9999 },
+  mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   // Light body
   body: { padding: spacing.md, backgroundColor: colors.bgCard },
   secLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 8, marginBottom: 12 },

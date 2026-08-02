@@ -35,6 +35,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
 import { track } from '../lib/analytics';
 import { useEntitlement } from '../lib/useEntitlement';
+import { useSavedLines, resurfacedLine } from '../lib/saved';
+import { SaveHeart } from '../components/SaveHeart';
+import { useQuoteShare } from '../lib/useQuoteShare';
+import { ReadingShareCard } from '../components/ReadingShareCard';
 
 
 const virtuePronunciations = {
@@ -148,7 +152,18 @@ export default function PracticeScreen() {
   const hasEnoughPractice = totalDays >= 3;
   const isReviewDay = hasEnoughPractice && dayOfWeek === reviewDay;
 
-  const quote = getDailyQuote(morningQuotes);
+  // The Practice quote is normally today's from constants/quotes.js, but once
+  // the user has kept enough lines it is drawn from their own collection
+  // roughly one day in three (see lib/saved.js). The heart renders already
+  // filled on those days, which is how a returning line announces itself —
+  // no "you kept this" label needed.
+  const savedLines = useSavedLines();
+  const { cardRef: quoteCardRef, pending: pendingShare, shareQuote } = useQuoteShare('practice');
+  const dailyQuote = getDailyQuote(morningQuotes);
+  const resurfaced = resurfacedLine(savedLines);
+  const quote = resurfaced
+    ? { text: resurfaced.text, author: resurfaced.author, source: resurfaced.work }
+    : dailyQuote;
   const sealQuote = getDailyQuote(mementoMoriQuotes, 7);
 
   const load = useCallback(async () => {
@@ -625,6 +640,12 @@ export default function PracticeScreen() {
           pointerEvents="none"
         />
         <View style={s.bgOverlay} pointerEvents="none" />
+      {/* Off-screen share card, mounted only while a share is in flight. */}
+      {pendingShare && (
+        <View ref={quoteCardRef} collapsable={false} style={s.quoteShareOffscreen}>
+          <ReadingShareCard quote={pendingShare.text} author={pendingShare.author} work={pendingShare.work} />
+        </View>
+      )}
         <SafeAreaView style={s.safeTransparent}>
         <ScrollView
           ref={sealedScrollRef}
@@ -691,6 +712,12 @@ export default function PracticeScreen() {
         pointerEvents="none"
       />
       <View style={s.bgOverlay} pointerEvents="none" />
+      {/* Off-screen share card, mounted only while a share is in flight. */}
+      {pendingShare && (
+        <View ref={quoteCardRef} collapsable={false} style={s.quoteShareOffscreen}>
+          <ReadingShareCard quote={pendingShare.text} author={pendingShare.author} work={pendingShare.work} />
+        </View>
+      )}
       <SafeAreaView style={s.safeTransparent}>
       <ScrollView
         ref={scrollRef}
@@ -714,7 +741,28 @@ export default function PracticeScreen() {
             <Text style={s.heroGrace}>Yesterday passed unmarked. The flame holds.</Text>
           )}
           <Text style={s.quoteText}>“{quote.text}”</Text>
-          <Text style={s.quoteAttr}>— {quote.author}, {quote.source}</Text>
+          <View style={s.quoteFooter}>
+            <Text style={s.quoteAttr}>
+              — {[quote.author, quote.source].filter(Boolean).join(', ')}
+            </Text>
+            <SaveHeart
+              text={quote.text}
+              author={quote.author}
+              work={quote.source}
+              from="practice"
+              size={18}
+            />
+            <TouchableOpacity
+              onPress={() => shareQuote({ text: quote.text, author: quote.author, work: quote.source })}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              activeOpacity={0.7}
+              style={s.quoteShareBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Share this passage"
+            >
+              <Ionicons name="arrow-redo-outline" size={17} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {streak.totalDays === 0 && completed === 0 && !morningComplete && (
@@ -919,6 +967,15 @@ const s = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
     marginTop: 28,
+  },
+  // Attribution and the save heart share a row, baseline-aligned, so the heart
+  // reads as part of the quote component rather than floating beside it.
+  // Off-screen so captureRef can reach a laid-out card the user never sees.
+  quoteShareOffscreen: { position: 'absolute', left: -9999, top: -9999 },
+  quoteShareBtn: { padding: 4 },
+  quoteFooter: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 10, flexWrap: 'wrap',
   },
   // Gold uppercase attribution — matches the onboarding welcome screen so
   // every quote reads as one unified component. Was Inter 20 gray title-case.
