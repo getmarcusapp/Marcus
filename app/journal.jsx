@@ -10,10 +10,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
-import { QuoteActions } from '../components/QuoteActions';
-import { useQuoteShare } from '../lib/useQuoteShare';
-import { splitAttribution } from '../lib/saved';
-import { ReadingShareCard } from '../components/ReadingShareCard';
 import { useCaretScroll } from '../lib/useCaretScroll';
 import { PracticeHeader } from '../components/PracticeHeader';
 import { WizardHeader } from '../components/WizardHeader';
@@ -68,69 +64,6 @@ const virtuePronunciations = {
   dikaiosyne: 'dee-KAY-oh-sih-nee',
 };
 
-// Morning memento quotes rotate day to day so the pre-writing landing does not
-// go stale. The Serenity Prayer earns its place: it is the dichotomy of control
-// compressed to three lines (Epictetus in later dress), and its Courage/Wisdom
-// name two of the four cardinal virtues the app is built around. Kept in its
-// secular "Give me" form, not "God grant me", to hold Marcus's non-religious
-// register. Add more entries here to extend the rotation.
-const MORNING_MEMENTOS = [
-  {
-    text: '"When you wake, expect to meet people who are difficult: meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them."',
-    attr: 'Marcus Aurelius · Meditations II.1',
-  },
-  {
-    text: '"Give me the Serenity to accept the things I cannot change,\nThe Courage to change the things I can,\nAnd the Wisdom to know the difference."',
-    attr: 'The Serenity Prayer',
-  },
-  {
-    text: '"Some things are within our control and some are not. Within our control are opinion, desire, aversion, and, in a word, whatever is our own doing. Not within our control are the body, property, and reputation, whatever is not our own doing."',
-    attr: 'Epictetus · Enchiridion 1',
-  },
-  {
-    text: '"Begin at once to live, and count each separate day as a separate life."',
-    attr: 'Seneca · Letters 101',
-  },
-  {
-    text: '"At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work, as a human being. What do I have to complain of, if I\'m going to do what I was born for, the things I was brought into the world to do?"',
-    attr: 'Marcus Aurelius · Meditations V.1',
-  },
-  {
-    // Replaced a second translation of Enchiridion 5. The emotions screen
-    // already carries that passage, and it belongs there: the whole emotion
-    // logger is built on it. Two translations of one text would also defeat
-    // the text-hash de-duplication in lib/saved.js and save as two entries.
-    text: '"Lay down for yourself, at the outset, a certain stamp and type of character, which you are to maintain whether you are by yourself or meeting with people."',
-    attr: 'Epictetus · Enchiridion 33',
-  },
-];
-
-// Evening mementos rotate the same way. Themed for day's-end: examination,
-// acceptance, retreat, release. Seen daily (like morning), so it carries a
-// full rotation. Add {text, attr} entries to extend.
-const EVENING_MEMENTOS = [
-  {
-    text: '"Ask yourself at day\'s end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn."',
-    attr: 'Epictetus · Discourses III.10',
-  },
-  {
-    text: '"Let us go to our sleep with joy and gladness; let us say, I have lived, and have run the course that Fortune set for me."',
-    attr: 'Seneca · Letters 12',
-  },
-  {
-    text: '"Nowhere can you find a more peaceful or untroubled retreat than in your own soul. Give yourself this retreat, and renew yourself."',
-    attr: 'Marcus Aurelius · Meditations IV.3',
-  },
-  {
-    text: '"Do not seek to have events happen as you want them to, but wish them to happen as they do, and your life will go well."',
-    attr: 'Epictetus · Enchiridion 8',
-  },
-  {
-    text: '"You could leave life right now. Let that determine what you do and say and think."',
-    attr: 'Marcus Aurelius · Meditations II.11',
-  },
-];
-
 export default function JournalScreen() {
   const router = useRouter();
   const playerInset = useMiniPlayerInset();
@@ -149,7 +82,6 @@ export default function JournalScreen() {
     router.push('/paywall');
   }
   const journalMedPlayer = useMeditationPlayer();
-  const { cardRef: shareCardRef, pending: pendingShare, shareQuote } = useQuoteShare('journal');
 
   // Sync sessionType when navigating here explicitly from practice with a type param
   useEffect(() => {
@@ -310,13 +242,6 @@ export default function JournalScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      {/* Off-screen share card, mounted only while a share is in flight. Kept
-          near the screen root so no ancestor can clip the capture. */}
-      {pendingShare && (
-        <View ref={shareCardRef} collapsable={false} style={s.shareCardOffscreen}>
-          <ReadingShareCard quote={pendingShare.text} author={pendingShare.author} work={pendingShare.work} />
-        </View>
-      )}
       {onLanding ? (
         <PracticeHeader current={isMorning ? 'morning' : 'evening'} />
       ) : (
@@ -354,7 +279,7 @@ export default function JournalScreen() {
       >
           {onLanding ? (
             // Landing — pre-writing context: date hero, past entries link, the
-            // meditative memento quote, optional pre-journal meditation, and
+            // optional pre-journal meditation, and
             // the Begin CTA. Tapping Begin enters the prompt wizard at index 0.
             <>
               <View style={s.header}>
@@ -385,33 +310,6 @@ export default function JournalScreen() {
                 </View>
               </View>
 
-              <View style={s.mementoStrip}>
-                {(() => {
-                  // Rotate the morning memento at the user's local midnight
-                  // (not UTC), so each new day the landing shows the next quote.
-                  const now = new Date();
-                  const localDay = Math.floor((now.getTime() - now.getTimezoneOffset() * 60000) / 86400000);
-                  const memento = isMorning
-                    ? MORNING_MEMENTOS[localDay % MORNING_MEMENTOS.length]
-                    : EVENING_MEMENTOS[localDay % EVENING_MEMENTOS.length];
-                  const { author, work } = splitAttribution(memento.attr);
-                  return (
-                    <>
-                      <Text style={s.mementoText}>{memento.text}</Text>
-                      <View style={s.mementoFooter}>
-                        <Text style={[s.mementoSub, s.mementoSubFlex]}>{memento.attr}</Text>
-                        <QuoteActions
-                          text={memento.text}
-                          author={author}
-                          work={work}
-                          from={isMorning ? 'journal-morning' : 'journal-evening'}
-                          onShare={shareQuote}
-                        />
-                      </View>
-                    </>
-                  );
-                })()}
-              </View>
 
               <View style={s.body}>
                 {(() => {
@@ -669,30 +567,6 @@ const s = StyleSheet.create({
   // Chip anchored bottom-right (asymmetric with the top-left heading) per V.
   heroChipBottom: { position: 'absolute', right: spacing.xl, bottom: spacing.xl },
   title: { fontSize: font.titleSize, fontFamily: font.display, color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 36, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
-  // Quiet black card (matches the welcome / list-card language): #0a0a0a
-  // fill, 0.5 #474747 border, radius.md, inset from the screen edges. Replaces
-  // the old bg.png image strip so all quote surfaces read consistently.
-  mementoStrip: {
-    backgroundColor: colors.bgCard,
-    borderWidth: 0.5,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.xl,
-    paddingVertical: 20,
-    marginHorizontal: spacing.md,
-    marginTop: 16,
-  },
-  // Inter, white, left-aligned — readable for the long morning passage.
-  // 20px Inter Light Italic — unified quote treatment across the app (per V).
-  mementoText: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
-  // Gold uppercase attribution — matches the onboarding welcome screen so
-  // every quote reads as one unified component. Was Inter 13 gray title-case.
-  // Attribution and the save/share pair share a row. The attribution shrinks
-  // rather than pushing the icons off a narrow screen.
-  shareCardOffscreen: { position: 'absolute', left: -9999, top: -9999 },
-  mementoFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  mementoSubFlex: { flexShrink: 1 },
-  mementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
 
   // The Reckoning step: the morning's own words, quoted inside the wizard
   // card above the question. 20px Light Italic per the unified quote

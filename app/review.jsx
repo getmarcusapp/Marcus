@@ -18,10 +18,6 @@ import { useEntitlement } from '../lib/useEntitlement';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { HeroOverlayChip } from '../components/HeroOverlayChip';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
-import { QuoteActions } from '../components/QuoteActions';
-import { useQuoteShare } from '../lib/useQuoteShare';
-import { splitAttribution } from '../lib/saved';
-import { ReadingShareCard } from '../components/ReadingShareCard';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { WizardHeader } from '../components/WizardHeader';
 
@@ -59,31 +55,8 @@ const reviewPrompts = [
   },
 ];
 
-// Weekly-review landing memento, rotated by local day like the journal
-// mementos. Themed for the long view: time, retrospection, the passage of
-// things. Seen ~weekly, so a smaller rotation is plenty; add entries to extend.
-const WEEKLY_MEMENTOS = [
-  {
-    text: '"Look back over the past, with its changing empires that rose and fell, and you can foresee the future too."',
-    attr: 'Marcus Aurelius · Meditations VII.49',
-  },
-  {
-    text: '"It is not that we have a short time to live, but that we waste much of it. Life is long enough if you know how to use it."',
-    attr: 'Seneca · On the Shortness of Life',
-  },
-  {
-    text: '"Reflect often upon the rapidity with which all existing things pass away and are carried out of sight."',
-    attr: 'Marcus Aurelius · Meditations V.23',
-  },
-  {
-    text: '"Hold every hour in your grasp. Lay hold of today, and you will depend less upon tomorrow."',
-    attr: 'Seneca · Letters 1',
-  },
-];
-
 export default function ReviewScreen() {
   const playerInset = useMiniPlayerInset();
-  const { cardRef: shareCardRef, pending: pendingShare, shareQuote } = useQuoteShare('review');
   const router = useRouter();
   const params = useLocalSearchParams();
   const fromPath = params?.from || '/';
@@ -368,13 +341,6 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      {/* Off-screen share card, mounted only while a share is in flight. Kept
-          near the screen root so no ancestor can clip the capture. */}
-      {pendingShare && (
-        <View ref={shareCardRef} collapsable={false} style={s.shareCardOffscreen}>
-          <ReadingShareCard quote={pendingShare.text} author={pendingShare.author} work={pendingShare.work} />
-        </View>
-      )}
       {openPrompt < 0 ? (
         <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
       ) : (
@@ -424,32 +390,9 @@ export default function ReviewScreen() {
 
         {openPrompt < 0 ? (
           // Landing — hero is already rendered above; remaining landing chrome
-          // is the memento quote and the Begin CTA. Tapping Begin enters the
+          // is the Begin CTA. Tapping Begin enters the
           // wizard at step 0.
           <View style={s.body}>
-            <View style={s.reviewMementoStrip}>
-              {(() => {
-                const now = new Date();
-                const localDay = Math.floor((now.getTime() - now.getTimezoneOffset() * 60000) / 86400000);
-                const memento = WEEKLY_MEMENTOS[localDay % WEEKLY_MEMENTOS.length];
-                const { author, work } = splitAttribution(memento.attr);
-                return (
-                  <>
-                    <Text style={s.reviewMementoText}>{memento.text}</Text>
-                    <View style={s.reviewMementoFooter}>
-                      <Text style={[s.reviewMementoSub, { flexShrink: 1 }]}>{memento.attr}</Text>
-                      <QuoteActions
-                        text={memento.text}
-                        author={author}
-                        work={work}
-                        from="review"
-                        onShare={shareQuote}
-                      />
-                    </View>
-                  </>
-                );
-              })()}
-            </View>
             <GoldPrimary
               style={[s.editBtn, s.sealBtn]}
               onPress={() => requireAccess(() => { haptics.tap(); setOpenPrompt(0); })}
@@ -873,28 +816,6 @@ const s = StyleSheet.create({
   // Disabled state — gated on at least one prompt OR intention having content.
   sealBtnDisabled: { opacity: 0.4 },
   sealBtnSub: { fontSize: 12, color: colors.textSecondary, textAlign: 'center', marginBottom: 36 },
-  // Memento strip on the review landing — same treatment as the
-  // journal/emotions mementos. Carries Marcus's "look back over the past..."
-  // anchor before the user enters the wizard.
-  // Quiet black card — matches the journal memento card exactly. Sits inside
-  // the body's spacing.md padding (no negative margins / full-bleed anymore).
-  reviewMementoStrip: {
-    backgroundColor: colors.bgCard,
-    borderWidth: 0.5,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.xl,
-    paddingVertical: 20,
-    marginBottom: 16,
-  },
-  // 20px Inter Light Italic — unified quote treatment across the app (matches
-  // the Daily Reading / Journal / Emotions card quotes). Was Inter regular 17.
-  reviewMementoText: { fontSize: 20, color: colors.textPrimary, lineHeight: 30, fontFamily: font.bodyLightItalic, fontStyle: 'italic' },
-  // Gold uppercase attribution — matches the unified treatment across the app
-  // (onboarding / journal / emotions / read). Was Inter 13 gray title-case.
-  shareCardOffscreen: { position: 'absolute', left: -9999, top: -9999 },
-  reviewMementoFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  reviewMementoSub: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 10 },
   // Wizard Back/Next pair shown when the keyboard is dismissed. The
   // InputAccessoryView covers the keyboard-up case.
   wizardNavRow: { flexDirection: 'row', gap: 10, marginTop: 14, marginBottom: 36 },

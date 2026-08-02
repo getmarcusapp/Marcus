@@ -135,16 +135,17 @@ function copyCounts() {
 
 function quoteDuplicates() {
   const fail = [];
-  // Required groups: these back a practice surface, so their absence is a bug.
-  // MORE_MEMENTOS is optional — the More hero quote was removed deliberately
-  // (it framed nothing, unlike the journal epigraphs which set up the prompt
-  // you are about to answer), and the check should not fail for that.
+  // Every rotating group is optional now. Quote surfaces have been removed
+  // deliberately — the More hero, then the journal and weekly-review epigraphs —
+  // so an absent array is a product decision, not a bug. The check's job is to
+  // catch DUPLICATES among whatever surfaces exist, not to insist a particular
+  // set of them does. EMOTIONS is a single object rather than an array.
   const raw = [
-    ['MORNING_MEMENTOS', extractLiteral('app/journal.jsx', 'MORNING_MEMENTOS')],
-    ['EVENING_MEMENTOS', extractLiteral('app/journal.jsx', 'EVENING_MEMENTOS')],
-    ['WEEKLY_MEMENTOS', extractLiteral('app/review.jsx', 'WEEKLY_MEMENTOS')],
+    ['MORNING_MEMENTOS', extractLiteral('app/journal.jsx', 'MORNING_MEMENTOS', { optional: true })],
+    ['EVENING_MEMENTOS', extractLiteral('app/journal.jsx', 'EVENING_MEMENTOS', { optional: true })],
+    ['WEEKLY_MEMENTOS', extractLiteral('app/review.jsx', 'WEEKLY_MEMENTOS', { optional: true })],
     ['MORE_MEMENTOS', extractLiteral('app/more.jsx', 'MORE_MEMENTOS', { optional: true })],
-    ['EMOTIONS', [extractLiteral('app/emotions.jsx', 'MEMENTO')]],
+    ['EMOTIONS', [extractLiteral('app/emotions.jsx', 'MEMENTO', { optional: true })].filter(Boolean)],
   ];
   const groups = raw.filter(([, list]) => Array.isArray(list) && list.length);
 
