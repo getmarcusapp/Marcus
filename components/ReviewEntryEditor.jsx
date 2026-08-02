@@ -162,9 +162,9 @@ const s = StyleSheet.create({
   promptAnswer: { marginTop: 12, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 },
   promptInput: { fontSize: 16, color: colors.textPrimary, lineHeight: 26, minHeight: 56, textAlignVertical: 'top', fontFamily: font.body },
   btnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
-  cancelBtn: { flex: 1, height: 56, borderRadius: radius.md, paddingHorizontal: 16 },
+  cancelBtn: { flex: 1, minHeight: 56, borderRadius: radius.md, paddingHorizontal: 16 },
   cancelBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
-  saveBtn: { flex: 1, height: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
+  saveBtn: { flex: 1, minHeight: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
   saveBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: '#1a1a1a', letterSpacing: 0.3 },
   // Library accessory bar — H44 outlined + filled-gold pair so Save/Cancel
   // are reachable above the keyboard when editing fields inside this editor.
@@ -174,7 +174,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8,
   },
   accessoryBtn: {
-    flex: 1, height: 44, borderRadius: radius.md,
+    flex: 1, minHeight: 44, borderRadius: radius.md,
     paddingHorizontal: 16,
   },
   accessoryBtnSave: { backgroundColor: colors.accent },

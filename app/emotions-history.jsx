@@ -389,7 +389,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8,
   },
   editBtn: {
-    flex: 1, height: 44, borderRadius: radius.md,
+    flex: 1, minHeight: 44, borderRadius: radius.md,
     paddingHorizontal: 16,
   },
   editBtnSave: { backgroundColor: colors.accent },

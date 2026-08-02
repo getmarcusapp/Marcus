@@ -386,7 +386,7 @@ const s = StyleSheet.create({
   // Library H56 filled-gold primary CTA (matches editBtn + editBtnSave pattern
   // used app-wide). saveBtnDone is a saved-confirmation variant (outlined gold).
   saveBtn: {
-    height: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.accent,
+    minHeight: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.accent,
     borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center',
     marginTop: 24, marginBottom: 14,
   },

@@ -111,6 +111,11 @@ function ManagedTabLabel({ label, tabKey }) {
       numberOfLines={1}
       adjustsFontSizeToFit
       minimumFontScale={0.8}
+      // The tab bar is a fixed 84pt of chrome, so its labels cannot be allowed
+      // to grow with the system text size the way body copy can — past this they
+      // blow out the bar. Capped rather than disabled: the label still responds
+      // to a user's larger-text preference, just within what the bar can hold.
+      maxFontSizeMultiplier={1.3}
     >
       {label}
     </Text>

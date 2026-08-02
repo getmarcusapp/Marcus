@@ -81,7 +81,7 @@ const s = StyleSheet.create({
   // H56 per library — matches onboarding primaryBtn + paywall cta.
   primaryBtn: {
     borderRadius: radius.md,
-    height: 56,
+    minHeight: 56,
   },
   primaryBtnText: {
     fontSize: 15,

@@ -594,12 +594,12 @@ const s = StyleSheet.create({
   // readingBtnBody to bring back to H56 no-keyboard primary.
   readingBtn: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     borderRadius: radius.md,
     paddingHorizontal: 16,
     marginTop: 8,
   },
-  readingBtnBody: { height: 56, marginBottom: 36 },
+  readingBtnBody: { minHeight: 56, marginBottom: 36 },
   readingBtnFilled: { backgroundColor: colors.accent },
   readingBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
   readingBtnFilledText: { color: '#1a1a1a' },

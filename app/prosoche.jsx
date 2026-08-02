@@ -257,6 +257,6 @@ const s = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   // H56 filled-gold primary, matching the app-wide button spec.
-  btn: { height: 56, alignSelf: 'stretch' },
+  btn: { minHeight: 56, alignSelf: 'stretch' },
   btnText: { fontSize: 14, color: '#1a1a1a', fontFamily: font.bodyMedium, letterSpacing: 0.3 },
 });

@@ -1136,7 +1136,7 @@ const s = StyleSheet.create({
   },
   editBtn: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     borderRadius: radius.md,
     paddingHorizontal: 16,
   },
@@ -1175,7 +1175,7 @@ const s = StyleSheet.create({
   // one primary-button size on iPhone width.
   primaryBtn: {
     borderRadius: radius.md,
-    height: 56,
+    minHeight: 56,
     paddingHorizontal: 24,
     gap: 8,
     marginBottom: 36,

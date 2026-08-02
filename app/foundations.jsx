@@ -114,7 +114,7 @@ const s = StyleSheet.create({
   para: { fontSize: 17, color: colors.textPrimary, lineHeight: 28, fontFamily: font.body },
   // The forward hook, set apart like the memento attributions.
   tomorrow: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, fontFamily: font.bodyLightItalic, fontStyle: 'italic', marginTop: 24 },
-  nextBtn: { height: 56, borderRadius: radius.md, marginTop: 28 },
+  nextBtn: { minHeight: 56, borderRadius: radius.md, marginTop: 28 },
   nextBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: '#1a1a1a', letterSpacing: 0.3 },
   lockedNote: { marginTop: 28, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, alignItems: 'center' },
   lockedNoteText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.3 },

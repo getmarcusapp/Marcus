@@ -266,7 +266,7 @@ const s = StyleSheet.create({
   controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xl },
   playBtn: {
     width: 56,
-    height: 56,
+    minHeight: 56,
     borderRadius: 28,
     backgroundColor: colors.accent,
     alignItems: 'center',

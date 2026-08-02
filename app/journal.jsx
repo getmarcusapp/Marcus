@@ -767,7 +767,7 @@ const s = StyleSheet.create({
   // The in-body primary CTA below overrides height to 56 (H80 medium → 56).
   editBtn: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     borderRadius: radius.md,
     paddingHorizontal: 16,
   },
@@ -792,7 +792,7 @@ const s = StyleSheet.create({
   // In-body primary CTA reuses the library editBtn + editBtnSave H56 filled-gold
   // pair; this override just adds bottom spacing below the button.
   // In-body primary CTA — H56 override (no-keyboard primary per library).
-  saveBtn: { height: 56, marginBottom: 12 },
+  saveBtn: { minHeight: 56, marginBottom: 12 },
   // Disabled state — gated on at least one prompt having content.
   saveBtnDisabled: { opacity: 0.4 },
   saveBtnSub: { fontSize: 12, color: colors.textSecondary, textAlign: 'center', marginBottom: 36 },

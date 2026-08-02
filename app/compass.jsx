@@ -680,7 +680,7 @@ const s = StyleSheet.create({
   // Secondary button from Valeriya's library — outlined gold, dark bg,
   // gold text. Matches the nav pill / Cancel pair tokens for consistency.
   editTrigger: {
-    height: 56,
+    minHeight: 56,
     borderWidth: 1,
     borderColor: colors.accent,
     backgroundColor: colors.bg,
@@ -709,7 +709,7 @@ const s = StyleSheet.create({
   // (her Figma H56 / 1.5 ≈ 37, rounded up to Apple's 44pt touch minimum).
   editBtn: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     borderRadius: radius.md,
     paddingHorizontal: 16,
   },

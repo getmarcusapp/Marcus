@@ -625,7 +625,7 @@ const s = StyleSheet.create({
   // In-body primary CTA reuses library editBtn + editBtnSave; this override
   // just adds spacing below the button before the caption.
   // In-body primary CTA — H56 override (no-keyboard primary per library).
-  saveBtn: { height: 56, marginBottom: 12 },
+  saveBtn: { minHeight: 56, marginBottom: 12 },
   // Disabled state — gated on selectedEmotion. Emotion must be picked
   // before a trigger can be logged; everything else stays optional.
   saveBtnDisabled: { opacity: 0.4 },
@@ -643,7 +643,7 @@ const s = StyleSheet.create({
   // H44 keyboard accessory per library. In-body saveBtn overrides to 56.
   editBtn: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     borderRadius: radius.md,
     paddingHorizontal: 16,
   },

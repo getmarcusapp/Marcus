@@ -157,9 +157,9 @@ const s = StyleSheet.create({
   btnRow: { flexDirection: 'row', gap: 10, padding: 14, backgroundColor: colors.bgDeep },
   // Library H56 outlined + filled-gold pair (matches editBtn / editBtnSave used
   // app-wide in compass / journal / emotions / review / read).
-  cancelBtn: { flex: 1, height: 56, borderRadius: radius.md, paddingHorizontal: 16 },
+  cancelBtn: { flex: 1, minHeight: 56, borderRadius: radius.md, paddingHorizontal: 16 },
   cancelBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: colors.accent, letterSpacing: 0.3 },
-  saveBtn: { flex: 1, height: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
+  saveBtn: { flex: 1, minHeight: 56, borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.accent, borderRadius: radius.md, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
   saveBtnText: { fontSize: 14, fontFamily: font.bodyMedium, color: '#1a1a1a', letterSpacing: 0.3 },
   // Library accessory bar — H44 outlined + filled-gold pair so Save/Cancel
   // remain reachable above the keyboard while editing prompts.
@@ -169,7 +169,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8,
   },
   accessoryBtn: {
-    flex: 1, height: 44, borderRadius: radius.md,
+    flex: 1, minHeight: 44, borderRadius: radius.md,
     paddingHorizontal: 16,
   },
   accessoryBtnSave: { backgroundColor: colors.accent },

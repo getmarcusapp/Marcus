@@ -451,7 +451,7 @@ const s = StyleSheet.create({
   cta: {
     marginHorizontal: spacing.md,
     marginTop: 8,
-    height: 56,
+    minHeight: 56,
   },
   ctaDisabled: { opacity: 0.6 },
   ctaText: { fontSize: 15, fontFamily: font.bodyBold, color: '#000', letterSpacing: 0.3 },

@@ -365,7 +365,7 @@ const s = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: colors.accent,
     borderRadius: radius.md,
-    height: 56,
+    minHeight: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -390,7 +390,7 @@ const s = StyleSheet.create({
   },
   editBtn: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     borderRadius: radius.md,
     paddingHorizontal: 16,
   },

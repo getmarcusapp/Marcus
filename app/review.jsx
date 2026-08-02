@@ -776,7 +776,7 @@ const s = StyleSheet.create({
   weekSealedTitle: { fontSize: 20, color: colors.textPrimary, fontFamily: font.bodyMedium, marginTop: 44, marginBottom: 10, textAlign: 'center' },
   weekSealedSub: { fontSize: 17, color: colors.textSecondary, fontFamily: font.body, lineHeight: 26, textAlign: 'center' },
   weekSealedFooter: { paddingHorizontal: 24, paddingBottom: 24 },
-  weekSealedBtn: { borderRadius: radius.md, height: 56 },
+  weekSealedBtn: { borderRadius: radius.md, minHeight: 56 },
   weekSealedBtnText: { fontSize: 15, fontFamily: font.bodyBold, color: '#000', letterSpacing: 0.3 },
   scroll: { flex: 1 },
   hero: {
@@ -823,7 +823,7 @@ const s = StyleSheet.create({
   // H44 keyboard accessory per library. In-body sealBtn overrides to 56.
   editBtn: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     borderRadius: radius.md,
     paddingHorizontal: 16,
   },
@@ -869,7 +869,7 @@ const s = StyleSheet.create({
   // In-body primary CTA reuses library editBtn + editBtnSave; this override
   // just adds spacing below the button before the caption.
   // In-body primary CTA — H56 override (no-keyboard primary per library).
-  sealBtn: { height: 56, marginBottom: 12 },
+  sealBtn: { minHeight: 56, marginBottom: 12 },
   // Disabled state — gated on at least one prompt OR intention having content.
   sealBtnDisabled: { opacity: 0.4 },
   sealBtnSub: { fontSize: 12, color: colors.textSecondary, textAlign: 'center', marginBottom: 36 },
