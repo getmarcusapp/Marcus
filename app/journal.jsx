@@ -96,8 +96,12 @@ const MORNING_MEMENTOS = [
     attr: 'Marcus Aurelius · Meditations V.1',
   },
   {
-    text: '"Men are disturbed not by things, but by the views which they take of them."',
-    attr: 'Epictetus · Enchiridion 5',
+    // Replaced a second translation of Enchiridion 5. The emotions screen
+    // already carries that passage, and it belongs there: the whole emotion
+    // logger is built on it. Two translations of one text would also defeat
+    // the text-hash de-duplication in lib/saved.js and save as two entries.
+    text: '"Lay down for yourself, at the outset, a certain stamp and type of character, which you are to maintain whether you are by yourself or meeting with people."',
+    attr: 'Epictetus · Enchiridion 33',
   },
 ];
 
