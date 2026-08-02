@@ -283,6 +283,14 @@ filter:drop-shadow(0 0 40px rgba(255,206,130,.18))}
 @media(max-width:500px){.dm-form{flex-direction:column}.dm-submit{padding:14px}}
 `;
 
+// Figure ids from constants/stoics.js. Scraped rather than evaluated: the
+// module carries require() calls for portrait assets that mean nothing here,
+// and the sitemap only needs the ids.
+function stoicIds() {
+  const src = fs.readFileSync(path.join(ROOT, 'constants', 'stoics.js'), 'utf8');
+  return [...src.matchAll(/^    id: '([^']+)'/gm)].map(m => m[1]);
+}
+
 // sitemap.xml — the canonical list of every indexable URL. Regenerated here so
 // it stays in sync as editions publish daily. Static pages carry a fixed set;
 // the meditations index + every edition page are added from the built records.
@@ -302,6 +310,14 @@ function buildSitemap(records) {
   add(SITE + '/', newest, 'weekly', '1.0');
   add(SITE + '/meditations', newest, 'daily', '0.9');
   add(SITE + '/library', null, 'monthly', '0.8');
+  add(SITE + '/stoics', null, 'monthly', '0.8');
+  // The twelve figure pages, read out of constants/stoics.js rather than listed
+  // here, so adding a Stoic cannot silently leave its page unindexed. This is
+  // also why the Stoics URLs have to live in THIS file: the sitemap is rebuilt
+  // with every edition, so an edit made anywhere else is overwritten daily.
+  for (const id of stoicIds()) {
+    add(SITE + '/stoics/' + id, null, 'monthly', '0.7');
+  }
   add(SITE + '/privacy', null, 'yearly', '0.3');
   for (const r of records) {
     add(SITE + '/meditations/' + r.slug, r.isoDate, 'monthly', '0.7');

@@ -173,6 +173,7 @@ function build() {
     '<nav class="lib-nav">' +
     '<a class="lib-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
     '<div class="lib-nav-right">' +
+    '<a class="lib-nav-link" href="/stoics">The Stoics</a>' +
     '<a class="lib-nav-link" href="/meditations">Daily Meditations</a>' +
     '<a class="lib-nav-cta" href="/">Get the app →</a>' +
     '</div></nav>' +
@@ -196,7 +197,7 @@ function build() {
     '</main>' +
     '<footer class="lib-footer"><p>Marcus &middot; A Stoic Practice App &middot; ' +
     '<a href="/">getmarcus.app</a> &middot; <a href="/meditations">Daily Meditations</a> &middot; ' +
-    '<a href="/library">The Library</a></p></footer>' +
+    '<a href="/stoics">The Stoics</a> &middot; <a href="/library">The Library</a></p></footer>' +
     '</body></html>';
 
   fs.writeFileSync(OUT, html, 'utf8');

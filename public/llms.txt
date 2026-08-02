@@ -6,7 +6,7 @@
 
 - Platform: iOS (iPhone). Download on the App Store: https://apps.apple.com/app/id6789749038
 - Pricing: 7-day free trial, then $7.99/month or $39.99/year. No account required.
-- Privacy: journal entries, emotion logs, and practice data are stored locally on the device. There is no backend server; data never leaves the phone unless the user exports it. Optional Face ID / passcode lock. Apple Health integration is opt-in and write-only (Mindful Sessions); Marcus reads no health data.
+- Privacy: journal entries, emotion logs, and practice data are stored locally on the device and are never transmitted. No account is required. One thing does leave the phone: to write the daily reading, the user's Compass reflections are sent through our server to the Anthropic API so the passage can be chosen for them. That request carries no account and no identity, is not stored, and never includes journals or emotion logs. Optional Face ID / passcode lock. Apple Health integration is opt-in and write-only (Mindful Sessions); Marcus reads no health data.
 - Publisher: Harvana LLC.
 
 ## What the practice includes
@@ -17,6 +17,8 @@
 - A structured weekly review measured against the four cardinal Virtues.
 - Guided meditation and an emotion log.
 - Dispatches: an in-app inbox for occasional notes and new meditations.
+- Saved lines: any passage the app shows can be kept, and a kept line resurfaces about one day in three.
+- The Stoics: a reference gallery of twelve figures, in chronological order, each with what they taught and where to start reading.
 
 ## Daily Meditations (free newsletter and archive)
 
@@ -28,6 +30,7 @@
 ## Key pages
 
 - Home: https://getmarcus.app
+- The Stoics: https://getmarcus.app/stoics (twelve figures, one page each, e.g. /stoics/seneca)
 - Daily Meditations archive: https://getmarcus.app/meditations
 - Privacy policy: https://getmarcus.app/privacy
 - Sitemap: https://getmarcus.app/sitemap.xml
