@@ -1,0 +1,26 @@
+#!/bin/sh
+# Pre-commit hook. Runs the repo checks and blocks the commit if any fail.
+#
+# This lives in scripts/hooks (tracked) rather than .git/hooks (never tracked),
+# and git is pointed at it with:
+#
+#     git config core.hooksPath scripts/hooks
+#
+# That one command is all a fresh clone needs — `npm run setup:hooks` does it.
+#
+# The checks are cheap, about a second, and have already caught on separate
+# days: a stale "Four Stoic prompts" claim, one Stoic passage duplicated across
+# two screens in different translations, a typo'd bookId that silently rendered
+# no books, a require() pointing at a missing asset, the Stoics list out of
+# chronological order, a saved-line hash that stored the same quote twice, and
+# seven FAQ answers that had drifted out of sync with their JSON-LD schema.
+# Nothing else in the toolchain catches any of that: there are no tests, no
+# lint, and none of it fails a build.
+#
+# Bypass deliberately with:  git commit --no-verify
+if ! npm run check --silent; then
+  echo ""
+  echo "✗ npm run check failed — commit blocked."
+  echo "  Fix the problems above, or bypass deliberately with: git commit --no-verify"
+  exit 1
+fi
