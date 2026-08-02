@@ -33,7 +33,7 @@ export const morningQuotes = [
   { text: "If someone is able to show me that what I think or do is not right, I will happily change.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "You have within you right now, everything you need to deal with whatever the world can throw at you.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Look back over the past, with its changing empires that rose and fell, and you can foresee the future, too.", author: "Marcus Aurelius", source: "Meditations" },
-  { text: "Nowhere can man find a quieter or more untroubled retreat than in his own soul.", author: "Marcus Aurelius", source: "Meditations" },
+  { text: "Nowhere can you find a more peaceful or untroubled retreat than in your own soul. Give yourself this retreat, and renew yourself.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Because your own strength is unequal to the task, do not assume that it is beyond the powers of man.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Forward, as occasion offers. Never look round to see whether any shall note it... Be satisfied with success in even the smallest matter.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Dwell on the beauty of life. Watch the stars, and see yourself running with them.", author: "Marcus Aurelius", source: "Meditations" },
@@ -167,7 +167,7 @@ export const morningQuotes = [
   { text: "Look well into thyself; there is a source of strength which will always spring up if thou wilt always look.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Be content to seem what you really are.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Anger cannot be dishonest.", author: "Marcus Aurelius", source: "Meditations" },
-  { text: "Don\'t seek that all that happens should happen as you wish; but wish that everything that happens be as it is.", author: "Epictetus", source: "Enchiridion" },
+  { text: "Do not seek to have events happen as you want them to, but wish them to happen as they do, and your life will go well.", author: "Epictetus", source: "Enchiridion" },
   { text: "The world turns aside to let any man pass who knows where he is going.", author: "Epictetus", source: "Discourses" },
   { text: "There is only one way to happiness, and that is to cease worrying about things which are beyond the power of our will.", author: "Epictetus", source: "Discourses" },
   { text: "If you want to be a writer, write. If you want to be a reader, read.", author: "Epictetus", source: "Discourses" },
@@ -234,7 +234,6 @@ export const morningQuotes = [
   { text: "It is not the man who has little, but the man who craves more, that is poor.", author: "Seneca", source: "Letters" },
   { text: "To wish to be well is a part of becoming well.", author: "Seneca", source: "Letters" },
   { text: "He who spends time regretting the past loses the present and risks the future.", author: "Seneca", source: "Letters" },
-  { text: "Life is long if you know how to use it.", author: "Seneca", source: "On the Shortness of Life" },
   { text: "The formula for success is to use what you have, and not to use what you have not.", author: "Seneca", source: "Letters" },
   { text: "Courage leads to heaven; fear leads to death.", author: "Seneca", source: "Letters" },
   { text: "Nothing is burdensome if taken lightly.", author: "Seneca", source: "Letters" },
@@ -244,7 +243,6 @@ export const morningQuotes = [
   { text: "The sun also rises for the wicked.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "The measure of a man is what he does with power.", author: "Epictetus", source: "Discourses" },
   { text: "If you realize that all things change, there is nothing you will try to hold on to.", author: "Epictetus", source: "Discourses" },
-  { text: "Do not seek to have events happen as you want them to, but instead want them to happen as they do happen.", author: "Epictetus", source: "Enchiridion" },
   { text: "Take what you are given.", author: "Epictetus", source: "Enchiridion" },
   { text: "Act well your given part.", author: "Epictetus", source: "Enchiridion" },
   { text: "Do not seek to bring things to pass in accordance with your wishes, but wish for them as they are.", author: "Epictetus", source: "Enchiridion" },
@@ -314,26 +312,13 @@ export const morningQuotes = [
   { text: "Lay down for yourself, at the outset, a certain stamp and type of character, which you are to maintain whether you are by yourself or meeting with people.", author: "Epictetus", source: "Enchiridion" },
 ];
 
-export const eveningQuotes = [
-  { text: "Let us prepare our minds as if we had come to the very end of life.", author: "Seneca", source: "Letters" },
-  { text: "Ask yourself at day's end: What was ill done? What done? What left undone?", author: "Epictetus", source: "Discourses" },
-  { text: "Perfection of character is this: to live each day as if it were your last.", author: "Marcus Aurelius", source: "Meditations" },
-  { text: "I have lived. The course which Fortune set for me is finished.", author: "Seneca", source: "Letters" },
-  { text: "Examine what you have done today — not with pride, but with honesty.", author: "Marcus Aurelius", source: "Meditations" },
-  { text: "Sleep is a daily reminder that we can let go.", author: "Marcus Aurelius", source: "Meditations" },
-  { text: "Today I escaped anxiety. Or no, I discarded it, because it was within me.", author: "Marcus Aurelius", source: "Meditations" },
-  { text: "When you arise in the morning, think of what a precious privilege it is to be alive.", author: "Marcus Aurelius", source: "Meditations" },
-  { text: "Dwell on the beauty of life. Watch the stars, and see yourself running with them.", author: "Marcus Aurelius", source: "Meditations" },
-  { text: "The object of life is not to be on the side of the majority, but to escape finding oneself in the ranks of the insane.", author: "Marcus Aurelius", source: "Meditations" },
-];
-
 export const mementoMoriQuotes = [
   { text: "You could leave life right now. Let that determine what you do and say and think.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Think of yourself as dead. You have lived your life. Now take what's left and live it properly.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Let us postpone nothing. Let us balance life's books each day.", author: "Seneca", source: "Letters" },
   { text: "The person who fears death will never do anything worth doing.", author: "Seneca", source: "Letters" },
   { text: "How many have laid waste to your life when you were unaware of what you were losing?", author: "Seneca", source: "On the Shortness of Life" },
-  { text: "It is not that we have a short time to live, but that we waste a good deal of it.", author: "Seneca", source: "On the Shortness of Life" },
+  { text: "It is not that we have a short time to live, but that we waste much of it. Life is long enough if you know how to use it.", author: "Seneca", source: "On the Shortness of Life" },
   { text: "Death is not an evil. What is it then? The one law mankind has that is free of all discrimination.", author: "Seneca", source: "Letters" },
   { text: "Perfecting yourself is the foundation of perfecting everything else.", author: "Epictetus", source: "Discourses" },
   { text: "This day will not come again. What will you make of the hours you are given?", author: "Marcus Aurelius", source: "Meditations" },
@@ -342,6 +327,7 @@ export const mementoMoriQuotes = [
   { text: "Let us go to our sleep with joy and gladness; let us say, I have lived, and have run the course that Fortune set for me.", author: "Seneca", source: "Letters" },
   { text: "Reflect often upon the rapidity with which all existing things pass away and are carried out of sight.", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Hold every hour in your grasp. Lay hold of today, and you will depend less upon tomorrow.", author: "Seneca", source: "Letters" },
+  { text: "Today I escaped anxiety. Or no, I discarded it, because it was within me.", author: "Marcus Aurelius", source: "Meditations" },
 ];
 
 export function getDailyQuote(pool, offset = 0) {

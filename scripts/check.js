@@ -173,11 +173,12 @@ function copyCounts() {
 // groups against each other and never opened this file.
 function poolDuplicates() {
   const fail = [];
-  const q = evalExports('constants/quotes.js', ['morningQuotes', 'eveningQuotes', 'mementoMoriQuotes']);
+  const q = evalExports('constants/quotes.js', ['morningQuotes', 'mementoMoriQuotes']);
 
-  // Only the pools app/index.jsx actually reads. eveningQuotes is exported but
-  // imported nowhere, so its contents never reach a screen; holding it to the
-  // same standard would be checking dead text.
+  // Both pools app/index.jsx reads: morningQuotes backs the daily reading,
+  // mementoMoriQuotes the sealed-day screen. There is deliberately no third
+  // array — a dead eveningQuotes sat here unrendered for months, and text
+  // nothing displays drifts out of sync without anyone noticing.
   const live = [];
   for (const name of ['morningQuotes', 'mementoMoriQuotes']) {
     for (const entry of q[name] || []) live.push({ pool: name, text: entry.text, key: passageKey(entry.text) });
