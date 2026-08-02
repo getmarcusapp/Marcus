@@ -353,6 +353,11 @@ export const morningQuotes = [
   { text: "Those who educate children well are more to be honored than they who produce them.", author: "Aristotle", source: "Fragments" },
   { text: "Well begun is half done.", author: "Aristotle", source: "Politics" },
   { text: "To run away from trouble is a form of cowardice.", author: "Aristotle", source: "Nicomachean Ethics" },
+  { text: "When you wake, expect to meet people who are difficult: meddling, arrogant, ungrateful. They are this way because they cannot tell good from evil. But they share your nature, and no one can truly harm you. You were made to work with them, not against them.", author: "Marcus Aurelius", source: "Meditations" },
+  { text: "Give me the Serenity to accept the things I cannot change,\nThe Courage to change the things I can,\nAnd the Wisdom to know the difference.", author: "Reinhold Niebuhr", source: "The Serenity Prayer" },
+  { text: "Some things are within our control and some are not. Within our control are opinion, desire, aversion, and, in a word, whatever is our own doing. Not within our control are the body, property, and reputation, whatever is not our own doing.", author: "Epictetus", source: "Enchiridion" },
+  { text: "At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work, as a human being. What do I have to complain of, if I'm going to do what I was born for, the things I was brought into the world to do?", author: "Marcus Aurelius", source: "Meditations" },
+  { text: "Lay down for yourself, at the outset, a certain stamp and type of character, which you are to maintain whether you are by yourself or meeting with people.", author: "Epictetus", source: "Enchiridion" },
 ];
 
 export const eveningQuotes = [
@@ -379,6 +384,10 @@ export const mementoMoriQuotes = [
   { text: "Perfecting yourself is the foundation of perfecting everything else.", author: "Epictetus", source: "Discourses" },
   { text: "This day will not come again. What will you make of the hours you are given?", author: "Marcus Aurelius", source: "Meditations" },
   { text: "Did you live well today? Not perfectly — but with intention?", author: "Marcus Aurelius", source: "Meditations" },
+  { text: "Ask yourself at day's end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn.", author: "Epictetus", source: "Discourses" },
+  { text: "Let us go to our sleep with joy and gladness; let us say, I have lived, and have run the course that Fortune set for me.", author: "Seneca", source: "Letters" },
+  { text: "Reflect often upon the rapidity with which all existing things pass away and are carried out of sight.", author: "Marcus Aurelius", source: "Meditations" },
+  { text: "Hold every hour in your grasp. Lay hold of today, and you will depend less upon tomorrow.", author: "Seneca", source: "Letters" },
 ];
 
 export function getDailyQuote(pool, offset = 0) {
