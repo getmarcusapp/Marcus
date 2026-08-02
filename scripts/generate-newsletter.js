@@ -51,6 +51,23 @@ function editionDate() {
 
 const RESERVE_PATH = path.join(__dirname, 'reserve-editions.json');
 
+// Which model writes the edition. Opus is the default because this is a hard
+// brief — find a real event from the last seven days, tie it to a Stoic idea
+// without being trite, avoid the lanes the system prompt bans, and not repeat
+// recent editions — and the output goes out under Gio's name.
+//
+// It is also the single largest recurring AI cost in the project: one Opus call
+// a day, forever, independent of how many app users there are. So it is worth
+// knowing whether a cheaper model holds the register.
+//
+// Set NEWSLETTER_MODEL to A/B it, e.g.
+//     NEWSLETTER_MODEL=claude-sonnet-4-6 node scripts/generate-newsletter.js
+// Run a week, then read those editions against recent Opus ones in
+// content/editions/ — each record stores the model that wrote it. Judge on the
+// hook: if the cheaper model reaches for the generic "new study finds" opening
+// the system prompt exists to prevent, the premium is buying something real.
+const MODEL = process.env.NEWSLETTER_MODEL || 'claude-opus-4-8';
+
 const SYSTEM_PROMPT = `You are the editor of Daily Meditations, a daily newsletter rooted in Stoic philosophy. Your role is to produce one edition per day in the following format:
 
 THEME: [2–4 words. e.g. "On anger" or "On impermanence"]
@@ -399,6 +416,7 @@ function recentEditionsBlock(recent) {
 // ─── Generation + Beehiiv helpers (extracted from run() for retry support) ──
 
 async function generateEdition(dateStr) {
+  console.log('Generating with model: ' + MODEL);
   const recentBlock = recentEditionsBlock(loadRecentEditions(10));
   const res = await httpsPost(
     'api.anthropic.com', '/v1/messages',
@@ -409,7 +427,7 @@ async function generateEdition(dateStr) {
       // before they hit context) — do NOT also declare code_execution, that
       // confuses the model. max_tokens has headroom over the ~350-token output;
       // you only pay for what's generated, so it's free insurance vs truncation.
-      model: 'claude-opus-4-8',
+      model: MODEL,
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       tools: [{ type: 'web_search_20260209', name: 'web_search' }],

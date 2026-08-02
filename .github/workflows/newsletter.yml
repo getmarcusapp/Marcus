@@ -24,7 +24,12 @@ on:
     - cron: '23 22 * * *'  # 22:23 UTC ≈ 3:23pm PDT / 2:23pm PST — early enough to
                            # land by ~5pm PT even with GitHub's queue delay, and
                            # off the top of the hour to dodge the worst of it.
-  workflow_dispatch: {}       # manual run from the Actions tab
+  workflow_dispatch:          # manual run from the Actions tab
+    inputs:
+      model:
+        description: 'Model for this edition (blank = claude-opus-4-8). Use claude-sonnet-4-6 to A/B the cheaper option — the edition record stores whichever model wrote it.'
+        required: false
+        default: ''
 
 permissions:
   contents: write             # the archive commit pushes back to main
@@ -50,6 +55,8 @@ jobs:
         working-directory: scripts
         env:
           ANTHROPIC_KEY: ${{ secrets.NEWSLETTER_ANTHROPIC_KEY }}
+          # Empty on the scheduled run, so the script falls back to its default.
+          NEWSLETTER_MODEL: ${{ inputs.model }}
           BEEHIIV_KEY: ${{ secrets.BEEHIIV_KEY }}
           BEEHIIV_PUB_ID: ${{ secrets.BEEHIIV_PUB_ID }}
           MAIL_USER: ${{ secrets.MAIL_USER }}
