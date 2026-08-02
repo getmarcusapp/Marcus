@@ -99,6 +99,10 @@ function similarity(a, b) {
 // two translations differ in commas and dashes long before they differ in words.
 const passageKey = t => norm(t).replace(/\\n/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
 
+// Two entries may legitimately share a ref when a section holds more than one
+// distinct aphorism. Listed by ref, with the count that is correct for it.
+const SHARED_REFS = { 'Seneca|Letters 1.3': 2, 'Epictetus|Enchiridion 1': 2 };
+
 // Pairs that score above the threshold but are genuinely different passages.
 // Each is here because it was read and judged, not because it was noisy.
 const DISTINCT_PAIRS = [
@@ -181,7 +185,7 @@ function poolDuplicates() {
   // nothing displays drifts out of sync without anyone noticing.
   const live = [];
   for (const name of ['morningQuotes', 'mementoMoriQuotes']) {
-    for (const entry of q[name] || []) live.push({ pool: name, text: entry.text, key: passageKey(entry.text) });
+    for (const entry of q[name] || []) live.push({ pool: name, text: entry.text, author: entry.author, ref: entry.ref, key: passageKey(entry.text) });
   }
 
   const allowed = new Set(DISTINCT_PAIRS.map(([a, b]) => [a, b].sort().join(' ')));
@@ -202,6 +206,23 @@ function poolDuplicates() {
         `near-duplicate passage (${live[i].pool}/${live[j].pool}):\n        "${live[i].text.slice(0, 62)}"\n        "${live[j].text.slice(0, 62)}"`
       );
     }
+  }
+
+  // Citation-level duplicates. This is the only check that sees the same
+  // passage in two genuinely different translations — wording comparison
+  // scores those near zero, which is how three renderings of Letters 71.3 and
+  // two of On the Shortness of Life 1.3 survived every earlier pass. Only
+  // entries carrying a ref participate; an uncited entry is not an error, it
+  // is a passage nobody has pinned down yet.
+  const byRef = new Map();
+  for (const item of live) {
+    if (!item.ref) continue;
+    const k = `${item.author}|${item.ref}`;
+    byRef.set(k, (byRef.get(k) || 0) + 1);
+  }
+  for (const [k, n] of byRef) {
+    const allow = SHARED_REFS[k] || 1;
+    if (n > allow) fail.push(`${k.replace('|', ' · ')}: ${n} entries cite this passage, expected ${allow}`);
   }
 
   // The emotions screen owns Enchiridion 5 permanently. A copy in the rotating
