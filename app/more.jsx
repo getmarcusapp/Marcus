@@ -15,10 +15,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { track } from '../lib/analytics';
-import { QuoteActions } from '../components/QuoteActions';
-import { useQuoteShare } from '../lib/useQuoteShare';
-import { splitAttribution } from '../lib/saved';
-import { ReadingShareCard } from '../components/ReadingShareCard';
 import { useEntitlement } from '../lib/useEntitlement';
 import { getUnreadCount, subscribeDispatches, refreshDispatches } from '../lib/dispatches';
 import { getPracticeTimeMs, seedPracticeTimeIfNeeded } from '../lib/practiceTime';
@@ -43,34 +39,6 @@ function formatPracticeTime(ms) {
 // reference items below are heavy in week one and archival after. The
 // mid-day pause deliberately lives on the Practice tab instead of here: it
 // is something you DO daily, not reference material.
-// More was the last quote surface still showing one hardcoded line forever.
-// Rotating it by local day matches the journal and review mementos, and it is
-// what lets the save/share pair mean anything here: a permanent quote can only
-// be kept once. Deliberately no overlap with the morning, evening or weekly
-// rotations. Append {text, attr} to extend.
-const MORE_MEMENTOS = [
-  {
-    text: '“The impediment to action advances action. What stands in the way becomes the way.”',
-    attr: 'Marcus Aurelius · Meditations V.20',
-  },
-  {
-    text: '“The soul becomes dyed with the colour of its thoughts.”',
-    attr: 'Marcus Aurelius · Meditations V.16',
-  },
-  {
-    text: '“Never let the future disturb you. You will meet it with the same weapons of reason which today arm you against the present.”',
-    attr: 'Marcus Aurelius · Meditations VII.8',
-  },
-  {
-    text: '“First say to yourself what you would be; and then do what you have to do.”',
-    attr: 'Epictetus · Discourses III.23',
-  },
-  {
-    text: '“As is a tale, so is life: not how long it is, but how good it is, is what matters.”',
-    attr: 'Seneca · Letters 77',
-  },
-];
-
 const menuItems = [
   {
     section: 'App',
@@ -104,7 +72,6 @@ export default function MoreScreen() {
   const [dispatchUnread, setDispatchUnread] = useState(0);
   const [practiceMs, setPracticeMs] = useState(0);
   const playerInset = useMiniPlayerInset();
-  const { cardRef: shareCardRef, pending: pendingShare, shareQuote } = useQuoteShare('more');
   const scrollRef = useRef(null);
   const { hasAccess, trialDaysLeft } = useEntitlement();
 
@@ -155,11 +122,6 @@ export default function MoreScreen() {
         pointerEvents="none"
       />
       <View style={s.bgOverlay} pointerEvents="none" />
-      {pendingShare && (
-        <View ref={shareCardRef} collapsable={false} style={s.shareCardOffscreen}>
-          <ReadingShareCard quote={pendingShare.text} author={pendingShare.author} work={pendingShare.work} />
-        </View>
-      )}
       <SafeAreaView style={s.safeTransparent}>
       <ScrollView
         ref={scrollRef}
@@ -171,27 +133,6 @@ export default function MoreScreen() {
         <View style={s.hero}>
           <Image source={require('../assets/marcus-wordmark.png')} style={s.titleWordmark} resizeMode="contain" />
           <Text style={s.sub}>A Stoic practice app</Text>
-          {(() => {
-            const now = new Date();
-            const localDay = Math.floor((now.getTime() - now.getTimezoneOffset() * 60000) / 86400000);
-            const memento = MORE_MEMENTOS[localDay % MORE_MEMENTOS.length];
-            const { author, work } = splitAttribution(memento.attr);
-            return (
-              <>
-                <Text style={s.heroQuote}>{memento.text}</Text>
-                <View style={s.heroQuoteFooter}>
-                  <Text style={[s.heroAttr, { flexShrink: 1 }]}>{memento.attr}</Text>
-                  <QuoteActions
-                    text={memento.text}
-                    author={author}
-                    work={work}
-                    from="more"
-                    onShare={shareQuote}
-                  />
-                </View>
-              </>
-            );
-          })()}
         </View>
 
         <View style={s.statsCard}>
@@ -352,14 +293,8 @@ const s = StyleSheet.create({
   statLabel: { fontSize: 11, color: colors.textSecondary, letterSpacing: 1, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
   statDivider: { width: 0.5, backgroundColor: colors.border },
   // Quote + attribution — same treatment as the practice hero.
-  heroQuote: { fontSize: 20, color: colors.textPrimary, lineHeight: 28, fontFamily: font.bodyLightItalic, fontStyle: 'italic', textAlign: 'center', marginTop: 28 },
   // Gold uppercase attribution — matches the onboarding welcome screen so
   // every quote reads as one unified component. Was Inter 20 gray title-case.
-  // Centered as a group so the attribution and icons stay visually tied to the
-  // quote above them, matching the centered hero composition.
-  heroQuoteFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 16 },
-  shareCardOffscreen: { position: 'absolute', left: -9999, top: -9999 },
-  heroAttr: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', textAlign: 'center' },
   section: { paddingHorizontal: spacing.md, paddingTop: spacing.lg, paddingBottom: 36 },
   card: {
     borderWidth: 0.5,
