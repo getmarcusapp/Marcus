@@ -367,6 +367,26 @@ export async function clearTodayPractice() {
   } catch (e) { return false; }
 }
 
+// Dev only. Forces the lapsed-streak state the Practice hero shows as
+// "Begin" + "The flame went out. Take it up again." — which needs a broken
+// streak WITH prior history (totalDays > 0, current 0), otherwise the hero
+// reads as a first launch instead. Backdates lastDate past the grace window
+// (getStreak forgives today, yesterday and the day before) and seeds a
+// history if there is none, so the state is reachable on a fresh install.
+export async function lapseStreak() {
+  const raw = await AsyncStorage.getItem(KEYS.STREAK);
+  const streak = raw ? JSON.parse(raw) : { ...EMPTY_STREAK };
+  const fourDaysAgo = new Date(Date.now() - 4 * 86400000).toDateString();
+  const updated = {
+    ...streak,
+    lastDate: fourDaysAgo,
+    totalDays: streak.totalDays > 0 ? streak.totalDays : 5,
+    longest: Math.max(streak.longest || 0, streak.current || 0, 5),
+  };
+  await AsyncStorage.setItem(KEYS.STREAK, JSON.stringify(updated));
+  return updated;
+}
+
 export async function sealTodayPractice() {
   try {
     const todayStr = new Date().toDateString();

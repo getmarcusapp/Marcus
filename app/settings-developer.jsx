@@ -7,7 +7,7 @@ import { useRouter, useFocusEffect, Redirect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { cancelAllNotifications } from '../notifications';
-import { clearTodayPractice, sealTodayPractice, seedWeekOfPracticeData, seedYearOfPracticeData } from '../store/db';
+import { clearTodayPractice, sealTodayPractice, seedWeekOfPracticeData, seedYearOfPracticeData, lapseStreak } from '../store/db';
 import { setPracticeTimeMs } from '../lib/practiceTime';
 import { seedSavedLines, clearSavedLines } from '../lib/saved';
 
@@ -188,6 +188,23 @@ function DeveloperSettingsInner() {
             const r = await seedYearOfPracticeData();
             await setPracticeTimeMs(YEAR_PRACTICE_MS);
             Alert.alert('', `Seeded a year-scale streak (${r.activeDays} active days) and set Time in Practice to ~90h. Check More.`);
+          },
+        },
+      ]
+    );
+  }
+
+  function handleLapseStreak() {
+    Alert.alert(
+      'Lapse the streak?',
+      'Backdates the last practice past the grace window, keeping your history. The Practice hero should then read "Begin" with "The flame went out. Take it up again." Practising once restores it.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Lapse',
+          onPress: async () => {
+            await lapseStreak();
+            Alert.alert('', 'Streak lapsed. Reopen Practice to see it.');
           },
         },
       ]
