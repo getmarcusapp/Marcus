@@ -56,6 +56,16 @@ function extractLiteral(file, name) {
 
 const NUM_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12 };
 const WORD_FOR = Object.fromEntries(Object.entries(NUM_WORDS).map(([w, n]) => [n, w]));
+// The visible copy carries HTML entities (&middot;, &#275;) where the JSON-LD
+// carries the character itself, so both sides must be decoded before comparing.
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', middot: '·', mdash: '—', ndash: '–', hellip: '…', rsquo: '’', lsquo: '‘', ldquo: '“', rdquo: '”' };
+function decodeEntities(t) {
+  return String(t)
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&([a-z]+);/gi, (m, n) => ENTITIES[n.toLowerCase()] ?? m);
+}
+
 const norm = t => String(t).replace(/[“”"'‘’]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
 
 // ── checks ──────────────────────────────────────────────────────────────────
@@ -201,6 +211,65 @@ function chronology() {
   return fail;
 }
 
+function faqSchema() {
+  const fail = [];
+  const src = read('public/index.html');
+
+  // The FAQ exists twice: as visible HTML, and inside the FAQPage JSON-LD added
+  // during the SEO pass. Editing one and not the other leaves Google reading a
+  // different answer than visitors see, which is exactly the mismatch
+  // structured data gets penalised for — and nothing about a build would ever
+  // complain.
+  const blocks = [...src.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+  let faqPage = null;
+  for (const b of blocks) {
+    let parsed;
+    try {
+      parsed = JSON.parse(b[1]);
+    } catch (e) {
+      fail.push(`public/index.html: JSON-LD block does not parse — ${e.message}`);
+      continue;
+    }
+    const nodes = parsed['@graph'] || [parsed];
+    for (const n of nodes) if (n['@type'] === 'FAQPage') faqPage = n;
+  }
+  if (!faqPage) {
+    fail.push('public/index.html: no FAQPage found in the JSON-LD');
+    return fail;
+  }
+
+  const strip = t => decodeEntities(String(t).replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim();
+  const schema = new Map(
+    (faqPage.mainEntity || []).map(q => [strip(q.name), strip(q.acceptedAnswer && q.acceptedAnswer.text)]),
+  );
+
+  const visible = new Map();
+  const re = /class="faq-question"[^>]*>([\s\S]*?)<\/div>\s*<div class="faq-answer">([\s\S]*?)<\/div>/g;
+  for (const m of src.matchAll(re)) visible.set(strip(m[1]), strip(m[2]));
+
+  if (!visible.size) {
+    fail.push('public/index.html: could not read any visible FAQ pairs — the markup shape changed, so this check is blind');
+    return fail;
+  }
+  if (visible.size !== schema.size) {
+    fail.push(`public/index.html: ${visible.size} visible FAQ entries but ${schema.size} in the FAQPage schema`);
+  }
+
+  for (const [q, a] of visible) {
+    if (!schema.has(q)) {
+      fail.push(`public/index.html: FAQ "${q.slice(0, 55)}…" is on the page but missing from the schema`);
+    } else if (schema.get(q) !== a) {
+      fail.push(`public/index.html: FAQ answer differs between the page and the schema — "${q.slice(0, 55)}…"`);
+    }
+  }
+  for (const q of schema.keys()) {
+    if (!visible.has(q)) {
+      fail.push(`public/index.html: FAQ "${q.slice(0, 55)}…" is in the schema but not on the page`);
+    }
+  }
+  return fail;
+}
+
 function savedLogic() {
   const fail = [];
   const { lineId, resurfacedLine } = evalExports('lib/saved.js', ['lineId', 'resurfacedLine']);
@@ -245,6 +314,7 @@ const CHECKS = [
   ['stoic bookIds resolve to real books', stoicBooks],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
+  ['FAQ page and schema agree', faqSchema],
   ['saved-line identity and resurfacing', savedLogic],
 ];
 
