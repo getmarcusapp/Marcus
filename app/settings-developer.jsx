@@ -281,6 +281,9 @@ function DeveloperSettingsInner() {
           <TouchableOpacity style={s.resetBtn} onPress={handleSealTodayPractice} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Seal today's practice</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={s.resetBtn} onPress={handleLapseStreak} activeOpacity={0.8}>
+            <Text style={s.resetBtnText}>Lapse the streak</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={s.resetBtn} onPress={handleSeedWeek} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Seed week of practice data</Text>
           </TouchableOpacity>
