@@ -11,7 +11,7 @@ import { getJournals, getTriggers, getStreak } from '../store/db';
 import * as health from '../lib/health';
 import { useAppLock, setLockEnabled, authenticate, getSupportedAuthLabel } from '../lib/appLock';
 import { exportBackup, pickAndImportBackup } from '../lib/backup';
-import { unlockDevTools, devToolsUnlocked } from '../lib/devGate';
+import { unlockDevTools, devToolsUnlocked, DEV_PIN_AVAILABLE } from '../lib/devGate';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import Constants from 'expo-constants';
@@ -23,7 +23,6 @@ const NOTIF_SETTINGS_KEY = 'notification_settings';
 // PIN — a "hidden + PIN" gate so curious users can't reach the test toggles
 // (premium override, data resets). The PIN ships in the JS bundle, so treat
 // it as obscurity, not real security. CHANGE THIS to your own code.
-const DEV_TOOLS_PIN = '4389';
 
 // Unique action icon on the right per Valeriya's pattern: the icon itself
 // is the affordance (the action it represents), rendered in accent gold.
@@ -57,14 +56,16 @@ export default function SettingsScreen() {
   const { lockEnabled } = useAppLock();
   const playerInset = useMiniPlayerInset();
   const scrollRef = useRef(null);
-  // Developer Tools visibility — unlocked by default in dev/beta; in
-  // production, revealed by tapping the Version number 7× + entering the PIN.
+  // Developer Tools visibility — unlocked by default in dev/beta; otherwise
+  // revealed by tapping the Version number 7× + entering the PIN, and only in
+  // builds that were given a PIN. App Store builds are not, so the taps do
+  // nothing there and the prompt is unreachable.
   // The unlock also flips the shared devGate so /settings-developer itself
   // admits the session (it redirects out otherwise — see lib/devGate.js).
   const [devUnlocked, setDevUnlocked] = useState(devToolsUnlocked());
   const versionTapsRef = useRef(0);
   function handleVersionTap() {
-    if (devUnlocked) return;
+    if (devUnlocked || !DEV_PIN_AVAILABLE) return;
     versionTapsRef.current += 1;
     if (versionTapsRef.current < 7) return;
     versionTapsRef.current = 0;
@@ -73,7 +74,7 @@ export default function SettingsScreen() {
       undefined,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: (pin) => { if (pin === DEV_TOOLS_PIN) { unlockDevTools(); setDevUnlocked(true); } } },
+        { text: 'OK', onPress: (pin) => { if (unlockDevTools(pin)) setDevUnlocked(true); } },
       ],
       'secure-text',
       '',
