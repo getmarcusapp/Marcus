@@ -12,6 +12,11 @@
  *   quote-duplicates  Epictetus Enchiridion 5 appeared on two screens in two
  *                     different translations. Saved-line identity is a text
  *                     hash, so it would have stored as two entries.
+ *   pool-duplicates   The 374-passage daily reading pool had never been looked
+ *                     at. 46 of its entries were an exact repeat, a second
+ *                     translation of a passage already there, or a truncated
+ *                     twin of a fuller line, so the "random" daily reading
+ *                     repeated itself far more often than the count implied.
  *   stoic-books       bookIds are hand-written strings joining into
  *                     constants/library.js. A typo silently renders no books.
  *   asset-refs        A require() pointing at a missing file breaks the bundle
@@ -74,6 +79,34 @@ function decodeEntities(t) {
 
 const norm = t => String(t).replace(/[“”"'‘’]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
 
+// Word-bigram Dice coefficient. Catches what a character-diff misses: a
+// truncated twin ("Very little is needed to make a happy life." beside the
+// full sentence) scores low on character overlap because the lengths differ,
+// but high here because every bigram of the short one is in the long one.
+function similarity(a, b) {
+  const grams = s => {
+    const w = s.split(' ');
+    return new Set(w.slice(0, -1).map((x, i) => `${x} ${w[i + 1]}`));
+  };
+  const A = grams(a), B = grams(b);
+  if (!A.size || !B.size) return a === b ? 1 : 0;
+  let shared = 0;
+  for (const g of A) if (B.has(g)) shared++;
+  return (2 * shared) / (A.size + B.size);
+}
+
+// norm() keeps punctuation, which is right for exact-match work but wrong here:
+// two translations differ in commas and dashes long before they differ in words.
+const passageKey = t => norm(t).replace(/\\n/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
+
+// Pairs that score above the threshold but are genuinely different passages.
+// Each is here because it was read and judged, not because it was noisy.
+const DISTINCT_PAIRS = [
+  ['if you wish to be loved love', 'if you wish to be beautiful practice beautiful deeds'],
+  ['wonder is the beginning of wisdom', 'knowing yourself is the beginning of all wisdom'],
+  ['the goal of life is living in agreement with nature', 'the goal of life is to live in accordance with reason'],
+];
+
 // ── checks ──────────────────────────────────────────────────────────────────
 
 function copyCounts() {
@@ -127,6 +160,58 @@ function copyCounts() {
     for (const title of medTitles) {
       if (!src.includes(title) && !src.includes(title.replace(/^The\s+/i, ''))) {
         fail.push(`${file}: does not mention the meditation "${title}"`);
+      }
+    }
+  }
+  return fail;
+}
+
+// The daily reading pool was never checked, and it had drifted badly: 46 of
+// its 374 passages were the same text twice, or the same passage in a second
+// translation, or a truncated twin of a fuller line. Nothing surfaced it
+// because quoteDuplicates() only ever compared the small hand-picked memento
+// groups against each other and never opened this file.
+function poolDuplicates() {
+  const fail = [];
+  const q = evalExports('constants/quotes.js', ['morningQuotes', 'eveningQuotes', 'mementoMoriQuotes']);
+
+  // Only the pools app/index.jsx actually reads. eveningQuotes is exported but
+  // imported nowhere, so its contents never reach a screen; holding it to the
+  // same standard would be checking dead text.
+  const live = [];
+  for (const name of ['morningQuotes', 'mementoMoriQuotes']) {
+    for (const entry of q[name] || []) live.push({ pool: name, text: entry.text, key: passageKey(entry.text) });
+  }
+
+  const allowed = new Set(DISTINCT_PAIRS.map(([a, b]) => [a, b].sort().join(' ')));
+  const seen = new Map();
+  for (const item of live) {
+    if (seen.has(item.key)) {
+      fail.push(`${item.pool}: identical to ${seen.get(item.key)} — "${item.text.slice(0, 52)}…"`);
+    } else {
+      seen.set(item.key, item.pool);
+    }
+  }
+  for (let i = 0; i < live.length; i++) {
+    for (let j = i + 1; j < live.length; j++) {
+      if (live[i].key === live[j].key) continue;
+      if (similarity(live[i].key, live[j].key) <= 0.40) continue;
+      if (allowed.has([live[i].key, live[j].key].sort().join(' '))) continue;
+      fail.push(
+        `near-duplicate passage (${live[i].pool}/${live[j].pool}):\n        "${live[i].text.slice(0, 62)}"\n        "${live[j].text.slice(0, 62)}"`
+      );
+    }
+  }
+
+  // The emotions screen owns Enchiridion 5 permanently. A copy in the rotating
+  // pool means one passage with two homes, which is what saved-line hashing
+  // stores as two entries.
+  const emotions = extractLiteral('app/emotions.jsx', 'MEMENTO', { optional: true });
+  if (emotions) {
+    const k = passageKey(emotions.text);
+    for (const item of live) {
+      if (item.key === k || similarity(item.key, k) > 0.40) {
+        fail.push(`${item.pool} repeats the emotions screen's passage — "${item.text.slice(0, 52)}…"`);
       }
     }
   }
@@ -324,6 +409,7 @@ const CHECKS = [
   ['copy counts agree with the data', copyCounts],
   ['no duplicate quotes across surfaces', quoteDuplicates],
   ['stoic bookIds resolve to real books', stoicBooks],
+  ['no duplicate passages in the daily pool', poolDuplicates],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],
