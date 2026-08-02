@@ -670,7 +670,7 @@ export default function PracticeScreen() {
                 { opacity: streakOpacity, transform: [{ scale: streakScale }] },
               ]}
             >
-              {streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}
+              {`Day ${Math.max(streak.current, 1)}`}
             </Animated.Text>
           </Animated.View>
 
@@ -733,7 +733,17 @@ export default function PracticeScreen() {
             resizeMode="contain"
           />
           <Text style={s.heroDate}>{dateStr}</Text>
-          <Text style={s.heroStreak}>{streak.current > 0 ? `Day ${streak.current}` : 'Day 1'}</Text>
+          {/* "Day 1" used to show at a zero streak, so a first launch, a
+              three-week lapse and a day already practiced all read the same.
+              The number now appears only once a day is actually credited. */}
+          <Text style={s.heroStreak}>{streak.current > 0 ? `Day ${streak.current}` : 'Begin'}</Text>
+          {streak.current === 0 && totalDays > 0 && (
+            // Returning after the streak lapsed. Counterpart to the grace
+            // line below, and deliberately not a reprimand: Marcus tells
+            // himself to return to it again, not to feel disgraced by having
+            // left. Cannot collide with graceActive, which requires current > 0.
+            <Text style={s.heroGrace}>The flame went out. Take it up again.</Text>
+          )}
           {graceActive && (
             // The grace day is holding the streak (yesterday went unmarked,
             // today not yet credited). Saying so quietly builds trust in the
