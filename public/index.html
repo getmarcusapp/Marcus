@@ -584,6 +584,16 @@
     line-height: 1.7;
   }
 
+  /* Inline links inside body copy. Without this they inherit nothing and render
+     as default browser blue, which is what the Stoics feature shipped with. */
+  .feature-body a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 206, 130, 0.32);
+    transition: border-color 0.15s ease;
+  }
+  .feature-body a:hover { border-bottom-color: var(--accent); }
+
   /* ─── DIFFERENTIATOR ────────────────────────────────── */
   .diff {
     max-width: 720px;
