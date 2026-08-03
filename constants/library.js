@@ -92,14 +92,19 @@ export const READING_LIST = [
   },
   {
     id: 'epictetus-art-of-living-lebell',
-    section: 'Primary sources',
+    // Filed under interpreters, not primary sources, and credited to Lebell
+    // rather than shown as "trans. Sharon Lebell". The book's own subtitle
+    // calls it a new interpretation: she rewrites and in places composes,
+    // which is why several lines circulating as Epictetus quotations are
+    // actually hers. A site that publishes a misattribution list should not
+    // itself label an interpretation as a translation.
+    section: 'Modern interpreters',
     title: 'The Art of Living',
-    author: 'Epictetus',
-    translator: 'Sharon Lebell',
+    author: 'Sharon Lebell, after Epictetus',
     year: 1995,
     asin: '0061286052',
     isbn: '9780061286056',
-    why: "An interpretive rendering of Epictetus's Handbook for modern readers. Not a literal translation. Lebell rewrites for clarity rather than scholarship, controversial among purists, but for a first encounter with Epictetus it's the most accessible door. Read this, then go to Hard.",
+    why: "An interpretive rendering of Epictetus's Handbook, not a translation, and the book's own subtitle says so. Lebell rewrites for clarity rather than scholarship, controversial among purists, but for a first encounter with Epictetus it's the most accessible door. Read this, then go to Hard.",
   },
   {
     id: 'cicero-on-duties',

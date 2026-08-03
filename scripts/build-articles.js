@@ -265,7 +265,12 @@ function page(meta, bodyHtml, prev, next) {
 }
 
 function build() {
-  const files = fs.readdirSync(SRC_DIR).filter(f => f.endsWith('.md')).sort();
+  // Sort by the numeric prefix, not by filename: a string sort puts 10- and 11-
+  // immediately after 1-, which silently scrambles the prev/next pager into a
+  // reading order nobody chose.
+  const num = f => parseInt(f.match(/^(\d+)/)?.[1] ?? '9999', 10);
+  const files = fs.readdirSync(SRC_DIR).filter(f => f.endsWith('.md'))
+    .sort((a, b) => num(a) - num(b) || a.localeCompare(b));
   const parsed = files.map(f => {
     const { meta, body } = parseFrontmatter(fs.readFileSync(path.join(SRC_DIR, f), 'utf8'));
     for (const k of ['slug', 'title', 'description']) {
