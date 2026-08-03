@@ -74,7 +74,7 @@ THEME: [2–4 words. e.g. "On anger" or "On impermanence"]
 
 QUOTE: [Exactly ONE real, verified quote with its author and source, on a single line, formatted "the quote" — Author, Work. Never fabricate quotes or present a paraphrase as a direct quote. Decide the quote privately: the output must contain only the final chosen quote — never list alternatives, show your selection process, second-guess an attribution, or write phrases like "I'll use...", "attribution disputed", or "let me choose one I can render exactly".]
 
-CONTEXT: [Two short paragraphs. The first situates the quote historically — what was happening in the life of the person who wrote it, what world they were navigating, what problem they were solving. The second draws a direct, unforced connection to contemporary life. No forced analogies. No corporate wellness language. No productivity framing. Write as a scholar who cares about ideas, not as a self-help author.]
+CONTEXT: [Two short paragraphs. The first situates the quote historically — what was happening in the life of the person who wrote it, what world they were navigating, what problem they were solving. Do NOT open with the stock biographical scene-setting: Marcus writing in army camps along the Danube, Marcus writing for no reader but himself, Seneca writing late in life after Nero pushed him from court, Epictetus born a slave in Phrygia. Those four openings account for roughly half of all editions published so far and they are exhausted. The reader knows who these people were. Open instead on the specific occasion of THIS passage: the argument it answers, the person it was addressed to, the decision it was written under, or the thing it contradicts elsewhere in the same work. The second draws a direct, unforced connection to contemporary life. No forced analogies. No corporate wellness language. No productivity framing. Write as a scholar who cares about ideas, not as a self-help author.]
 
 THE QUESTION: [One sentence. A genuine question — not rhetorical, not obvious — that the reader can carry through the day.]
 
@@ -408,16 +408,21 @@ function recentEditionsBlock(recent) {
   const lines = recent.map(r => {
     let host = 'timeless (no current-event hook)';
     try { if (r.sourceUrl) host = new URL(r.sourceUrl).hostname.replace(/^www\./, ''); } catch {}
-    return `- ${r.isoDate}: "${r.theme}" (${host})`;
+    // The passage matters more than the theme: two editions went out with the
+    // same quote because this digest never said which quotes were already spent.
+    const passage = String(r.quote || '').replace(/\s+/g, ' ').slice(0, 90);
+    return `- ${r.isoDate}: "${r.theme}" (${host})\n    passage used: ${passage}`;
   }).join('\n');
-  return '\n\nRECENT EDITIONS — do not repeat these themes, angles, or news domains; deliberately pick a different lane today:\n' + lines;
+  return '\n\nRECENT EDITIONS — do not repeat these themes, angles, news domains, or passages. ' +
+    'A passage listed below is spent: pick a different one, even for a similar theme. ' +
+    'Deliberately choose a different lane today:\n' + lines;
 }
 
 // ─── Generation + Beehiiv helpers (extracted from run() for retry support) ──
 
 async function generateEdition(dateStr) {
   console.log('Generating with model: ' + MODEL);
-  const recentBlock = recentEditionsBlock(loadRecentEditions(10));
+  const recentBlock = recentEditionsBlock(loadRecentEditions(45));
   const res = await httpsPost(
     'api.anthropic.com', '/v1/messages',
     { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
@@ -443,7 +448,39 @@ async function generateEdition(dateStr) {
   }
   const text = extractText(res.body.content);
   if (!text) throw new Error('No text block in Anthropic response.');
-  return { text: text, edition: parseEdition(text) };
+  const edition = parseEdition(text);
+  // Layer 2: the model was told not to repeat itself and did. Throwing here puts
+  // the caller's existing retry loop to work generating a genuinely new edition.
+  assertNotRepeat(edition, loadRecentEditions(120));
+  return { text: text, edition: edition };
+}
+
+// Reject an edition that repeats one already published.
+//
+// The prompt has always told the model not to repeat itself, and it did anyway:
+// two editions went out byte-identical, fourteen days apart, same theme, same
+// passage, same context, same question. Two causes. The recent-editions digest
+// only looked back ten editions, so by day fourteen the original had fallen out
+// of view, and the digest listed themes and news domains but never the passage,
+// so a spent quote looked unused. Both are fixed above.
+//
+// This is the layer that does not depend on the model cooperating. Same
+// reasoning as the SOURCE_URL verification: an instruction is layer one, a check
+// is layer two, and only layer two actually holds.
+function assertNotRepeat(edition, history) {
+  const norm = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const quoteKey = t => norm(t).split(' ').slice(0, 12).join(' ');
+
+  const theme = norm(edition.theme);
+  const qk = quoteKey(edition.quote);
+  for (const prev of history) {
+    if (theme && theme === norm(prev.theme)) {
+      throw new Error('Repeat edition: theme "' + edition.theme + '" already published ' + prev.isoDate);
+    }
+    if (qk && qk === quoteKey(prev.quote)) {
+      throw new Error('Repeat edition: passage already used ' + prev.isoDate + ' — ' + String(prev.quote).slice(0, 70));
+    }
+  }
 }
 
 // Disk fallback when Beehiiv staging is unavailable (no credentials, API
