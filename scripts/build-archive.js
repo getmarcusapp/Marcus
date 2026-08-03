@@ -66,13 +66,16 @@ function metaDesc(rec) {
   return base.length > 155 ? base.slice(0, 152).replace(/[\s,;:.]+\S*$/, '') + '…' : base;
 }
 
-function pageHead(title, description, canonical, jsonLd, extraOg) {
+// `robots` is passed per page rather than defaulted, because the two page types
+// want opposite things. See the edition call for why.
+function pageHead(title, description, canonical, jsonLd, extraOg, robots) {
   return '<!doctype html><html lang="en"><head>' +
     '<meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1">' +
     GA +
     '<title>' + esc(title) + '</title>' +
     '<meta name="description" content="' + esc(description) + '">' +
+    (robots ? '<meta name="robots" content="' + robots + '">' : '') +
     '<link rel="canonical" href="' + esc(canonical) + '">' +
     '<meta property="og:title" content="' + esc(title) + '">' +
     '<meta property="og:description" content="' + esc(description) + '">' +
@@ -144,7 +147,14 @@ function renderEditionPage(rec) {
   const source = rec.sourceUrl
     ? '<p class="dm-source">Source: <a href="' + esc(rec.sourceUrl) + '" rel="nofollow noopener" target="_blank">' + esc(hostname(rec.sourceUrl)) + ' →</a></p>'
     : '';
-  return pageHead(title, desc, canonical, jsonLd, '<meta property="og:type" content="article">') +
+  // noindex, follow. An edition is pegged to the day it was written (this week's
+  // news, this morning's passage), so nobody searches for it a month later: it
+  // can never earn search traffic, but at one new URL per day it would within a
+  // year be ~365 thin pages against ~15 substantial ones, which is what a search
+  // engine would then take this domain to be. `follow` keeps link equity flowing
+  // to /library, /stoics and the app. The archive stays fully public and
+  // shareable; it simply stops defining the site.
+  return pageHead(title, desc, canonical, jsonLd, '<meta property="og:type" content="article">', 'noindex, follow') +
     '<body>' + nav() +
     '<main class="dm-main">' +
     '<article class="dm-article">' +
@@ -187,7 +197,7 @@ function renderIndex(records) {
         '<p class="dm-item-quote">' + md(esc(r.quote)) + '</p>' +
         '</a>').join('')
     : '<p class="dm-empty">The first edition arrives soon.</p>';
-  return pageHead(title, desc, canonical, jsonLd, '<meta property="og:type" content="website">') +
+  return pageHead(title, desc, canonical, jsonLd, '<meta property="og:type" content="website">', 'index, follow, max-image-preview:large') +
     '<body>' + nav() +
     '<header class="dm-hero"><div class="dm-hero-inner">' +
     '<img class="dm-hero-skull" src="/skull-gold.png" alt="Marcus" width="132" height="132">' +
@@ -319,9 +329,9 @@ function buildSitemap(records) {
     add(SITE + '/stoics/' + id, null, 'monthly', '0.7');
   }
   add(SITE + '/privacy', null, 'yearly', '0.3');
-  for (const r of records) {
-    add(SITE + '/meditations/' + r.slug, r.isoDate, 'monthly', '0.7');
-  }
+  // Editions are deliberately noindex (see buildEditionPage), and listing a
+  // noindexed URL in the sitemap is a contradictory signal, so they are omitted.
+  // The archive index carries the links for discovery.
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     urls.join('\n') + '\n</urlset>\n';
