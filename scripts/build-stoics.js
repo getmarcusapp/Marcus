@@ -73,6 +73,10 @@ function coverUrl(isbn) {
 // if it is missing the file is copied at full size rather than failing the
 // build, since a heavy image beats a broken one.
 function preparePortrait(assetRef) {
+  // Not merely unreferenced: not copied at all. A file sitting in public/ is a
+  // published file whether or not a page links to it, so leaving them there
+  // while the pages render typographically would publish them anyway.
+  if (!WEB_PORTRAITS) return null;
   if (!assetRef || !String(assetRef).startsWith('__ASSET__')) return null;
   const rel = String(assetRef).replace('__ASSET__', '');
   const src = path.join(ROOT, 'constants', rel);
@@ -92,11 +96,27 @@ function preparePortrait(assetRef) {
   return '/img/stoics/' + base;
 }
 
+// WEB_PORTRAITS gates the museum photographs on the public site.
+//
+// The busts are ancient and public domain, but a photograph of a
+// three-dimensional object carries its own copyright: lighting and angle are
+// creative choices, unlike a flat scan of a painting. Most of these came from
+// Wikimedia under licences nobody has checked, and the credits cannot be
+// reconstructed from the files alone without guessing, which is precisely the
+// failure /misattributed-stoic-quotes exists to call out. Until each portrait
+// has a verified imageCredit, the web renders all twelve figures
+// typographically. The app keeps its portraits: that is a private surface, not
+// a published one.
+//
+// To turn them back on: record imageCredit per figure in constants/stoics.js
+// and set this to true. The build warns about any portrait still uncredited.
+const WEB_PORTRAITS = false;
+
 // A figure with no surviving likeness gets the name set in Cinzel, matching
 // what the app does. Inventing a face would undercut the accuracy claim the
 // rest of the app makes, which is the whole point of the imageNote field.
 function portrait(fig, cls) {
-  if (fig.webImage) {
+  if (WEB_PORTRAITS && fig.webImage) {
     return '<img class="st-portrait ' + cls + '" src="' + esc(fig.webImage) + '" alt="' +
       esc(fig.name) + '" loading="lazy">';
   }
@@ -183,7 +203,7 @@ function figurePage(fig, prev, next, books, bookshopUrl, amazonUrl) {
     name: fig.name,
     description: fig.summary,
     url: canonical,
-    ...(fig.webImage ? { image: SITE + fig.webImage } : {}),
+    ...(WEB_PORTRAITS && fig.webImage ? { image: SITE + fig.webImage } : {}),
     ...(fig.wikipedia ? { sameAs: [fig.wikipedia] } : {}),
     jobTitle: fig.role,
   };
@@ -219,7 +239,7 @@ function figurePage(fig, prev, next, books, bookshopUrl, amazonUrl) {
     desc,
     canonical,
     ogType: 'article',
-    ogImage: fig.webImage ? SITE + fig.webImage : undefined,
+    ogImage: WEB_PORTRAITS && fig.webImage ? SITE + fig.webImage : undefined,
     jsonLd,
   }) +
     NAV +
@@ -234,7 +254,7 @@ function figurePage(fig, prev, next, books, bookshopUrl, amazonUrl) {
     '</div></header>' +
     // imageNote is the honesty field: it says what the picture actually is, and
     // constants/stoics.js instructs that it always appear under the image.
-    '<p class="st-imagenote">' + esc(fig.imageNote) + '</p>' + creditHtml +
+    (WEB_PORTRAITS ? '<p class="st-imagenote">' + esc(fig.imageNote) + '</p>' + creditHtml : '') +
     '<section class="st-block st-lead">' + paragraphs(fig.life) + '</section>' +
     // Never rendered with quote marks or an attribution dash: it is a plain
     // statement of the idea, not the figure's words.
@@ -340,12 +360,16 @@ function build() {
     fs.writeFileSync(path.join(OUT_DIR, fig.id + '.html'), html, 'utf8');
   });
 
-  const withPortrait = figures.filter(f => f.webImage).length;
+  const withPortrait = WEB_PORTRAITS ? figures.filter(f => f.webImage).length : 0;
   console.log('Built stoics: ' + figures.length + ' figure(s) → public/stoics/index.html + public/stoics/*.html');
   console.log('  portraits: ' + withPortrait + ' rendered, ' + (figures.length - withPortrait) + ' typographic');
   if (missingBooks) console.log('  ! ' + missingBooks + ' unresolved bookId(s)');
-  const uncredited = figures.filter(f => f.webImage && !f.imageCredit).length;
-  if (uncredited) console.log('  ! ' + uncredited + ' portrait(s) have no imageCredit — see FIELD NOTES in constants/stoics.js');
+  if (!WEB_PORTRAITS) {
+    console.log('  portraits are OFF for the web (WEB_PORTRAITS=false): licences unverified');
+  } else {
+    const uncredited = figures.filter(f => f.webImage && !f.imageCredit).length;
+    if (uncredited) console.log('  ! ' + uncredited + ' portrait(s) have no imageCredit — see FIELD NOTES in constants/stoics.js');
+  }
 }
 
 const CSS = `
