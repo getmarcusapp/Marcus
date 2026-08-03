@@ -108,9 +108,11 @@ function preparePortrait(assetRef) {
 // typographically. The app keeps its portraits: that is a private surface, not
 // a published one.
 //
-// To turn them back on: record imageCredit per figure in constants/stoics.js
-// and set this to true. The build warns about any portrait still uncredited.
-const WEB_PORTRAITS = false;
+// Gio reviewed the exposure and chose to publish without per-image credits
+// (2026-08-02). The flag stays here, and the build still names every portrait
+// missing an imageCredit, so recording them later is a data change rather than
+// a code change. Until then a general source line renders under the gallery.
+const WEB_PORTRAITS = true;
 
 // A figure with no surviving likeness gets the name set in Cinzel, matching
 // what the app does. Inventing a face would undercut the accuracy claim the
@@ -332,6 +334,11 @@ function indexPage(figures) {
     'the book worth reading first.</p>' +
     '</div></header>' +
     '<main class="st-main">' + sectionsHtml +
+    '<section class="st-credits">' +
+    '<p>Portrait photographs are of ancient busts held in public collections, sourced via ' +
+    'Wikimedia Commons. If you hold rights in one of these photographs and would like it ' +
+    'credited or removed, <a href="mailto:hello@getmarcus.app">tell us</a> and we will act on it.</p>' +
+    '</section>' +
     '<section class="st-app">' +
     '<img class="st-app-skull" src="/skull-gold.png" alt="" width="64" height="64">' +
     '<p class="st-app-copy">Marcus turns these voices into a daily practice, for iOS.</p>' +
@@ -444,6 +451,9 @@ img{max-width:100%;display:block}
 .st-app{text-align:center;margin:64px 0 0;padding:40px 24px;border-top:1px solid rgba(232,228,220,.09)}
 .st-app-skull{width:56px;height:56px;object-fit:contain;margin:0 auto 16px;opacity:.9}
 .st-app-copy{font-size:16px;color:rgba(232,228,220,.76);max-width:52ch;margin:0 auto 20px}
+.st-credits{max-width:1000px;margin:48px auto 0;padding:0 24px}
+.st-credits p{font-size:13px;color:rgba(232,228,220,.45);margin:0;max-width:70ch}
+.st-credits a{color:rgba(232,228,220,.7)}
 .st-footer{text-align:center;padding:32px 24px 48px;font-size:13px;color:rgba(232,228,220,.45)}
 .st-footer a{color:rgba(232,228,220,.7)}
 @media (max-width:640px){
