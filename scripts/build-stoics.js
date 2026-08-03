@@ -167,6 +167,7 @@ const NAV =
   '<div class="st-nav-right">' +
   '<a class="st-nav-link" href="/stoics">The Stoics</a>' +
   '<a class="st-nav-link" href="/library">Library</a>' +
+  '<a class="st-nav-link" href="/misattributed-stoic-quotes">Attribution</a>' +
   '<a class="st-nav-link" href="/meditations">Daily Meditations</a>' +
   '<a class="st-nav-cta" href="/">Get the app →</a>' +
   '</div></nav>';
@@ -174,7 +175,7 @@ const NAV =
 const FOOTER =
   '<footer class="st-footer"><p>Marcus &middot; A Stoic Practice App &middot; ' +
   '<a href="/">getmarcus.app</a> &middot; <a href="/stoics">The Stoics</a> &middot; ' +
-  '<a href="/library">The Library</a> &middot; <a href="/meditations">Daily Meditations</a></p></footer>';
+  '<a href="/library">The Library</a> &middot; <a href="/misattributed-stoic-quotes">Attribution</a> &middot; <a href="/meditations">Daily Meditations</a></p></footer>';
 
 function figurePage(fig, prev, next, books, bookshopUrl, amazonUrl) {
   const canonical = SITE + '/stoics/' + fig.id;

@@ -321,6 +321,7 @@ function buildSitemap(records) {
   add(SITE + '/meditations', newest, 'daily', '0.9');
   add(SITE + '/library', null, 'monthly', '0.8');
   add(SITE + '/stoics', null, 'monthly', '0.8');
+  add(SITE + '/misattributed-stoic-quotes', null, 'monthly', '0.9');
   // The twelve figure pages, read out of constants/stoics.js rather than listed
   // here, so adding a Stoic cannot silently leave its page unindexed. This is
   // also why the Stoics URLs have to live in THIS file: the sitemap is rebuilt
