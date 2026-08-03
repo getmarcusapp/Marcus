@@ -10,7 +10,7 @@ import { track } from '../lib/analytics';
 //
 // On a quote you have not kept, it is the save button. On a line resurfaced by
 // lib/saved.js on the Practice screen, it renders already filled, which is how
-// you recognise the line as one of your own without a "you kept this" label.
+// you recognize the line as one of your own without a "you kept this" label.
 // The state IS the marker.
 export function SaveHeart({ text, author, work, from, size = 20, style }) {
   const saved = useIsSaved(text);

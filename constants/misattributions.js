@@ -12,7 +12,7 @@
 // 2. `confidence` is 'certain' or 'strong'. Anything weaker does not belong on
 //    the page at all. 'certain' means the real source is documented and
 //    checkable (a film, a song, a dated book). 'strong' means the attribution is
-//    well established in scholarship but rests on a judgement rather than a
+//    well established in scholarship but rests on a judgment rather than a
 //    receipt.
 //
 // This list came out of auditing Marcus's own quote library in August 2026,
@@ -46,7 +46,7 @@ export const MISATTRIBUTIONS = [
     actual: 'Will Durant, The Story of Philosophy (1926)',
     confidence: 'certain',
     group: 'modern',
-    note: 'Durant was summarising Aristotle, and said so. The sentence is his own compression of a passage in the Nicomachean Ethics about virtue arising from habituation. It is the most quoted thing Aristotle never wrote.',
+    note: 'Durant was summarizing Aristotle, and said so. The sentence is his own compression of a passage in the Nicomachean Ethics about virtue arising from habituation. It is the most quoted thing Aristotle never wrote.',
   },
   {
     id: 'secret-of-change',

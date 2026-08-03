@@ -5,10 +5,10 @@ import { coverUrl } from '../constants/library';
 
 // A book cover from Open Library, with a typographic fallback.
 //
-// Covers are the only real colour on the reading surfaces, which are otherwise
+// Covers are the only real color on the reading surfaces, which are otherwise
 // type on near-black, so they do a lot of work. But not every ISBN has one:
 // Musonius Rufus's lectures have no cover at all, and `default=false` on the
-// Open Library URL makes those return 404 rather than a grey placeholder. When
+// Open Library URL makes those return 404 rather than a gray placeholder. When
 // that happens, onError swaps in the title set in Cinzel, which matches the
 // treatment used for the Stoics who have no surviving likeness and reads as a
 // deliberate choice rather than a broken image.

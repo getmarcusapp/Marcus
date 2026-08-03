@@ -202,7 +202,7 @@ function figurePage(fig, prev, next, books, bookshopUrl, amazonUrl) {
 
   // The credit line renders only when constants/stoics.js carries one. Museum
   // photographs are not automatically free to republish, so this is where the
-  // per-image licence and photographer go once they are recorded.
+  // per-image license and photographer go once they are recorded.
   const creditHtml = fig.imageCredit
     ? '<p class="st-credit">' + esc(fig.imageCredit) + '</p>'
     : '';

@@ -37,7 +37,7 @@ export function amazonUrl(asin) {
 // Where multiple translations exist, the recommended one is named.
 
 // Open Library cover by ISBN. `default=false` makes a missing cover return 404
-// rather than a grey placeholder image, so callers can fall back deliberately.
+// rather than a gray placeholder image, so callers can fall back deliberately.
 // -L is the large size, which is what the in-app cover rows want; the website
 // generator uses -M for its smaller grid.
 export function coverUrl(isbn, size = 'L') {

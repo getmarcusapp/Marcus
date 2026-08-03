@@ -13,7 +13,7 @@ import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { BookCover } from '../components/BookCover';
 
-// The cover row is the only real colour on this screen, which is otherwise
+// The cover row is the only real color on this screen, which is otherwise
 // marble and type. BookCover handles the missing-cover fallback; this wraps it
 // with the title, author and the Bookshop link.
 function BookCoverCard({ book }) {

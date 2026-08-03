@@ -161,7 +161,7 @@ function DeveloperSettingsInner() {
   function handleSeedWeek() {
     Alert.alert(
       'Seed a week of practice data?',
-      'Replaces existing journals and emotion logs with seven days of synthetic morning + evening entries and twelve emotion logs trending from high to low intensity. Useful for previewing the weekly review with realistic spread. Today is left untouched.',
+      'Replaces existing journals and emotion logs with seven days of synthetic morning + evening entries and twelve emotion logs trending from high to low intensity. Useful for previewing the weekly review with realiztic spread. Today is left untouched.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -197,7 +197,7 @@ function DeveloperSettingsInner() {
   function handleLapseStreak() {
     Alert.alert(
       'Lapse the streak?',
-      'Backdates the last practice past the grace window, keeping your history. The Practice hero should then read "Begin" with "The flame went out. Take it up again." Practising once restores it.',
+      'Backdates the last practice past the grace window, keeping your history. The Practice hero should then read "Begin" with "The flame went out. Take it up again." Practicing once restores it.',
       [
         { text: 'Cancel', style: 'cancel' },
         {

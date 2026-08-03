@@ -1,7 +1,7 @@
 export const colors = {
   // ── Dark zones (hero, nav, headers, sealed state) ──
   // Unified near-black per Valeriya's design system: everything that used
-  // to be a distinct grey fill (bgCard, bgElevated) now reads as one canvas,
+  // to be a distinct gray fill (bgCard, bgElevated) now reads as one canvas,
   // with hierarchy expressed via borders + typography rather than fills.
   // Tokens kept as separate names so per-spot tweaks can still happen if a
   // surface truly needs to read as a different shade.

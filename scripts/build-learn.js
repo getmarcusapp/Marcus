@@ -67,7 +67,7 @@ const PILLARS = [
 
 function build() {
   const title = 'Learn Stoicism — Practice, Sources and the Stoics | Marcus';
-  const desc = 'How the Stoics actually practised: the evening examination, premeditatio malorum, the dichotomy of control ' +
+  const desc = 'How the Stoics actually practiced: the evening examination, premeditatio malorum, the dichotomy of control ' +
     'and the four virtues. Plus the twelve figures behind it and which translations to read.';
   const canonical = SITE + '/learn';
 
@@ -130,7 +130,7 @@ function build() {
     '</div></nav>' +
     '<header class="ln-hero"><div class="ln-hero-inner">' +
     '<p class="ln-eyebrow">Learn</p>' +
-    '<h1 class="ln-title">Stoicism, as it was actually practised</h1>' +
+    '<h1 class="ln-title">Stoicism, as it was actually practiced</h1>' +
     '<p class="ln-hero-copy">Not a summary of the philosophy. The exercises the Stoics ran on themselves daily, ' +
     'the people who wrote them down, and an honest account of which famous quotations are not theirs at all.</p>' +
     '</div></header>' +
