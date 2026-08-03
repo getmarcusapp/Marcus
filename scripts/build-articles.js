@@ -193,8 +193,9 @@ function page(meta, bodyHtml, prev, next) {
         // without a fetch.
         '@type': 'Person',
         '@id': SITE + '#author',
-        name: 'Gio',
+        name: 'Gio White',
         url: SITE + '/about',
+        sameAs: ['https://www.linkedin.com/in/giovanniwhite/'],
         worksFor: { '@id': SITE + '#org' },
         image: SITE + '/img/author.jpg',
       },
@@ -261,7 +262,7 @@ function page(meta, bodyHtml, prev, next) {
     '<p class="ar-eyebrow"><a href="/learn">The practice</a></p>' +
     '<h1 class="ar-title">' + esc(meta.title) + '</h1>' +
     '<p class="ar-byline"><img src="/img/author.jpg" alt="" width="30" height="30">' +
-    'By <a href="/about">Gio</a><span>&middot;</span>' +
+    'By <a href="/about">Gio White</a><span>&middot;</span>' +
     '<a href="/about">How sources are checked</a></p>' +
     '</header>' +
     bodyHtml +

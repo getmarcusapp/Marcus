@@ -15,10 +15,8 @@
 // checkable so you do not have to trust me" is a stronger position than a
 // credential anyway.
 //
-// FILL THESE IN: AUTHOR.name (currently a first name only, which weakens the
-// signal), AUTHOR.sameAs (empty; add real profile URLs), and drop a headshot at
-// public/img/author.jpg — the page renders it only if the file exists, so it
-// costs nothing to leave absent.
+// The headshot is optional: the page renders it only if public/img/author.jpg
+// exists, so removing the file degrades gracefully rather than breaking.
 //
 // The headshot at public/img/author.jpg was produced from the original with:
 //   sips -c 1500 1500 --cropOffset 430 225 <original> --out author.jpg
@@ -39,10 +37,13 @@ const HEADSHOT = path.join(ROOT, 'public', 'img', 'author.jpg');
 const GA = '<script src="/analytics.js"></script>';
 
 const AUTHOR = {
-  name: 'Gio',                       // TODO: full name — a first name alone is a weak entity
+  name: 'Gio White',
   role: 'Founder, Marcus',
   email: 'hello@getmarcus.app',
-  sameAs: [],                        // TODO: real profile URLs only. An empty array is better than a guess.
+  // sameAs asserts that the Person here and the profile there are one entity.
+  // The assertion is corroborated when the profile points back, so the LinkedIn
+  // page should name Marcus and link getmarcus.app.
+  sameAs: ['https://www.linkedin.com/in/giovanniwhite/'],
 };
 
 function esc(s) {
@@ -126,7 +127,11 @@ function build() {
     '</header>' +
 
     '<p class="ab-p">I am ' + esc(AUTHOR.name) + '. I built <a href="/">Marcus</a>, a Stoic practice app for iOS, ' +
-    'and I write the guides on this site.</p>' +
+    'and I write the guides on this site.' +
+    (AUTHOR.sameAs.length
+      ? ' You can find me on <a href="' + esc(AUTHOR.sameAs[0]) + '" rel="me noopener" target="_blank">LinkedIn</a>.'
+      : '') +
+    '</p>' +
 
     '<h2 class="ab-h2">What I am not</h2>' +
     '<p class="ab-p">I am not a classicist. I do not read Greek or Latin, I hold no degree in ancient ' +
