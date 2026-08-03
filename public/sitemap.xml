@@ -58,6 +58,16 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://getmarcus.app/did-marcus-aurelius-say-echoes-in-eternity</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://getmarcus.app/epictetus-discourses-enchiridion-or-art-of-living</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://getmarcus.app/stoics</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

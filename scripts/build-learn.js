@@ -51,6 +51,8 @@ const PILLARS = [
       { href: '/premeditatio-malorum', title: 'Premeditatio malorum', blurb: 'Rehearsing what could go wrong, and why it is the opposite of worrying about it.', published: true },
       { href: '/dichotomy-of-control', title: 'The dichotomy of control', blurb: 'The most quoted idea in Stoicism, and the most consistently flattened in the retelling.', published: true },
       { href: '/stoicism-is-not-suppressing-emotions', title: 'Stoicism is not about suppressing emotions', blurb: 'The most common misreading of the philosophy. Seneca wept for his friend, and apatheia never meant apathy.', published: true },
+      { href: '/did-marcus-aurelius-say-echoes-in-eternity', title: 'Did Marcus Aurelius say "what we do in life echoes in eternity"?', blurb: 'No. It is from Gladiator, and Marcus argued the opposite: that being remembered is worthless and oblivion comes fast.', published: true },
+      { href: '/epictetus-discourses-enchiridion-or-art-of-living', title: 'Epictetus: Discourses, Enchiridion, or The Art of Living?', blurb: 'Three different kinds of book under one name, and one of them is not a translation. Which to read, and which never to quote.', published: true },
       { href: '/best-translation-of-meditations', title: 'Which translation of Meditations should you read?', blurb: 'Hays, Hard, Hammond and Waterfield compared, and why the free edition sounds like the King James Bible.', published: true },
       { href: '/four-stoic-virtues', title: 'The four Stoic virtues', blurb: 'Wisdom, courage, justice, temperance. Three of the four are about acting, and one is entirely about other people.', published: true },
     ],
