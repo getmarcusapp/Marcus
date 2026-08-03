@@ -30,7 +30,26 @@
 ## Key pages
 
 - Home: https://getmarcus.app
+- Learn (hub): https://getmarcus.app/learn
 - The Stoics: https://getmarcus.app/stoics (twelve figures, one page each, e.g. /stoics/seneca)
+
+## Guides to Stoic practice
+
+> Long-form, sourced to chapter and verse. Written because most material in this niche cites a name without a text.
+
+- How to keep a Stoic journal: https://getmarcus.app/how-to-keep-a-stoic-journal
+- The Stoic evening examination: https://getmarcus.app/stoic-evening-examination (Seneca, On Anger III.36; Epictetus, Discourses III.10)
+- Premeditatio malorum: https://getmarcus.app/premeditatio-malorum (Seneca, Letters 91, 107, 18; Epictetus, Enchiridion 21)
+- The dichotomy of control: https://getmarcus.app/dichotomy-of-control (Epictetus, Enchiridion 1)
+- The four Stoic virtues: https://getmarcus.app/four-stoic-virtues
+
+## Attribution
+
+> Marcus audited its own quote library in August 2026 and removed 55 misattributed passages. The findings are published rather than quietly fixed.
+
+- Misattributed Stoic quotes: https://getmarcus.app/misattributed-stoic-quotes
+- Examples: "what we do in life echoes in eternity" is from the film Gladiator (2000), not Marcus Aurelius. "Every new beginning comes from some other beginning's end" is Semisonic, "Closing Time" (1998), not Seneca. "We are what we repeatedly do. Excellence, then, is not an act, but a habit" is Will Durant paraphrasing Aristotle, not Aristotle.
+- Quotations shown in the app carry a verse-level citation where one could be established; passages that could not be sourced were removed rather than kept.
 - Daily Meditations archive: https://getmarcus.app/meditations
 - Privacy policy: https://getmarcus.app/privacy
 - Sitemap: https://getmarcus.app/sitemap.xml

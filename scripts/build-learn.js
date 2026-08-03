@@ -46,11 +46,11 @@ const PILLARS = [
     title: 'The practice',
     intro: 'How the Stoics actually worked on themselves, daily, and how to run the same exercises without abandoning them by February.',
     pages: [
-      { href: '/how-to-keep-a-stoic-journal', title: 'How to keep a Stoic journal', blurb: 'The most famous book in Stoicism is a private notebook. What made it a Stoic one, and how to keep your own.', published: false },
-      { href: '/stoic-evening-examination', title: 'The Stoic evening examination', blurb: 'Seneca put himself on trial every night, as a judge who does not frighten the defendant. The oldest documented practice in the tradition.', published: false },
-      { href: '/premeditatio-malorum', title: 'Premeditatio malorum', blurb: 'Rehearsing what could go wrong, and why it is the opposite of worrying about it.', published: false },
-      { href: '/dichotomy-of-control', title: 'The dichotomy of control', blurb: 'The most quoted idea in Stoicism, and the most consistently flattened in the retelling.', published: false },
-      { href: '/four-stoic-virtues', title: 'The four Stoic virtues', blurb: 'Wisdom, courage, justice, temperance. Three of the four are about acting, and one is entirely about other people.', published: false },
+      { href: '/how-to-keep-a-stoic-journal', title: 'How to keep a Stoic journal', blurb: 'The most famous book in Stoicism is a private notebook. What made it a Stoic one, and how to keep your own.', published: true },
+      { href: '/stoic-evening-examination', title: 'The Stoic evening examination', blurb: 'Seneca put himself on trial every night, as a judge who does not frighten the defendant. The oldest documented practice in the tradition.', published: true },
+      { href: '/premeditatio-malorum', title: 'Premeditatio malorum', blurb: 'Rehearsing what could go wrong, and why it is the opposite of worrying about it.', published: true },
+      { href: '/dichotomy-of-control', title: 'The dichotomy of control', blurb: 'The most quoted idea in Stoicism, and the most consistently flattened in the retelling.', published: true },
+      { href: '/four-stoic-virtues', title: 'The four Stoic virtues', blurb: 'Wisdom, courage, justice, temperance. Three of the four are about acting, and one is entirely about other people.', published: true },
     ],
   },
   {

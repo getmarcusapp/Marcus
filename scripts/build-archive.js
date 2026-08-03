@@ -293,6 +293,15 @@ filter:drop-shadow(0 0 40px rgba(255,206,130,.18))}
 @media(max-width:500px){.dm-form{flex-direction:column}.dm-submit{padding:14px}}
 `;
 
+// Article slugs from content/articles/*.md frontmatter.
+function articleSlugs() {
+  const dir = path.join(ROOT, 'content', 'articles');
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort()
+    .map(f => (fs.readFileSync(path.join(dir, f), 'utf8').match(/^slug:\s*(.+)$/m) || [])[1])
+    .filter(Boolean).map(s => s.trim());
+}
+
 // Figure ids from constants/stoics.js. Scraped rather than evaluated: the
 // module carries require() calls for portrait assets that mean nothing here,
 // and the sitemap only needs the ids.
@@ -321,6 +330,12 @@ function buildSitemap(records) {
   add(SITE + '/meditations', newest, 'daily', '0.9');
   add(SITE + '/library', null, 'monthly', '0.8');
   add(SITE + '/learn', null, 'monthly', '0.8');
+  // Long-form articles, read from content/articles rather than listed, for the
+  // same reason as the Stoics: adding one must not require remembering to add
+  // it here too.
+  for (const slug of articleSlugs()) {
+    add(SITE + '/' + slug, null, 'monthly', '0.9');
+  }
   add(SITE + '/stoics', null, 'monthly', '0.8');
   add(SITE + '/misattributed-stoic-quotes', null, 'monthly', '0.9');
   // The twelve figure pages, read out of constants/stoics.js rather than listed
