@@ -100,11 +100,11 @@ function build() {
     '<meta property="og:title" content="The Stoic Quotes That Are Not Stoic">' +
     '<meta property="og:description" content="' + esc(desc) + '">' +
     '<meta property="og:url" content="' + canonical + '">' +
-    '<meta property="og:image" content="' + SITE + '/og-image.png">' +
+    '<meta property="og:image" content="' + SITE + '/og/misattributed-stoic-quotes.png">' +
     '<meta name="twitter:card" content="summary_large_image">' +
     '<meta name="twitter:title" content="The Stoic Quotes That Are Not Stoic">' +
     '<meta name="twitter:description" content="' + esc(desc) + '">' +
-    '<meta name="twitter:image" content="' + SITE + '/og-image.png">' +
+    '<meta name="twitter:image" content="' + SITE + '/og/misattributed-stoic-quotes.png">' +
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
     '<link rel="icon" type="image/png" href="/favicon.png">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +

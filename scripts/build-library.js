@@ -154,13 +154,13 @@ function build() {
     '<meta property="og:title" content="The Stoic Library — Best Books on Stoicism">' +
     '<meta property="og:description" content="' + esc(desc) + '">' +
     '<meta property="og:url" content="' + canonical + '">' +
-    '<meta property="og:image" content="' + SITE + '/og-image.png">' +
+    '<meta property="og:image" content="' + SITE + '/og/library.png">' +
     '<meta property="og:image:width" content="1200">' +
     '<meta property="og:image:height" content="630">' +
     '<meta name="twitter:card" content="summary_large_image">' +
     '<meta name="twitter:title" content="The Stoic Library — Best Books on Stoicism">' +
     '<meta name="twitter:description" content="' + esc(desc) + '">' +
-    '<meta name="twitter:image" content="' + SITE + '/og-image.png">' +
+    '<meta name="twitter:image" content="' + SITE + '/og/library.png">' +
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
     '<link rel="icon" type="image/png" href="/favicon.png">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +

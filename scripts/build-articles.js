@@ -126,6 +126,7 @@ function renderMarkdown(md) {
 
 function page(meta, bodyHtml, prev, next) {
   const canonical = SITE + '/' + meta.slug;
+  const ogImage = SITE + '/og/' + meta.slug + '.png';
   // Structured data serves two readers with different needs, so this emits a
   // @graph rather than one node.
   //
@@ -220,11 +221,11 @@ function page(meta, bodyHtml, prev, next) {
     '<meta property="og:title" content="' + esc(meta.title) + '">' +
     '<meta property="og:description" content="' + esc(meta.description) + '">' +
     '<meta property="og:url" content="' + canonical + '">' +
-    '<meta property="og:image" content="' + SITE + '/og-image.png">' +
+    '<meta property="og:image" content="' + ogImage + '">'+'<meta property="og:image:width" content="1200">'+'<meta property="og:image:height" content="630">' +
     '<meta name="twitter:card" content="summary_large_image">' +
     '<meta name="twitter:title" content="' + esc(meta.title) + '">' +
     '<meta name="twitter:description" content="' + esc(meta.description) + '">' +
-    '<meta name="twitter:image" content="' + SITE + '/og-image.png">' +
+    '<meta name="twitter:image" content="' + ogImage + '">' +
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
     '<link rel="icon" type="image/png" href="/favicon.png">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +

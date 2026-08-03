@@ -145,11 +145,11 @@ function head(opts) {
     '<meta property="og:title" content="' + esc(opts.ogTitle || opts.title) + '">' +
     '<meta property="og:description" content="' + esc(opts.desc) + '">' +
     '<meta property="og:url" content="' + esc(opts.canonical) + '">' +
-    '<meta property="og:image" content="' + esc(opts.ogImage || (SITE + '/og-image.png')) + '">' +
+    '<meta property="og:image" content="' + esc(opts.ogImage || (SITE + '/og/stoics.png')) + '">' +
     '<meta name="twitter:card" content="summary_large_image">' +
     '<meta name="twitter:title" content="' + esc(opts.ogTitle || opts.title) + '">' +
     '<meta name="twitter:description" content="' + esc(opts.desc) + '">' +
-    '<meta name="twitter:image" content="' + esc(opts.ogImage || (SITE + '/og-image.png')) + '">' +
+    '<meta name="twitter:image" content="' + esc(opts.ogImage || (SITE + '/og/stoics.png')) + '">' +
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
     '<link rel="icon" type="image/png" href="/favicon.png">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +
