@@ -39,7 +39,11 @@ function parseFrontmatter(src) {
   for (const line of m[1].split('\n')) {
     const kv = line.match(/^(\w+):\s*(.*)$/);
     if (!kv) continue;
-    const raw = kv[2].trim();
+    // A value containing a colon has to be quoted in the frontmatter, so strip
+    // one layer of wrapping quotes. Without this the quotes render into the
+    // <h1> and the <title>.
+    let raw = kv[2].trim();
+    if (/^"(.*)"$/.test(raw) || /^'(.*)'$/.test(raw)) raw = raw.slice(1, -1);
     // about/mentions are authored as JSON so the entities a page claims to be
     // about live next to the prose rather than being inferred at build time.
     meta[kv[1]] = /^[[{]/.test(raw) ? JSON.parse(raw) : raw;
