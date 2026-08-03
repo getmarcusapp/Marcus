@@ -48,6 +48,16 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://getmarcus.app/stoicism-is-not-suppressing-emotions</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://getmarcus.app/best-translation-of-meditations</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://getmarcus.app/stoics</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

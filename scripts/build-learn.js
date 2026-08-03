@@ -50,6 +50,8 @@ const PILLARS = [
       { href: '/stoic-evening-examination', title: 'The Stoic evening examination', blurb: 'Seneca put himself on trial every night, as a judge who does not frighten the defendant. The oldest documented practice in the tradition.', published: true },
       { href: '/premeditatio-malorum', title: 'Premeditatio malorum', blurb: 'Rehearsing what could go wrong, and why it is the opposite of worrying about it.', published: true },
       { href: '/dichotomy-of-control', title: 'The dichotomy of control', blurb: 'The most quoted idea in Stoicism, and the most consistently flattened in the retelling.', published: true },
+      { href: '/stoicism-is-not-suppressing-emotions', title: 'Stoicism is not about suppressing emotions', blurb: 'The most common misreading of the philosophy. Seneca wept for his friend, and apatheia never meant apathy.', published: true },
+      { href: '/best-translation-of-meditations', title: 'Which translation of Meditations should you read?', blurb: 'Hays, Hard, Hammond and Waterfield compared, and why the free edition sounds like the King James Bible.', published: true },
       { href: '/four-stoic-virtues', title: 'The four Stoic virtues', blurb: 'Wisdom, courage, justice, temperance. Three of the four are about acting, and one is entirely about other people.', published: true },
     ],
   },
