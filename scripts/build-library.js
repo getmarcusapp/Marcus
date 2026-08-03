@@ -173,9 +173,7 @@ function build() {
     '<nav class="lib-nav">' +
     '<a class="lib-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
     '<div class="lib-nav-right">' +
-    '<a class="lib-nav-link" href="/stoics">The Stoics</a>' +
-    '<a class="lib-nav-link" href="/misattributed-stoic-quotes">Attribution</a>' +
-    '<a class="lib-nav-link" href="/meditations">Daily Meditations</a>' +
+    '<a class="lib-nav-link" href="/learn">Learn</a>' +
     '<a class="lib-nav-cta" href="/">Get the app →</a>' +
     '</div></nav>' +
     '<header class="lib-hero"><div class="lib-hero-inner">' +

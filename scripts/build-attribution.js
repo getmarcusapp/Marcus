@@ -117,8 +117,7 @@ function build() {
     '<nav class="mq-nav">' +
     '<a class="mq-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
     '<div class="mq-nav-right">' +
-    '<a class="mq-nav-link" href="/stoics">The Stoics</a>' +
-    '<a class="mq-nav-link" href="/library">Library</a>' +
+    '<a class="mq-nav-link" href="/learn">Learn</a>' +
     '<a class="mq-nav-cta" href="/">Get the app →</a>' +
     '</div></nav>' +
 
@@ -174,7 +173,7 @@ function build() {
     '</main>' +
 
     '<footer class="mq-footer"><p>Marcus &middot; A Stoic Practice App &middot; ' +
-    '<a href="/">getmarcus.app</a> &middot; <a href="/stoics">The Stoics</a> &middot; ' +
+    '<a href="/">getmarcus.app</a> &middot; <a href="/learn">Learn</a> &middot; <a href="/stoics">The Stoics</a> &middot; ' +
     '<a href="/library">The Library</a> &middot; <a href="/meditations">Daily Meditations</a></p></footer>' +
     '</body></html>';
 

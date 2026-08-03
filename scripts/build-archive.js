@@ -320,6 +320,7 @@ function buildSitemap(records) {
   add(SITE + '/', newest, 'weekly', '1.0');
   add(SITE + '/meditations', newest, 'daily', '0.9');
   add(SITE + '/library', null, 'monthly', '0.8');
+  add(SITE + '/learn', null, 'monthly', '0.8');
   add(SITE + '/stoics', null, 'monthly', '0.8');
   add(SITE + '/misattributed-stoic-quotes', null, 'monthly', '0.9');
   // The twelve figure pages, read out of constants/stoics.js rather than listed
