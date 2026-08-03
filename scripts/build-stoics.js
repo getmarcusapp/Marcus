@@ -25,7 +25,12 @@ const { execFileSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
-const OUT_INDEX = path.join(ROOT, 'public', 'stoics.html');
+// The index lives at public/stoics/index.html, not public/stoics.html. The
+// meditations archive already uses the directory-index shape, and having BOTH
+// a stoics.html file and a stoics/ directory makes /stoics ambiguous: the file
+// and the directory are different resources and which one wins depends on the
+// host's cleanUrls implementation. One shape, matching the existing one.
+const OUT_INDEX = path.join(ROOT, 'public', 'stoics', 'index.html');
 const OUT_DIR = path.join(ROOT, 'public', 'stoics');
 const IMG_DIR = path.join(ROOT, 'public', 'img', 'stoics');
 const GA = '<script src="/analytics.js"></script>';
@@ -338,7 +343,7 @@ function build() {
   });
 
   const withPortrait = figures.filter(f => f.webImage).length;
-  console.log('Built stoics: ' + figures.length + ' figure(s) → public/stoics.html + public/stoics/*.html');
+  console.log('Built stoics: ' + figures.length + ' figure(s) → public/stoics/index.html + public/stoics/*.html');
   console.log('  portraits: ' + withPortrait + ' rendered, ' + (figures.length - withPortrait) + ' typographic');
   if (missingBooks) console.log('  ! ' + missingBooks + ' unresolved bookId(s)');
   const uncredited = figures.filter(f => f.webImage && !f.imageCredit).length;
