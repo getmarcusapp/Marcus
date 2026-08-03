@@ -147,6 +147,16 @@ function build() {
 
     groupsHtml +
 
+    '<section class="mq-thanks">' +
+    '<h2 class="mq-section-title">Found by other people</h2>' +
+    '<p>Three entries on this page were still live in our own app after the first audit, and we ' +
+    'removed them only because someone else had done the work. ' +
+    '<a href="https://gregorybsadler.substack.com/p/10-definitely-fake-quotes-not-from" rel="noopener" target="_blank">Gregory Sadler</a> ' +
+    'traced the Elbert Hubbard and Tolstoy lines. ' +
+    '<a href="https://modernstoicism.com/did-the-stoics-really-say-that-by-thomas-colligan/" rel="noopener" target="_blank">Thomas Colligan, writing for Modern Stoicism</a>, ' +
+    'showed that the everything-we-hear line is a reworking of a four-word passage that means something else. ' +
+    'A page about honest attribution that quietly took credit for their research would be self-refuting.</p>' +
+    '</section>' +
     '<section class="mq-method">' +
     '<h2 class="mq-section-title">How to check one yourself</h2>' +
     '<p>Four questions catch almost everything on this page.</p>' +
@@ -215,7 +225,10 @@ img{max-width:100%;display:block}
 .mq-actual{font-size:16px;color:#c9a961;margin:0 0 14px}
 .mq-actual-none{color:rgba(232,228,220,.72)}
 .mq-note{font-size:15.5px;color:rgba(232,228,220,.76);margin:0;max-width:66ch}
-.mq-method{margin-top:72px}
+.mq-thanks{margin-top:64px}
+.mq-thanks p{font-size:16px;color:rgba(232,228,220,.72);margin:0;max-width:66ch}
+.mq-thanks a{color:#c9a961}
+.mq-method{margin-top:64px}
 .mq-method p{font-size:16.5px;color:rgba(232,228,220,.8);margin:0 0 16px;max-width:66ch}
 .mq-method strong{color:#e8e4dc}
 .mq-app{text-align:center;margin:72px 0 0;padding:44px 24px;border-top:1px solid rgba(232,228,220,.09)}

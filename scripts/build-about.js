@@ -143,8 +143,8 @@ function build() {
 
     '<h2 class="ab-h2">What I have actually done</h2>' +
     '<p class="ab-p">In August 2026 I audited the quote library inside the app, one passage at a time, ' +
-    'against its sources. It had 374 entries. It now has 327, and then 271, and finally 218, because ' +
-    'the audit ran in three passes and each one found a different kind of problem.</p>' +
+    'against its sources. It went in with 374 entries and came out with 227, over several passes that ' +
+    'each found a different kind of problem.</p>' +
     '<p class="ab-p">Fifty-five entries were not what they claimed to be. Some belonged to other ' +
     'philosophers, some to other centuries, and two had been written for the app and quietly attributed ' +
     'to Marcus Aurelius. Marcus was credited with a line from <em>Gladiator</em>. Seneca was credited ' +
@@ -153,8 +153,11 @@ function build() {
     '<p class="ab-p">I published <a href="/misattributed-stoic-quotes">the findings</a> rather than ' +
     'quietly fixing them, because the same quotations are still circulating everywhere else, and ' +
     'because a philosophy about seeing things as they are deserves better sourcing than it usually gets.</p>' +
+    '<p class="ab-p">The audit was not complete. Three more were still live afterwards, and came out only ' +
+    'because Gregory Sadler and Thomas Colligan had already traced them. Their names are on the page, ' +
+    'because a site about attribution that took credit for other people’s research would be self-refuting.</p>' +
     '<p class="ab-p">That is the entire basis on which I would ask you to take this site seriously. Not ' +
-    'expertise. Willingness to check, and to publish what checking turned up.</p>' +
+    'expertise. Willingness to check, to publish what checking turned up, and to be corrected.</p>' +
 
     '<h2 class="ab-h2">Editorial rules</h2>' +
     '<p class="ab-p">These are the rules the app and this site are held to. They exist because breaking ' +

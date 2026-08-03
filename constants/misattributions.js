@@ -103,6 +103,34 @@ export const MISATTRIBUTIONS = [
     note: 'An American academic, not a Roman slave. The cadence is motivational-poster English, which is usually the tell.',
   },
 
+  {
+    id: 'precious-privilege',
+    text: 'When you arise in the morning, think of what a precious privilege it is to be alive, to breathe, to think, to enjoy, to love.',
+    credited: 'Marcus Aurelius',
+    actual: 'Elbert Hubbard, The Fra: For Philistines and Roycrofters, volume 12 (1913)',
+    confidence: 'strong',
+    group: 'modern',
+    note: 'An American arts-and-crafts publisher writing in 1913. The register is the tell: Marcus does address himself at dawn, in Meditations V.1, but to argue himself out of staying in bed rather than to celebrate breathing. Traced by Gregory Sadler.',
+  },
+  {
+    id: 'ranks-of-the-insane',
+    text: 'The object of life is not to be on the side of the majority, but to escape finding oneself in the ranks of the insane.',
+    credited: 'Marcus Aurelius',
+    actual: 'Leo Tolstoy, Bethink Yourselves! (1904)',
+    confidence: 'strong',
+    group: 'modern',
+    note: 'Tolstoy, in an anti-war essay written seventeen centuries after Marcus. It circulates so widely under the wrong name that it appears in printed collections. Traced by Gregory Sadler.',
+  },
+  {
+    id: 'everything-we-hear-is-an-opinion',
+    text: 'Everything we hear is an opinion, not a fact. Everything we see is a perspective, not the truth.',
+    credited: 'Marcus Aurelius',
+    actual: null,
+    confidence: 'strong',
+    group: 'no-source',
+    note: 'No translation of the Meditations contains this. It appears to be a modern reworking of Meditations II.15, which is four words long and is Marcus quoting Monimus the Cynic: everything is what you suppose it to be. The rewrite turns a remark about judgment into a claim about the unreliability of perception, which is not a Stoic position. Identified by Thomas Colligan writing for Modern Stoicism.',
+  },
+
   // ─── Ancient, but the wrong ancient ────────────────────────────────────
   {
     id: 'know-thyself',
