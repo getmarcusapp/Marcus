@@ -1,0 +1,226 @@
+#!/usr/bin/env node
+// /about — the named human behind the site, and the editorial standards.
+//
+// WHY IT EXISTS. Author markup is not a Google ranking signal and this page
+// will not move rankings on its own. It is here for three concrete reasons:
+// the attribution page makes claims about other people's work and an anonymous
+// "we" is a weak thing to make them behind; journalists cannot quote a source
+// with no name or description; and the grief and CBT articles are the ones a
+// reader is most likely to want a byline on.
+//
+// The claim to standing is deliberately narrow and checkable: this site audited
+// its own quote library and published what it found. It does not claim
+// scholarly credentials, because inventing them would be the precise failure
+// /misattributed-stoic-quotes exists to document, and because "the citations are
+// checkable so you do not have to trust me" is a stronger position than a
+// credential anyway.
+//
+// FILL THESE IN: AUTHOR.name (currently a first name only, which weakens the
+// signal), AUTHOR.sameAs (empty; add real profile URLs), and drop a headshot at
+// public/img/author.jpg — the page renders it only if the file exists, so it
+// costs nothing to leave absent.
+//
+// Re-run:  node scripts/build-about.js
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.join(__dirname, '..');
+const SITE = 'https://getmarcus.app';
+const OUT = path.join(ROOT, 'public', 'about.html');
+const HEADSHOT = path.join(ROOT, 'public', 'img', 'author.jpg');
+const GA = '<script src="/analytics.js"></script>';
+
+const AUTHOR = {
+  name: 'Gio',                       // TODO: full name — a first name alone is a weak entity
+  role: 'Founder, Marcus',
+  email: 'hello@getmarcus.app',
+  sameAs: [],                        // TODO: real profile URLs only. An empty array is better than a guess.
+};
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function build() {
+  const hasHeadshot = fs.existsSync(HEADSHOT);
+  const title = 'About — Who Writes This, and How the Sources Are Checked | Marcus';
+  const desc = 'Marcus is a Stoic practice app for iOS. This page says who writes the guides, ' +
+    'what is and is not being claimed, and the editorial rules the quotations are held to.';
+  const canonical = SITE + '/about';
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Person',
+        '@id': SITE + '#author',
+        name: AUTHOR.name,
+        jobTitle: AUTHOR.role,
+        url: canonical,
+        email: 'mailto:' + AUTHOR.email,
+        worksFor: { '@id': SITE + '#org' },
+        ...(hasHeadshot ? { image: SITE + '/img/author.jpg' } : {}),
+        ...(AUTHOR.sameAs.length ? { sameAs: AUTHOR.sameAs } : {}),
+      },
+      { '@type': 'Organization', '@id': SITE + '#org', name: 'Marcus', url: SITE, logo: SITE + '/skull-gold.png' },
+      {
+        '@type': 'AboutPage',
+        '@id': canonical + '#webpage',
+        url: canonical,
+        name: 'About Marcus',
+        description: desc,
+        mainEntity: { '@id': SITE + '#author' },
+      },
+    ],
+  };
+
+  const html = '<!doctype html><html lang="en"><head>' +
+    '<meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+    GA +
+    '<title>' + esc(title) + '</title>' +
+    '<meta name="description" content="' + esc(desc) + '">' +
+    '<meta name="robots" content="index, follow, max-image-preview:large">' +
+    '<link rel="canonical" href="' + canonical + '">' +
+    '<meta property="og:type" content="profile">' +
+    '<meta property="og:site_name" content="Marcus">' +
+    '<meta property="og:title" content="About Marcus">' +
+    '<meta property="og:description" content="' + esc(desc) + '">' +
+    '<meta property="og:url" content="' + canonical + '">' +
+    '<meta property="og:image" content="' + SITE + '/og/about.png">' +
+    '<meta name="twitter:card" content="summary_large_image">' +
+    '<meta name="twitter:title" content="About Marcus">' +
+    '<meta name="twitter:description" content="' + esc(desc) + '">' +
+    '<meta name="twitter:image" content="' + SITE + '/og/about.png">' +
+    '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
+    '<link rel="icon" type="image/png" href="/favicon.png">' +
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +
+    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+    '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">' +
+    '<style>' + CSS + '</style>' +
+    '<script type="application/ld+json">' + JSON.stringify(jsonLd) + '</script>' +
+    '</head><body>' +
+
+    '<nav class="ab-nav">' +
+    '<a class="ab-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
+    '<div class="ab-nav-right">' +
+    '<a class="ab-nav-link" href="/learn">Learn</a>' +
+    '<a class="ab-nav-cta" href="/">Get the app →</a>' +
+    '</div></nav>' +
+
+    '<main class="ab-main">' +
+    '<header class="ab-head">' +
+    (hasHeadshot ? '<img class="ab-photo" src="/img/author.jpg" alt="' + esc(AUTHOR.name) + '" width="120" height="120">' : '') +
+    '<p class="ab-eyebrow">About</p>' +
+    '<h1 class="ab-title">Who writes this, and how the sources are checked</h1>' +
+    '</header>' +
+
+    '<p class="ab-p">I am ' + esc(AUTHOR.name) + '. I built <a href="/">Marcus</a>, a Stoic practice app for iOS, ' +
+    'and I write the guides on this site.</p>' +
+
+    '<h2 class="ab-h2">What I am not</h2>' +
+    '<p class="ab-p">I am not a classicist. I do not read Greek or Latin, I hold no degree in ancient ' +
+    'philosophy, and nothing here should be taken on my authority.</p>' +
+    '<p class="ab-p">That is deliberate rather than apologetic. Every substantive claim on this site is ' +
+    'tied to a text you can open yourself: a book, a chapter, a letter number. If I have read a passage ' +
+    'wrongly, the citation is right there for you to check, which is a better arrangement than asking you ' +
+    'to trust a credential.</p>' +
+
+    '<h2 class="ab-h2">What I have actually done</h2>' +
+    '<p class="ab-p">In August 2026 I audited the quote library inside the app, one passage at a time, ' +
+    'against its sources. It had 374 entries. It now has 327, and then 271, and finally 218, because ' +
+    'the audit ran in three passes and each one found a different kind of problem.</p>' +
+    '<p class="ab-p">Fifty-five entries were not what they claimed to be. Some belonged to other ' +
+    'philosophers, some to other centuries, and two had been written for the app and quietly attributed ' +
+    'to Marcus Aurelius. Marcus was credited with a line from <em>Gladiator</em>. Seneca was credited ' +
+    'with a Semisonic lyric. Aristotle’s single most quoted sentence turned out to be Will Durant ' +
+    'paraphrasing him, and it was in the library twice, in two different wordings.</p>' +
+    '<p class="ab-p">I published <a href="/misattributed-stoic-quotes">the findings</a> rather than ' +
+    'quietly fixing them, because the same quotations are still circulating everywhere else, and ' +
+    'because a philosophy about seeing things as they are deserves better sourcing than it usually gets.</p>' +
+    '<p class="ab-p">That is the entire basis on which I would ask you to take this site seriously. Not ' +
+    'expertise. Willingness to check, and to publish what checking turned up.</p>' +
+
+    '<h2 class="ab-h2">Editorial rules</h2>' +
+    '<p class="ab-p">These are the rules the app and this site are held to. They exist because breaking ' +
+    'them is how the library got into the state it was in.</p>' +
+    '<ol class="ab-list">' +
+    '<li><strong>A quotation names its work.</strong> Where a passage can be pinned to a chapter or ' +
+    'letter, the citation is recorded. Where it cannot, it is marked unverified rather than dressed up.</li>' +
+    '<li><strong>No invented citations.</strong> A confidently wrong verse number is worse than none, so ' +
+    'passages that could not be pinned were left uncited instead of given a plausible-looking reference.</li>' +
+    '<li><strong>Unsourceable passages are removed, not kept.</strong> If no text contains it, it does ' +
+    'not appear, however good the line is.</li>' +
+    '<li><strong>Attribution over provenance.</strong> A non-Stoic may be quoted when the content is ' +
+    'defensibly Stoic and the byline is accurate. Voltaire is credited to Voltaire.</li>' +
+    '<li><strong>Translations are not silently edited.</strong> House style is American English; ' +
+    'quotations keep the wording their translator used, and titles keep their own spelling.</li>' +
+    '<li><strong>Interpretations are labelled as interpretations.</strong> Sharon Lebell’s ' +
+    '<em>The Art of Living</em> is a rendering, not a translation, and is credited to her.</li>' +
+    '</ol>' +
+
+    '<h2 class="ab-h2">Corrections</h2>' +
+    '<p class="ab-p">If something here is wrong, I want to know, and I will fix it and say that I did. ' +
+    'That applies to a citation, a translation, an image credit, or an argument. Write to ' +
+    '<a href="mailto:' + esc(AUTHOR.email) + '">' + esc(AUTHOR.email) + '</a>.</p>' +
+    '<p class="ab-p">Running a page that corrects other people’s attributions while being ' +
+    'unreachable about my own would be indefensible.</p>' +
+
+    '<h2 class="ab-h2">Affiliate disclosure</h2>' +
+    '<p class="ab-p">Book links on this site are affiliate links, Bookshop.org first and Amazon as a ' +
+    'fallback. They earn a commission at no extra cost to you. Nothing is listed that I would not ' +
+    'recommend without them, and the full disclosure is on the ' +
+    '<a href="/library#disclosure">Library</a> page.</p>' +
+
+    '<section class="ab-app">' +
+    '<img class="ab-app-skull" src="/skull-gold.png" alt="" width="64" height="64">' +
+    '<p class="ab-app-copy">Marcus is a daily Stoic practice for iOS: a morning preparation, a daily ' +
+    'reading, and a structured evening examination.</p>' +
+    '<a class="ab-nav-cta" href="/">Explore the app →</a></section>' +
+    '</main>' +
+
+    '<footer class="ab-footer"><p>Marcus &middot; A Stoic Practice App &middot; ' +
+    '<a href="/">getmarcus.app</a> &middot; <a href="/about">About</a> &middot; ' +
+    '<a href="/learn">Learn</a> &middot; <a href="/library">The Library</a></p></footer>' +
+    '</body></html>';
+
+  fs.writeFileSync(OUT, html, 'utf8');
+  console.log('Built about page → public/about.html');
+  if (!hasHeadshot) console.log('  note: no headshot at public/img/author.jpg (page renders fine without one)');
+  if (!AUTHOR.sameAs.length) console.log('  note: AUTHOR.sameAs is empty — add real profile URLs to strengthen the entity');
+  if (!AUTHOR.name.includes(' ')) console.log('  note: AUTHOR.name is a first name only');
+}
+
+const CSS = `
+*{box-sizing:border-box}
+body{margin:0;background:#0d0d0f;color:#e8e4dc;font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+img{max-width:100%;display:block}
+.ab-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;border-bottom:1px solid rgba(232,228,220,.09);flex-wrap:wrap}
+.ab-brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:Cinzel,Georgia,serif;font-size:19px;letter-spacing:.02em}
+.ab-brand img{width:40px;height:40px;object-fit:contain;opacity:.9}
+.ab-nav-right{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.ab-nav-link{text-decoration:none;font-size:14px;color:rgba(232,228,220,.72)}
+.ab-nav-cta{text-decoration:none;font-size:14px;color:#0d0d0f;background:#c9a961;padding:9px 16px;border-radius:999px;white-space:nowrap}
+.ab-main{max-width:680px;margin:0 auto;padding:56px 24px 8px}
+.ab-head{margin-bottom:34px}
+.ab-photo{width:110px;height:110px;border-radius:999px;object-fit:cover;margin-bottom:24px}
+.ab-eyebrow{font-family:Cinzel,Georgia,serif;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#c9a961;margin:0 0 14px}
+.ab-title{font-family:Cinzel,Georgia,serif;font-size:clamp(28px,4.8vw,40px);font-weight:600;margin:0;letter-spacing:-.01em;line-height:1.2;text-wrap:balance}
+.ab-p{font-size:17.5px;color:rgba(232,228,220,.86);margin:0 0 22px}
+.ab-p a{color:#c9a961}
+.ab-h2{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#c9a961;margin:48px 0 18px;padding-bottom:10px;border-bottom:1px solid rgba(232,228,220,.09)}
+.ab-list{margin:0 0 24px;padding-left:22px}
+.ab-list li{font-size:17px;color:rgba(232,228,220,.84);margin-bottom:14px}
+.ab-list strong{color:#e8e4dc}
+.ab-app{text-align:center;margin:64px 0 0;padding:44px 24px;border-top:1px solid rgba(232,228,220,.09)}
+.ab-app-skull{width:56px;height:56px;object-fit:contain;margin:0 auto 16px;opacity:.9}
+.ab-app-copy{font-size:16px;color:rgba(232,228,220,.78);max-width:52ch;margin:0 auto 20px}
+.ab-footer{text-align:center;padding:32px 24px 48px;font-size:13px;color:rgba(232,228,220,.45)}
+.ab-footer a{color:rgba(232,228,220,.7)}
+`;
+
+build();

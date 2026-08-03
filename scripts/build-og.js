@@ -125,6 +125,7 @@ function articles() {
 // Pages that are not markdown articles still need their own card.
 const STATIC = [
   { slug: 'home', title: 'A Stoic practice, every day', eyebrow: 'Marcus' },
+  { slug: 'about', title: 'Who writes this, and how the sources are checked', eyebrow: 'About' },
   { slug: 'learn', title: 'Stoicism, as it was actually practiced', eyebrow: 'Learn' },
   { slug: 'stoics', title: 'The Stoics', eyebrow: 'Twelve figures' },
   { slug: 'library', title: 'The Stoic Library', eyebrow: 'The books behind the practice' },

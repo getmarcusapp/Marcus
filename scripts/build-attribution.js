@@ -173,7 +173,7 @@ function build() {
     '</main>' +
 
     '<footer class="mq-footer"><p>Marcus &middot; A Stoic Practice App &middot; ' +
-    '<a href="/">getmarcus.app</a> &middot; <a href="/learn">Learn</a> &middot; <a href="/stoics">The Stoics</a> &middot; ' +
+    '<a href="/">getmarcus.app</a> &middot; <a href="/learn">Learn</a> &middot; <a href="/about">About</a> &middot; <a href="/stoics">The Stoics</a> &middot; ' +
     '<a href="/library">The Library</a> &middot; <a href="/meditations">Daily Meditations</a></p></footer>' +
     '</body></html>';
 

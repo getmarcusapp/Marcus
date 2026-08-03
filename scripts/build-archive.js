@@ -330,6 +330,7 @@ function buildSitemap(records) {
   add(SITE + '/meditations', newest, 'daily', '0.9');
   add(SITE + '/library', null, 'monthly', '0.8');
   add(SITE + '/learn', null, 'monthly', '0.8');
+  add(SITE + '/about', null, 'yearly', '0.6');
   // Long-form articles, read from content/articles rather than listed, for the
   // same reason as the Stoics: adding one must not require remembering to add
   // it here too.

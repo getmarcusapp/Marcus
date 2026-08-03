@@ -164,7 +164,7 @@ function page(meta, bodyHtml, prev, next) {
         inLanguage: 'en-US',
         wordCount,
         articleSection: 'Stoic practice',
-        author: { '@id': SITE + '#org' },
+        author: { '@id': SITE + '#author' },
         publisher: { '@id': SITE + '#org' },
         isPartOf: { '@id': SITE + '#website' },
         about: (meta.about || []).map(t => ({ '@type': 'DefinedTerm', name: t.name, description: t.description, ...(t.sameAs ? { sameAs: t.sameAs } : {}) })),
@@ -186,6 +186,17 @@ function page(meta, bodyHtml, prev, next) {
           { '@type': 'ListItem', position: 2, name: 'Learn', item: SITE + '/learn' },
           { '@type': 'ListItem', position: 3, name: meta.title },
         ],
+      },
+      {
+        // The Person the articles are attributed to. Defined on /about, which is
+        // the canonical node; repeated here so each article's graph resolves
+        // without a fetch.
+        '@type': 'Person',
+        '@id': SITE + '#author',
+        name: 'Gio',
+        url: SITE + '/about',
+        worksFor: { '@id': SITE + '#org' },
+        image: SITE + '/img/author.jpg',
       },
       {
         '@type': 'Organization',
@@ -249,6 +260,9 @@ function page(meta, bodyHtml, prev, next) {
     '<header class="ar-head">' +
     '<p class="ar-eyebrow"><a href="/learn">The practice</a></p>' +
     '<h1 class="ar-title">' + esc(meta.title) + '</h1>' +
+    '<p class="ar-byline"><img src="/img/author.jpg" alt="" width="30" height="30">' +
+    'By <a href="/about">Gio</a><span>&middot;</span>' +
+    '<a href="/about">How sources are checked</a></p>' +
     '</header>' +
     bodyHtml +
     pager +
@@ -305,6 +319,10 @@ img{max-width:100%;display:block}
 .ar-eyebrow{font-family:Cinzel,Georgia,serif;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#c9a961;margin:0 0 14px}
 .ar-eyebrow a{text-decoration:none}
 .ar-title{font-family:Cinzel,Georgia,serif;font-size:clamp(30px,5.2vw,44px);font-weight:600;margin:0;letter-spacing:-.01em;line-height:1.18;text-wrap:balance}
+.ar-byline{display:flex;align-items:center;gap:9px;margin:18px 0 0;font-size:13.5px;color:rgba(232,228,220,.55);flex-wrap:wrap}
+.ar-byline img{width:30px;height:30px;border-radius:999px;object-fit:cover}
+.ar-byline a{color:rgba(232,228,220,.8)}
+.ar-byline span{opacity:.4}
 .ar-p{font-size:17.5px;color:rgba(232,228,220,.86);margin:0 0 22px}
 .ar-h2{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#c9a961;margin:52px 0 18px;padding-bottom:10px;border-bottom:1px solid rgba(232,228,220,.09)}
 .ar-h3{font-family:Cinzel,Georgia,serif;font-size:19px;font-weight:600;margin:36px 0 12px;color:#e8e4dc}
