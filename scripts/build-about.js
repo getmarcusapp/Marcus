@@ -20,6 +20,13 @@
 // public/img/author.jpg — the page renders it only if the file exists, so it
 // costs nothing to leave absent.
 //
+// The headshot at public/img/author.jpg was produced from the original with:
+//   sips -c 1500 1500 --cropOffset 430 225 <original> --out author.jpg
+//   sips -Z 440 author.jpg && sips -s formatOptions 72 author.jpg --out author.jpg
+// The offset matters: a center crop clips the top of the head on a portrait
+// original, and too tight a top margin gets clipped again by the circular mask,
+// which touches the frame at top-centre. 2.4MB to 43KB.
+//
 // Re-run:  node scripts/build-about.js
 
 const fs = require('fs');
