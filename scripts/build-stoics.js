@@ -115,6 +115,12 @@ function bookCard(b, bookshopUrl, amazonUrl) {
     '</div></div></article>';
 }
 
+// Index-page headings for the section keys in constants/stoics.js. "The Stoics"
+// is the page's own title, so repeating it as the first section heading made
+// the top of the page say it three times over. Web-only: the app and the figure
+// page eyebrows still use the raw section value.
+const SECTION_LABELS = { 'The Stoics': 'The school' };
+
 const DISCLOSURE =
   'Marcus earns a commission from qualifying purchases made through the links on this page, ' +
   'at no additional cost to you. We link to Bookshop.org first (which supports independent ' +
@@ -277,7 +283,7 @@ function indexPage(figures) {
   }
 
   const sectionsHtml = sections.map(sec =>
-    '<section class="st-section"><h2 class="st-section-title">' + esc(sec.key) + '</h2>' +
+    '<section class="st-section"><h2 class="st-section-title">' + esc(SECTION_LABELS[sec.key] || sec.key) + '</h2>' +
     '<div class="st-grid">' +
     sec.figures.map(f =>
       '<a class="st-card" href="/stoics/' + f.id + '">' +
@@ -296,7 +302,6 @@ function indexPage(figures) {
     NAV +
     '<header class="st-hero"><div class="st-hero-inner">' +
     '<img class="st-hero-skull" src="/skull-gold.png" alt="Marcus" width="120" height="120">' +
-    '<p class="st-eyebrow">The Stoics</p>' +
     '<h1 class="st-title">The Stoics</h1>' +
     '<p class="st-hero-copy">Twelve figures, in the order they lived. A shipwrecked merchant who ' +
     'founded a school on a public porch, a slave who taught emperors, and the most powerful man ' +
@@ -347,13 +352,14 @@ a{color:inherit}
 img{max-width:100%;display:block}
 .st-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;border-bottom:1px solid rgba(232,228,220,.09);flex-wrap:wrap}
 .st-brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:Cinzel,Georgia,serif;font-size:19px;letter-spacing:.02em}
+.st-brand img{width:40px;height:40px;object-fit:contain;opacity:.9}
 .st-nav-right{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .st-nav-link{text-decoration:none;font-size:14px;color:rgba(232,228,220,.72)}
 .st-nav-link:hover{color:#e8e4dc}
 .st-nav-cta{text-decoration:none;font-size:14px;color:#0d0d0f;background:#c9a961;padding:9px 16px;border-radius:999px;white-space:nowrap}
 .st-hero{padding:64px 24px 40px;text-align:center;border-bottom:1px solid rgba(232,228,220,.09)}
 .st-hero-inner{max-width:720px;margin:0 auto}
-.st-hero-skull{width:96px;height:96px;margin:0 auto 20px;opacity:.92}
+.st-hero-skull{width:110px;height:110px;object-fit:contain;margin:0 auto 20px;opacity:.92;filter:drop-shadow(0 0 40px rgba(255,206,130,.18))}
 .st-eyebrow{font-family:Cinzel,Georgia,serif;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#c9a961;margin:0 0 10px}
 .st-title{font-family:Cinzel,Georgia,serif;font-size:clamp(34px,6vw,52px);font-weight:600;margin:0 0 18px;letter-spacing:-.01em}
 .st-hero-copy{font-size:17px;color:rgba(232,228,220,.76);margin:0 auto;max-width:60ch}
@@ -409,7 +415,7 @@ img{max-width:100%;display:block}
 .st-pager-next{text-align:right}
 .st-pager span{display:block;font-family:Inter,sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(232,228,220,.42);margin-bottom:4px}
 .st-app{text-align:center;margin:64px 0 0;padding:40px 24px;border-top:1px solid rgba(232,228,220,.09)}
-.st-app-skull{width:56px;height:56px;margin:0 auto 16px;opacity:.9}
+.st-app-skull{width:56px;height:56px;object-fit:contain;margin:0 auto 16px;opacity:.9}
 .st-app-copy{font-size:16px;color:rgba(232,228,220,.76);max-width:52ch;margin:0 auto 20px}
 .st-footer{text-align:center;padding:32px 24px 48px;font-size:13px;color:rgba(232,228,220,.45)}
 .st-footer a{color:rgba(232,228,220,.7)}
