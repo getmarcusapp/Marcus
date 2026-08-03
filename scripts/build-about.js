@@ -143,7 +143,7 @@ function build() {
 
     '<h2 class="ab-h2">What I have actually done</h2>' +
     '<p class="ab-p">In August 2026 I audited the quote library inside the app, one passage at a time, ' +
-    'against its sources. It went in with 374 entries and came out with 227, over several passes that ' +
+    'against its sources. It went in with 374 entries and came out with 224, over several passes that ' +
     'each found a different kind of problem.</p>' +
     '<p class="ab-p">Fifty-five entries were not what they claimed to be. Some belonged to other ' +
     'philosophers, some to other centuries, and two had been written for the app and quietly attributed ' +
@@ -153,7 +153,7 @@ function build() {
     '<p class="ab-p">I published <a href="/misattributed-stoic-quotes">the findings</a> rather than ' +
     'quietly fixing them, because the same quotations are still circulating everywhere else, and ' +
     'because a philosophy about seeing things as they are deserves better sourcing than it usually gets.</p>' +
-    '<p class="ab-p">The audit was not complete. Three more were still live afterwards, and came out only ' +
+    '<p class="ab-p">The audit was not complete. Six more were still live afterwards, and came out only ' +
     'because Gregory Sadler and Thomas Colligan had already traced them. Their names are on the page, ' +
     'because a site about attribution that took credit for other people’s research would be self-refuting.</p>' +
     '<p class="ab-p">That is the entire basis on which I would ask you to take this site seriously. Not ' +

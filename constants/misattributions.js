@@ -131,6 +131,25 @@ export const MISATTRIBUTIONS = [
     note: 'No translation of the Meditations contains this. It appears to be a modern reworking of Meditations II.15, which is four words long and is Marcus quoting Monimus the Cynic: everything is what you suppose it to be. The rewrite turns a remark about judgment into a claim about the unreliability of perception, which is not a Stoic position. Identified by Thomas Colligan writing for Modern Stoicism.',
   },
 
+  {
+    id: 'greater-the-difficulty',
+    text: 'The greater the difficulty, the more glory in surmounting it.',
+    credited: 'Epictetus',
+    actual: 'Charles de Saint-Evremond, An Essay on the Vindication of Epicurus and his Doctrine',
+    confidence: 'strong',
+    group: 'modern',
+    note: 'A seventeenth-century French writer, in an essay about Epicurus rather than Epictetus. The two names are confused constantly, which is probably how it travelled. Traced by Gregory Sadler.',
+  },
+  {
+    id: 'circumstances-reveal-the-man',
+    text: 'Circumstances do not make the man, they only reveal him to himself.',
+    credited: 'Epictetus',
+    actual: 'James Allen, As a Man Thinketh (1903)',
+    confidence: 'strong',
+    group: 'modern',
+    note: 'Early twentieth-century self-help, and the cadence gives it away once you know. Traced by Gregory Sadler.',
+  },
+
   // ─── Ancient, but the wrong ancient ────────────────────────────────────
   {
     id: 'know-thyself',
