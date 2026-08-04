@@ -677,6 +677,31 @@ export default function PracticeScreen() {
           <Animated.View style={[s.sealedCard, sealedAnimStyle(1)]}>
             <Text style={s.sealedQuoteText}>“{sealQuote.text}”</Text>
             <Text style={s.sealedQuoteAttr}>— {sealQuote.author}, {sealQuote.source}</Text>
+            {/* The seal passage comes from mementoMoriQuotes, which is used
+                nowhere else in the app. Without save and share here, those
+                thirteen passages could be read but never kept: the one quote
+                surface the Saved feature could not reach. Centered beneath the
+                attribution rather than beside it, so the card keeps its symmetry
+                and the ceremony does not become a toolbar. */}
+            <View style={s.sealedQuoteActions}>
+              <SaveHeart
+                text={sealQuote.text}
+                author={sealQuote.author}
+                work={sealQuote.source}
+                from="sealed"
+                size={18}
+              />
+              <TouchableOpacity
+                onPress={() => shareQuote({ text: sealQuote.text, author: sealQuote.author, work: sealQuote.source })}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                activeOpacity={0.7}
+                style={s.quoteShareBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Share this passage"
+              >
+                <Ionicons name="arrow-redo-outline" size={17} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
           </Animated.View>
 
           <Animated.View style={[s.sealedRestCard, sealedAnimStyle(2)]}>
@@ -983,6 +1008,7 @@ const s = StyleSheet.create({
   // Off-screen so captureRef can reach a laid-out card the user never sees.
   quoteShareOffscreen: { position: 'absolute', left: -9999, top: -9999 },
   quoteShareBtn: { padding: 4 },
+  sealedQuoteActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 18, marginTop: 14 },
   quoteFooter: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 10, flexWrap: 'wrap',
