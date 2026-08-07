@@ -512,6 +512,36 @@ function promptSnapshot() {
   return fail;
 }
 
+// III · Pattern asks what patterns you are noticing, which is the one question
+// in the app that cannot be answered from memory. The review used to load the
+// week's journals and keep only uniqueDaysJournaled, throwing the words away,
+// so the prompt was asking for recall and calling it reflection. If the entries
+// stop reaching the screen the prompt quietly becomes dishonest again.
+function weekReadBack() {
+  const fail = [];
+  const src = read('app/review.jsx');
+
+  if (!/setWeekEntries\(weekJournals\)/.test(src)) {
+    fail.push('app/review.jsx: the week\'s journals are loaded but never kept');
+  }
+  const rendered = [...src.matchAll(/<WeekInYourWords\b/g)].length;
+  if (rendered < 2) {
+    fail.push(`app/review.jsx: renders the read-back ${rendered} time(s); expected the landing and the Pattern step`);
+  }
+  if (!/isPattern && <WeekInYourWords/.test(src)) {
+    fail.push('app/review.jsx: the read-back is not on the Pattern step, which is the one that needs it');
+  }
+
+  // The hint points at the panel. If the panel moved, the hint is a lie.
+  const { reviewPromptByKey } = evalExports('constants/reviewPrompts.js', ['reviewPromptByKey']);
+  const hint = reviewPromptByKey.challenges?.hint || '';
+  if (!/week in your words/i.test(hint)) {
+    fail.push('constants/reviewPrompts.js: III · Pattern no longer tells the user to read the week back');
+  }
+
+  return fail;
+}
+
 // ── runner ──────────────────────────────────────────────────────────────────
 
 const CHECKS = [
@@ -524,6 +554,7 @@ const CHECKS = [
   ['FAQ page and schema agree', faqSchema],
   ['saved-line identity and resurfacing', savedLogic],
   ['entries record the questions they were asked', promptSnapshot],
+  ['the weekly review can read its own week', weekReadBack],
 ];
 
 let total = 0;

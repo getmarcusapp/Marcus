@@ -28,7 +28,7 @@ export const reviewPrompts = [
     key: 'challenges',
     num: 'III · Pattern',
     q: 'What patterns am I noticing? What remains unresolved?',
-    hint: 'A single bad day is a moment. The same bad day three weeks running is a pattern, and patterns are where the practice does its real work.\n\nThis is the one question you cannot answer from memory, because memory is where patterns hide. Before you write, open Past entries and read this week back, the mornings and the evenings together. Everyone has one recurring failure and one recurring evasion, and neither is visible from inside a single day.\n\nReading the week is the step almost everyone skips, and it is where most of the value of a weekly review actually is.',
+    hint: 'A single bad day is a moment. The same bad day three weeks running is a pattern, and patterns are where the practice does its real work.\n\nThis is the one question you cannot answer from memory, because memory is where patterns hide. The week in your words sits directly above this question. Open it and read the days back, the mornings and the evenings together. Everyone has one recurring failure and one recurring evasion, and neither is visible from inside a single day.\n\nReading the week is the step almost everyone skips, and it is where most of the value of a weekly review actually is.',
   },
   {
     key: 'body',

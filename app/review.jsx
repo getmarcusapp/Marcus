@@ -22,6 +22,7 @@ import { HeroOverlayChip } from '../components/HeroOverlayChip';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { WizardHeader } from '../components/WizardHeader';
+import { WeekInYourWords } from '../components/WeekInYourWords';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
@@ -81,6 +82,9 @@ export default function ReviewScreen() {
   const [emotionBreakdown, setEmotionBreakdown] = useState([]);
   const [dailyIntensity, setDailyIntensity] = useState([]);
   const [roles, setRoles] = useState([]);
+  // The week's journal entries, kept rather than reduced to a count, so
+  // III · Pattern can be answered from the record instead of from memory.
+  const [weekEntries, setWeekEntries] = useState([]);
 
   // Wizard step model: 6 or 7 steps depending on whether the user has any
   // roles defined in Compass.
@@ -192,6 +196,7 @@ export default function ReviewScreen() {
       const reframed = weekTriggers.filter(t => t.chosenResponse && t.chosenResponse.trim().length > 0);
       const uniqueDaysJournaled = new Set(weekJournals.map(j => new Date(j.date).toDateString())).size;
       setStats({ journaled: uniqueDaysJournaled, triggers: weekTriggers.length, reframed: reframed.length });
+      setWeekEntries(weekJournals);
 
       const emotionMap = {};
       weekTriggers.forEach(t => {
@@ -377,6 +382,10 @@ export default function ReviewScreen() {
           // is the Begin CTA. Tapping Begin enters the
           // wizard at step 0.
           <View style={s.body}>
+            {/* Read the week before answering anything. I · Honor and
+                II · Reckon now ask about recurrence, which is not a question
+                memory can answer, and they come before III · Pattern. */}
+            <WeekInYourWords entries={weekEntries} />
             <GoldPrimary
               style={[s.editBtn, s.sealBtn]}
               onPress={() => requireAccess(() => { haptics.tap(); setOpenPrompt(0); })}
@@ -468,6 +477,8 @@ export default function ReviewScreen() {
                     </View>
                   );
                 })()}
+
+                {isPattern && <WeekInYourWords entries={weekEntries} />}
 
                 <Text style={s.promptQ}>{p.q}</Text>
                 {openHint === idx && p.hint && (
