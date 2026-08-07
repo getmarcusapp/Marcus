@@ -130,8 +130,11 @@ function copyCounts() {
   // `sessions` is here because the howto describes the meditations as "Seven
   // short audio sessions" without using the word meditation at all — the exact
   // phrasing that let a stale count survive a review.
-  const CLAIM = /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|\d+)\s+((?:[A-Za-z]+\s+){0,2}?)(meditations?|prompts?|sessions?)\b/gi;
-  const FILES = ['app/howto.jsx', 'app/onboarding.jsx', 'app/meditate.jsx', 'app/imagery.jsx', 'public/index.html'];
+  // `movements` is here because the journal archive's empty state counted the
+  // evening in movements rather than prompts, which is how it went on claiming
+  // four a full release after the evening became five.
+  const CLAIM = /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|\d+)\s+((?:[A-Za-z]+\s+){0,2}?)(meditations?|prompts?|sessions?|movements?)\b/gi;
+  const FILES = ['app/howto.jsx', 'app/onboarding.jsx', 'app/meditate.jsx', 'app/imagery.jsx', 'app/journal-history.jsx', 'public/index.html'];
 
   for (const file of FILES) {
     const src = read(file);
@@ -145,8 +148,16 @@ function copyCounts() {
       let key = null;
       if (/meditation/i.test(noun)) key = 'meditations';
       else if (/session/i.test(noun)) { if (/audio|meditat|voiced/i.test(`${middle} ${before}`)) key = 'meditations'; }
-      else if (/prompt/i.test(noun)) {
-        const ctx = `${middle} ${before}`;
+      else if (/prompt|movement/i.test(noun)) {
+        // Both nouns need a morning/evening anchor before they count, which
+        // also keeps IV · Body's "sleep, movement, food" out of the tally.
+        //
+        // Look FORWARD first. "Five movements each evening" puts the anchor
+        // after the count, and reading only backwards found the neighbouring
+        // morning string instead — or, when the window was too short to reach
+        // it, gave up and passed the claim silently.
+        const ahead = `${middle} ${src.slice(m.index, m.index + 80)}`.toLowerCase();
+        const ctx = /morning|evening/.test(ahead) ? ahead : `${middle} ${before}`;
         if (ctx.includes('morning')) key = 'morning prompts';
         else if (ctx.includes('evening')) key = 'evening prompts';
       }
@@ -425,6 +436,62 @@ function savedLogic() {
   return fail;
 }
 
+// A saved entry must record the questions it was asked. If any read surface
+// goes back to looking a past answer's prompt up live by index, rewording a
+// prompt silently re-labels every entry already written — an answer sitting
+// beneath a question its author never saw. See the WHAT WAS ASKED note in
+// constants/journalPrompts.
+function promptSnapshot() {
+  const fail = [];
+  const { morningPrompts, eveningPromptsInOrder, snapshotPrompts, askedPrompt } =
+    evalExports('constants/journalPrompts.js',
+      ['morningPrompts', 'eveningPromptsInOrder', 'snapshotPrompts', 'askedPrompt']);
+
+  // Both wizard shapes: morning keys by array index, evening carries the
+  // storage key through a display reorder. A prompt reaching the snapshot
+  // without an answerKey would be dropped, and its question lost.
+  const keyed = morningPrompts.map((p, i) => ({ ...p, answerKey: i }));
+  for (const [label, set] of [['morning', keyed], ['evening', eveningPromptsInOrder]]) {
+    const qs = snapshotPrompts(set);
+    if (Object.keys(qs).length !== set.length) {
+      fail.push(`snapshotPrompts covered ${Object.keys(qs).length} of ${set.length} ${label} prompts`);
+    }
+    for (const p of set) {
+      if (qs[p.answerKey]?.num !== p.num || qs[p.answerKey]?.q !== p.q) {
+        fail.push(`snapshotPrompts lost the label or question for ${label} ${p.num}`);
+      }
+    }
+  }
+
+  const live = keyed[1];
+  const withSnap = { qs: { 1: { num: 'II · Old', q: 'The old question?' } } };
+  const asked = askedPrompt(withSnap, live, 1);
+  if (asked.q !== 'The old question?' || asked.num !== 'II · Old') {
+    fail.push('askedPrompt ignored the snapshot and returned the live prompt');
+  }
+  if (asked.hint !== live.hint) {
+    fail.push('askedPrompt froze the hint — teaching material must stay current');
+  }
+  if (askedPrompt({}, live, 1)?.q !== live.q) {
+    fail.push('askedPrompt did not fall back to the live prompt for a pre-snapshot entry');
+  }
+  if (askedPrompt(withSnap, undefined, 1)?.q !== 'The old question?') {
+    fail.push('askedPrompt dropped the snapshot when the live prompt was gone');
+  }
+
+  // The three surfaces that write or read the record.
+  const wiring = [
+    ['app/journal.jsx', /qs:\s*snapshotPrompts\(/, 'saves without snapshotting the questions'],
+    ['app/journal-history.jsx', /askedPrompt\(entry,/, 'renders past labels live instead of from the snapshot'],
+    ['components/JournalEntryEditor.jsx', /askedPrompt\(entry,/, 'edits under live prompts instead of the snapshot'],
+  ];
+  for (const [file, re, why] of wiring) {
+    if (!re.test(read(file))) fail.push(`${file}: ${why}`);
+  }
+
+  return fail;
+}
+
 // ── runner ──────────────────────────────────────────────────────────────────
 
 const CHECKS = [
@@ -436,6 +503,7 @@ const CHECKS = [
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],
   ['saved-line identity and resurfacing', savedLogic],
+  ['entries record the questions they were asked', promptSnapshot],
 ];
 
 let total = 0;

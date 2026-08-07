@@ -7,7 +7,7 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
-import { morningPrompts, eveningPrompts, UNDONE_KEY } from '../constants/journalPrompts';
+import { morningPrompts, eveningPrompts, UNDONE_KEY, askedPrompt } from '../constants/journalPrompts';
 import { JournalEntryEditor } from '../components/JournalEntryEditor';
 import { useEntitlement } from '../lib/useEntitlement';
 import { useCaretScroll } from '../lib/useCaretScroll';
@@ -212,8 +212,8 @@ export default function JournalHistoryScreen() {
               <Text style={s.emptyTitle}>Your {isMorning ? 'mornings' : 'evenings'} are not yet written</Text>
               <Text style={s.emptyText}>
                 {isMorning
-                  ? 'Four prompts each morning — what is in your control, where courage is required, what you are postponing, what difficulty might arise. Begin one when you are ready.'
-                  : 'Four movements each evening — where you acted with Virtue, where you fell short, what you are carrying, and one thing that deserves your thanks.'}
+                  ? 'Five prompts each morning: what is in your control, where courage is required, what you are postponing, what difficulty might arise, and what you are carrying into the day unexamined. Begin one when you are ready.'
+                  : 'Five movements each evening: where you acted with Virtue, where you fell short, what you left undone, what you are carrying, and one thing that deserves your thanks.'}
               </Text>
             </View>
           ) : (
@@ -267,7 +267,11 @@ export default function JournalHistoryScreen() {
                             (prompts[parseInt(b)]?.order ?? parseInt(b))
                           )
                           .map(([idx, answer]) => {
-                            const prompt = prompts[parseInt(idx)];
+                            // The label this answer was written under, not
+                            // whatever the prompt says today. Pre-1.3.0
+                            // entries carry no snapshot and fall back to the
+                            // live prompt, as they always did.
+                            const prompt = askedPrompt(entry, prompts[parseInt(idx)], parseInt(idx));
                             const showsEcho = !isMorning && parseInt(idx) === UNDONE_KEY && entry.reckonOf;
                             return (
                               <View key={idx} style={s.histAnswerBlock}>

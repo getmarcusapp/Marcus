@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { colors, radius, font } from '../constants/theme';
 import { GoldPrimary, GoldSecondary } from './GoldButton';
-import { morningPrompts, eveningPromptsInOrder } from '../constants/journalPrompts';
+import { morningPrompts, eveningPromptsInOrder, askedPrompt } from '../constants/journalPrompts';
 
 // Inline editor for editing a saved journal entry. Used from the
 // Past Entries view (app/journal-history.jsx). Rebuilds the same prompt
@@ -18,9 +18,13 @@ export function JournalEntryEditor({ entry, onSave, onCancel, onInputGrow }) {
   const isMorning = entry.type === 'morning';
   // Evening renders in display order (III · Undone sits at storage index 4);
   // `answerKey` carries the storage index so edits land on the right answer.
-  const prompts = isMorning
+  // Edits show the entry the questions it was written under, so editing an old
+  // answer never quietly re-frames it as an answer to a reworded prompt. Hints
+  // stay live; only the label and question come from the snapshot.
+  const prompts = (isMorning
     ? morningPrompts.map((p, i) => ({ ...p, answerKey: i }))
-    : eveningPromptsInOrder;
+    : eveningPromptsInOrder
+  ).map(p => askedPrompt(entry, p, p.answerKey));
   const [answers, setAnswers] = useState(entry.answers || {});
   const [openPrompt, setOpenPrompt] = useState(-1);
   const [openHint, setOpenHint] = useState(null);

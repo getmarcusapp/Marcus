@@ -106,3 +106,44 @@ export const UNDONE_KEY = 4;
 export const eveningPromptsInOrder = eveningPrompts
   .map((p, i) => ({ ...p, answerKey: i }))
   .sort((a, b) => a.order - b.order);
+
+// ── WHAT WAS ASKED ─────────────────────────────────────────────────────────
+//
+// The archive and the entry editor used to look a past answer's question up
+// live by index. That made the question text mutable after the fact: reword a
+// prompt and every entry a user had already written would silently re-label,
+// their old answer sitting beneath a question they were never asked. In an app
+// whose archive is meant to be the evidence of a character, the question is
+// part of the record, not chrome.
+//
+// So every entry saved from 1.3.0 on carries `qs`: a snapshot of the prompt
+// label and question as they stood the moment it was written, keyed by the
+// same answer index as `answers`. Entries written before this shipped have no
+// `qs` and fall back to the live prompt, which is exactly their old behavior.
+//
+// This is what makes the prompts safe to reword. Nothing else here changes:
+// the storage contract above still holds, the array is still append-only.
+//
+// Only `num` and `q` are snapshotted. Hints and info cards are teaching
+// material rather than a record of what was asked, and should always be
+// current — a user rereading an old entry should get today's best explanation.
+export function snapshotPrompts(prompts) {
+  const qs = {};
+  for (const p of prompts) {
+    if (p?.answerKey == null) continue;
+    qs[p.answerKey] = { num: p.num, q: p.q };
+  }
+  return qs;
+}
+
+// Reads a prompt as it was ASKED for a given entry: snapshotted label and
+// question where one was recorded, the live prompt otherwise.
+//
+// Tolerates a missing live prompt so the archive can still render an answer
+// whose prompt has since been removed from the array — the snapshot is then
+// the only surviving record of what was asked.
+export function askedPrompt(entry, prompt, answerKey) {
+  const snap = entry?.qs?.[answerKey];
+  if (!snap) return prompt || null;
+  return { ...(prompt || {}), num: snap.num || prompt?.num, q: snap.q || prompt?.q };
+}

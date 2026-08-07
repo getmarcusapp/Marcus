@@ -55,7 +55,7 @@ async function maybeAskHealthPermission() {
 // Morning + Evening prompts live in constants/journalPrompts.js so the
 // Past Entries view can render the same prompt copy when displaying or
 // editing past entries.
-import { morningPrompts, eveningPromptsInOrder, UNDONE_KEY } from '../constants/journalPrompts';
+import { morningPrompts, eveningPromptsInOrder, UNDONE_KEY, snapshotPrompts } from '../constants/journalPrompts';
 
 const virtuePronunciations = {
   sophia: 'soh-FEE-ah',
@@ -214,6 +214,11 @@ export default function JournalScreen() {
       type: isMorning ? 'morning' : 'evening',
       date: new Date().toISOString(),
       answers,
+      // The questions as they were asked tonight, keyed like `answers`. The
+      // archive reads from this rather than looking the prompt up live, so
+      // rewording a prompt can never re-label an entry already written. See
+      // the WHAT WAS ASKED note in constants/journalPrompts.
+      qs: snapshotPrompts(wizardPrompts),
     };
     // Preserve what the reckoning was ABOUT — the answer alone ("yes,
     // finally") is meaningless in the archive without the morning's words.
