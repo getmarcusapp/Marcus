@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import { colors, radius, font } from '../constants/theme';
 import { GoldPrimary, GoldSecondary } from './GoldButton';
+import { reviewTextPrompts, reviewPromptByKey, commitNum } from '../constants/reviewPrompts';
+import { askedPrompt } from '../constants/journalPrompts';
 
 // Inline editor for a saved weekly review entry. Mirrors JournalEntryEditor:
 // expandable prompt cards with the stored answers pre-populated, plus the
@@ -12,12 +14,10 @@ import { GoldPrimary, GoldSecondary } from './GoldButton';
 // Virtue picks (V · Ledger best/worst) are not currently editable here —
 // the text fields cover the substance of a revision pass.
 
-const PROMPTS = [
-  { num: 'I · Honor',  key: 'wentWell',   q: 'What went well? Where did I act with Virtue this week?' },
-  { num: 'II · Reckon', key: 'strayed',    q: 'Where did I stray? Where did I fall short of my own standard?' },
-  { num: 'III · Pattern', key: 'challenges', q: 'What patterns am I noticing? What remains unresolved?' },
-  { num: 'IV · Body', key: 'body',        q: 'How did I treat my physical self: sleep, movement, food, restraint?' },
-];
+// Copy comes from constants/reviewPrompts. This file used to keep its own
+// list, and it had drifted: Commit asked "What is the single most important
+// thing I want to do this week?" while the wizard asked "What one thing will I
+// do differently next week?" for the same stored answer.
 
 // `onInputGrow` is the onGrow factory from the host screen's useCaretScroll
 // hook — keeps the caret above the keyboard as an answer grows past one line.
@@ -27,6 +27,11 @@ export function ReviewEntryEditor({ entry, onSave, onCancel, onInputGrow }) {
   const [openPrompt, setOpenPrompt] = useState(-1);
 
   const hasRoles = typeof (entry.answers?.roles) !== 'undefined';
+
+  // Show this review the questions it was written under. Reviews sealed
+  // before the snapshot shipped carry no `qs` and fall back to today's copy.
+  const PROMPTS = reviewTextPrompts.map(p => askedPrompt(entry, p, p.key));
+  const asked = key => askedPrompt(entry, reviewPromptByKey[key], key);
 
   return (
     <View style={s.container}>
@@ -69,8 +74,8 @@ export function ReviewEntryEditor({ entry, onSave, onCancel, onInputGrow }) {
           onPress={() => setOpenPrompt(openPrompt === 'account' ? -1 : 'account')}
           activeOpacity={0.8}
         >
-          <Text style={s.promptNum}>VI · Account</Text>
-          <Text style={s.promptQ}>Which role did I serve well this week? Which fell short?</Text>
+          <Text style={s.promptNum}>{asked('roles').num}</Text>
+          <Text style={s.promptQ}>{asked('roles').q}</Text>
           {openPrompt === 'account' && (
             <View style={s.promptAnswer}>
               <TextInput
@@ -95,8 +100,8 @@ export function ReviewEntryEditor({ entry, onSave, onCancel, onInputGrow }) {
         onPress={() => setOpenPrompt(openPrompt === 'commit' ? -1 : 'commit')}
         activeOpacity={0.8}
       >
-        <Text style={s.promptNum}>{hasRoles ? 'VII · Commit' : 'VI · Commit'}</Text>
-        <Text style={s.promptQ}>What is the single most important thing I want to do this week?</Text>
+        <Text style={s.promptNum}>{entry.qs?.intention?.num || commitNum(hasRoles)}</Text>
+        <Text style={s.promptQ}>{asked('intention').q}</Text>
         {openPrompt === 'commit' && (
           <View style={s.promptAnswer}>
             <TextInput

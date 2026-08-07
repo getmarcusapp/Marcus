@@ -9,6 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { virtues } from '../constants/virtues';
+import { reviewPrompts as allReviewPrompts, reviewTextPrompts, reviewPromptByKey, commitNum } from '../constants/reviewPrompts';
+import { snapshotPrompts } from '../constants/journalPrompts';
 import { saveReview, updateReview, getReviews, getJournals, getTriggers, getRoles } from '../store/db';
 import * as haptics from '../lib/haptics';
 import { track } from '../lib/analytics';
@@ -28,32 +30,9 @@ const EMOTION_LABELS = {
   shame: 'Shame', avoidance: 'Avoidance', envy: 'Envy',
   grief: 'Grief', fear: 'Fear', other: 'Other',
 };
-const reviewPrompts = [
-  {
-    num: 'I · Honor',
-    q: 'What went well? Where did I act with Virtue this week?',
-    hint: 'Notice the small moments where you showed up as the person you want to be. Catalog what worked so you can repeat it.',
-    key: 'wentWell',
-  },
-  {
-    num: 'II · Reckon',
-    q: 'Where did I stray? Where did I fall short of my own standard?',
-    hint: 'Without shame, without flinching. Naming where you fell short is the beginning of correcting it.',
-    key: 'strayed',
-  },
-  {
-    num: 'III · Pattern',
-    q: 'What patterns am I noticing? What remains unresolved?',
-    hint: 'A single bad day is a moment. The same bad day three weeks running is a pattern, and patterns are where the practice does its real work.',
-    key: 'challenges',
-  },
-  {
-    num: 'IV · Body',
-    q: 'How did I treat my physical self: sleep, movement, food, restraint?',
-    hint: 'The Stoics treated food, sleep, and movement as moral matters; the body is the instrument of Virtue. Glance at Apple Health if you want real data instead of memory.',
-    key: 'body',
-  },
-];
+// Prompt copy lives in constants/reviewPrompts so the archive's inline editor
+// renders the same questions this screen asks. It used to keep its own copy.
+const reviewPrompts = reviewTextPrompts;
 
 export default function ReviewScreen() {
   const playerInset = useMiniPlayerInset();
@@ -293,6 +272,11 @@ export default function ReviewScreen() {
           date: new Date().toISOString(),
           weekOf: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           answers, bestVirtue, worstVirtue, intention, stats,
+          // The questions as asked this week, keyed by answer field. Same
+          // contract as the journal: see WHAT WAS ASKED in
+          // constants/journalPrompts. Keyed by `key` rather than an index,
+          // since that is how review answers are stored.
+          qs: snapshotPrompts(allReviewPrompts.map(p => ({ ...p, answerKey: p.key }))),
         };
         await saveReview(entry);
         setEditingReview(entry);
@@ -516,7 +500,7 @@ export default function ReviewScreen() {
             {stepKind(openPrompt) === 'ledger' && (
             <View style={s.promptCard}>
               <View style={s.promptTopRow}>
-                <Text style={s.promptNum}>V · Ledger</Text>
+                <Text style={s.promptNum}>{reviewPromptByKey.ledger.num}</Text>
                 <TouchableOpacity
                   style={s.hintBtn}
                   onPress={() => { if (openHint !== 'ledger') Keyboard.dismiss(); setOpenHint(openHint === 'ledger' ? null : 'ledger'); }}
@@ -524,10 +508,10 @@ export default function ReviewScreen() {
                   <Text style={s.hintBtnText}>ⓘ</Text>
                 </TouchableOpacity>
               </View>
-              <Text style={s.promptQ}>Which Virtue did I most embody this week, and which did I fall short on?</Text>
+              <Text style={s.promptQ}>{reviewPromptByKey.ledger.q}</Text>
               {openHint === 'ledger' && (
                 <View style={s.hintBox}>
-                  <Text style={s.hintText}>The four Virtues are inseparable. Wisdom without Justice is shallow. Courage without Temperance is recklessness. This question is not which Virtue you remembered to do; it is a sober assessment of where the unified character was tested most, and where it held.</Text>
+                  <Text style={s.hintText}>{reviewPromptByKey.ledger.hint}</Text>
                 </View>
               )}
               <View style={s.virtueRow}>
@@ -568,7 +552,7 @@ export default function ReviewScreen() {
             {stepKind(openPrompt) === 'roles' && (
               <View style={s.promptCard}>
                 <View style={s.promptTopRow}>
-                  <Text style={s.promptNum}>VI · Account</Text>
+                  <Text style={s.promptNum}>{reviewPromptByKey.roles.num}</Text>
                   <TouchableOpacity
                     style={s.hintBtn}
                     onPress={() => { if (openHint !== 'account') Keyboard.dismiss(); setOpenHint(openHint === 'account' ? null : 'account'); }}
@@ -576,10 +560,10 @@ export default function ReviewScreen() {
                     <Text style={s.hintBtnText}>ⓘ</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={s.promptQ}>Which role did I serve well this week? Which fell short?</Text>
+                <Text style={s.promptQ}>{reviewPromptByKey.roles.q}</Text>
                 {openHint === 'account' && (
                   <View style={s.hintBox}>
-                    <Text style={s.hintText}>These are the roles you defined in your Compass — parent, friend, citizen, worker. Edit them there if they have shifted. Epictetus held that virtue is not abstract; it is paid out through the specific parts each person is called to play. The week is the natural unit to test how those parts were served. A sober accounting here, not a defense.</Text>
+                    <Text style={s.hintText}>{reviewPromptByKey.roles.hint}</Text>
                   </View>
                 )}
                 <View style={s.roleChipRow}>
@@ -611,7 +595,7 @@ export default function ReviewScreen() {
             {stepKind(openPrompt) === 'commit' && (
             <View style={s.promptCard}>
               <View style={s.promptTopRow}>
-                <Text style={s.promptNum}>{roles.length > 0 ? 'VII · Commit' : 'VI · Commit'}</Text>
+                <Text style={s.promptNum}>{commitNum(roles.length > 0)}</Text>
                 <TouchableOpacity
                   style={s.hintBtn}
                   onPress={() => { if (openHint !== 'commit') Keyboard.dismiss(); setOpenHint(openHint === 'commit' ? null : 'commit'); }}
@@ -619,10 +603,10 @@ export default function ReviewScreen() {
                   <Text style={s.hintBtnText}>ⓘ</Text>
                 </TouchableOpacity>
               </View>
-              <Text style={s.promptQ}>What one thing will I do differently next week?</Text>
+              <Text style={s.promptQ}>{reviewPromptByKey.intention.q}</Text>
               {openHint === 'commit' && (
                 <View style={s.hintBox}>
-                  <Text style={s.hintText}>One change, not many. The Stoics measured the year by what they actually did, not by what they intended. A single concrete commitment, kept, reshapes next week more than a long list you abandon by Wednesday. Make it specific. Make it visible. Make it doable in the conditions you actually live in.</Text>
+                  <Text style={s.hintText}>{reviewPromptByKey.intention.hint}</Text>
                 </View>
               )}
               <TextInput

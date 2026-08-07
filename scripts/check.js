@@ -134,7 +134,7 @@ function copyCounts() {
   // evening in movements rather than prompts, which is how it went on claiming
   // four a full release after the evening became five.
   const CLAIM = /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|\d+)\s+((?:[A-Za-z]+\s+){0,2}?)(meditations?|prompts?|sessions?|movements?)\b/gi;
-  const FILES = ['app/howto.jsx', 'app/onboarding.jsx', 'app/meditate.jsx', 'app/imagery.jsx', 'app/journal-history.jsx', 'public/index.html'];
+  const FILES = ['app/howto.jsx', 'app/onboarding.jsx', 'app/meditate.jsx', 'app/imagery.jsx', 'app/journal-history.jsx', 'app/review.jsx', 'public/index.html'];
 
   for (const file of FILES) {
     const src = read(file);
@@ -479,11 +479,31 @@ function promptSnapshot() {
     fail.push('askedPrompt dropped the snapshot when the live prompt was gone');
   }
 
-  // The three surfaces that write or read the record.
+  // Reviews key their answers by field name rather than index, but carry the
+  // same record and the same hazard.
+  const { reviewPrompts } = evalExports('constants/reviewPrompts.js', ['reviewPrompts']);
+  const rqs = snapshotPrompts(reviewPrompts.map(p => ({ ...p, answerKey: p.key })));
+  for (const p of reviewPrompts) {
+    if (rqs[p.key]?.q !== p.q) fail.push(`snapshotPrompts lost the question for review ${p.key}`);
+  }
+
+  // The weekly review kept a second copy of its prompts in the archive editor
+  // and the two drifted, asking different questions for one stored answer.
+  // Neither file may hard-code a question again.
+  for (const file of ['app/review.jsx', 'components/ReviewEntryEditor.jsx']) {
+    const src = read(file);
+    for (const p of reviewPrompts) {
+      if (src.includes(`>${p.q}<`)) fail.push(`${file}: hard-codes the ${p.key} question instead of reading constants/reviewPrompts`);
+    }
+  }
+
+  // The surfaces that write or read the record.
   const wiring = [
     ['app/journal.jsx', /qs:\s*snapshotPrompts\(/, 'saves without snapshotting the questions'],
     ['app/journal-history.jsx', /askedPrompt\(entry,/, 'renders past labels live instead of from the snapshot'],
     ['components/JournalEntryEditor.jsx', /askedPrompt\(entry,/, 'edits under live prompts instead of the snapshot'],
+    ['app/review.jsx', /qs:\s*snapshotPrompts\(/, 'seals a review without snapshotting the questions'],
+    ['components/ReviewEntryEditor.jsx', /askedPrompt\(entry,/, 'edits reviews under live prompts instead of the snapshot'],
   ];
   for (const [file, re, why] of wiring) {
     if (!re.test(read(file))) fail.push(`${file}: ${why}`);
