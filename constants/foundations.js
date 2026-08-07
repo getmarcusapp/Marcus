@@ -1,7 +1,7 @@
 // The Foundations — seven letters, one unlocked per day across the user's
 // first week. The trial-week teaching arc: each letter gives one Stoic tool
 // and quietly points at the part of the app that exercises it (Letter III →
-// morning journal's II · Brace, IV → evening journal, V → weekly review's
+// morning journal's II · Meet and IV · Foresee, IV → evening journal, V → weekly review's
 // Ledger). Letter VII lands as the trial closes and does the conversion work
 // in-world: no pricing, no CTA, just "the letters end, the practice does not."
 //
@@ -45,7 +45,7 @@ export const FOUNDATIONS_LETTERS = [
       'The Stoics called it premeditatio malorum: the premeditation of adversity. Before the day begins, you rehearse what could go wrong. Not to worry. To prepare. The difficult colleague, the delayed train, the plan that collapses at noon. You meet each one in your mind and choose your response while you are still calm enough to choose well.',
       'This is the opposite of anxiety. Anxiety rehearses the disaster and stops there. Premeditation rehearses the disaster and then rehearses you: meeting it with patience, with humor, with a steady voice. When the difficulty arrives, and some version of it will, it finds you already acquainted.',
       'Seneca observed that the blow we never saw coming is the one that lands heaviest. The whole exercise is simply refusing to be surprised.',
-      'Your morning journal asks where courage will be required of you today. Now you know why.',
+      'Your morning journal asks what might come at you today that you cannot control, and how a person of Virtue would bear it. Now you know why. The question before it asks who you will meet, which is the half of the rehearsal Marcus never skipped.',
     ],
     tomorrow: 'Tomorrow: the oldest habit in Stoicism, and the reason this practice has an evening.',
   },

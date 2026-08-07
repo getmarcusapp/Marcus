@@ -114,7 +114,7 @@ export default function JournalScreen() {
   }, [openPrompt, hasAccess]);
   const [alreadySaved, setAlreadySaved] = useState(false);
   // Loop-closure: what the user committed to this morning (III · Name,
-  // falling back to II · Brace). Seeds the Reckoning — a conditional first
+  // falling back to II · Meet). Seeds the Reckoning — a conditional first
   // step in the evening wizard where the nightly examination audits the
   // morning's intention — Seneca's whole point. { lead, text, question }
   // or null when there's nothing to reckon with.
@@ -129,10 +129,13 @@ export default function JournalScreen() {
     if (isMorning) { setMorningEcho(null); return; }
     const morning = await getTodayJournal('morning');
     const named = morning?.answers?.[2]?.trim();
-    const braced = morning?.answers?.[1]?.trim();
+    // II · Meet, the fallback, now answers what you owed someone today. That
+    // is a better seed for III · Undone than the old II ever was: a debt you
+    // named this morning and did not pay IS Epictetus's third question.
+    const owed = morning?.answers?.[1]?.trim();
     // No `question` here — III · Undone supplies it now.
     if (named) setMorningEcho({ lead: 'You named what you were postponing:', text: named });
-    else if (braced) setMorningEcho({ lead: 'You braced for:', text: braced });
+    else if (owed) setMorningEcho({ lead: 'You owed:', text: owed });
     else setMorningEcho(null);
   }, [isMorning]);
 

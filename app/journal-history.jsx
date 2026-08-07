@@ -212,7 +212,7 @@ export default function JournalHistoryScreen() {
               <Text style={s.emptyTitle}>Your {isMorning ? 'mornings' : 'evenings'} are not yet written</Text>
               <Text style={s.emptyText}>
                 {isMorning
-                  ? 'Five prompts each morning: what is in your control, where courage is required, what you are postponing, what difficulty might arise, and what you are carrying into the day unexamined. Begin one when you are ready.'
+                  ? 'Five prompts each morning: what is in your control, who you will meet and what you owe them, what you are postponing, what may come at you unbidden, and what you are already telling yourself. Begin one when you are ready.'
                   : 'Five movements each evening: where you acted with Virtue, where you fell short, what you left undone, what you are carrying, and one thing that deserves your thanks.'}
               </Text>
             </View>
