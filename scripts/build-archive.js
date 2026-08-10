@@ -294,12 +294,50 @@ filter:drop-shadow(0 0 40px rgba(255,206,130,.18))}
 `;
 
 // Article slugs from content/articles/*.md frontmatter.
-function articleSlugs() {
+// { slug, lastmod } per article. The date is the article's own `modified` (or
+// `published`) from frontmatter, which is the only genuinely accurate lastmod
+// available to this script: it changes when the article changes and not before.
+function articleEntries() {
   const dir = path.join(ROOT, 'content', 'articles');
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort()
-    .map(f => (fs.readFileSync(path.join(dir, f), 'utf8').match(/^slug:\s*(.+)$/m) || [])[1])
-    .filter(Boolean).map(s => s.trim());
+    .map(f => {
+      const src = fs.readFileSync(path.join(dir, f), 'utf8');
+      const field = name => {
+        let v = (src.match(new RegExp('^' + name + ':\\s*(.+)$', 'm')) || [])[1];
+        if (!v) return null;
+        v = v.trim().replace(/^["'](.*)["']$/, '$1');
+        return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+      };
+      const slug = (src.match(/^slug:\s*(.+)$/m) || [])[1];
+      return slug
+        ? { slug: slug.trim(), lastmod: field('modified') || field('published') }
+        : null;
+    })
+    .filter(Boolean);
+}
+
+// Date of the last commit that touched a file, as YYYY-MM-DD. Deterministic for
+// a given repo state, unlike mtime, which in CI is just checkout time.
+//
+// Returns null rather than guessing when git cannot answer, and callers omit
+// lastmod entirely in that case. A wrong lastmod is worse than none: teach
+// Google the field is unreliable here and it stops using it at all. The CI
+// checkout needs fetch-depth: 0 for this to work, since a shallow clone has no
+// per-file history (see .github/workflows/newsletter.yml).
+function gitDate(relPath) {
+  try {
+    const out = require('child_process')
+      .execSync('git log -1 --format=%cs -- ' + JSON.stringify(relPath), {
+        cwd: ROOT,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      })
+      .toString()
+      .trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : null;
+  } catch {
+    return null;
+  }
 }
 
 // Figure ids from constants/stoics.js. Scraped rather than evaluated: the
@@ -313,9 +351,9 @@ function stoicIds() {
 // sitemap.xml — the canonical list of every indexable URL. Regenerated here so
 // it stays in sync as editions publish daily. Static pages carry a fixed set;
 // the meditations index + every edition page are added from the built records.
-// lastmod uses each edition's ISO date; static pages use the newest edition
-// date (a reasonable "site last changed" proxy) or today's build isn't stamped
-// to keep the file deterministic across rebuilds.
+// lastmod is truthful per page rather than a site-wide proxy: see the note
+// inside buildSitemap for why stamping everything with the newest edition date
+// would actively devalue the field.
 function buildSitemap(records) {
   const newest = records.length ? records[0].isoDate : null;
   const urls = [];
@@ -326,27 +364,36 @@ function buildSitemap(records) {
     (priority ? '\n    <priority>' + priority + '</priority>' : '') +
     '\n  </url>'
   );
-  add(SITE + '/', newest, 'weekly', '1.0');
+  // lastmod is per page and has to be TRUE. The tempting shortcut is to stamp
+  // every URL with `newest`, but an edition publishes daily, so all 40 pages
+  // would then claim to change every day. That is false for 38 of them, and a
+  // lastmod Google learns to distrust is worth less than no lastmod at all.
+  //
+  // So: /meditations really does change daily. Articles carry their own
+  // frontmatter date. Everything else is dated by the last commit that touched
+  // the source it is generated from.
+  const stoicsDate = gitDate('constants/stoics.js');
+  add(SITE + '/', gitDate('public/index.html'), 'weekly', '1.0');
   add(SITE + '/meditations', newest, 'daily', '0.9');
-  add(SITE + '/library', null, 'monthly', '0.8');
-  add(SITE + '/learn', null, 'monthly', '0.8');
-  add(SITE + '/about', null, 'yearly', '0.6');
+  add(SITE + '/library', gitDate('constants/library.js'), 'monthly', '0.8');
+  add(SITE + '/learn', gitDate('scripts/build-learn.js'), 'monthly', '0.8');
+  add(SITE + '/about', gitDate('scripts/build-about.js'), 'yearly', '0.6');
   // Long-form articles, read from content/articles rather than listed, for the
   // same reason as the Stoics: adding one must not require remembering to add
   // it here too.
-  for (const slug of articleSlugs()) {
-    add(SITE + '/' + slug, null, 'monthly', '0.9');
+  for (const { slug, lastmod } of articleEntries()) {
+    add(SITE + '/' + slug, lastmod, 'monthly', '0.9');
   }
-  add(SITE + '/stoics', null, 'monthly', '0.8');
-  add(SITE + '/misattributed-stoic-quotes', null, 'monthly', '0.9');
+  add(SITE + '/stoics', stoicsDate, 'monthly', '0.8');
+  add(SITE + '/misattributed-stoic-quotes', gitDate('constants/misattributions.js'), 'monthly', '0.9');
   // The twelve figure pages, read out of constants/stoics.js rather than listed
   // here, so adding a Stoic cannot silently leave its page unindexed. This is
   // also why the Stoics URLs have to live in THIS file: the sitemap is rebuilt
   // with every edition, so an edit made anywhere else is overwritten daily.
   for (const id of stoicIds()) {
-    add(SITE + '/stoics/' + id, null, 'monthly', '0.7');
+    add(SITE + '/stoics/' + id, stoicsDate, 'monthly', '0.7');
   }
-  add(SITE + '/privacy', null, 'yearly', '0.3');
+  add(SITE + '/privacy', gitDate('public/privacy.html'), 'yearly', '0.3');
   // Editions are deliberately noindex (see buildEditionPage), and listing a
   // noindexed URL in the sitemap is a contradictory signal, so they are omitted.
   // The archive index carries the links for discovery.

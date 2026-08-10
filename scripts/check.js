@@ -542,6 +542,51 @@ function weekReadBack() {
   return fail;
 }
 
+// Sitemap health. Two failures worth catching, both silent:
+//
+// A missing lastmod costs a crawl-scheduling hint, and this file shipped with
+// 38 of 40 URLs lacking one while carrying changefreq and priority, which
+// Google ignores. Worse is a lastmod that is not true: stamp all 40 pages with
+// the newest edition date and every page claims to change daily, which teaches
+// Google to disregard the field entirely. So: every URL dated, and not all of
+// them dated the same day the newsletter last ran.
+//
+// The IndexNow key file must also match the key the submitter sends, or every
+// batch is rejected and the script's caller sees nothing.
+function sitemapHealth() {
+  const fail = [];
+  const xml = read('public/sitemap.xml');
+  const blocks = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(m => m[1]);
+  if (!blocks.length) return ['public/sitemap.xml has no <url> entries'];
+
+  const dated = [];
+  for (const b of blocks) {
+    const loc = (b.match(/<loc>(.*?)<\/loc>/) || [])[1];
+    const lm = (b.match(/<lastmod>(.*?)<\/lastmod>/) || [])[1];
+    if (!lm) fail.push(`sitemap: ${loc} has no <lastmod>`);
+    else if (!/^\d{4}-\d{2}-\d{2}/.test(lm)) fail.push(`sitemap: ${loc} has a malformed <lastmod> "${lm}"`);
+    else dated.push(lm.slice(0, 10));
+  }
+
+  // If every page shares one date, lastmod has become a site-wide stamp again.
+  // Legitimately possible only if the whole site really was built in a day, and
+  // it no longer is.
+  if (dated.length > 5 && new Set(dated).size === 1) {
+    fail.push(`sitemap: all ${dated.length} URLs claim lastmod ${dated[0]}; lastmod is a site-wide stamp, not a per-page date`);
+  }
+
+  const src = read('scripts/indexnow.js');
+  const key = (src.match(/const KEY = '([^']+)'/) || [])[1];
+  if (!key) fail.push('scripts/indexnow.js: no KEY found');
+  else {
+    const p = path.join(ROOT, 'public', `${key}.txt`);
+    if (!fs.existsSync(p)) fail.push(`public/${key}.txt is missing, so every IndexNow submission would be rejected`);
+    else if (fs.readFileSync(p, 'utf8').trim() !== key) fail.push(`public/${key}.txt does not contain the key`);
+  }
+
+  return fail;
+}
+
 // ── runner ──────────────────────────────────────────────────────────────────
 
 const CHECKS = [
@@ -555,6 +600,7 @@ const CHECKS = [
   ['saved-line identity and resurfacing', savedLogic],
   ['entries record the questions they were asked', promptSnapshot],
   ['the weekly review can read its own week', weekReadBack],
+  ['sitemap dates and the IndexNow key', sitemapHealth],
 ];
 
 let total = 0;
