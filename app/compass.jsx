@@ -23,14 +23,17 @@ import { DEFAULT_COMPASS } from '../constants/compassFields';
 
 const COMPASS_HINTS = {
   why: {
+    question: "Why do I practice?",
     placeholder: "e.g. To act with integrity regardless of outcome. To be the kind of person my future self would be proud of.",
     hint: "The Stoics distinguished sharply between what is 'up to us' and what is not. Your Why should live entirely in the first category — character, intention, how you show up — not outcomes, status, or what others think of you.\n\nAsk: is this something I could achieve even if everything around me went wrong? If yes, it is a Stoic Why. If it depends on external circumstances going your way, return to what is in your control.\n\nMarcus Aurelius' unspoken Why was simple: to be a just and rational man, regardless of whether his empire prospered.",
   },
   aspire: {
+    question: "Who am I becoming?",
     placeholder: "e.g. To respond to difficulty with reason rather than reaction. To be present with the people I love.",
     hint: "Aspiration in Stoic terms is the cultivation of Virtue, not achievement of outcomes. The four Virtues are Wisdom, Courage, Temperance, and Justice.\n\nThe test: does your aspiration describe who you are becoming, or what you are getting? 'I aspire to be promoted' is external. 'I aspire to do work worthy of recognition' is internal.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.'",
   },
   overcome: {
+    question: "What pattern in myself will I overcome?",
     placeholder: "e.g. My tendency to avoid difficult conversations. Mistaking busyness for progress.",
     hint: "Name a pattern you can observe in yourself, not a circumstance or another person. Those are outside your control.\n\nWhat you can overcome is your habitual judgment about events. 'I want to overcome anxiety' is external. 'I want to stop treating anxiety as a verdict rather than an impression' is internal.\n\nThat distinction is where the Stoic practice lives.",
   },
@@ -393,7 +396,7 @@ export default function CompassScreen() {
             editing ? (
               <View>
                 <View style={s.hintRow}>
-                  <Text style={s.hintLabel}>{tabs[activeTab]}</Text>
+                  <Text style={s.hintQuestion}>{COMPASS_HINTS[tabKeys[activeTab]]?.question}</Text>
                   <TouchableOpacity style={s.hintBtn} onPress={() => { if (!hintOpen) Keyboard.dismiss(); setHintOpen(!hintOpen); }} activeOpacity={0.7}>
                     <Text style={s.hintBtnText}>ⓘ</Text>
                   </TouchableOpacity>
@@ -422,7 +425,7 @@ export default function CompassScreen() {
             ) : (
               <View>
                 <View style={s.hintRow}>
-                  <Text style={s.hintLabel}>{tabs[activeTab]}</Text>
+                  <Text style={s.hintQuestion}>{COMPASS_HINTS[tabKeys[activeTab]]?.question}</Text>
                   <TouchableOpacity style={s.hintBtn} onPress={() => { if (!hintOpen) Keyboard.dismiss(); setHintOpen(!hintOpen); }} activeOpacity={0.7}>
                     <Text style={s.hintBtnText}>ⓘ</Text>
                   </TouchableOpacity>
@@ -780,6 +783,12 @@ const s = StyleSheet.create({
   // would duplicate the "Your roles" section header below.
   hintRowRight: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 },
   hintLabel: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase' },
+  // The Compass question, shown above the field in both edit and view mode.
+  // Replaces a label that just repeated the selected tab directly above it.
+  // Sentence case rather than hintLabel's 11pt tracked caps: these run long,
+  // and letterspaced caps stop being readable past about two words.
+  // flex:1 keeps the ⓘ pinned right when the question wraps.
+  hintQuestion: { flex: 1, fontSize: font.subSize, color: colors.accent, fontFamily: font.bodyMedium, lineHeight: 22, paddingRight: 8 },
   hintBtn: { padding: 6 },
   hintBtnText: { fontSize: 20, color: colors.accent },
   hintBox: { backgroundColor: colors.bgDeep, borderWidth: 0.5, borderColor: colors.border, borderRadius: radius.md, padding: 16, marginBottom: 14 },
