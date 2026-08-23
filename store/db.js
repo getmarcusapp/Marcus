@@ -200,6 +200,13 @@ export async function addToReadingHistory(reading) {
     const raw = await AsyncStorage.getItem('reading_history');
     const history = raw ? JSON.parse(raw) : [];
     const entry = {
+      // quote_id is what the daily reading's no-repeat filter runs on. It was
+      // missing here for a long time while app/read.jsx read `r.quote_id` and
+      // dropped falsy values, so the exclude list was silently always empty
+      // and the reading could serve the same passage again. Any new field the
+      // reading needs to remember has to be added HERE, not just passed to
+      // saveTodayReading.
+      quote_id: reading.quote_id || null,
       date: new Date().toISOString(),
       author: reading.author,
       quote: reading.quote,

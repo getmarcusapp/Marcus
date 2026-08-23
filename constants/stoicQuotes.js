@@ -1594,8 +1594,19 @@ export function selectCandidates({
   excludeIds = [],       // recent quote ids to skip
   limit = 24,
 }) {
-  const exclude = new Set(excludeIds);
+  // excludeIds arrives most-recently-seen first. Excluding every passage the
+  // user has already read is what makes the daily reading unique, but the pool
+  // is finite: at one a day it runs dry in under six months. So when honouring
+  // the whole exclude list would leave too few candidates to choose from, the
+  // OLDEST exclusions are released first — the passages seen longest ago come
+  // back before recent ones ever do.
+  let exclude = new Set(excludeIds);
   let pool = STOIC_QUOTES.filter(q => !exclude.has(q.id));
+  if (pool.length < limit) {
+    const keep = Math.max(0, STOIC_QUOTES.length - limit);
+    exclude = new Set(excludeIds.slice(0, keep));
+    pool = STOIC_QUOTES.filter(q => !exclude.has(q.id));
+  }
   if (virtueFocus) {
     const matched = pool.filter(q => (q.virtues || []).includes(virtueFocus));
     if (matched.length >= limit) pool = matched;

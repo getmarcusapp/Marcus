@@ -31,6 +31,19 @@ import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { PracticeHeader } from '../components/PracticeHeader';
 import { STOIC_QUOTES, selectCandidates } from '../constants/stoicQuotes';
 
+// Recover a quote id from stored reading text. Only needed for history rows
+// written before store/db.js started persisting quote_id; normalisation
+// mirrors lib/saved.js so wrapping quote marks and spacing don't defeat it.
+const normaliseQuote = t => String(t || '')
+  .replace(/[\u201C\u201D"\u2018\u2019']/g, '')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .toLowerCase();
+const QUOTE_TEXT_TO_ID = new Map(
+  STOIC_QUOTES.map(q => [normaliseQuote(q.quote ?? q.text), q.id])
+);
+const idForQuoteText = text => QUOTE_TEXT_TO_ID.get(normaliseQuote(text)) || null;
+
 // Reading generation goes through our server proxy (api/generate-reading.js,
 // deployed with the getmarcus.app site). The Anthropic key, system prompt,
 // model, and token cap all live server-side — nothing sensitive ships in the
@@ -144,12 +157,20 @@ export default function ReadScreen() {
       const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
       const recentReflections = history.slice(0, 14).map((r, i) => r.reflection ? `(${i + 1}) ${r.reflection.substring(0, 160)}` : '').filter(Boolean).join('\n');
       const recentThemes = history.slice(0, 30).map(r => r.theme).filter(Boolean).join(', ');
-      // Build the candidate pool: exclude any quote ids the user has seen
-      // recently. The AI does the resonance match against the user's
+      // Build the candidate pool: exclude every passage the user has already
+      // been given. The daily reading is meant to be unique each day; only the
+      // Practice screen quote deliberately returns to something (see
+      // lib/saved.js). The AI does the resonance match against the user's
       // Compass — no virtue-level pre-filter; the Compass is the signal.
-      const recentIds = history.slice(0, 60).map(r => r.quote_id).filter(Boolean);
+      //
+      // History written before quote_id was persisted has no id, so fall back
+      // to matching the stored text. Without this, every reading taken before
+      // that fix would count as unseen and could be served a second time.
+      const seenIds = history
+        .map(r => r.quote_id || idForQuoteText(r.quote))
+        .filter(Boolean);
       const candidates = selectCandidates({
-        excludeIds: recentIds,
+        excludeIds: seenIds,
         limit: 24,
       });
       const candidateBlock = candidates
