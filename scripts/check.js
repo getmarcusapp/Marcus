@@ -199,7 +199,7 @@ function poolDuplicates() {
     for (const entry of q[name] || []) live.push({ pool: name, text: entry.text, author: entry.author, ref: entry.ref, key: passageKey(entry.text) });
   }
 
-  const allowed = new Set(DISTINCT_PAIRS.map(([a, b]) => [a, b].sort().join(' ')));
+  const allowed = new Set(DISTINCT_PAIRS.map(([a, b]) => [a, b].sort().join('\0')));
   const seen = new Map();
   for (const item of live) {
     if (seen.has(item.key)) {
@@ -212,7 +212,7 @@ function poolDuplicates() {
     for (let j = i + 1; j < live.length; j++) {
       if (live[i].key === live[j].key) continue;
       if (similarity(live[i].key, live[j].key) <= 0.40) continue;
-      if (allowed.has([live[i].key, live[j].key].sort().join(' '))) continue;
+      if (allowed.has([live[i].key, live[j].key].sort().join('\0'))) continue;
       fail.push(
         `near-duplicate passage (${live[i].pool}/${live[j].pool}):\n        "${live[i].text.slice(0, 62)}"\n        "${live[j].text.slice(0, 62)}"`
       );
@@ -397,6 +397,62 @@ function faqSchema() {
       fail.push(`public/index.html: FAQ "${q.slice(0, 55)}…" is in the schema but not on the page`);
     }
   }
+  return fail;
+}
+
+// The daily reading must never serve a passage the user has already been given.
+// This shipped broken: store/db.js built its history entry by hand and omitted
+// quote_id, while app/read.jsx read `r.quote_id` and dropped falsy values, so
+// the exclude list was always empty and the no-repeat filter did nothing at
+// all. Nothing failed loudly — the reading just repeated. Checked here because
+// the two halves live in different files and neither looks wrong alone.
+function readingUniqueness() {
+  const fail = [];
+
+  // 1. History must persist the id the filter runs on.
+  const db = read('store/db.js');
+  const entry = db.slice(db.indexOf('export async function addToReadingHistory'));
+  // Strip comments first: an earlier version of this check matched the word
+  // quote_id inside the comment explaining why it must be there, so deleting
+  // the actual field still passed.
+  const body = entry
+    .slice(entry.indexOf('const entry = {'), entry.indexOf('};'))
+    .replace(/\/\/[^\n]*/g, '');
+  if (!/\bquote_id\s*:/.test(body)) {
+    fail.push('store/db.js: addToReadingHistory drops quote_id — the daily reading no-repeat filter silently does nothing');
+  }
+
+  // 2. The reader must exclude the WHOLE history, not a recent window, and
+  //    must cope with rows written before quote_id was stored.
+  const rd = read('app/read.jsx');
+  if (/history\.slice\(0,\s*\d+\)\s*\.map\(r => r\.quote_id\)/.test(rd)) {
+    fail.push('app/read.jsx: only a recent window of readings is excluded — older passages can be served again');
+  }
+  if (!/idForQuoteText/.test(rd)) {
+    fail.push('app/read.jsx: no text fallback for history rows saved before quote_id existed');
+  }
+
+  // 3. The pool is finite, so excluding everything must still return a full
+  //    slate of candidates, and must release the OLDEST seen first.
+  const { STOIC_QUOTES, selectCandidates } = evalExports(
+    'constants/stoicQuotes.js', ['STOIC_QUOTES', 'selectCandidates']
+  );
+  const ids = STOIC_QUOTES.map(q => q.id);
+  const limit = 24;
+  for (const seen of [0, 60, ids.length - 1, ids.length]) {
+    const excludeIds = ids.slice(0, seen);
+    const got = selectCandidates({ excludeIds, limit });
+    if (got.length < limit) {
+      fail.push(`constants/stoicQuotes.js: only ${got.length}/${limit} candidates with ${seen} seen — the reading would run dry`);
+    }
+    // Whatever comes back must not be something seen recently.
+    const recent = new Set(excludeIds.slice(0, Math.max(0, ids.length - limit)));
+    const repeats = got.filter(q => recent.has(q.id));
+    if (repeats.length) {
+      fail.push(`constants/stoicQuotes.js: ${repeats.length} recently-seen passages offered with ${seen} seen`);
+    }
+  }
+
   return fail;
 }
 
@@ -598,6 +654,7 @@ const CHECKS = [
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],
   ['saved-line identity and resurfacing', savedLogic],
+  ['the daily reading never repeats a passage', readingUniqueness],
   ['entries record the questions they were asked', promptSnapshot],
   ['the weekly review can read its own week', weekReadBack],
   ['sitemap dates and the IndexNow key', sitemapHealth],
