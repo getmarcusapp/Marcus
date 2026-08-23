@@ -153,7 +153,7 @@ function build() {
     '<p class="ab-p">I published <a href="/misattributed-stoic-quotes">the findings</a> rather than ' +
     'quietly fixing them, because the same quotations are still circulating everywhere else, and ' +
     'because a philosophy about seeing things as they are deserves better sourcing than it usually gets.</p>' +
-    '<p class="ab-p">The audit was not complete. Six more were still live afterwards, and came out only ' +
+    '<p class="ab-p">The audit was not complete. Five more were still live afterwards, and came out only ' +
     'because Gregory Sadler and Thomas Colligan had already traced them. Their names are on the page, ' +
     'because a site about attribution that took credit for other people’s research would be self-refuting.</p>' +
     '<p class="ab-p">That is the entire basis on which I would ask you to take this site seriously. Not ' +

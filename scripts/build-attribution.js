@@ -149,10 +149,12 @@ function build() {
 
     '<section class="mq-thanks">' +
     '<h2 class="mq-section-title">Found by other people</h2>' +
-    '<p>Three entries on this page were still live in our own app after the first audit, and we ' +
+    '<p>Five entries on this page were still live in our own app after the first audit, and we ' +
     'removed them only because someone else had done the work. ' +
     '<a href="https://gregorybsadler.substack.com/p/10-definitely-fake-quotes-not-from" rel="noopener" target="_blank">Gregory Sadler</a> ' +
-    'traced the Elbert Hubbard and Tolstoy lines. ' +
+    'traced the Elbert Hubbard and Tolstoy lines, and his ' +
+    '<a href="https://gregorybsadler.substack.com/p/10-fake-quotes-definitely-not-from-384" rel="noopener" target="_blank">list of fake Epictetus quotes</a> ' +
+    'caught the Saint-Evremond and James Allen ones. ' +
     '<a href="https://modernstoicism.com/did-the-stoics-really-say-that-by-thomas-colligan/" rel="noopener" target="_blank">Thomas Colligan, writing for Modern Stoicism</a>, ' +
     'showed that the everything-we-hear line is a reworking of a four-word passage that means something else. ' +
     'A page about honest attribution that quietly took credit for their research would be self-refuting.</p>' +
