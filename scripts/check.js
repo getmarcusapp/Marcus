@@ -489,6 +489,52 @@ function savedLogic() {
   const same = (morning && evening && morning.text === evening.text) || (!morning && !evening);
   if (!same) fail.push('lib/saved.js: resurfaced line differs within one day — the Practice screen would flicker');
 
+  // Keeping a line must not disturb the walk. The cache is newest-first, so
+  // indexing it directly moved every existing entry down a slot on each save
+  // and replayed a line the user had just been shown: measured at 4 cycles
+  // between two showings where a collection of 6 owes 6. Every save day in
+  // the window is tried, because whether it bit depended on where in the walk
+  // the save landed.
+  const dayAt = n => new Date(2026, 0, 1 + n, 12, 0);
+  const mkLine = (text, n) => ({ id: text, text, savedAt: dayAt(n).toISOString() });
+  const kept = ['A', 'B', 'C', 'D', 'E', 'F'].map((t, i) => mkLine(t, i * 4));
+  const newestFirst = [...kept].reverse();
+  const walkWith = cacheFor => {
+    const out = [];
+    for (let d = 20; d <= 140; d++) {
+      const r = resurfacedLine(cacheFor(d), dayAt(d));
+      if (r) out.push({ d, text: r.text });
+    }
+    return out;
+  };
+  const undisturbed = walkWith(() => newestFirst);
+  for (let saveDay = 24; saveDay <= 60; saveDay++) {
+    const grown = [mkLine('NEW', saveDay), ...newestFirst];
+    const after = walkWith(d => (d >= saveDay ? grown : newestFirst));
+
+    // A line kept today cannot change which line was due last week.
+    const upToSave = x => x.d < saveDay;
+    if (after.filter(upToSave).map(x => x.text).join(' ')
+        !== undisturbed.filter(upToSave).map(x => x.text).join(' ')) {
+      fail.push(`lib/saved.js: saving on day ${saveDay} rewrote the walk that had already happened before it`);
+      break;
+    }
+
+    // And nothing may come back sooner than the collection is big.
+    const seq = after.map(x => x.text);
+    const lastAt = {};
+    let tight = null;
+    for (let i = 0; i < seq.length; i++) {
+      const prev = lastAt[seq[i]];
+      if (prev !== undefined && i - prev < kept.length) tight = `${seq[i]} again after ${i - prev}`;
+      lastAt[seq[i]] = i;
+    }
+    if (tight) {
+      fail.push(`lib/saved.js: saving on day ${saveDay} replays a line too soon (${tight} cycles, ${kept.length} kept)`);
+      break;
+    }
+  }
+
   return fail;
 }
 
