@@ -677,6 +677,34 @@ function sitemapHealth() {
     fail.push(`sitemap: all ${dated.length} URLs claim lastmod ${dated[0]}; lastmod is a site-wide stamp, not a per-page date`);
   }
 
+  // A generated page changes when either its data or its builder changes.
+  // Dating it by the data alone is silently wrong for prose edits, which is
+  // how /misattributed-stoic-quotes carried a lastmod three weeks older than
+  // the paragraph a reader could see on it.
+  const archive = read('scripts/build-archive.js');
+  const GENERATED = [
+    ['/library', 'constants/library.js', 'scripts/build-library.js'],
+    ['/misattributed-stoic-quotes', 'constants/misattributions.js', 'scripts/build-attribution.js'],
+    ['/stoics', 'constants/stoics.js', 'scripts/build-stoics.js'],
+  ];
+  for (const [page, data, builder] of GENERATED) {
+    if (!archive.includes(builder)) {
+      fail.push(`scripts/build-archive.js: ${page} is not dated from ${builder}, so editing its copy would not move its lastmod`);
+    }
+    if (new RegExp(`gitDate\\('${data.replace('.', '\\.')}'\\)`).test(archive)) {
+      fail.push(`scripts/build-archive.js: ${page} is dated from ${data} alone — use newestDate so a builder edit counts too`);
+    }
+  }
+
+  // The nightly job rebuilds the sitemap. It has to commit it as well, or the
+  // rebuild is discarded and /meditations claims to be older than the editions
+  // it already lists.
+  const workflow = read('.github/workflows/newsletter.yml');
+  const staged = (workflow.match(/git add ([^\n]*)/) || [])[1] || '';
+  if (/build-archive\.js/.test(workflow) && !staged.includes('public/sitemap.xml')) {
+    fail.push('.github/workflows/newsletter.yml: build-archive.js rewrites public/sitemap.xml but the publish step does not stage it, so every nightly rebuild is thrown away');
+  }
+
   const src = read('scripts/indexnow.js');
   const key = (src.match(/const KEY = '([^']+)'/) || [])[1];
   if (!key) fail.push('scripts/indexnow.js: no KEY found');

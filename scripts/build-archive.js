@@ -372,10 +372,17 @@ function buildSitemap(records) {
   // So: /meditations really does change daily. Articles carry their own
   // frontmatter date. Everything else is dated by the last commit that touched
   // the source it is generated from.
-  const stoicsDate = gitDate('constants/stoics.js');
+  // A generated page changes when EITHER its data or the code that renders it
+  // changes, so it is dated by whichever moved last. Dating it by the data
+  // alone let a prose edit to the builder ship invisibly: the credit
+  // paragraph on /misattributed-stoic-quotes was rewritten on 2026-08-23 and
+  // its lastmod went on reading 2026-08-02.
+  const newestDate = (...paths) => paths.map(gitDate).filter(Boolean).sort().pop() || null;
+
+  const stoicsDate = newestDate('constants/stoics.js', 'scripts/build-stoics.js');
   add(SITE + '/', gitDate('public/index.html'), 'weekly', '1.0');
   add(SITE + '/meditations', newest, 'daily', '0.9');
-  add(SITE + '/library', gitDate('constants/library.js'), 'monthly', '0.8');
+  add(SITE + '/library', newestDate('constants/library.js', 'scripts/build-library.js'), 'monthly', '0.8');
   add(SITE + '/learn', gitDate('scripts/build-learn.js'), 'monthly', '0.8');
   add(SITE + '/about', gitDate('scripts/build-about.js'), 'yearly', '0.6');
   // Long-form articles, read from content/articles rather than listed, for the
@@ -385,7 +392,7 @@ function buildSitemap(records) {
     add(SITE + '/' + slug, lastmod, 'monthly', '0.9');
   }
   add(SITE + '/stoics', stoicsDate, 'monthly', '0.8');
-  add(SITE + '/misattributed-stoic-quotes', gitDate('constants/misattributions.js'), 'monthly', '0.9');
+  add(SITE + '/misattributed-stoic-quotes', newestDate('constants/misattributions.js', 'scripts/build-attribution.js'), 'monthly', '0.9');
   // The twelve figure pages, read out of constants/stoics.js rather than listed
   // here, so adding a Stoic cannot silently leave its page unindexed. This is
   // also why the Stoics URLs have to live in THIS file: the sitemap is rebuilt

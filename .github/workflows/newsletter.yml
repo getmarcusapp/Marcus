@@ -80,7 +80,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add content/editions public/meditations
+          # public/sitemap.xml too: the Build archive step above rewrites it,
+          # and leaving it unstaged meant the rebuild was discarded on every
+          # run. /meditations then sat on whatever date a human last pushed,
+          # claiming to be older than the editions it was already listing.
+          git add content/editions public/meditations public/sitemap.xml
           if git diff --cached --quiet; then
             echo "No archive changes to publish."
           else
