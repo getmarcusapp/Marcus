@@ -735,6 +735,18 @@ function compassCopy() {
     }
   }
 
+  // 6. The daily reading is chosen against the Compass server-side, and the
+  //    prompt lets the reflection echo its language back. Seed text reaching
+  //    it means the reading is personalised against the app's own words and
+  //    can quote them at the user on day one.
+  const rd = read('app/read.jsx');
+  if (!/isAppWrittenCompassText/.test(rd)) {
+    fail.push('app/read.jsx: the reading prompt does not screen app-written Compass text out');
+  }
+  if (/\$\{compass[.?]*\.?(why|overcome|aspire)\}/.test(rd)) {
+    fail.push('app/read.jsx: raw Compass fields are interpolated into the reading prompt — onboarding seed text would reach the model as the user\'s own');
+  }
+
   return fail;
 }
 

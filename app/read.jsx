@@ -30,6 +30,7 @@ import { SaveHeart } from '../components/SaveHeart';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { PracticeHeader } from '../components/PracticeHeader';
 import { STOIC_QUOTES, selectCandidates } from '../constants/stoicQuotes';
+import { isAppWrittenCompassText } from '../constants/compassFields';
 
 // Recover a quote id from stored reading text. Only needed for history rows
 // written before store/db.js started persisting quote_id; normalisation
@@ -177,12 +178,27 @@ export default function ReadScreen() {
         .map(c => `- id: ${c.id}\n  quote: "${c.quote}"\n  author: ${c.author}\n  work: ${c.work}\n  source: ${c.source}\n  virtues: ${c.virtues.join(', ')}\n  themes: ${c.themes.join(', ')}`)
         .join('\n');
 
-      const compassBlock = compass && (compass.why || compass.overcome || compass.aspire)
-        ? `User's Compass — the durable signal of who they are and what they're working on:
-${compass.why ? `- Why they practice: ${compass.why}` : ''}
-${compass.overcome ? `- What they want to overcome: ${compass.overcome}` : ''}
-${compass.aspire ? `- Who they aspire to be: ${compass.aspire}` : ''}`
-        : '';
+      // The Compass is only a signal once the user has written it. Until then
+      // storage holds the onboarding seed text, and sending that would have
+      // the reading resonate against words the app wrote about itself. Worse,
+      // the server prompt lets the reflection "quietly echo language or ideas
+      // from their Compass", so the boilerplate would come back at the user
+      // in their first reading as if it were theirs. notifications.js has
+      // always guarded this; the reading never did.
+      const ownVoice = key => {
+        const text = (compass?.[key] || '').trim();
+        return isAppWrittenCompassText(text) ? '' : text;
+      };
+      // Built as a list so a Compass that is only partly written does not
+      // send blank bullets, which is what the old per-line ternaries did.
+      const ownLines = [
+        ['- Why they practice: ', ownVoice('why')],
+        ['- What they want to overcome: ', ownVoice('overcome')],
+        ['- Who they aspire to be: ', ownVoice('aspire')],
+      ].filter(([, text]) => text).map(([label, text]) => label + text);
+      const compassBlock = ownLines.length
+        ? `User's Compass — the durable signal of who they are and what they're working on:\n${ownLines.join('\n')}`
+        : "The user has not written their Compass yet, so there is nothing personal to resonate against. Choose the candidate with the widest reach and keep the reflection general. Do not invent what they might be working on.";
 
       async function callOnce({ dedupNote } = {}) {
         const dedupLine = dedupNote ? `\n\n${dedupNote}\n` : '';
