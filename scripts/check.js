@@ -643,6 +643,101 @@ function sitemapHealth() {
   return fail;
 }
 
+function compassCopy() {
+  const fail = [];
+
+  const { DEFAULT_COMPASS, COMPASS_QUESTIONS, COMPASS_FIELDS, isAppWrittenCompassText } =
+    evalExports('constants/compassFields.js',
+      ['DEFAULT_COMPASS', 'COMPASS_QUESTIONS', 'COMPASS_FIELDS', 'isAppWrittenCompassText']);
+
+  const KEYS = ['why', 'overcome', 'aspire'];
+
+  // 1. Every seed string the app has ever written must stay recognisable.
+  //    notifications.js quotes a Compass line back on the lock screen only
+  //    when the user wrote it, so a default that stops being recognised gets
+  //    pushed at the user as if it were their own words. HEAD is the witness:
+  //    change DEFAULT_COMPASS without appending the old text to
+  //    PAST_COMPASS_DEFAULTS and this fails on the very commit that does it.
+  let head = null;
+  try {
+    head = require('child_process')
+      .execSync('git show HEAD:constants/compassFields.js', { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  } catch (e) { /* no git, or the file is new — nothing to compare against */ }
+  if (head) {
+    const m = head.match(/const DEFAULT_COMPASS = (\{[\s\S]*?\n\});/);
+    if (m) {
+      const previous = new Function(`return ${m[1]}`)();
+      for (const key of KEYS) {
+        const was = previous[key];
+        if (was && !isAppWrittenCompassText(was)) {
+          fail.push(`constants/compassFields.js: the previous ${key} default is no longer recognised as app-written — append it to PAST_COMPASS_DEFAULTS or notifications will quote it back to existing users as their own`);
+        }
+      }
+    }
+  }
+
+  // 2. Nothing else may hold its own copy of the seed text. store/db.js used
+  //    to carry a second, divergent set inside getCompass().
+  const db = read('store/db.js');
+  const getCompassBody = db.slice(db.indexOf('export async function getCompass()'));
+  const bodyEnd = getCompassBody.indexOf('\n}');
+  const prose = getCompassBody.slice(0, bodyEnd).match(/'[^']{60,}'/g);
+  if (prose) {
+    fail.push(`store/db.js: getCompass() hardcodes ${prose.length} line(s) of Compass prose — it must fall back to DEFAULT_COMPASS`);
+  }
+
+  // 3. The default guard must not be an equality test against the current
+  //    default, which only ever recognises the newest copy.
+  const notif = read('notifications.js');
+  if (/===\s*DEFAULT_COMPASS\[/.test(notif)) {
+    fail.push('notifications.js: compares against DEFAULT_COMPASS by equality — older seed text stored on existing devices would pass as the user\'s own');
+  }
+  if (!/isAppWrittenCompassText/.test(notif)) {
+    fail.push('notifications.js: no app-written check before quoting a Compass line on the lock screen');
+  }
+
+  // 4. Both surfaces must ask the same question. The onboarding walkthrough
+  //    and /compass each used to phrase these independently, so a user wrote
+  //    an answer to one question and was shown another one forever after.
+  const compass = read('app/compass.jsx');
+  for (const key of KEYS) {
+    const q = COMPASS_QUESTIONS[key];
+    if (!q || !/\?$/.test(q)) {
+      fail.push(`constants/compassFields.js: COMPASS_QUESTIONS.${key} is missing or is not a question`);
+      continue;
+    }
+    if (compass.includes(`"${q}"`) || compass.includes(`'${q}'`)) {
+      fail.push(`app/compass.jsx: the ${key} question is written out literally — import it from COMPASS_QUESTIONS or the two screens will drift`);
+    }
+    if (!new RegExp(`question:\\s*COMPASS_QUESTIONS\\.${key}\\b`).test(compass)) {
+      fail.push(`app/compass.jsx: the ${key} tab does not ask COMPASS_QUESTIONS.${key}`);
+    }
+    const field = COMPASS_FIELDS.find(f => f.key === key);
+    if (!field) {
+      fail.push(`constants/compassFields.js: COMPASS_FIELDS has no ${key} entry`);
+    } else if (field.sub !== q) {
+      fail.push(`constants/compassFields.js: the onboarding walkthrough asks "${field.sub}" for ${key} where /compass asks "${q}"`);
+    }
+  }
+
+  // 5. A seed answer has to answer its question in that question's grammar.
+  //    All three used to open "I want to…", which answers "what do you want?"
+  //    and modelled the wrong shape for the user about to write their own.
+  if (/^I want to\b/.test(DEFAULT_COMPASS.aspire || '')) {
+    fail.push('constants/compassFields.js: the aspire default answers "Who am I becoming?" with a want, not a person');
+  }
+  if (/^I want to\b/.test(DEFAULT_COMPASS.overcome || '')) {
+    fail.push('constants/compassFields.js: the overcome default answers "What pattern in myself…?" with a want, not a named pattern');
+  }
+  for (const key of KEYS) {
+    if (!String(DEFAULT_COMPASS[key] || '').trim()) {
+      fail.push(`constants/compassFields.js: DEFAULT_COMPASS.${key} is empty`);
+    }
+  }
+
+  return fail;
+}
+
 // ── runner ──────────────────────────────────────────────────────────────────
 
 const CHECKS = [
@@ -658,6 +753,7 @@ const CHECKS = [
   ['entries record the questions they were asked', promptSnapshot],
   ['the weekly review can read its own week', weekReadBack],
   ['sitemap dates and the IndexNow key', sitemapHealth],
+  ['the Compass asks one question and seeds one answer', compassCopy],
 ];
 
 let total = 0;

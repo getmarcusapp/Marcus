@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DEFAULT_COMPASS } from '../constants/compassFields';
 
 const KEYS = {
   JOURNALS: 'journals',
@@ -72,11 +73,10 @@ export async function saveCompass(data) {
 export async function getCompass() {
   try {
     const raw = await AsyncStorage.getItem(KEYS.COMPASS);
-    return raw ? JSON.parse(raw) : {
-      why: 'I am drawn to Stoicism because it offers something rare — a practical philosophy for living well, tested across centuries. Not theory. Not productivity hacks. A system for becoming someone you respect.',
-      overcome: 'I want to worry less about what I cannot control. To respond instead of react. To free myself from the anxiety of other people\'s opinions and the tyranny of my own undisciplined mind.',
-      aspire: 'I want to meet adversity with calm and fortune with humility. To live each day with intention — not perfectly, but deliberately. To be someone who acts in accordance with their values, even when it\'s hard.',
-    };
+    // The seed text lives in one place. This used to hold a second, divergent
+    // copy whose `why` existed nowhere else in the app, so a user who reached
+    // this fallback saw prose no other surface would ever show them.
+    return raw ? JSON.parse(raw) : { ...DEFAULT_COMPASS };
   } catch (e) { return {}; }
 }
 

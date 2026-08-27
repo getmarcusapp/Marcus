@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DEFAULT_COMPASS } from './constants/compassFields';
+import { isAppWrittenCompassText } from './constants/compassFields';
 
 // How notifications appear when app is foregrounded. shouldShowBanner /
 // shouldShowList are the current expo-notifications keys; shouldShowAlert is
@@ -68,7 +68,11 @@ async function getCompassPhrase() {
     const compass = JSON.parse(raw);
     for (const key of ['aspire', 'why']) {
       const text = (compass?.[key] || '').trim();
-      if (!text || text === DEFAULT_COMPASS[key]) continue;
+      // Not an equality test against the current default: a user who
+      // onboarded before a copy change still has the older seed text stored,
+      // and comparing only to today's default would let that boilerplate
+      // through as if they had written it.
+      if (isAppWrittenCompassText(text)) continue;
       // First sentence, clipped — a fragment of their own voice, not a wall.
       const sentence = text.split(/(?<=[.!?])\s+/)[0] || text;
       const phrase = sentence.length > 90 ? `${sentence.slice(0, 90)}…` : sentence;

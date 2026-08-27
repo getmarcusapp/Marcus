@@ -19,21 +19,21 @@ import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { PracticeHeader } from '../components/PracticeHeader';
 import { CompassIntro } from '../components/CompassIntro';
-import { DEFAULT_COMPASS } from '../constants/compassFields';
+import { DEFAULT_COMPASS, COMPASS_QUESTIONS } from '../constants/compassFields';
 
 const COMPASS_HINTS = {
   why: {
-    question: "Why do I practice?",
+    question: COMPASS_QUESTIONS.why,
     placeholder: "e.g. To act with integrity regardless of outcome. To be the kind of person my future self would be proud of.",
     hint: "The Stoics distinguished sharply between what is 'up to us' and what is not. Your Why should live entirely in the first category — character, intention, how you show up — not outcomes, status, or what others think of you.\n\nAsk: is this something I could achieve even if everything around me went wrong? If yes, it is a Stoic Why. If it depends on external circumstances going your way, return to what is in your control.\n\nMarcus Aurelius' unspoken Why was simple: to be a just and rational man, regardless of whether his empire prospered.",
   },
   aspire: {
-    question: "Who am I becoming?",
+    question: COMPASS_QUESTIONS.aspire,
     placeholder: "e.g. To respond to difficulty with reason rather than reaction. To be present with the people I love.",
     hint: "Aspiration in Stoic terms is the cultivation of Virtue, not achievement of outcomes. The four Virtues are Wisdom, Courage, Temperance, and Justice.\n\nThe test: does your aspiration describe who you are becoming, or what you are getting? 'I aspire to be promoted' is external. 'I aspire to do work worthy of recognition' is internal.\n\nEpictetus: 'First say to yourself what you would be; then do what you have to do.'",
   },
   overcome: {
-    question: "What pattern in myself will I overcome?",
+    question: COMPASS_QUESTIONS.overcome,
     placeholder: "e.g. My tendency to avoid difficult conversations. Mistaking busyness for progress.",
     hint: "Name a pattern you can observe in yourself, not a circumstance or another person. Those are outside your control.\n\nWhat you can overcome is your habitual judgment about events. 'I want to overcome anxiety' is external. 'I want to stop treating anxiety as a verdict rather than an impression' is internal.\n\nThat distinction is where the Stoic practice lives.",
   },
