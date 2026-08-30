@@ -186,6 +186,58 @@ function copyCounts() {
 // translation, or a truncated twin of a fuller line. Nothing surfaced it
 // because quoteDuplicates() only ever compared the small hand-picked memento
 // groups against each other and never opened this file.
+// The misattributions page and the Learn hub each spell the size of the list
+// out in prose, and both went on saying "Twenty" long after it reached
+// twenty-five. On the one page whose whole subject is checking claims, a wrong
+// number is the worst one to carry. build-attribution.js derives its own from
+// the data now; the Learn hub is a hand-written list that cannot, so it is
+// guarded here. Only "quotation(s)" is matched, never "quotes": the page links
+// out to Sadler's "10 fake quotes" lists, whose counts are not ours.
+function misattributionCount() {
+  const fail = [];
+  const { MISATTRIBUTIONS } = evalExports('constants/misattributions.js', ['MISATTRIBUTIONS']);
+  const n = MISATTRIBUTIONS.length;
+
+  const TEENS = { thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19 };
+  const TENS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+  const wordNum = raw => {
+    const w = String(raw).toLowerCase();
+    if (NUM_WORDS[w] !== undefined) return NUM_WORDS[w];
+    if (TEENS[w] !== undefined) return TEENS[w];
+    const [t, u] = w.split('-');
+    if (TENS[t] !== undefined) return TENS[t] + (u ? (NUM_WORDS[u] ?? 0) : 0);
+    return Number(w);
+  };
+
+  const NUMBER = '(?:\\d+|(?:twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)(?:-[a-z]+)?|[a-z]+)';
+  const CLAIM = new RegExp('\\b(' + NUMBER + ')\\s+((?:[a-z]+\\s+){0,2}?)quotations?\\b', 'gi');
+
+  const FILES = [
+    'scripts/build-attribution.js',
+    'scripts/build-learn.js',
+    'public/misattributed-stoic-quotes.html',
+    'public/learn.html',
+  ];
+  let checked = 0;
+  for (const file of FILES) {
+    for (const m of read(file).matchAll(CLAIM)) {
+      const num = wordNum(m[1]);
+      // "these quotations", "many quotations" — not a count.
+      if (!Number.isFinite(num)) continue;
+      checked++;
+      if (num !== n) {
+        fail.push(`${file}: claims ${m[1]} ${m[2]}quotations; constants/misattributions.js has ${n}`);
+      }
+    }
+  }
+  // A silent zero would mean the phrasing changed and this stopped watching.
+  if (!checked) {
+    fail.push('no count of the misattributions was found in any surface — the phrasing changed and this check is no longer watching anything');
+  }
+
+  return fail;
+}
+
 function poolDuplicates() {
   const fail = [];
   const q = evalExports('constants/quotes.js', ['morningQuotes', 'mementoMoriQuotes']);
@@ -828,6 +880,7 @@ function compassCopy() {
 
 const CHECKS = [
   ['copy counts agree with the data', copyCounts],
+  ['the misattribution count matches the list', misattributionCount],
   ['no duplicate quotes across surfaces', quoteDuplicates],
   ['stoic bookIds resolve to real books', stoicBooks],
   ['no duplicate passages in the daily pool', poolDuplicates],

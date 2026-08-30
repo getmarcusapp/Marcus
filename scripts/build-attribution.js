@@ -48,12 +48,29 @@ function entryHtml(e) {
     '</article>';
 }
 
+// The count is spelled out in the prose, and it went stale: the page and the
+// Learn hub both said "Twenty" long after the list reached 25. On a page whose
+// whole subject is checking claims, a wrong number is the worst possible one to
+// carry, so it is derived from the data rather than typed.
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+  'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+const TENS = { 20: 'twenty', 30: 'thirty', 40: 'forty', 50: 'fifty', 60: 'sixty', 70: 'seventy', 80: 'eighty', 90: 'ninety' };
+function spell(n) {
+  if (n < 20) return WORDS[n];
+  if (n < 100) {
+    const t = TENS[Math.floor(n / 10) * 10];
+    return n % 10 ? t + '-' + WORDS[n % 10] : t;
+  }
+  return String(n);
+}
+const capitalise = w => w.charAt(0).toUpperCase() + w.slice(1);
+
 function jsonLd(list) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'The Stoic Quotes That Are Not Stoic',
-    description: 'Twenty quotations widely attributed to Marcus Aurelius, Seneca, Epictetus and Socrates that belong to someone else, with what each one actually is.',
+    description: capitalise(spell(list.length)) + ' quotations widely attributed to Marcus Aurelius, Seneca, Epictetus and others that belong to someone else, with what each one actually is.',
     url: SITE + '/' + SLUG,
     author: { '@type': 'Organization', name: 'Marcus' },
     publisher: { '@type': 'Organization', name: 'Marcus' },
@@ -74,7 +91,8 @@ function build() {
 
   const title = 'The Stoic Quotes That Are Not Stoic | Marcus';
   const desc = 'Marcus Aurelius did not say "what we do in life echoes in eternity". Seneca did not write ' +
-    '"every new beginning comes from some other beginning\'s end". Twenty misattributed quotations, and what each one actually is.';
+    '"every new beginning comes from some other beginning\'s end". ' +
+    capitalise(spell(MISATTRIBUTIONS.length)) + ' misattributed quotations, and what each one actually is.';
   const canonical = SITE + '/' + SLUG;
 
   const groupsHtml = GROUPS.map(g => {
