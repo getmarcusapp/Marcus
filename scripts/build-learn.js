@@ -41,6 +41,7 @@ const PILLARS = [
       { href: '/misattributed-stoic-quotes', title: 'The Stoic quotes that are not Stoic', blurb: 'Twenty-five quotations credited to Marcus Aurelius, Seneca, Epictetus and others that belong to a screenwriter, a songwriter, Voltaire and Kant. Found by auditing our own library.', published: true },
       { href: '/did-aristotle-say-we-are-what-we-repeatedly-do', title: 'Did Aristotle say "we are what we repeatedly do"?', blurb: 'No. The sentence is Will Durant\u2019s, from 1926. Unusually for a misquote it is a good summary of Aristotle, which is why it has been impossible to dislodge.', published: true },
       { href: '/did-epictetus-say-its-not-what-happens-to-you', title: 'Did Epictetus say "it\u2019s not what happens to you, but how you react"?', blurb: 'The idea is his, the sentence is not. A paraphrase of Enchiridion 5 that moved the work from judgment to reaction, and threw away the best part of the passage.', published: true },
+      { href: '/who-said-everyone-you-meet-is-fighting-a-hard-battle', title: 'Who said "be kind, for everyone you meet is fighting a hard battle"?', blurb: 'A Scottish minister in 1897, and he wrote "be pitiful". A century of anonymous editing sanded off every marker of its date, which is how it ended up credited to Seneca.', published: true },
     ],
   },
   {
