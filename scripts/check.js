@@ -238,6 +238,52 @@ function misattributionCount() {
   return fail;
 }
 
+// The nightly newsletter has a reserve bank for the days the generator cannot
+// produce something publishable, and on 2026-08-31 it was unreachable: a repeat
+// draft threw, the catch around generateEdition called process.exit(1), and
+// that walked past both the retry loop and the reserve bank underneath it. The
+// guard that fires most often was the one guaranteeing no edition and no email.
+// The 2026-08-29 edition had already been lost the same way and nobody noticed
+// for two days, because from an inbox a failed run looks like a quiet one.
+function newsletterFallback() {
+  const fail = [];
+  const gen = read('scripts/generate-newsletter.js');
+
+  // Slice the CATCH, not the try. A first pass took everything up to the first
+  // closing brace, which is the end of the `try`, so the arm testing for the
+  // exit passed against code that still had it.
+  const after = gen.slice(gen.indexOf('g = await generateEdition(dateStr);'));
+  const catchStart = after.indexOf('catch');
+  const catchBody = after.slice(catchStart, after.indexOf('\n    }', catchStart)).replace(/\/\/[^\n]*/g, '');
+  if (/process\.exit\(/.test(catchBody)) {
+    fail.push('scripts/generate-newsletter.js: a failed generation exits instead of retrying, which skips the retry loop and the reserve bank below it');
+  }
+
+  // A crash must not look like a quiet day. `.catch(console.error)` logs and
+  // then falls off the end, which exits 0 and turns the workflow green.
+  if (/run\(\)\.catch\(console\.error\)/.test(gen)) {
+    fail.push('scripts/generate-newsletter.js: an unhandled throw exits 0, so the workflow reports success on a dead generator');
+  }
+
+  // Every path that ends with nothing staged has to say so.
+  if (!/emailFailure\(/.test(gen)) {
+    fail.push('scripts/generate-newsletter.js: no failure notice, so a night with no edition is silent');
+  }
+
+  const reserves = JSON.parse(read('scripts/reserve-editions.json'));
+  const bank = Array.isArray(reserves) ? reserves : reserves.editions || [];
+  if (bank.length < 3) {
+    fail.push(`scripts/reserve-editions.json: only ${bank.length} reserve edition(s); the fallback needs a real bank to draw from`);
+  }
+
+  const wf = read('.github/workflows/newsletter.yml');
+  if (!/if:\s*failure\(\)[\s\S]{0,400}notify-failure\.js/.test(wf)) {
+    fail.push('.github/workflows/newsletter.yml: no failure notification step, so a run that dies before the generator is silent');
+  }
+
+  return fail;
+}
+
 function poolDuplicates() {
   const fail = [];
   const q = evalExports('constants/quotes.js', ['morningQuotes', 'mementoMoriQuotes']);
@@ -881,6 +927,7 @@ function compassCopy() {
 const CHECKS = [
   ['copy counts agree with the data', copyCounts],
   ['the misattribution count matches the list', misattributionCount],
+  ['the newsletter can fail without going quiet', newsletterFallback],
   ['no duplicate quotes across surfaces', quoteDuplicates],
   ['stoic bookIds resolve to real books', stoicBooks],
   ['no duplicate passages in the daily pool', poolDuplicates],

@@ -23,6 +23,7 @@ const BEEHIIV_PUB_ID = (BEEHIIV_PUB_ID_RAW && !BEEHIIV_PUB_ID_RAW.startsWith('pu
 // fallback still happen). MAIL_PASS is a Gmail App Password, not the account
 // password. Requires nodemailer (see scripts/package.json), loaded lazily so
 // the generator still runs for anyone who doesn't email.
+const MAX_ATTEMPTS = 3;
 const MAIL_USER = process.env.MAIL_USER;
 const MAIL_PASS = process.env.MAIL_PASS;
 const MAIL_TO = process.env.MAIL_TO || MAIL_USER;
@@ -535,6 +536,32 @@ function suggestedPreview(edition) {
 // real deliverable, this is just the nudge. `beehiivNote` describes where the
 // draft ended up (staged in Beehiiv, or saved to disk) so the email tells Gio
 // what to do next.
+// Silence is the failure mode that actually hurt: the 2026-08-29 edition never
+// existed and nobody noticed for two days, because a failed run looks exactly
+// like a quiet one from the inbox. Every path that ends without a staged
+// edition says so out loud.
+async function emailFailure(dateStr, reason) {
+  if (!(MAIL_USER && MAIL_PASS)) return;
+  let nodemailer;
+  try { nodemailer = require('nodemailer'); } catch (e) { return; }
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com', port: 465, secure: true,
+      auth: { user: MAIL_USER, pass: MAIL_PASS },
+    });
+    await transporter.sendMail({
+      from: MAIL_USER, to: MAIL_TO,
+      subject: 'Daily Meditations: no draft for ' + dateStr,
+      text: 'No edition was staged for ' + dateStr + '.\n\n' + reason
+        + '\n\nNothing was sent to Beehiiv and nothing was published to the archive.'
+        + '\nRe-run the workflow from the Actions tab when you want another attempt.\n',
+    });
+    console.log('Failure notice emailed to ' + MAIL_TO);
+  } catch (e) {
+    console.warn('Could not email the failure notice: ' + e.message);
+  }
+}
+
 async function emailDraft(html, edition, dateStr, beehiivNote) {
   if (!(MAIL_USER && MAIL_PASS)) return;
   let nodemailer;
@@ -646,24 +673,37 @@ async function run() {
   const dateStr = editionDate().display;
   console.log('Generating edition for', dateStr, '...\n');
 
-  // Two attempts max: initial generation + one automatic regeneration on
-  // verification failure. After the second failure we fall back to the
-  // reserve bank. We never stage an unverified current-event edition.
+  // Three attempts: an initial generation plus two regenerations. Both gates
+  // an edition has to clear (source verification and the no-repeat check) are
+  // probabilistic, and one retry was not enough cover for two of them: on
+  // 2026-08-31 attempt one failed verification and attempt two drew a passage
+  // used twelve days earlier, which was the whole budget. After the last
+  // attempt we fall back to the reserve bank. We never stage an unverified
+  // current-event edition.
   let attempt = 1;
-  while (attempt <= 2) {
+  while (attempt <= MAX_ATTEMPTS) {
     let g;
     try {
       g = await generateEdition(dateStr);
     } catch (e) {
+      // A repeat is a bad DRAFT, not a broken run. This used to exit(1) right
+      // here, which walked past both the retry below and the reserve bank
+      // underneath it, so the guard that fires most often was also the one
+      // that guaranteed no edition at all and no email. assertNotRepeat's own
+      // comment says throwing "puts the caller's existing retry loop to work";
+      // it never did. Burn the attempt and go round again, same as a failed
+      // verification.
       console.error(e.message);
-      process.exit(1);
+      attempt++;
+      if (attempt <= MAX_ATTEMPTS) console.log('\nRegenerating (attempt ' + attempt + ' of ' + MAX_ATTEMPTS + ')...');
+      continue;
     }
     const text = g.text;
     const edition = g.edition;
 
     const heading = attempt === 1
       ? '--- Generated edition ---'
-      : '--- Regenerated edition (retry ' + (attempt - 1) + ') ---';
+      : '--- Regenerated edition (attempt ' + attempt + ' of ' + MAX_ATTEMPTS + ') ---';
     console.log('\n' + heading + '\n');
     console.log(text);
     console.log('\n---\n');
@@ -695,16 +735,17 @@ async function run() {
     }
 
     console.error('Verification failed: ' + verification.reason);
-    if (attempt === 1) console.log('\nRegenerating once for retry...');
     attempt++;
+    if (attempt <= MAX_ATTEMPTS) console.log('\nRegenerating (attempt ' + attempt + ' of ' + MAX_ATTEMPTS + ')...');
   }
 
-  // Both attempts failed verification. Fall back to the reserve bank.
+  // Every attempt failed. Fall back to the reserve bank.
   console.log('\nFalling back to reserve bank...');
   const reserves = loadReserveBank();
   if (reserves.length === 0) {
     console.error('VALIDATION FAILED \u2014 no edition staged. Manual review required.');
     console.error('Reserve bank at scripts/reserve-editions.json is empty. Populate it with timeless editions to enable automatic fallback.');
+    await emailFailure(dateStr, 'Every attempt failed and the reserve bank at scripts/reserve-editions.json is empty, so nothing was staged.');
     console.log('\nResult: FAILED');
     process.exit(2);
   }
@@ -723,4 +764,11 @@ async function run() {
   console.log('Done.');
 }
 
-run().catch(console.error);
+// A crash used to log and fall off the end, which exits 0. The workflow then
+// ran its remaining steps, found nothing to commit, and reported success, so a
+// dead generator looked exactly like a quiet day.
+run().catch(async e => {
+  console.error(e && e.stack ? e.stack : e);
+  try { await emailFailure(editionDate().display, String((e && e.message) || e)); } catch {}
+  process.exit(1);
+});

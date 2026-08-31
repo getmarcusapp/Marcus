@@ -92,6 +92,20 @@ jobs:
             git push origin HEAD:main
           fi
 
+      # The generator emails Gio itself when it fails in a way it can see. This
+      # is the backstop for the failures it cannot: a bad checkout, npm install
+      # dying, the runner being killed. Without it those are silent, and silence
+      # is indistinguishable from a quiet day.
+      - name: Report a failed run
+        if: failure()
+        working-directory: scripts
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node notify-failure.js || true
+
       # If Beehiiv staging failed, the generator writes the HTML to
       # scripts/out/. Capture it so a produced-but-unstaged edition is never
       # lost — download it from the run and paste into Beehiiv by hand.
