@@ -24,6 +24,10 @@ const BEEHIIV_PUB_ID = (BEEHIIV_PUB_ID_RAW && !BEEHIIV_PUB_ID_RAW.startsWith('pu
 // password. Requires nodemailer (see scripts/package.json), loaded lazily so
 // the generator still runs for anyone who doesn't email.
 const MAX_ATTEMPTS = 3;
+// How long a reserve edition has to sit before it may run again.
+const RESERVE_COOLDOWN_DAYS = 60;
+// Longest run of consecutive words an edition may share with its source.
+const MAX_VERBATIM_WORDS = 12;
 const MAIL_USER = process.env.MAIL_USER;
 const MAIL_PASS = process.env.MAIL_PASS;
 const MAIL_TO = process.env.MAIL_TO || MAIL_USER;
@@ -361,13 +365,53 @@ async function verifySource(url, contextText) {
       reason: 'Only ' + matched.length + '/' + keywords.length + ' keywords matched (' + Math.round(ratio * 100) + '%, need >=60%). Missing: ' + missing.join(', '),
     };
   }
+  // The most frequent defect across editions 42-62 was verbatim source text
+  // presented as the newsletter's own prose. The page text is already in hand
+  // here, so the check costs nothing: find the longest run of consecutive words
+  // the context shares with the article.
+  const lifted = longestSharedRun(contextText, pageText);
+  if (lifted.words >= MAX_VERBATIM_WORDS) {
+    return {
+      ok: false,
+      status: 200,
+      matchedKeywords: matched,
+      totalKeywords: keywords.length,
+      reason: 'Lifted prose: ' + lifted.words + ' consecutive words copied from the source (limit '
+        + MAX_VERBATIM_WORDS + '). "' + lifted.text.slice(0, 110) + '"',
+    };
+  }
+
   return {
     ok: true,
     status: 200,
     matchedKeywords: matched,
     totalKeywords: keywords.length,
-    reason: matched.length + '/' + keywords.length + ' keywords matched (' + Math.round(ratio * 100) + '%).',
+    reason: matched.length + '/' + keywords.length + ' keywords matched (' + Math.round(ratio * 100)
+      + '%), longest verbatim run ' + lifted.words + ' words.',
   };
+}
+
+// Longest run of consecutive words shared between the context and the source.
+// Word-level and case-insensitive, so it survives punctuation changes but still
+// catches a sentence that was pasted and lightly retouched.
+function longestSharedRun(a, b) {
+  const words = t => String(t || '').toLowerCase().replace(/[^a-z0-9\s]+/g, ' ').split(/\s+/).filter(Boolean);
+  const A = words(a), B = words(b);
+  if (!A.length || !B.length) return { words: 0, text: '' };
+  const index = new Map();
+  for (let i = 0; i < B.length; i++) {
+    if (!index.has(B[i])) index.set(B[i], []);
+    index.get(B[i]).push(i);
+  }
+  let best = 0, bestAt = 0;
+  for (let i = 0; i < A.length; i++) {
+    for (const j of index.get(A[i]) || []) {
+      let n = 0;
+      while (i + n < A.length && j + n < B.length && A[i + n] === B[j + n]) n++;
+      if (n > best) { best = n; bestAt = i; }
+    }
+  }
+  return { words: best, text: A.slice(bestAt, bestAt + best).join(' ') };
 }
 
 function loadReserveBank() {
@@ -453,7 +497,45 @@ async function generateEdition(dateStr) {
   // Layer 2: the model was told not to repeat itself and did. Throwing here puts
   // the caller's existing retry loop to work generating a genuinely new edition.
   assertNotRepeat(edition, loadRecentEditions(120));
+  // Required, not advisory: a quote on our own misattributions list must never
+  // reach a draft, let alone 13,000 subscribers.
+  assertQuoteNotMisattributed(edition);
   return { text: text, edition: edition };
+}
+
+// Load the published misattributions list. The app and the site already carry
+// a checked list of quotations that are not what they claim to be; the
+// newsletter was the one surface that could still ship one. Edition 61 went out
+// with "Wealth consists not in having great possessions, but in having few
+// wants" credited to Epictetus, which is not his, and it came from the reserve
+// bank so it would have kept going out.
+function loadMisattributions() {
+  try {
+    const src = fs.readFileSync(path.join(__dirname, '..', 'constants', 'misattributions.js'), 'utf8')
+      .replace(/export\s+const/g, 'const');
+    const mod = { exports: {} };
+    new Function('module', 'exports', src + '\nmodule.exports={MISATTRIBUTIONS};')(mod, mod.exports);
+    return mod.exports.MISATTRIBUTIONS || [];
+  } catch (e) {
+    console.warn('Could not load the misattributions list: ' + e.message);
+    return [];
+  }
+}
+
+// A required gate, not a post-hoc cleanup. Runs on every edition including
+// timeless ones and reserve editions, which previously passed through with no
+// checks of any kind.
+function assertQuoteNotMisattributed(edition) {
+  const norm = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const key = t => norm(t).split(' ').slice(0, 10).join(' ');
+  const qk = key(String(edition.quote || '').replace(/\s+\u2014.*$/, ''));
+  if (!qk) return;
+  for (const m of loadMisattributions()) {
+    if (key(m.text) === qk) {
+      throw new Error('Misattributed quote: "' + String(m.text).slice(0, 60) + '" is on our own published list. '
+        + 'Credited to ' + m.credited + '; actually ' + (m.actual || 'no known source') + '.');
+    }
+  }
 }
 
 // Reject an edition that repeats one already published.
@@ -750,15 +832,61 @@ async function run() {
     process.exit(2);
   }
 
-  const picked = reserves[Math.floor(Math.random() * reserves.length)];
+  // Reserve editions used to be picked at random and staged without passing the
+  // repeat guard, because assertNotRepeat lives inside generateEdition and the
+  // reserve path never goes through it. With eight of them and a random draw,
+  // repetition was not a risk but a certainty: every duplicated theme in the
+  // whole 62-edition archive is a reserve edition, and "On what we control"
+  // went out three times, twice within eleven days.
+  //
+  // So: same guard as a generated edition, then oldest-used first rather than
+  // random. If a passage or theme has run before, the reserve is spent and we
+  // move on. Only if every one is spent do we fail, which is the correct
+  // outcome: eight canned editions cannot cover an indefinite run of failures,
+  // and pretending otherwise is what produced the duplicate.
+  // Eligibility runs against a rolling window, not all of history. Checking
+  // forever would mark all eight spent immediately and kill the fallback, which
+  // is how we get no edition at all. Sixty days is the bar: a reserve theme or
+  // passage that has not run in two months is fresh enough to run again.
+  const all = loadRecentEditions(365);
+  const cutoff = new Date(Date.now() - RESERVE_COOLDOWN_DAYS * 86400000).toISOString().slice(0, 10);
+  const history = all.filter(h => String(h.isoDate) >= cutoff);
+  const lastUsed = t => {
+    const prev = all.filter(h => h.theme === t).map(h => String(h.isoDate)).sort();
+    return prev.length ? prev[prev.length - 1] : '';
+  };
+  console.log('  reserve cooldown: ' + RESERVE_COOLDOWN_DAYS + ' days (since ' + cutoff + '), ' + history.length + ' editions in window');
+  const fresh = reserves.filter(r => {
+    try {
+      assertNotRepeat(r, history);
+      // The reserve bank is frozen text that no downstream correction ever
+      // reaches, so it needs the gate more than a fresh generation does.
+      assertQuoteNotMisattributed({ quote: (r.quote || '') + ' \u2014 ' + (r.attribution || '') });
+      return true;
+    } catch (e) {
+      console.log('  spent: ' + r.theme + ' \u2014 ' + e.message.replace('Repeat edition: ', ''));
+      return false;
+    }
+  });
+  if (fresh.length === 0) {
+    console.error('VALIDATION FAILED \u2014 every reserve edition has already been published.');
+    await emailFailure(dateStr, 'Every attempt failed, and all ' + reserves.length +
+      ' reserve editions have run within the last ' + RESERVE_COOLDOWN_DAYS + ' days, so there was ' +
+      'nothing unspent to fall back on. Add entries to scripts/reserve-editions.json, or look at ' +
+      'why generation is failing.');
+    console.log('\nResult: FAILED');
+    process.exit(2);
+  }
+  fresh.sort((a, b) => lastUsed(a.theme).localeCompare(lastUsed(b.theme)));
+  const picked = fresh[0];
   // Reserve editions store quote + attribution as separate fields for
   // clarity. Generated editions bake the attribution into the QUOTE string
   // (per the prompt). Merge them here so buildHtml renders both the same
   // way regardless of which path produced the edition.
   const staged = picked.attribution && !picked.quote.includes(picked.attribution)
-    ? Object.assign({}, picked, { quote: picked.quote + ' — ' + picked.attribution })
+    ? Object.assign({}, picked, { quote: picked.quote + ' \u2014 ' + picked.attribution })
     : picked;
-  console.log('Used reserve edition: ' + picked.theme);
+  console.log('Used reserve edition: ' + picked.theme + ' (' + fresh.length + ' of ' + reserves.length + ' unused)');
   await postToBeehiiv(staged, dateStr);
   console.log('\nResult: RESERVE USED (theme: ' + picked.theme + ')');
   console.log('Done.');

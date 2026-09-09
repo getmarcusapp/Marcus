@@ -10,7 +10,7 @@
     "theme": "On what we control",
     "quote": "Seek not that the things which happen should happen as you wish; but wish the things which happen to be as they are, and you will have a tranquil flow of life.",
     "attribution": "Epictetus, Enchiridion VIII",
-    "context": "Epictetus was born into slavery, probably in Hierapolis in modern-day Turkey, around 50 AD. He had no control over his status, his location, or his owner, a man named Epaphroditus who, according to at least one account, broke Epictetus's leg to demonstrate a point about pain. Epictetus kept talking.\n\nThis teaching isn't resignation. It's a distinction: between what is subject to your will and what isn't. The weather, other people's opinions, the outcome of a project: not yours. Your response to each of those things: entirely yours. The Stoics called this the dichotomy of control, and Epictetus spent his entire career teaching it to people who thought they already understood it.",
+    "context": "Epictetus was born into slavery, probably in Hierapolis in modern-day Turkey, around 50 AD. He had no control over his status, his location, or his owner, a man named Epaphroditus. One ancient account has Epaphroditus twisting his leg until it broke, with Epictetus remarking only that he had said it would; another tradition puts the lameness down to illness. Either way, he kept talking.\n\nThis teaching isn't resignation. It's a distinction: between what is subject to your will and what isn't. The weather, other people's opinions, the outcome of a project: not yours. Your response to each of those things: entirely yours. Epictetus framed it as a division between what is up to us and what is not, and he spent his entire career teaching it to people who thought they already understood it.",
     "question": "Where today are you fighting reality instead of working with it?"
   },
   {
@@ -36,17 +36,19 @@
   },
   {
     "theme": "On adversity",
-    "quote": "The greater the difficulty, the more glory in surmounting it. Skillful pilots gain their reputation from storms and tempests.",
-    "attribution": "Epictetus, as recorded in the Discourses",
-    "context": "Epictetus taught that hardship is not the opposite of a good life but the raw material of one. He used the image of an athlete: no one becomes formidable by training against weak opponents. The difficulty is not in the way of the work. The difficulty is the work.\n\nThis is one of the most misread Stoic ideas. It is not a call to seek out suffering, nor a claim that everything happens for a reason. It is narrower and more useful than that: when difficulty arrives, as it will, it is also the only occasion on which certain virtues can be practiced at all. You cannot practice patience in the absence of provocation, or courage in the absence of fear. The storm is not a detour from becoming a skillful pilot. It is the test that makes the skill real.",
-    "question": "What difficulty in front of you right now is also an opportunity to practice something you claim to value?"
+    "quote": "Fire is the test of gold; adversity, of strong men.",
+    "attribution": "Seneca, On Providence 5",
+    "context": "Seneca wrote On Providence to answer a hard question: why, if the world is rationally ordered, do good people suffer? His answer is that hardship is not the opposite of a good life but the raw material of one. He reaches for the image of an athlete, and of a father who trains his sons strictly rather than indulging them. No one becomes formidable by training against weak opponents. The difficulty is not in the way of the work. The difficulty is the work.\n\nThis is one of the most misread Stoic ideas. It is not a call to seek out suffering, nor a claim that everything happens for a reason. It is narrower and more useful than that: when difficulty arrives, as it will, it is also the only occasion on which certain virtues can be practiced at all. You cannot practice patience in the absence of provocation, or courage in the absence of fear. The storm is not a detour from becoming a skillful pilot. It is the test that makes the skill real.",
+    "question": "What difficulty in front of you right now is also an opportunity to practice something you claim to value?",
+    "quoteId": "seneca-providence-fire"
   },
   {
     "theme": "On enough",
-    "quote": "Wealth consists not in having great possessions, but in having few wants.",
-    "attribution": "Attributed to Epictetus",
-    "context": "The Stoics drew a sharp line between what is necessary and what is merely desired. Epictetus, who owned almost nothing for most of his life, argued that the person who has trained their wants to be small is freer than the person with vast holdings and a restless appetite for more. The first is hard to disturb. The second is permanently exposed.\n\nThis is not an argument for poverty. The Stoics called external things like wealth indifferent: not bad, not required, fine to have and use well. The point is about where your sense of sufficiency lives. If it depends on the next acquisition, it will always live one step ahead of you. If it lives in having clarified what you actually need, it is available now, with what you already have.",
-    "question": "What do you currently want that, if you examined it honestly, you do not actually need?"
+    "quote": "It is not the man who has too little, but the man who craves more, that is poor. He is rich whose pleasures are cheap.",
+    "attribution": "Seneca, Letters to Lucilius 2",
+    "context": "The Stoics drew a sharp line between what is necessary and what is merely desired. Seneca, who was among the richest men in Rome, argued that the person who has trained their wants to be small is freer than the person with vast holdings and a restless appetite for more. The first is hard to disturb. The second is permanently exposed.\n\nThis is not an argument for poverty. The Stoics called external things like wealth indifferent: not bad, not required, fine to have and use well. The point is about where your sense of sufficiency lives. If it depends on the next acquisition, it will always live one step ahead of you. If it lives in having clarified what you actually need, it is available now, with what you already have.",
+    "question": "What do you currently want that, if you examined it honestly, you do not actually need?",
+    "quoteId": "seneca-letter-16-control"
   },
   {
     "theme": "On death",

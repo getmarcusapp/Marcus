@@ -284,6 +284,74 @@ function newsletterFallback() {
   return fail;
 }
 
+// The reserve bank is eight canned editions the newsletter falls back on, and
+// it turned out to be the worst-governed content in the repo. It bypassed the
+// repeat guard entirely (that lives inside generateEdition, which the reserve
+// path never calls), so it was picked at random from a fixed pool: every
+// duplicated theme in the whole 62-edition archive was a reserve edition, and
+// "On what we control" shipped three times. Nothing downstream ever wrote
+// corrections back into it either, so two defects Gio fixed by hand on
+// 2026-08-29 shipped again verbatim on 2026-09-09, and a quote on our OWN
+// published misattributions list sat in it for two months.
+function reserveBank() {
+  const fail = [];
+  const bank = JSON.parse(read('scripts/reserve-editions.json'));
+  const gen = read('scripts/generate-newsletter.js');
+
+  // 1. No reserve edition may carry a quote we have publicly called false.
+  const { MISATTRIBUTIONS } = evalExports('constants/misattributions.js', ['MISATTRIBUTIONS']);
+  const norm = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const key = t => norm(t).split(' ').slice(0, 10).join(' ');
+  const listed = new Map(MISATTRIBUTIONS.map(m => [key(m.text), m]));
+  for (const r of bank) {
+    const m = listed.get(key(r.quote));
+    if (m) {
+      fail.push(`scripts/reserve-editions.json: "${r.theme}" quotes ${m.credited}, which our own list says is ${m.actual || 'unsourced'}`);
+    }
+  }
+
+  // 2. The reserve pick must clear the same guard a generated edition does,
+  //    and must not be random.
+  const tail = gen.slice(gen.indexOf('Falling back to reserve bank'));
+  if (/Math\.random\(\)/.test(tail)) {
+    fail.push('scripts/generate-newsletter.js: the reserve edition is still picked at random, which is what shipped the same one three times');
+  }
+  if (!/assertNotRepeat\(r, history\)/.test(tail)) {
+    fail.push('scripts/generate-newsletter.js: reserve editions bypass the repeat guard');
+  }
+  if (!/assertQuoteNotMisattributed/.test(tail)) {
+    fail.push('scripts/generate-newsletter.js: reserve editions bypass the misattributed-quote gate');
+  }
+
+  // 3. The gate has to run on generated editions too, not only the fallback.
+  //    Slice to the END of generateEdition, not to the reserve section: the
+  //    gate's own function definition sits between the two, so a wider span
+  //    matches the definition and passes even when the call is gone.
+  const genStart = gen.indexOf('async function generateEdition');
+  const genPath = gen.slice(genStart, gen.indexOf('return { text: text, edition: edition };', genStart));
+  if (!/assertQuoteNotMisattributed\(edition\);/.test(genPath)) {
+    fail.push('scripts/generate-newsletter.js: generated editions are not checked against the misattributions list');
+  }
+
+  // 4. Lifted source text was the single most frequent defect across editions
+  //    42-62. verifySource already holds the page text, so the check is free.
+  if (!/longestSharedRun/.test(gen)) {
+    fail.push('scripts/generate-newsletter.js: no verbatim-overlap check, so source prose can ship as the newsletter\'s own');
+  }
+
+  // 5. A bank this small cannot absorb an indefinite run of failures. Warn
+  //    while it still has room rather than on the night it runs out.
+  const cooldown = Number((gen.match(/RESERVE_COOLDOWN_DAYS = (\d+)/) || [])[1] || 0);
+  if (!cooldown) {
+    fail.push('scripts/generate-newsletter.js: no reserve cooldown, so a spent edition can run again immediately');
+  }
+  if (bank.length < 8) {
+    fail.push(`scripts/reserve-editions.json: only ${bank.length} reserve editions for a ${cooldown}-day cooldown`);
+  }
+
+  return fail;
+}
+
 function poolDuplicates() {
   const fail = [];
   const q = evalExports('constants/quotes.js', ['morningQuotes', 'mementoMoriQuotes']);
@@ -928,6 +996,7 @@ const CHECKS = [
   ['copy counts agree with the data', copyCounts],
   ['the misattribution count matches the list', misattributionCount],
   ['the newsletter can fail without going quiet', newsletterFallback],
+  ['the newsletter reserve bank is clean and rationed', reserveBank],
   ['no duplicate quotes across surfaces', quoteDuplicates],
   ['stoic bookIds resolve to real books', stoicBooks],
   ['no duplicate passages in the daily pool', poolDuplicates],
