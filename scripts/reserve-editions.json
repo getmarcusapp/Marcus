@@ -36,11 +36,11 @@
   },
   {
     "theme": "On adversity",
-    "quote": "Fire is the test of gold; adversity, of strong men.",
-    "attribution": "Seneca, On Providence 5",
-    "context": "Seneca wrote On Providence to answer a hard question: why, if the world is rationally ordered, do good people suffer? His answer is that hardship is not the opposite of a good life but the raw material of one. He reaches for the image of an athlete, and of a father who trains his sons strictly rather than indulging them. No one becomes formidable by training against weak opponents. The difficulty is not in the way of the work. The difficulty is the work.\n\nThis is one of the most misread Stoic ideas. It is not a call to seek out suffering, nor a claim that everything happens for a reason. It is narrower and more useful than that: when difficulty arrives, as it will, it is also the only occasion on which certain virtues can be practiced at all. You cannot practice patience in the absence of provocation, or courage in the absence of fear. The storm is not a detour from becoming a skillful pilot. It is the test that makes the skill real.",
+    "quote": "It is in adversity, after all, that the brave most accustom themselves to act bravely.",
+    "attribution": "Seneca, On the Firmness of the Wise Man 3",
+    "context": "Seneca wrote On the Firmness of the Wise Man for a friend who could not see the point of Stoic composure, and On Providence to answer a harder question: why, if the world is rationally ordered, do good people suffer? Both arrive at the same claim. Hardship is not the opposite of a good life but the raw material of one. He reaches for the image of an athlete, and of a father who trains his sons strictly rather than indulging them. No one becomes formidable by training against weak opponents.\n\nThis is one of the most misread Stoic ideas. It is not a call to seek out suffering, nor a claim that everything happens for a reason. It is narrower and more useful than that: when difficulty arrives, as it will, it is also the only occasion on which certain virtues can be practiced at all. You cannot practice patience in the absence of provocation, or courage in the absence of fear. The storm is not a detour from becoming a skillful pilot. It is the test that makes the skill real.",
     "question": "What difficulty in front of you right now is also an opportunity to practice something you claim to value?",
-    "quoteId": "seneca-providence-fire"
+    "quoteId": "seneca-tranquility-still"
   },
   {
     "theme": "On enough",
@@ -56,5 +56,69 @@
     "attribution": "Marcus Aurelius, Meditations II.11",
     "context": "Marcus returned to the subject of death constantly, not out of morbidity but as a tool for clarity. He had buried most of his children. He governed during a plague that killed a significant portion of the empire. Death was not abstract to him, and he refused to let it be abstract in his thinking.\n\nThe Stoic practice of memento mori, remembering that you will die, was never meant to produce dread. It was meant to produce proportion. Most of what consumes a day, the slights, the delays, the things that did not go as planned, shrinks immediately when held against the fact of mortality. Marcus used the thought not to withdraw from life but to engage with it more honestly: to stop postponing the person he meant to be, since the postponement assumes a tomorrow no one is promised.",
     "question": "If today were the measure of your life, what would you want to have done differently with it?"
+  },
+  {
+    "theme": "On the two handles",
+    "quote": "Everything has two handles: the one by which it may be borne, the other by which it may not. If your brother acts unjustly, do not lay hold on the act by that handle wherein he acts unjustly, for this is the handle which cannot be borne; but lay hold on the other, that he is your brother, that he was nurtured with you, and you will lay hold on the thing by that handle by which it can be borne.",
+    "attribution": "Epictetus, Enchiridion 43",
+    "quoteId": "epictetus-enchiridion-43-handles",
+    "context": "Epictetus taught at Nicopolis, in what is now western Greece, after Domitian expelled the philosophers from Rome in the 90s AD. The Enchiridion is not his book: it is a handbook his student Arrian assembled from lecture notes, which is why it reads like a set of instructions rather than an argument.\n\nThis one is a practical instruction about attention. The same event genuinely has more than one true description, and the description you reach for determines whether you can carry it. He is not asking you to pretend the injustice did not happen. The unjust act is real, and it is the handle that cannot be borne. What he is pointing out is that it is not the only handle, and that which one you take hold of is a choice you are making whether or not you notice making it.",
+    "question": "What are you holding by the handle that cannot be borne?"
+  },
+  {
+    "theme": "On imagined suffering",
+    "quote": "We suffer more in imagination than in reality.",
+    "attribution": "Seneca, Letters to Lucilius 13",
+    "quoteId": "seneca-letter-13-imagination",
+    "context": "Seneca wrote the letters to Lucilius in his last years, after withdrawing from Nero's court, and Letter 13 is about groundless fear. He was writing with some authority on the subject: he had already survived exile and would shortly be ordered to kill himself.\n\nThe claim is narrower than it first sounds. He is not saying that nothing bad happens, or that fear is irrational. He is making an arithmetic point. Most of what frightens us either does not arrive, or arrives in a smaller form than the one we rehearsed, and in the meantime we have paid for it in full and often more than once. The suffering is real. It is just that a large share of it is spent on a version of the event that never occurs.",
+    "question": "What have you already paid for in advance that has not arrived?"
+  },
+  {
+    "theme": "On the character you keep alone",
+    "quote": "Lay down for yourself, at the outset, a certain stamp and type of character for yourself, which you are to maintain whether you are by yourself or are meeting with people.",
+    "attribution": "Epictetus, Enchiridion 33",
+    "quoteId": "epictetus-enchiridion-33-character",
+    "context": "The chapter this comes from is the closest thing in the Enchiridion to a rule of life: what to say, how much to eat, whom to spend time with, how to handle being laughed at. Epictetus is unembarrassed about the ordinariness of it. He thought character was built out of small settled decisions made before the moment of pressure arrives.\n\nThe test in this line is the phrase about being by yourself. A character maintained only in company is a performance, and performances are exhausting to keep up and collapse under strain. What he is describing is cheaper to run and harder to build: deciding once what sort of person you are, so that each separate occasion does not have to be argued out from the beginning.",
+    "question": "Where does the version of you that is alone differ from the one other people meet?"
+  },
+  {
+    "theme": "On not announcing it",
+    "quote": "On no occasion call yourself a philosopher, and do not, for the most part, talk among the laity about philosophical principles, but act in accordance with them.",
+    "attribution": "Epictetus, Enchiridion 46",
+    "quoteId": "epictetus-enchiridion-46-philosopher",
+    "context": "Epictetus follows this with an image about sheep. They do not bring the shepherd grass to prove how much they have eaten; they produce wool and milk, and the eating is evident from that. He was talking to young men who had come to study philosophy and were liable to go home and explain it to everyone.\n\nThe warning is about a substitution that is easy to make without noticing. Describing a practice feels like doing it, and it is considerably more comfortable, because an account of yourself can be corrected on the spot while conduct cannot. He is not recommending secrecy. He is pointing out that the only evidence anyone should need is the wool.",
+    "question": "What are you currently explaining that you could simply be doing?"
+  },
+  {
+    "theme": "On the fountain within",
+    "quote": "Look within. Within is the fountain of good, and it will ever bubble up, if thou wilt ever dig.",
+    "attribution": "Marcus Aurelius, Meditations VII.59",
+    "quoteId": "aurelius-meditations-7-59-fountain",
+    "context": "Marcus wrote the Meditations in Greek, privately, mostly while on campaign on the northern frontier. Nobody was meant to read them. That is worth holding on to when a line like this one sounds like advice: it is a man giving himself an instruction he evidently needed repeating.\n\nThe second half is the part that gets dropped. If thou wilt ever dig. The source is not sitting on the surface waiting to be noticed, and the sentence is not a reassurance that you are fine as you are. It is a claim that the work is available and that it is work: nothing arrives without the digging, and the digging does not finish.",
+    "question": "What would you find today if you dug rather than waited?"
+  },
+  {
+    "theme": "On the retreat you already have",
+    "quote": "Men seek retreats for themselves, houses in the country, seashores, and mountains; and thou too art wont to desire such things very much. But this is altogether a mark of the most common sort of men, for it is in thy power whenever thou shalt choose to retire into thyself.",
+    "attribution": "Marcus Aurelius, Meditations IV.3",
+    "quoteId": "aurelius-meditations-4-3-retreat",
+    "context": "The emperor of Rome, who owned houses in the country and could have gone to any of them, is telling himself that wanting to go is the mark of the most common sort of men. He wrote it during a frontier war that had already run for years.\n\nThe argument is not that rest is a weakness. It is that the retreat most people are actually looking for is not geographic. A change of place moves the same mind somewhere more pleasant, which is why the relief tends to wear off on roughly the schedule of the journey home. What he claims is available is smaller and stranger: a place you can enter without going anywhere, at any hour, including the ones where leaving is not an option.",
+    "question": "What are you hoping a change of place will do that you could do here?"
+  },
+  {
+    "theme": "On the best revenge",
+    "quote": "The best revenge is to be unlike him who performed the injury.",
+    "attribution": "Marcus Aurelius, Meditations VI.6",
+    "quoteId": "aurelius-meditations-6-6-revenge",
+    "context": "Eleven words, and one of the few lines in the Meditations that reads as though it were written for someone else. Marcus dealt daily with courtiers, informants and a senate that had reason to fear him, and the temptation he is addressing is not abstract.\n\nWhat makes it more than a consolation is the word revenge. He does not tell himself that the injury does not matter, or that the person who did it should be forgiven, or that he is above minding. He concedes the wish to settle the score and then redirects it, because the ordinary way of settling it requires becoming, briefly, the sort of person who does that thing. The proposal is that you win by declining to be changed by them.",
+    "question": "Who has recently made you more like them than you want to be?"
+  },
+  {
+    "theme": "On the two tests",
+    "quote": "If it is not right, do not do it; if it is not true, do not say it.",
+    "attribution": "Marcus Aurelius, Meditations XII.17",
+    "quoteId": "aurelius-meditations-12-17-not-vexed",
+    "context": "This sits near the end of the Meditations, in the twelfth and last book, among a run of notes that are shorter and blunter than the earlier ones. Whatever else it is, it is a man late in a long life reducing the thing to its smallest possible form.\n\nTwo tests, one for action and one for speech, and neither of them asks about outcome. Not: will this work, will it be noticed, will it be understood, will it cost me. Only whether the act is right and whether the statement is true, both of which you can determine before you move and neither of which depends on anyone else. It is a short sentence with almost nothing in it, which is the point: at this length there is nowhere for a qualification to hide.",
+    "question": "What are you about to do or say that would not survive either test?"
   }
 ]
