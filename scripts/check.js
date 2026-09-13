@@ -850,6 +850,63 @@ function misquoteDetector() {
   return fail;
 }
 
+// The outreach pipeline. It touches other people's sites and handles their
+// contact addresses, so the things that must stay true are about conduct as
+// much as correctness.
+function outreachPipeline() {
+  const fail = [];
+  const src = read('scripts/outreach.js');
+  const o = require(path.join(ROOT, 'scripts', 'outreach.js'));
+  const list = require(path.join(ROOT, 'scripts', 'find-misquotes.js')).loadMisattributions();
+
+  // 1. It drafts. It does not send. Ever.
+  for (const [pat, why] of [
+    [/nodemailer/, 'can send mail'],
+    [/smtp/i, 'references SMTP'],
+    [/sendmail|mailgun|sendgrid|postmark|ses\.send/i, 'references a mail service'],
+  ]) {
+    if (pat.test(src)) fail.push(`scripts/outreach.js: ${why}; the sending stays human`);
+  }
+
+  // 2. Other people's addresses never enter the repo.
+  const ignore = read('.gitignore');
+  for (const f of ['outreach-state.json', 'outreach.md']) {
+    if (!ignore.split('\n').some(l => l.trim() === f)) {
+      fail.push(`.gitignore: ${f} is not ignored, and it holds other people's contact addresses`);
+    }
+  }
+
+  // 3. robots.txt is consulted before fetching anyone's page.
+  // Both fetch loops must be guarded. A looser test for the mere presence of
+  // `await allowed(url)` passed with the guard removed from the run loop,
+  // because findContact also calls it.
+  const guards = (src.match(/if \(!\(await allowed\(url\)\)\)/g) || []).length;
+  if (guards < 2) {
+    fail.push(`scripts/outreach.js: only ${guards} of the two fetch loops checks robots.txt before requesting a page`);
+  }
+  if (!/User-Agent/.test(src) || !/getmarcus\.app/.test(src)) {
+    fail.push('scripts/outreach.js: the crawler does not identify itself');
+  }
+
+  // 4. The junk filter must be anchored, not a substring match. A bare
+  //    "example" discarded editor@example-quotes.test in testing.
+  const legit = ['editor@example-quotes.test', 'hello@examplemedia.com', 'contact@stoicdomain.org'];
+  const junk = ['noreply@wix.com', 'yourname@example.com', 'postmaster@anything.com', 'logo@2x.png'];
+  for (const a2 of legit) if (o.isJunk(a2)) fail.push(`scripts/outreach.js: the junk filter discards a legitimate address, ${a2}`);
+  for (const a2 of junk) if (!o.isJunk(a2)) fail.push(`scripts/outreach.js: the junk filter keeps ${a2}`);
+
+  // 5. The draft's count is derived. A typed number is the stale-count bug
+  //    that had /about claiming twenty for months.
+  const sample = o.draft({ entry: list[0] }, 'https://example.org/x');
+  if (!sample.includes('one of ' + list.length + ' that did not survive')) {
+    fail.push(`scripts/outreach.js: the draft does not state the live count of ${list.length}`);
+  }
+  if (/\.\./.test(sample)) fail.push('scripts/outreach.js: the draft contains a doubled full stop');
+  if (!sample.includes(list[0].id)) fail.push('scripts/outreach.js: the draft does not link the specific entry');
+
+  return fail;
+}
+
 function siteNav() {
   const fail = [];
   const { ITEMS } = require(path.join(ROOT, 'scripts', 'site-nav.js'));
@@ -1615,6 +1672,7 @@ const CHECKS = [
   ['article artwork exists and is credited', artwork],
   ['the logo is never squashed', logoAspect],
   ['the misquote detector knows a correction from a claim', misquoteDetector],
+  ['the outreach pipeline drafts but never sends', outreachPipeline],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],

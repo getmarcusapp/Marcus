@@ -52,3 +52,7 @@ yarn-error.*
 
 # generated newsletter drafts (disk-fallback when Beehiiv API is unavailable)
 scripts/out/
+
+# Outreach pipeline state: holds other people's contact addresses
+outreach-state.json
+outreach.md

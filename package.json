@@ -12,7 +12,8 @@
     "indexnow": "node scripts/indexnow.js",
     "build:themes": "node scripts/build-themes.js",
     "build:checker": "node scripts/build-quote-checker.js",
-    "find:misquotes": "node scripts/find-misquotes.js"
+    "find:misquotes": "node scripts/find-misquotes.js",
+    "outreach": "node scripts/outreach.js"
   },
   "dependencies": {
     "@aptabase/react-native": "^0.4.0",
