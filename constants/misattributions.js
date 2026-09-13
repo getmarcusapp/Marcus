@@ -31,6 +31,15 @@ export const MISATTRIBUTIONS = [
     note: 'Spoken by Russell Crowe as Maximus, in a film whose emperor is Marcus Aurelius. That proximity is why it spread. It appears nowhere in the Meditations, in any translation, because it was written for the screen in the late 1990s.',
   },
   {
+    id: 'obstacle-is-the-way',
+    text: 'The obstacle is the way.',
+    credited: 'Marcus Aurelius',
+    actual: 'Ryan Holiday, The Obstacle Is the Way (2014), compressing Meditations V.20',
+    confidence: 'strong',
+    group: 'modern',
+    note: 'Unusually, the thought really is his. Meditations V.20 runs, in Gregory Hays\u2019s rendering, "The impediment to action advances action. What stands in the way becomes the way." The five-word version is the title of a 2014 book, and Holiday is open about where he got it. What travels is the title, in quotation marks, under Marcus\u2019s name, and it appears in no translation of the Meditations because it is not a translation of anything.',
+  },
+  {
     id: 'closing-time',
     text: "Every new beginning comes from some other beginning's end.",
     credited: 'Seneca',
