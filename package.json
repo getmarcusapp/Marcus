@@ -11,7 +11,8 @@
     "setup:hooks": "git config core.hooksPath scripts/hooks",
     "indexnow": "node scripts/indexnow.js",
     "build:themes": "node scripts/build-themes.js",
-    "build:checker": "node scripts/build-quote-checker.js"
+    "build:checker": "node scripts/build-quote-checker.js",
+    "find:misquotes": "node scripts/find-misquotes.js"
   },
   "dependencies": {
     "@aptabase/react-native": "^0.4.0",

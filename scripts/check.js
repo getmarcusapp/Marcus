@@ -768,6 +768,56 @@ function logoAspect() {
   return fail;
 }
 
+// The misquote detector. Two things have to stay true.
+//
+// It must never flag our own attribution page as a target: that page quotes
+// all 26 in order to correct them, and a tool that cannot tell "publishes this
+// as genuine" from "explains this is not genuine" would have us writing to
+// people who already agree with us, which is the fastest way to become the
+// thing it exists to avoid.
+//
+// And it must stay a research tool. The value of the outreach is that a person
+// read the page; the moment this can send, that is gone.
+function misquoteDetector() {
+  const fail = [];
+  const det = require(path.join(ROOT, 'scripts', 'find-misquotes.js'));
+  const list = det.loadMisattributions();
+
+  // Our own page: every entry present, every one classed as already correct.
+  const own = det.norm(det.visibleText(read('public/misattributed-stoic-quotes.html')));
+  let found = 0;
+  for (const e of list) {
+    const hit = det.analyse(e, own);
+    if (!hit) { fail.push(`find-misquotes: "${String(e.text).slice(0, 40)}" is on our page but not detected`); continue; }
+    found++;
+    if (!hit.namesTrueSource) {
+      fail.push(`find-misquotes: our own page is flagged as a target for ${e.id}`);
+    }
+  }
+  if (found !== list.length) {
+    fail.push(`find-misquotes: detected ${found} of ${list.length} entries on our own page`);
+  }
+
+  // A source with no distinguishing token would always read as a target.
+  for (const e of list) {
+    if (e.actual && det.sourceTokens(e).length === 0) {
+      fail.push(`find-misquotes: ${e.id} has a source but no usable token, so it can never be seen as corrected`);
+    }
+  }
+
+  // It researches. It does not contact.
+  const src = read('scripts/find-misquotes.js');
+  for (const [pat, why] of [
+    [/nodemailer/, 'can send mail'],
+    [/method:\s*['"]POST['"]/, 'makes POST requests'],
+    [/smtp/i, 'references SMTP'],
+  ]) {
+    if (pat.test(src)) fail.push(`scripts/find-misquotes.js: ${why}; this is a research tool and the sending stays human`);
+  }
+
+  return fail;
+}
+
 function siteNav() {
   const fail = [];
   const { ITEMS } = require(path.join(ROOT, 'scripts', 'site-nav.js'));
@@ -1532,6 +1582,7 @@ const CHECKS = [
   ['focus rings and social cards exist', polish],
   ['article artwork exists and is credited', artwork],
   ['the logo is never squashed', logoAspect],
+  ['the misquote detector knows a correction from a claim', misquoteDetector],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],
