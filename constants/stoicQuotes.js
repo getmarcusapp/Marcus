@@ -410,15 +410,6 @@ export const STOIC_QUOTES = [
 
   // ─── ARISTOTLE · Nicomachean Ethics ──────────────────────────────────────
   {
-    id: 'aristotle-ethics-habit',
-    quote: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
-    author: 'Aristotle',
-    work: 'Nicomachean Ethics',
-    source: 'paraphrase of II.4',
-    virtues: ['courage', 'moderation'],
-    themes: ['habit', 'character'],
-  },
-  {
     id: 'aristotle-ethics-virtue-mean',
     quote: "Virtue is a state of character concerned with choice, lying in a mean relative to us, this being determined by reason and in the way in which the man of practical wisdom would determine it.",
     author: 'Aristotle',

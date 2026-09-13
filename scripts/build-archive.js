@@ -397,6 +397,9 @@ function buildSitemap(records) {
   // adding one cannot leave it out of the sitemap.
   const themesDate = newestDate('constants/stoicQuotes.js', 'scripts/build-themes.js');
   add(SITE + '/stoic-quotes', themesDate, 'monthly', '0.8');
+  add(SITE + '/' + require('./build-quote-checker').SLUG,
+      newestDate('constants/stoicQuotes.js', 'constants/misattributions.js', 'scripts/build-quote-checker.js'),
+      'monthly', '0.9');
   for (const t of require('./build-themes').PAGES) {
     add(SITE + '/stoic-quotes/' + t.slug, themesDate, 'monthly', '0.8');
   }

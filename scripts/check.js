@@ -516,6 +516,74 @@ function themePages() {
   return fail;
 }
 
+// The quote checker is the one page here that renders a verdict, so it is the
+// one page where being wrong is expensive. These cases run the real matcher
+// against the real corpus: a line we have published as false must come back
+// false, a line we have cited must come back cited, and a line we do not hold
+// must come back as "we cannot find it" rather than as "fake".
+function quoteChecker() {
+  const fail = [];
+  const { CLIENT, loadModule, SLUG } = require(path.join(ROOT, 'scripts', 'build-quote-checker.js'));
+  const { STOIC_QUOTES } = loadModule('stoicQuotes.js', ['STOIC_QUOTES']);
+  const { MISATTRIBUTIONS } = loadModule('misattributions.js', ['MISATTRIBUTIONS']);
+  const D = {
+    corpus: STOIC_QUOTES.map(q => [q.quote, q.author, q.work, q.source || '']),
+    mis: MISATTRIBUTIONS.map(m => [m.text, m.credited, m.actual || '', m.note, m.confidence, m.id]),
+  };
+  const body = CLIENT.slice(CLIENT.indexOf('function norm'), CLIENT.indexOf('var elInput'));
+  let norm, stripAttr, best;
+  try {
+    ({ norm, stripAttr, best } = new Function('D', body + '; return {norm,stripAttr,best};')(D));
+  } catch (e) {
+    return ['scripts/build-quote-checker.js: the client matcher could not be evaluated — ' + e.message];
+  }
+  const verdict = raw => {
+    const input = norm(stripAttr(raw));
+    if (input.split(' ').length < 2) return 'short';
+    const m = best(input, D.mis, r => r[0]);
+    const v = best(input, D.corpus, r => r[0]);
+    if (m.score >= 0.82) return 'misattributed';
+    if (v.score >= 0.82) return 'verified';
+    return Math.max(m.score, v.score) >= 0.45 ? 'close' : 'unknown';
+  };
+
+  // Every published misattribution must be caught, pasted plainly and pasted
+  // the way people actually paste them, with the attribution still attached.
+  for (const m of MISATTRIBUTIONS) {
+    if (verdict(m.text) !== 'misattributed') {
+      fail.push(`quote checker: "${String(m.text).slice(0, 44)}" is on our list but does not come back as misattributed`);
+    }
+    if (verdict(m.text + ' \u2014 ' + m.credited) !== 'misattributed') {
+      fail.push(`quote checker: "${String(m.text).slice(0, 40)}" is missed when the attribution is pasted with it`);
+    }
+  }
+
+  // Every cited passage must come back cited.
+  for (const q of STOIC_QUOTES) {
+    if (verdict(q.quote) !== 'verified') {
+      fail.push(`quote checker: ${q.id} is in the corpus but does not come back as verified`);
+    }
+  }
+
+  // And the answer for something we do not hold must not be a verdict.
+  const strangers = [
+    'The only thing we never get enough of is love, and the only thing we never give enough of is love.',
+    'A screaming comes across the sky.',
+    'All happy families are alike; each unhappy family is unhappy in its own way.',
+  ];
+  for (const t of strangers) {
+    const got = verdict(t);
+    if (got === 'verified' || got === 'misattributed') {
+      fail.push(`quote checker: a line we do not hold came back as "${got}" — "${t.slice(0, 40)}"`);
+    }
+  }
+
+  if (!fs.existsSync(path.join(ROOT, 'public', SLUG + '.html'))) {
+    fail.push(`public/${SLUG}.html has not been built`);
+  }
+  return fail;
+}
+
 function quoteDuplicates() {
   const fail = [];
   // Every rotating group is optional now. Quote surfaces have been removed
@@ -1101,6 +1169,7 @@ const CHECKS = [
   ['no duplicate passages in the daily pool', poolDuplicates],
   ['no duplicate passages in the reading corpus', corpusDuplicates],
   ['the themed quote pages are sourced and distinct', themePages],
+  ['the quote checker returns the right verdict', quoteChecker],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],
