@@ -17,6 +17,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { footerHtml } = require('./site-footer');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -162,10 +163,7 @@ function build() {
     'a daily reading, and a structured evening examination.</p>' +
     '<a class="ln-nav-cta" href="/">Explore the app →</a></section>' +
     '</main>' +
-    '<footer class="ln-footer"><p>Marcus &middot; A Stoic Practice App &middot; ' +
-    '<a href="/">getmarcus.app</a> &middot; <a href="/learn">Learn</a> &middot; <a href="/about">About</a> &middot; ' +
-    '<a href="/stoics">The Stoics</a> &middot; <a href="/library">The Library</a> &middot; ' +
-    '<a href="/meditations">Daily Meditations</a></p></footer>' +
+    footerHtml('ln', '/learn') +
     '</body></html>';
 
   fs.writeFileSync(OUT, html, 'utf8');

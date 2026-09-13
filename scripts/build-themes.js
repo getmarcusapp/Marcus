@@ -29,6 +29,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { footerHtml } = require('./site-footer');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -238,10 +239,7 @@ const NAV =
   '<a class="tq-nav-cta" href="/">Get the app →</a>' +
   '</div></nav>';
 
-const FOOTER =
-  '<footer class="tq-footer"><p>Marcus &middot; A Stoic Practice App &middot; <a href="/">getmarcus.app</a> &middot; ' +
-  '<a href="/learn">Learn</a> &middot; <a href="/stoics">The Stoics</a> &middot; ' +
-  '<a href="/misattributed-stoic-quotes">Attribution</a></p></footer>';
+const FOOTER = footerHtml('tq', '/stoic-quotes');
 
 function shell({ title, desc, canonical, jsonLd, body }) {
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">' +

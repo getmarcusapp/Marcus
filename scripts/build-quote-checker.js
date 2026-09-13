@@ -24,6 +24,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { footerHtml } = require('./site-footer');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -242,10 +243,7 @@ const NAV =
   '<a class="qc-nav-cta" href="/">Get the app →</a>' +
   '</div></nav>';
 
-const FOOTER =
-  '<footer class="qc-footer"><p>Marcus &middot; A Stoic Practice App &middot; <a href="/">getmarcus.app</a> &middot; ' +
-  '<a href="/learn">Learn</a> &middot; <a href="/stoic-quotes">Sourced quotes</a> &middot; ' +
-  '<a href="/misattributed-stoic-quotes">Attribution</a></p></footer>';
+const FOOTER = footerHtml('qc', '/check-a-stoic-quote');
 
 function build() {
   const { STOIC_QUOTES } = loadModule('stoicQuotes.js', ['STOIC_QUOTES']);

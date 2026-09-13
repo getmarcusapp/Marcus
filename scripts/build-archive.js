@@ -12,6 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { footerHtml } = require('./site-footer');
 
 const ROOT = path.join(__dirname, '..');
 const EDITIONS_DIR = path.join(ROOT, 'content', 'editions');
@@ -120,9 +121,10 @@ function appCta() {
     '<a class="dm-nav-cta" href="/">Explore the app →</a></section>';
 }
 
+// Editions are noindex, follow, so these links are still crawled: this is
+// sixty-odd pages that were pointing at two destinations.
 function footer() {
-  return '<footer class="dm-footer"><p>Marcus &middot; A Stoic Practice App &middot; ' +
-    '<a href="/">getmarcus.app</a> &middot; <a href="/meditations">Daily Meditations</a></p></footer>';
+  return footerHtml('dm', '/meditations');
 }
 
 

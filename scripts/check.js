@@ -584,6 +584,65 @@ function quoteChecker() {
   return fail;
 }
 
+// Every builder used to hand-write its own footer, and they had drifted into
+// eight different link sets. The consequence was quiet: /check-a-stoic-quote
+// and /stoic-quotes shipped reachable from exactly one page on the site, so a
+// reader could not find them and a crawler had almost no reason to. Pages
+// nobody links to are pages nobody reads, however good they are.
+function siteFooter() {
+  const fail = [];
+  const { LINKS } = require(path.join(ROOT, 'scripts', 'site-footer.js'));
+
+  // Every builder takes its footer from the shared module.
+  const BUILDERS = ['articles', 'attribution', 'learn', 'library', 'about', 'stoics', 'themes', 'quote-checker', 'archive'];
+  for (const b of BUILDERS) {
+    const src = read('scripts/build-' + b + '.js');
+    if (/<footer class="/.test(src)) {
+      fail.push(`scripts/build-${b}.js: still hand-writes a footer instead of calling footerHtml`);
+    }
+    if (!/footerHtml\(/.test(src)) {
+      fail.push(`scripts/build-${b}.js: does not use the shared footer`);
+    }
+  }
+
+  // Every destination in the shared footer must actually exist.
+  for (const [href] of LINKS) {
+    if (href === '/') continue;
+    const rel = href.replace(/^\//, '');
+    const direct = path.join(ROOT, 'public', rel + '.html');
+    const dir = path.join(ROOT, 'public', rel, 'index.html');
+    if (!fs.existsSync(direct) && !fs.existsSync(dir)) {
+      fail.push(`scripts/site-footer.js: links to ${href}, which is not built`);
+    }
+  }
+
+  // And the two newest pages must be reachable from a serious share of the
+  // site, not from one page. This is the number that was wrong.
+  const pages = [];
+  const walk = d => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.html')) pages.push(fs.readFileSync(p, 'utf8'));
+    }
+  };
+  walk(path.join(ROOT, 'public'));
+  for (const href of ['/check-a-stoic-quote', '/stoic-quotes', '/misattributed-stoic-quotes']) {
+    const n = pages.filter(h => h.includes('href="' + href + '"')).length;
+    if (n < 20) fail.push(`${href} is linked from only ${n} page(s); it was orphaned on one once already`);
+  }
+
+  // The homepage is hand-maintained and is the page most likely to be left behind.
+  const home = read('public/index.html');
+  for (const href of ['/learn', '/stoic-quotes', '/check-a-stoic-quote', '/misattributed-stoic-quotes']) {
+    if (!home.includes('href="' + href + '"')) {
+      fail.push(`public/index.html does not link to ${href}`);
+    }
+  }
+
+  return fail;
+}
+
 function quoteDuplicates() {
   const fail = [];
   // Every rotating group is optional now. Quote surfaces have been removed
@@ -1170,6 +1229,7 @@ const CHECKS = [
   ['no duplicate passages in the reading corpus', corpusDuplicates],
   ['the themed quote pages are sourced and distinct', themePages],
   ['the quote checker returns the right verdict', quoteChecker],
+  ['every page can be reached from the footer', siteFooter],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],
