@@ -207,7 +207,6 @@ function build() {
 }
 
 const CSS = `
-${navCss('mq')}
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0f;color:#e8e4dc;font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:inherit}
@@ -252,6 +251,9 @@ img{max-width:100%;display:block}
 .mq-app-links a{color:#c9a961}
 .mq-footer{text-align:center;padding:32px 24px 48px;font-size:13px;color:rgba(232,228,220,.45)}
 .mq-footer a{color:rgba(232,228,220,.7)}
-`;
+
+/* Shared chrome last: these override the builder's own nav rules, and a
+   mobile menu that cannot hide is worse than no mobile menu. */
+${navCss('mq')}`;
 
 build();

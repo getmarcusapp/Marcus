@@ -201,7 +201,6 @@ const PAGES = [
 ];
 
 const CSS = `
-${navCss('tq')}
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0f;color:#e8e4dc;font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:#c9a961}
@@ -232,7 +231,10 @@ img{max-width:100%;display:block}
 .tq-app p{margin:0;flex:1 1 280px;font-size:15px;color:rgba(232,228,220,.78)}
 .tq-footer{padding:26px 24px 52px;border-top:1px solid rgba(232,228,220,.09);font-size:13px;color:rgba(232,228,220,.55);text-align:center}
 .tq-footer a{color:rgba(232,228,220,.7)}
-`;
+
+/* Shared chrome last: these override the builder's own nav rules, and a
+   mobile menu that cannot hide is worse than no mobile menu. */
+${navCss('tq')}`;
 
 const NAV =
   skipLink('tq') + navHtml('tq');

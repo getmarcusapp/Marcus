@@ -203,7 +203,6 @@ function build() {
 }
 
 const CSS = `
-${navCss('ab')}
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0f;color:#e8e4dc;font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
 a{color:inherit}
@@ -230,6 +229,9 @@ img{max-width:100%;display:block}
 .ab-app-copy{font-size:16px;color:rgba(232,228,220,.78);max-width:52ch;margin:0 auto 20px}
 .ab-footer{text-align:center;padding:32px 24px 48px;font-size:13px;color:rgba(232,228,220,.45)}
 .ab-footer a{color:rgba(232,228,220,.7)}
-`;
+
+/* Shared chrome last: these override the builder's own nav rules, and a
+   mobile menu that cannot hide is worse than no mobile menu. */
+${navCss('ab')}`;
 
 build();

@@ -792,6 +792,36 @@ function siteNav() {
     fail.push('scripts/site-nav.js: still hides section links on phones instead of putting them in the menu');
   }
 
+  // The shared chrome has to come LAST in each stylesheet. It was injected at
+  // the top, so every builder's own `.xx-nav-right{display:flex}` sat after it
+  // at equal specificity and won, the `display:none` inside the media query
+  // never applied, and the panel was permanently open on every phone with a
+  // toggle that appeared to do nothing.
+  const walk = d => {
+    const out = [];
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const f = path.join(d, e.name);
+      if (e.isDirectory()) out.push(...walk(f));
+      else if (e.name.endsWith('.html')) out.push(f);
+    }
+    return out;
+  };
+  for (const file of walk(path.join(ROOT, 'public'))) {
+    const css = (fs.readFileSync(file, 'utf8').match(/<style>([\s\S]*?)<\/style>/) || [])[1];
+    if (!css) continue;
+    const prefix = (css.match(/\.([a-z]+)-nav-right/) || [])[1];
+    if (!prefix) continue;
+    const mq = css.lastIndexOf('@media (max-width:720px)');
+    if (mq < 0) {
+      fail.push(`${path.relative(ROOT, file)}: no mobile menu rules`);
+      continue;
+    }
+    const bare = [...css.matchAll(new RegExp('(?<![-\\w])\\.' + prefix + '-nav-right\\{display:flex;align-items:center', 'g'))].map(m => m.index);
+    if (bare.length && Math.max(...bare) > mq) {
+      fail.push(`${path.relative(ROOT, file)}: the builder's nav rule comes after the shared chrome, so the mobile menu cannot close`);
+    }
+  }
+
   // The homepage keeps its own landing-page nav, and it has TWO menus: the
   // desktop bar in .nav-links, and a separate #mobile-menu that the hamburger
   // actually opens. Adding a link to the first and not the second is invisible

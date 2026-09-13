@@ -197,7 +197,6 @@ function build() {
 }
 
 const CSS = `
-${navCss('lib')}
 :root{--bg:#080808;--bg-deep:#040404;--border:#252525;--border-mid:#2a2a2a;
 --text-primary:#F0F0F0;--text-secondary:#C0C0C0;--text-muted:#888;--text-dim:#7A7A7A;--accent:#FFCE82;--accent-dim:#B38B5B;
 --display:'Cinzel',Georgia,serif;--body:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;}
@@ -259,6 +258,9 @@ display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20
 .lib-disclosure p{font-size:13.5px;color:var(--text-dim);line-height:1.7;max-width:640px}
 .lib-footer{border-top:1px solid var(--border);margin-top:40px;padding:28px 24px;text-align:center;font-size:13px;color:var(--text-dim)}
 .lib-footer a{color:var(--accent-dim)}
-`;
+
+/* Shared chrome last: these override the builder's own nav rules, and a
+   mobile menu that cannot hide is worse than no mobile menu. */
+${navCss('lib')}`;
 
 build();

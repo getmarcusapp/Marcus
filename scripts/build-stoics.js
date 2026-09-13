@@ -373,7 +373,6 @@ function build() {
 }
 
 const CSS = `
-${navCss('st')}
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0f;color:#e8e4dc;font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:inherit}
@@ -455,6 +454,9 @@ img{max-width:100%;display:block}
   .st-portrait-lg{width:140px;flex:0 0 140px}
   .st-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px}
 }
-`;
+
+/* Shared chrome last: these override the builder's own nav rules, and a
+   mobile menu that cannot hide is worse than no mobile menu. */
+${navCss('st')}`;
 
 build();

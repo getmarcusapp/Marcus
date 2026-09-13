@@ -212,7 +212,6 @@ function renderIndex(records) {
 }
 
 const CSS = `
-${navCss('dm')}
 :root{--bg:#080808;--bg-deep:#040404;--bg-card:#0f0f0f;--border:#252525;--border-mid:#2a2a2a;
 --text-primary:#F0F0F0;--text-secondary:#C0C0C0;--text-muted:#888;--text-dim:#7A7A7A;--accent:#FFCE82;--accent-dim:#B38B5B;
 --display:'Cinzel',Georgia,serif;--body:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;}
@@ -289,7 +288,10 @@ filter:drop-shadow(0 0 40px rgba(255,206,130,.18))}
 .dm-embed{max-width:420px;margin:0 auto;min-height:64px;display:flex;justify-content:center}
 .dm-embed iframe,.dm-embed>div{margin:0 auto!important;max-width:100%}
 @media(max-width:500px){.dm-form{flex-direction:column}.dm-submit{padding:14px}}
-`;
+
+/* Shared chrome last: these override the builder's own nav rules, and a
+   mobile menu that cannot hide is worse than no mobile menu. */
+${navCss('dm')}`;
 
 // Article slugs from content/articles/*.md frontmatter.
 // { slug, lastmod } per article. The date is the article's own `modified` (or
