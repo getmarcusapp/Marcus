@@ -666,38 +666,56 @@ function polish() {
 // and an uncredited image is the same claim in another medium.
 function artwork() {
   const fail = [];
-  const { BY_SLUG, artFor } = require(path.join(ROOT, 'scripts', 'site-artwork.js'));
+  const { ART, BY_SLUG, GRIDS, artFor } = require(path.join(ROOT, 'scripts', 'site-artwork.js'));
+
+  // Every figcaption on the page, with tags stripped, so a labelled grid
+  // caption (<b>Wisdom</b>Caravaggio, ...) reads the same as a plain one.
+  const captions = html => (html.match(/<figcaption>[\s\S]*?<\/figcaption>/g) || [])
+    .map(c => c.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+
+  const expected = [];                         // [slug, artKey]
   for (const [slug, key] of Object.entries(BY_SLUG)) {
-    const a = artFor(slug);
-    if (!a || !a.file) {
-      fail.push(`scripts/site-artwork.js: ${slug} maps to ${key}, which has no entry`);
-      continue;
-    }
-    if (!fs.existsSync(path.join(ROOT, 'public', 'img', 'art', a.file))) {
-      fail.push(`public/img/art/${a.file} is missing, but ${slug} renders it`);
-    }
+    if (GRIDS[slug]) continue;                 // grids are checked below
+    expected.push([slug, key]);
+  }
+  for (const [slug, rows] of Object.entries(GRIDS)) {
+    for (const [, key] of rows) expected.push([slug, key]);
+  }
+
+  const bySlug = {};
+  for (const [slug, key] of expected) (bySlug[slug] = bySlug[slug] || []).push(key);
+
+  for (const [slug, keys] of Object.entries(bySlug)) {
     const page = path.join(ROOT, 'public', slug + '.html');
     if (!fs.existsSync(page)) {
       fail.push(`scripts/site-artwork.js: ${slug} has artwork but no page`);
       continue;
     }
     const html = fs.readFileSync(page, 'utf8');
-    if (!html.includes('/img/art/' + a.file)) {
-      fail.push(`public/${slug}.html: the artwork is mapped but not rendered`);
-    }
-    // The credit must be VISIBLE, not just in the alt text. A first version
-    // looked for the artist anywhere in the page and passed with the
-    // figcaption deleted, because the same string sits in alt.
-    const cap = (html.match(/<figcaption>([^<]*)<\/figcaption>/) || [])[1] || '';
-    if (!cap.includes(a.artist)) {
-      fail.push(`public/${slug}.html: renders a painting with no visible credit to ${a.artist}`);
+    const caps = captions(html);
+    for (const key of keys) {
+      const a = ART[key];
+      if (!a) { fail.push(`scripts/site-artwork.js: ${slug} maps to ${key}, which has no entry`); continue; }
+      if (!fs.existsSync(path.join(ROOT, 'public', 'img', 'art', a.file))) {
+        fail.push(`public/img/art/${a.file} is missing, but ${slug} renders it`);
+      }
+      if (!html.includes('/img/art/' + a.file)) {
+        fail.push(`public/${slug}.html: ${key} is mapped but not rendered`);
+      }
+      // The credit must be VISIBLE, not only in alt text. A first version
+      // looked for the artist anywhere on the page and passed with the caption
+      // deleted, because the same string sits in alt.
+      if (!caps.some(c => c.includes(a.artist))) {
+        fail.push(`public/${slug}.html: renders ${key} with no visible credit to ${a.artist}`);
+      }
     }
     if (!/loading="lazy"/.test(html)) {
       fail.push(`public/${slug}.html: the artwork is not lazy-loaded`);
     }
   }
-  // Nothing in the folder should be unused: these are 100KB each.
-  const used = new Set(Object.keys(BY_SLUG).map(s2 => artFor(s2).file));
+
+  // Nothing in the folder should be unused: these are ~100KB each.
+  const used = new Set(expected.map(([, key]) => ART[key] && ART[key].file).filter(Boolean));
   const dir = path.join(ROOT, 'public', 'img', 'art');
   if (fs.existsSync(dir)) {
     for (const f of fs.readdirSync(dir)) {
