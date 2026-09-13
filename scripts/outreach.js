@@ -44,6 +44,23 @@ const det = require('./find-misquotes');
 
 const ROOT = path.join(__dirname, '..');
 const STATE_PATH = path.join(ROOT, 'outreach-state.json');
+
+// A search key read from a gitignored file, so it does not have to live in a
+// shell profile and cannot be committed. Shell exports do not survive between
+// tool calls either, which makes a file the practical option. Real env vars
+// win, so CI can still pass one in.
+(function loadEnvLocal() {
+  try {
+    const txt = fs.readFileSync(path.join(ROOT, '.env.local'), 'utf8');
+    for (const line of txt.split('\n')) {
+      const m = line.match(/^\s*(?:export\s+)?([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+      if (!m) continue;
+      const key = m[1];
+      const val = m[2].replace(/^['"]|['"]$/g, '').trim();
+      if (val && !process.env[key]) process.env[key] = val;
+    }
+  } catch { /* no .env.local, which is fine */ }
+})();
 const UA = 'MarcusQuoteChecker/1.0 (+https://getmarcus.app/check-a-stoic-quote)';
 const PAUSE_MS = 1500;          // between requests to the same host, and generally
 const CONTACT_PATHS = ['/contact', '/contact-us', '/about', '/about-us', '/contact.html', '/about.html'];

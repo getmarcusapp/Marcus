@@ -48,7 +48,6 @@ yarn-error.*
 /ios
 /android
 .env
-.env.local
 
 # generated newsletter drafts (disk-fallback when Beehiiv API is unavailable)
 scripts/out/
@@ -56,3 +55,6 @@ scripts/out/
 # Outreach pipeline state: holds other people's contact addresses
 outreach-state.json
 outreach.md
+
+# Local secrets (search API keys). Never committed.
+.env.local

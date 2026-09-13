@@ -868,10 +868,24 @@ function outreachPipeline() {
     if (pat.test(src)) fail.push(`scripts/outreach.js: ${why}; the sending stays human`);
   }
 
-  // 2. Other people's addresses never enter the repo.
-  const ignore = read('.gitignore');
+  const ignoreLines = () => read('.gitignore').split('\n').map(l => l.trim());
+  // 2. A search key must be loadable from a gitignored file, and that file must
+  //     actually be ignored. The example file must never carry a real key.
+  for (const f of ['.env.local']) {
+    if (!ignoreLines().some(l => l === f)) fail.push(`.gitignore: ${f} is not ignored, and it holds an API key`);
+  }
+  if (fs.existsSync(path.join(ROOT, '.env.local.example'))) {
+    const ex = read('.env.local.example');
+    // [ \t]* rather than \s*: \s crosses the newline, so a blank KEY= matched
+    // the '#' starting the next line and the example flagged itself.
+    for (const m of ex.matchAll(/^[ \t]*(?:export[ \t]+)?([A-Z0-9_]*KEY)[ \t]*=[ \t]*(\S+)/gm)) {
+      fail.push(`.env.local.example: ${m[1]} has a value in it; the example file must be blank`);
+    }
+  }
+
+  // 2b. Other people's addresses never enter the repo.
   for (const f of ['outreach-state.json', 'outreach.md']) {
-    if (!ignore.split('\n').some(l => l.trim() === f)) {
+    if (!ignoreLines().some(l => l === f)) {
       fail.push(`.gitignore: ${f} is not ignored, and it holds other people's contact addresses`);
     }
   }
