@@ -200,7 +200,11 @@ const JUNK_EMAIL = [
 const isJunk = a => JUNK_EMAIL.some(r => r.test(a));
 
 async function findContact(origin) {
-  const out = { emails: [], form: null, checked: [] };
+  // `page` is the contact page that exists but gave up nothing. Plenty of
+  // contact forms are rendered client-side, so a static fetch sees a 125KB
+  // document with no <form> in it. "No contact found" is true and useless;
+  // "there is a contact page, open it" is what you can act on.
+  const out = { emails: [], form: null, page: null, checked: [] };
   for (const p of CONTACT_PATHS) {
     const url = origin + p;
     if (!(await allowed(url))) continue;
@@ -222,6 +226,7 @@ async function findContact(origin) {
       : /^(info|support|enquir|inquir|office)@/i.test(a2) ? 1 : 2);
     out.emails.sort((x, y) => rank(x) - rank(y));
     if (!out.form && /<form[\s\S]{0,600}?(contact|message|enquir)/i.test(res.body)) out.form = url;
+    if (!out.page && /\/contact/.test(p)) out.page = url;
     if (out.emails.length) break;
   }
   return out;
@@ -314,12 +319,13 @@ async function run(state, opts) {
       weak: targets.some(t => t.weak),
       emails: contact.emails.slice(0, 3),
       form: contact.form,
+      page: contact.page,
       drafts: targets.map(t => draft(t, url)),
       sent: false,
     };
     saveState(state);
     process.stderr.write(targets.length + ' target(s), ' +
-      (contact.emails[0] || (contact.form ? 'form' : 'no contact found')) + '\n');
+      (contact.emails[0] || (contact.form ? 'form' : contact.page ? 'contact page, open by hand' : 'no contact found')) + '\n');
   }
   return state;
 }
@@ -327,8 +333,9 @@ async function run(state, opts) {
 // ── report ──────────────────────────────────────────────────────────────────
 function report(state) {
   const rows = Object.entries(state.sites).filter(([, s]) => s.targets > 0);
-  const ready = rows.filter(([, s]) => !s.sent && (s.emails.length || s.form));
-  const noContact = rows.filter(([, s]) => !s.sent && !s.emails.length && !s.form);
+  const reachable = s => s.emails.length || s.form || s.page;
+  const ready = rows.filter(([, s]) => !s.sent && reachable(s));
+  const noContact = rows.filter(([, s]) => !s.sent && !reachable(s));
   const done = rows.filter(([, s]) => s.sent);
 
   const out = ['# Outreach', '',
@@ -339,7 +346,9 @@ function report(state) {
     out.push('## Ready', '');
     for (const [url, s] of ready) {
       out.push('### ' + url);
-      out.push('- Contact: ' + (s.emails.join(', ') || 'form: ' + s.form));
+      out.push('- Contact: ' + (s.emails.join(', ')
+        || (s.form ? 'form at ' + s.form
+        : 'contact page at ' + s.page + ' (address is rendered by JavaScript, open it)')));
       out.push('- Entries: ' + s.entries.join(', ') + (s.weak ? '  **short phrase, confirm by eye**' : ''));
       out.push('', '```', s.drafts.join('\n\n---\n\n'), '```', '');
       out.push('Mark done:  `node scripts/outreach.js sent ' + url + '`', '');
