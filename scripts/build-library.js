@@ -16,7 +16,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
-const { navHtml } = require('./site-nav');
+const { navHtml, navCss } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -199,6 +199,7 @@ function build() {
 }
 
 const CSS = `
+${navCss('lib')}
 :root{--bg:#080808;--bg-deep:#040404;--border:#252525;--border-mid:#2a2a2a;
 --text-primary:#F0F0F0;--text-secondary:#C0C0C0;--text-muted:#888;--text-dim:#7A7A7A;--accent:#FFCE82;--accent-dim:#B38B5B;
 --display:'Cinzel',Georgia,serif;--body:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;}

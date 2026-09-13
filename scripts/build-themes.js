@@ -30,7 +30,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
-const { navHtml } = require('./site-nav');
+const { navHtml, navCss } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -201,6 +201,7 @@ const PAGES = [
 ];
 
 const CSS = `
+${navCss('tq')}
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0f;color:#e8e4dc;font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:#c9a961}

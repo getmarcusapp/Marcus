@@ -30,10 +30,20 @@ const ITEMS = [
 
 const CTA = ['/', 'Get the app →'];
 
+// Four items plus a wordmark plus the CTA do not fit a phone. Measured on the
+// built pages: the bar is 74px at 768px wide and 126px at 390px, because it
+// wraps to two lines, which is 15% of an iPhone viewport spent on navigation
+// before any content. Below 720px the two section links are hidden and the
+// footer carries them, which is exactly where /learn was before this change.
+function navCss(prefix) {
+  return '@media (max-width:720px){.' + prefix + '-nav-secondary{display:none}}';
+}
+
 function navHtml(prefix, current) {
   const links = ITEMS
     .filter(([href]) => href !== current)
-    .map(([href, label]) => '<a class="' + prefix + '-nav-link" href="' + href + '">' + label + '</a>')
+    .map(([href, label], i) => '<a class="' + prefix + '-nav-link' +
+      (i > 0 ? ' ' + prefix + '-nav-secondary' : '') + '" href="' + href + '">' + label + '</a>')
     .join('');
   return '<nav class="' + prefix + '-nav">' +
     '<a class="' + prefix + '-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="36" height="36"><span>Marcus</span></a>' +
@@ -42,4 +52,4 @@ function navHtml(prefix, current) {
     '</div></nav>';
 }
 
-module.exports = { ITEMS, CTA, navHtml };
+module.exports = { ITEMS, CTA, navHtml, navCss };
