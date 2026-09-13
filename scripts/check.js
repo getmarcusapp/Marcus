@@ -874,6 +874,15 @@ function outreachPipeline() {
   for (const f of ['.env.local']) {
     if (!ignoreLines().some(l => l === f)) fail.push(`.gitignore: ${f} is not ignored, and it holds an API key`);
   }
+  // The example must not read as "copy me over .env.local": that file already
+  // holds RevenueCat, Beehiiv and Expo keys, and cp would destroy them. This
+  // check exists because I told Gio to run exactly that command.
+  if (fs.existsSync(path.join(ROOT, '.env.local.example'))) {
+    const ex0 = read('.env.local.example');
+    if (/^\s*#\s*Copy to \.env\.local/im.test(ex0) || !/APPEND/i.test(ex0)) {
+      fail.push('.env.local.example: tells the reader to copy over .env.local, which would destroy the keys already in it');
+    }
+  }
   if (fs.existsSync(path.join(ROOT, '.env.local.example'))) {
     const ex = read('.env.local.example');
     // [ \t]* rather than \s*: \s crosses the newline, so a blank KEY= matched
