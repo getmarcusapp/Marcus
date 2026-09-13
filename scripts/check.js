@@ -417,6 +417,105 @@ function poolDuplicates() {
   return fail;
 }
 
+// poolDuplicates covers constants/quotes.js. The daily reading corpus in
+// constants/stoicQuotes.js had never been checked at all, and carried two
+// passages twice: Enchiridion 5 in two translations, and Seneca Letters 2 with
+// and without its second sentence. On a themed quote page both copies land in
+// the same list, one above the other.
+function corpusDuplicates() {
+  const fail = [];
+  const { STOIC_QUOTES } = evalExports('constants/stoicQuotes.js', ['STOIC_QUOTES']);
+  const norm = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+  const ids = new Set();
+  for (const q of STOIC_QUOTES) {
+    if (ids.has(q.id)) fail.push(`constants/stoicQuotes.js: duplicate id ${q.id}`);
+    ids.add(q.id);
+  }
+
+  // Same author, work and citation, with one quote a prefix of the other, is
+  // the same passage twice rather than two passages from one chapter.
+  const by = {};
+  for (const q of STOIC_QUOTES) {
+    const k = [q.author, q.work, q.source].join('|');
+    (by[k] = by[k] || []).push(q);
+  }
+  for (const group of Object.values(by)) {
+    for (let i = 0; i < group.length; i++) {
+      for (let j = i + 1; j < group.length; j++) {
+        const a = norm(group[i].quote), b = norm(group[j].quote);
+        const same = a === b || (a.length > 40 && b.startsWith(a.slice(0, 40))) || (b.length > 40 && a.startsWith(b.slice(0, 40)));
+        if (same) {
+          fail.push(`constants/stoicQuotes.js: ${group[i].id} and ${group[j].id} are the same passage (${group[i].author}, ${group[i].work} ${group[i].source})`);
+        }
+      }
+    }
+  }
+
+  // The work field must not contradict the id, which is how a quote labelled
+  // Enchiridion 5 came to carry the id epictetus-discourses-2-5-*.
+  for (const q of STOIC_QUOTES) {
+    const work = norm(q.work).split(' ')[0];
+    if (work && /^(enchiridion|discourses|meditations)$/.test(work) && q.id.includes('-') && !norm(q.id).includes(work)) {
+      const other = ['enchiridion', 'discourses', 'meditations'].find(w => w !== work && norm(q.id).includes(w));
+      if (other) fail.push(`constants/stoicQuotes.js: ${q.id} says ${other} but its work is ${q.work}`);
+    }
+  }
+
+  return fail;
+}
+
+// The themed quote pages are generated from the corpus by hand-picked id, so
+// the two ways they can rot are a page referencing an id that has been removed
+// (the builder exits on that, but only if it is run) and a page quietly going
+// thin or duplicating another. The whole argument for these pages is that every
+// line carries chapter and verse; a page of five, four of which are on another
+// page, is the thin-content pattern this site has twice declined.
+function themePages() {
+  const fail = [];
+  const { PAGES } = require(path.join(ROOT, 'scripts', 'build-themes.js'));
+  const { STOIC_QUOTES } = evalExports('constants/stoicQuotes.js', ['STOIC_QUOTES']);
+  const byId = new Map(STOIC_QUOTES.map(q => [q.id, q]));
+
+  const seen = new Map();
+  for (const page of PAGES) {
+    for (const id of page.ids) {
+      if (!byId.has(id)) {
+        fail.push(`scripts/build-themes.js: /stoic-quotes/${page.slug} references ${id}, which is not in the corpus`);
+        continue;
+      }
+      seen.set(id, (seen.get(id) || 0) + 1);
+      // Every quote on these pages must be citable. That is the entire pitch.
+      const q = byId.get(id);
+      if (!q.source) fail.push(`constants/stoicQuotes.js: ${id} has no source, so it cannot appear on a sourced-quotes page`);
+    }
+    if (page.ids.length < 7) {
+      fail.push(`scripts/build-themes.js: /stoic-quotes/${page.slug} has only ${page.ids.length} passages`);
+    }
+    if (new Set(page.ids).size !== page.ids.length) {
+      fail.push(`scripts/build-themes.js: /stoic-quotes/${page.slug} lists the same passage twice`);
+    }
+    for (const built of [path.join(ROOT, 'public', 'stoic-quotes', page.slug + '.html')]) {
+      if (!fs.existsSync(built)) fail.push(`public/stoic-quotes/${page.slug}.html has not been built`);
+    }
+  }
+
+  // A passage on three pages means the pages are not really distinct.
+  for (const [id, n] of seen) {
+    if (n > 2) fail.push(`scripts/build-themes.js: ${id} appears on ${n} theme pages`);
+  }
+
+  // And the sitemap has to know about them.
+  const xml = read('public/sitemap.xml');
+  for (const page of PAGES) {
+    if (!xml.includes('/stoic-quotes/' + page.slug)) {
+      fail.push(`public/sitemap.xml: /stoic-quotes/${page.slug} is missing`);
+    }
+  }
+
+  return fail;
+}
+
 function quoteDuplicates() {
   const fail = [];
   // Every rotating group is optional now. Quote surfaces have been removed
@@ -1000,6 +1099,8 @@ const CHECKS = [
   ['no duplicate quotes across surfaces', quoteDuplicates],
   ['stoic bookIds resolve to real books', stoicBooks],
   ['no duplicate passages in the daily pool', poolDuplicates],
+  ['no duplicate passages in the reading corpus', corpusDuplicates],
+  ['the themed quote pages are sourced and distinct', themePages],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],

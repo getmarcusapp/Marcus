@@ -171,7 +171,7 @@ export const STOIC_QUOTES = [
   },
   {
     id: 'epictetus-enchiridion-5-disturbed',
-    quote: "Men are disturbed not by the things which happen, but by the opinions about the things.",
+    quote: "It is not events that disturb people, it is their judgments concerning them.",
     author: 'Epictetus',
     work: 'Enchiridion',
     source: '5',
@@ -339,15 +339,6 @@ export const STOIC_QUOTES = [
     source: 'Letter 101',
     virtues: ['wisdom', 'courage'],
     themes: ['mortality', 'evening'],
-  },
-  {
-    id: 'seneca-tranquillity-poor',
-    quote: "It is not the man who has too little, but the man who craves more, that is poor.",
-    author: 'Seneca',
-    work: 'Letters to Lucilius',
-    source: 'Letter 2',
-    virtues: ['moderation'],
-    themes: ['contentment', 'wealth'],
   },
   {
     id: 'seneca-letter-26-rehearse-death',
@@ -779,15 +770,6 @@ export const STOIC_QUOTES = [
     source: '26',
     virtues: ['wisdom', 'moderation'],
     themes: ['equanimity', 'perception'],
-  },
-  {
-    id: 'epictetus-discourses-2-5-things-themselves',
-    quote: "It is not events that disturb people, it is their judgments concerning them.",
-    author: 'Epictetus',
-    work: 'Enchiridion',
-    source: '5',
-    virtues: ['wisdom', 'moderation'],
-    themes: ['perception', 'control'],
   },
   {
     id: 'epictetus-discourses-1-15-progress',

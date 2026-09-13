@@ -393,6 +393,13 @@ function buildSitemap(records) {
   }
   add(SITE + '/stoics', stoicsDate, 'monthly', '0.8');
   add(SITE + '/misattributed-stoic-quotes', newestDate('constants/misattributions.js', 'scripts/build-attribution.js'), 'monthly', '0.9');
+  // Themed quote pages, read from the builder rather than listed here, so
+  // adding one cannot leave it out of the sitemap.
+  const themesDate = newestDate('constants/stoicQuotes.js', 'scripts/build-themes.js');
+  add(SITE + '/stoic-quotes', themesDate, 'monthly', '0.8');
+  for (const t of require('./build-themes').PAGES) {
+    add(SITE + '/stoic-quotes/' + t.slug, themesDate, 'monthly', '0.8');
+  }
   // The twelve figure pages, read out of constants/stoics.js rather than listed
   // here, so adding a Stoic cannot silently leave its page unindexed. This is
   // also why the Stoics URLs have to live in THIS file: the sitemap is rebuilt

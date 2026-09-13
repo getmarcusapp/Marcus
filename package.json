@@ -9,7 +9,8 @@
     "web": "expo start --web",
     "check": "node scripts/check.js",
     "setup:hooks": "git config core.hooksPath scripts/hooks",
-    "indexnow": "node scripts/indexnow.js"
+    "indexnow": "node scripts/indexnow.js",
+    "build:themes": "node scripts/build-themes.js"
   },
   "dependencies": {
     "@aptabase/react-native": "^0.4.0",
