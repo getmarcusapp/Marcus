@@ -792,11 +792,25 @@ function siteNav() {
     fail.push('scripts/site-nav.js: still hides section links on phones instead of putting them in the menu');
   }
 
-  // The homepage keeps its own landing-page nav, but must offer a route in.
+  // The homepage keeps its own landing-page nav, and it has TWO menus: the
+  // desktop bar in .nav-links, and a separate #mobile-menu that the hamburger
+  // actually opens. Adding a link to the first and not the second is invisible
+  // on desktop and wrong on every phone, which is exactly what happened.
   const home = read('public/index.html');
-  const navBlock = (home.match(/<div class="nav-links">[\s\S]*?<\/div>/) || [''])[0];
-  if (!navBlock.includes('href="/stoic-quotes"')) {
-    fail.push('public/index.html: the header nav has no link into the quotes section');
+  for (const [label, pat] of [
+    ['desktop nav', /<div class="nav-links">[\s\S]*?<\/div>/],
+    ['mobile menu', /<div[^>]*id="mobile-menu"[\s\S]*?<\/div>/],
+  ]) {
+    const block = (home.match(pat) || [''])[0];
+    if (!block) {
+      fail.push(`public/index.html: could not find the ${label}`);
+      continue;
+    }
+    for (const href of ['/learn', '/stoic-quotes']) {
+      if (!block.includes('href="' + href + '"')) {
+        fail.push(`public/index.html: the ${label} has no link to ${href}`);
+      }
+    }
   }
 
   return fail;
