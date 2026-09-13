@@ -23,6 +23,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { footerHtml } = require('./site-footer');
+const { navHtml } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -185,12 +186,7 @@ function head(opts) {
 }
 
 const NAV =
-  '<nav class="st-nav">' +
-  '<a class="st-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
-  '<div class="st-nav-right">' +
-  '<a class="st-nav-link" href="/learn">Learn</a>' +
-  '<a class="st-nav-cta" href="/">Get the app →</a>' +
-  '</div></nav>';
+  navHtml('st');
 
 const FOOTER =
   footerHtml('st');

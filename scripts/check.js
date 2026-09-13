@@ -589,6 +589,64 @@ function quoteChecker() {
 // and /stoic-quotes shipped reachable from exactly one page on the site, so a
 // reader could not find them and a crawler had almost no reason to. Pages
 // nobody links to are pages nobody reads, however good they are.
+function siteNav() {
+  const fail = [];
+  const { ITEMS } = require(path.join(ROOT, 'scripts', 'site-nav.js'));
+
+  // Match the HEADER nav only. A first pass looked for any `<nav class="`,
+  // which flagged the article pager, the Stoic pager and the library jump
+  // links: three legitimate navs that have nothing to do with this.
+  const BUILDERS = {
+    articles: 'ar', attribution: 'mq', learn: 'ln', library: 'lib', about: 'ab',
+    stoics: 'st', themes: 'tq', 'quote-checker': 'qc', archive: 'dm',
+  };
+  for (const [b, prefix] of Object.entries(BUILDERS)) {
+    const src = read('scripts/build-' + b + '.js');
+    if (new RegExp('<nav class="' + prefix + '-nav"').test(src)) {
+      fail.push(`scripts/build-${b}.js: still hand-writes its header nav instead of calling navHtml`);
+    }
+    if (!/navHtml\(/.test(src)) {
+      fail.push(`scripts/build-${b}.js: does not use the shared nav`);
+    }
+  }
+
+  for (const [href] of ITEMS) {
+    const rel = href.replace(/^\//, '');
+    if (!fs.existsSync(path.join(ROOT, 'public', rel + '.html')) &&
+        !fs.existsSync(path.join(ROOT, 'public', rel, 'index.html'))) {
+      fail.push(`scripts/site-nav.js: links to ${href}, which is not built`);
+    }
+  }
+
+  // A child page needs the section link more than the hub does: it is the way
+  // back up. Omitting self-links is right for the footer and wrong here.
+  for (const [page, section] of [['public/stoic-quotes/death.html', '/stoic-quotes'],
+                                 ['public/stoics/seneca.html', '/stoics']]) {
+    const nav = (read(page).match(/<nav[\s\S]*?<\/nav>/) || [''])[0];
+    if (!nav.includes('href="' + section + '"')) {
+      fail.push(`${page}: its nav has no link back up to ${section}`);
+    }
+  }
+
+  // /stoic-quotes is the hub for the whole cluster, not only the themed pages.
+  // It shipped with no link at all to the checker.
+  const hub = read('public/stoic-quotes/index.html').replace(/<(nav|footer)[\s\S]*?<\/\1>/g, '');
+  for (const href of ['/check-a-stoic-quote', '/misattributed-stoic-quotes']) {
+    if (!hub.includes('href="' + href + '"')) {
+      fail.push(`public/stoic-quotes/index.html: the hub does not link to ${href}`);
+    }
+  }
+
+  // The homepage keeps its own landing-page nav, but must offer a route in.
+  const home = read('public/index.html');
+  const navBlock = (home.match(/<div class="nav-links">[\s\S]*?<\/div>/) || [''])[0];
+  if (!navBlock.includes('href="/stoic-quotes"')) {
+    fail.push('public/index.html: the header nav has no link into the quotes section');
+  }
+
+  return fail;
+}
+
 function siteFooter() {
   const fail = [];
   const { LINKS } = require(path.join(ROOT, 'scripts', 'site-footer.js'));
@@ -1230,6 +1288,7 @@ const CHECKS = [
   ['the themed quote pages are sourced and distinct', themePages],
   ['the quote checker returns the right verdict', quoteChecker],
   ['every page can be reached from the footer', siteFooter],
+  ['the header nav is shared and complete', siteNav],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],

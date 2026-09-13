@@ -13,6 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
+const { navHtml } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const EDITIONS_DIR = path.join(ROOT, 'content', 'editions');
@@ -95,13 +96,7 @@ function pageHead(title, description, canonical, jsonLd, extraOg, robots) {
 
 // Fixed nav matching the main site: skull-gold wordmark + gold pill CTA.
 function nav() {
-  return '<nav class="dm-nav">' +
-    '<a class="dm-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
-    '<div class="dm-nav-right">' +
-    '<a class="dm-nav-link" href="/meditations">Daily Meditations</a>' +
-    '<a class="dm-nav-link" href="/library">Library</a>' +
-    '<a class="dm-nav-cta" href="/">Get the app →</a>' +
-    '</div></nav>';
+  return navHtml('dm');
 }
 
 function subscribeBlock() {

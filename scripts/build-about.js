@@ -30,6 +30,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
+const { navHtml } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -113,12 +114,7 @@ function build() {
     '<script type="application/ld+json">' + JSON.stringify(jsonLd) + '</script>' +
     '</head><body>' +
 
-    '<nav class="ab-nav">' +
-    '<a class="ab-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
-    '<div class="ab-nav-right">' +
-    '<a class="ab-nav-link" href="/learn">Learn</a>' +
-    '<a class="ab-nav-cta" href="/">Get the app →</a>' +
-    '</div></nav>' +
+    navHtml('ab') +
 
     '<main class="ab-main">' +
     '<header class="ab-head">' +

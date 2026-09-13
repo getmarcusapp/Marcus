@@ -30,6 +30,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
+const { navHtml } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -221,6 +222,7 @@ img{max-width:100%;display:block}
 .tq-text{font-size:20px;line-height:1.55;margin:0 0 12px;color:#f3efe7}
 .tq-cite{font-size:14px;color:rgba(232,228,220,.6);margin:0;font-style:normal}
 .tq-cite b{color:rgba(232,228,220,.85);font-weight:600}
+.tq-h2{font-family:Cinzel,Georgia,serif;font-size:22px;margin:44px 0 14px}
 .tq-list{list-style:none;padding:0;margin:0;display:grid;gap:14px}
 .tq-card{border:.5px solid rgba(232,228,220,.16);border-radius:12px;padding:18px 20px}
 .tq-card a{text-decoration:none;font-size:17px;font-family:Cinzel,Georgia,serif}
@@ -232,12 +234,7 @@ img{max-width:100%;display:block}
 `;
 
 const NAV =
-  '<nav class="tq-nav">' +
-  '<a class="tq-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="36" height="36"><span>Marcus</span></a>' +
-  '<div class="tq-nav-right">' +
-  '<a class="tq-nav-link" href="/learn">Learn</a>' +
-  '<a class="tq-nav-cta" href="/">Get the app →</a>' +
-  '</div></nav>';
+  navHtml('tq');
 
 const FOOTER = footerHtml('tq', '/stoic-quotes');
 
@@ -329,8 +326,8 @@ function build() {
     '<header class="tq-hero"><div class="tq-wrap">' +
     '<p class="tq-eyebrow">Sourced quotes</p>' +
     '<h1 class="tq-title">Stoic Quotes, With Sources</h1>' +
-    '<p class="tq-intro">Every passage below is cited to a book and a chapter, because most of what circulates as Stoic wisdom is not, ' +
-    'and a good deal of it is not Stoic. These are drawn from the same checked corpus the app reads from.</p>' +
+    '<p class="tq-intro">Every passage here is cited to a book and a chapter, because most of what circulates as Stoic wisdom is not, ' +
+    'and a good deal of it is not Stoic. Browse them by theme, check a quote of your own, or read the ones we traced to somebody else.</p>' +
     '</div></header>' +
     '<main class="tq-main"><div class="tq-wrap">' +
     '<p class="tq-note">We audited our own quote library one passage at a time and removed the ones that were not what they claimed to be. ' +
@@ -338,6 +335,18 @@ function build() {
     '<ul class="tq-list">' +
     PAGES.map(p => '<li class="tq-card"><a href="/stoic-quotes/' + p.slug + '">' + esc(p.title) + '</a>' +
       '<p>' + esc(p.blurb) + '</p></li>').join('') +
+    '</ul>' +
+    // This is the hub for the whole quotes cluster, not just the themed pages.
+    // It shipped without a single link to the checker, which is the most useful
+    // thing in the section.
+    '<h2 class="tq-h2">Checking a quote of your own</h2>' +
+    '<ul class="tq-list">' +
+    '<li class="tq-card"><a href="/check-a-stoic-quote">Check a Stoic quote</a>' +
+    '<p>Paste a line attributed to Marcus Aurelius, Seneca or Epictetus and find out whether it is theirs. ' +
+    'Runs in your browser, nothing is sent anywhere.</p></li>' +
+    '<li class="tq-card"><a href="/misattributed-stoic-quotes">The Stoic quotes that are not Stoic</a>' +
+    '<p>The quotations we traced to someone else: a screenwriter, a songwriter, Voltaire, Kant, a Victorian minister. ' +
+    'Found by auditing our own library.</p></li>' +
     '</ul>' + APP_CTA +
     '</div></main>';
   fs.writeFileSync(path.join(OUT_DIR, 'index.html'),

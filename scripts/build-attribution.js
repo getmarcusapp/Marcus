@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
+const { navHtml } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -133,12 +134,7 @@ function build() {
     '<style>' + CSS + '</style>' +
     '<script type="application/ld+json">' + JSON.stringify(jsonLd(MISATTRIBUTIONS)) + '</script>' +
     '</head><body>' +
-    '<nav class="mq-nav">' +
-    '<a class="mq-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
-    '<div class="mq-nav-right">' +
-    '<a class="mq-nav-link" href="/learn">Learn</a>' +
-    '<a class="mq-nav-cta" href="/">Get the app →</a>' +
-    '</div></nav>' +
+    navHtml('mq') +
 
     '<header class="mq-hero"><div class="mq-hero-inner">' +
     '<p class="mq-eyebrow">Attribution</p>' +

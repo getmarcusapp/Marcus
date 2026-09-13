@@ -16,6 +16,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
+const { navHtml } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -171,12 +172,7 @@ function build() {
     '<style>' + CSS + '</style>' +
     '<script type="application/ld+json">' + JSON.stringify(jsonLd(READING_LIST)) + '</script>' +
     '</head><body>' +
-    '<nav class="lib-nav">' +
-    '<a class="lib-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="40" height="40"><span>Marcus</span></a>' +
-    '<div class="lib-nav-right">' +
-    '<a class="lib-nav-link" href="/learn">Learn</a>' +
-    '<a class="lib-nav-cta" href="/">Get the app →</a>' +
-    '</div></nav>' +
+    navHtml('lib') +
     '<header class="lib-hero"><div class="lib-hero-inner">' +
     '<img class="lib-hero-skull" src="/skull-gold.png" alt="Marcus" width="120" height="120">' +
     '<p class="lib-eyebrow">The Library</p>' +

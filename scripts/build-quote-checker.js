@@ -25,6 +25,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
+const { navHtml } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -236,12 +237,7 @@ const CLIENT = `
 `;
 
 const NAV =
-  '<nav class="qc-nav">' +
-  '<a class="qc-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="36" height="36"><span>Marcus</span></a>' +
-  '<div class="qc-nav-right">' +
-  '<a class="qc-nav-link" href="/learn">Learn</a>' +
-  '<a class="qc-nav-cta" href="/">Get the app →</a>' +
-  '</div></nav>';
+  navHtml('qc');
 
 const FOOTER = footerHtml('qc', '/check-a-stoic-quote');
 
