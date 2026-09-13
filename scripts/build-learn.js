@@ -36,6 +36,16 @@ function esc(s) {
 // ships. The build prints what is still pending.
 const PILLARS = [
   {
+    key: 'start',
+    title: 'Start here',
+    intro: 'Three pieces that carry most of the weight. If you read nothing else, read these.',
+    pages: [
+      { href: '/how-to-keep-a-stoic-journal', title: 'How to keep a Stoic journal', blurb: 'The most famous book in Stoicism is a private notebook. What made it a Stoic one, and how to keep your own.', published: true },
+      { href: '/dichotomy-of-control', title: 'The dichotomy of control', blurb: 'The most quoted idea in Stoicism, and the most consistently flattened in the retelling.', published: true },
+      { href: '/four-stoic-virtues', title: 'The four Stoic virtues', blurb: 'Wisdom, courage, justice, temperance. Three of the four are about acting, and one is entirely about other people.', published: true },
+    ],
+  },
+  {
     key: 'attribution',
     title: 'Sources and attribution',
     intro: 'A great deal of what circulates as Stoic wisdom is not. This is the part of the site that checks.',
@@ -43,6 +53,7 @@ const PILLARS = [
       { href: '/misattributed-stoic-quotes', title: 'The Stoic quotes that are not Stoic', blurb: 'Twenty-six quotations credited to Marcus Aurelius, Seneca, Epictetus and others that belong to a screenwriter, a songwriter, Voltaire and Kant. Found by auditing our own library.', published: true },
       { href: '/check-a-stoic-quote', title: 'Check a Stoic quote', blurb: 'Paste a line attributed to Marcus Aurelius, Seneca or Epictetus and find out whether it is theirs. Free, runs in your browser, nothing is sent anywhere.', published: true },
       { href: '/stoic-quotes', title: 'Stoic quotes, with sources', blurb: 'Six themed collections \u2014 death, perception, anxiety, discipline, character, other people \u2014 every passage cited to a book and a chapter.', published: true },
+      { href: '/did-marcus-aurelius-say-echoes-in-eternity', title: 'Did Marcus Aurelius say "what we do in life echoes in eternity"?', blurb: 'No. It is from Gladiator, and Marcus argued the opposite: that being remembered is worthless and oblivion comes fast.', published: true },
       { href: '/did-aristotle-say-we-are-what-we-repeatedly-do', title: 'Did Aristotle say "we are what we repeatedly do"?', blurb: 'No. The sentence is Will Durant\u2019s, from 1926. Unusually for a misquote it is a good summary of Aristotle, which is why it has been impossible to dislodge.', published: true },
       { href: '/did-epictetus-say-its-not-what-happens-to-you', title: 'Did Epictetus say "it\u2019s not what happens to you, but how you react"?', blurb: 'The idea is his, the sentence is not. A paraphrase of Enchiridion 5 that moved the work from judgment to reaction, and threw away the best part of the passage.', published: true },
       { href: '/who-said-everyone-you-meet-is-fighting-a-hard-battle', title: 'Who said "be kind, for everyone you meet is fighting a hard battle"?', blurb: 'A Scottish minister in 1897, and he wrote "be pitiful". A century of anonymous editing sanded off every marker of its date, which is how it ended up credited to Seneca.', published: true },
@@ -50,30 +61,54 @@ const PILLARS = [
     ],
   },
   {
-    key: 'practice',
-    title: 'The practice',
-    intro: 'How the Stoics actually worked on themselves, daily, and how to run the same exercises without abandoning them by February.',
+    key: 'exercises',
+    title: 'The exercises',
+    intro: 'What the Stoics actually did, daily, and how to run the same drills without abandoning them by February.',
     pages: [
-      { href: '/how-to-keep-a-stoic-journal', title: 'How to keep a Stoic journal', blurb: 'The most famous book in Stoicism is a private notebook. What made it a Stoic one, and how to keep your own.', published: true },
+      { href: '/stoic-morning-routine', title: 'The Stoic morning routine', blurb: 'What Marcus actually did at dawn, and why the morning has a different job than the evening.', published: true },
       { href: '/stoic-evening-examination', title: 'The Stoic evening examination', blurb: 'Seneca put himself on trial every night, as a judge who does not frighten the defendant. The oldest documented practice in the tradition.', published: true },
       { href: '/premeditatio-malorum', title: 'Premeditatio malorum', blurb: 'Rehearsing what could go wrong, and why it is the opposite of worrying about it.', published: true },
-      { href: '/dichotomy-of-control', title: 'The dichotomy of control', blurb: 'The most quoted idea in Stoicism, and the most consistently flattened in the retelling.', published: true },
-      { href: '/how-to-read-meditations', title: 'How to actually read the Meditations', blurb: 'It is a notebook, not a book. Skip Book One first time, and read the repetition as the point.', published: true },
-      { href: '/where-to-start-with-seneca', title: 'Where to start with Seneca', blurb: '124 letters and reading them in order is a mistake. Which eight to read first, and how to handle the fact he did not live what he wrote.', published: true },
-      { href: '/is-stoicism-a-religion', title: 'Is Stoicism a religion?', blurb: 'No, but the ancient version was religious in a way modern practice is not. Marcus said gods or atoms and got on with the day.', published: true },
-      { href: '/stoicism-and-cbt', title: 'Stoicism and cognitive behavioral therapy', blurb: 'The founders of CBT cited Epictetus by name. A real lineage, and the differences matter more than the enthusiasts admit.', published: true },
-      { href: '/stoicism-vs-buddhism', title: 'Stoicism and Buddhism', blurb: 'Similar practices from incompatible starting points. Flattening them loses what each is actually for.', published: true },
-      { href: '/stoic-morning-routine', title: 'The Stoic morning routine', blurb: 'What Marcus actually did at dawn, and why the morning has a different job than the evening.', published: true },
-      { href: '/stoicism-and-anger', title: 'What the Stoics said about anger', blurb: 'Seneca wrote three books arguing anger is never useful, against Aristotle. The best remedy he gives is delay.', published: true },
-      { href: '/stoicism-and-grief', title: 'What the Stoics said about grief', blurb: 'An honest account, including the passages that read badly. They never said do not grieve.', published: true },
-      { href: '/amor-fati', title: 'Amor fati: loving what happens', blurb: 'The phrase is Nietzsche\u2019s, the idea is older. Willing what occurred, and how it differs from the toxic positivity it gets mistaken for.', published: true },
       { href: '/view-from-above', title: 'The view from above', blurb: 'Seeing your circumstances at their actual size. The exercise only works if you come back down.', published: true },
       { href: '/memento-mori', title: 'Memento mori: remember you will die', blurb: 'Not about death, about time. Seneca\u2019s claim is that life is long enough, and we waste most of it.', published: true },
+      { href: '/amor-fati', title: 'Amor fati: loving what happens', blurb: 'The phrase is Nietzsche\u2019s, the idea is older. Willing what occurred, and how it differs from the toxic positivity it gets mistaken for.', published: true },
+    ],
+  },
+  {
+    key: 'misread',
+    title: 'What people get wrong',
+    intro: 'The two misreadings that do the most damage, both of them widespread.',
+    pages: [
       { href: '/stoicism-is-not-suppressing-emotions', title: 'Stoicism is not about suppressing emotions', blurb: 'The most common misreading of the philosophy. Seneca wept for his friend, and apatheia never meant apathy.', published: true },
-      { href: '/did-marcus-aurelius-say-echoes-in-eternity', title: 'Did Marcus Aurelius say "what we do in life echoes in eternity"?', blurb: 'No. It is from Gladiator, and Marcus argued the opposite: that being remembered is worthless and oblivion comes fast.', published: true },
-      { href: '/epictetus-discourses-enchiridion-or-art-of-living', title: 'Epictetus: Discourses, Enchiridion, or The Art of Living?', blurb: 'Three different kinds of book under one name, and one of them is not a translation. Which to read, and which never to quote.', published: true },
+      { href: '/is-stoicism-a-religion', title: 'Is Stoicism a religion?', blurb: 'No, but the ancient version was religious in a way modern practice is not. Marcus said gods or atoms and got on with the day.', published: true },
+    ],
+  },
+  {
+    key: 'hard',
+    title: 'When it is hard',
+    intro: 'The Stoics wrote at length about anger and about grief, and were more honest about both than their reputation suggests.',
+    pages: [
+      { href: '/stoicism-and-anger', title: 'What the Stoics said about anger', blurb: 'Seneca wrote three books arguing anger is never useful, against Aristotle. The best remedy he gives is delay.', published: true },
+      { href: '/stoicism-and-grief', title: 'What the Stoics said about grief', blurb: 'An honest account, including the passages that read badly. They never said do not grieve.', published: true },
+    ],
+  },
+  {
+    key: 'neighbours',
+    title: 'Neighbouring traditions',
+    intro: 'Where Stoicism genuinely overlaps with something else, and where the comparison is usually made badly.',
+    pages: [
+      { href: '/stoicism-and-cbt', title: 'Stoicism and cognitive behavioral therapy', blurb: 'The founders of CBT cited Epictetus by name. A real lineage, and the differences matter more than the enthusiasts admit.', published: true },
+      { href: '/stoicism-vs-buddhism', title: 'Stoicism and Buddhism', blurb: 'Similar practices from incompatible starting points. Flattening them loses what each is actually for.', published: true },
+    ],
+  },
+  {
+    key: 'books',
+    title: 'Which book, which translation',
+    intro: 'Four of the five surviving sources are worth your time. Knowing which edition to buy matters more than people expect.',
+    pages: [
+      { href: '/how-to-read-meditations', title: 'How to actually read the Meditations', blurb: 'It is a notebook, not a book. Skip Book One first time, and read the repetition as the point.', published: true },
+      { href: '/where-to-start-with-seneca', title: 'Where to start with Seneca', blurb: '124 letters and reading them in order is a mistake. Which eight to read first, and how to handle the fact he did not live what he wrote.', published: true },
       { href: '/best-translation-of-meditations', title: 'Which translation of Meditations should you read?', blurb: 'Hays, Hard, Hammond and Waterfield compared, and why the free edition sounds like the King James Bible.', published: true },
-      { href: '/four-stoic-virtues', title: 'The four Stoic virtues', blurb: 'Wisdom, courage, justice, temperance. Three of the four are about acting, and one is entirely about other people.', published: true },
+      { href: '/epictetus-discourses-enchiridion-or-art-of-living', title: 'Epictetus: Discourses, Enchiridion, or The Art of Living?', blurb: 'Three different kinds of book under one name, and one of them is not a translation. Which to read, and which never to quote.', published: true },
     ],
   },
   {
@@ -109,7 +144,9 @@ function build() {
   };
 
   const sections = live.map(p =>
-    '<section class="ln-section"><h2 class="ln-section-title">' + esc(p.title) + '</h2>' +
+    '<section class="ln-section' + (p.key === 'start' ? ' ln-section-lead' : '') + '">' +
+    '<h2 class="ln-section-title">' + esc(p.title) +
+    '<span class="ln-count">' + p.pages.length + '</span></h2>' +
     '<p class="ln-section-intro">' + esc(p.intro) + '</p>' +
     '<div class="ln-list">' +
     p.pages.map(x =>
@@ -186,14 +223,23 @@ img{max-width:100%;display:block}
 .ln-hero-copy{font-size:18px;color:rgba(232,228,220,.78);margin:0;max-width:62ch}
 .ln-main{max-width:760px;margin:0 auto;padding:48px 24px 8px}
 .ln-section{margin-bottom:60px}
-.ln-section-title{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#c9a961;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid rgba(232,228,220,.09)}
+.ln-section-title{display:flex;align-items:baseline;justify-content:space-between;gap:14px;font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#c9a961;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid rgba(232,228,220,.09)}
 .ln-section-intro{font-size:16px;color:rgba(232,228,220,.66);margin:0 0 28px;max-width:64ch}
-.ln-list{display:flex;flex-direction:column;gap:4px}
-.ln-item{text-decoration:none;display:block;padding:18px 20px;margin:0 -20px;border-radius:8px;transition:background .15s}
-.ln-item:hover{background:rgba(232,228,220,.04)}
+/* A grid, not one column. Thirty items in a single file is the wall; two
+   abreast on a wide screen is a page you can scan. */
+.ln-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:8px}
+.ln-item{text-decoration:none;display:block;padding:18px 20px;border-radius:10px;border:1px solid transparent;background:rgba(232,228,220,.02);transition:background .15s,border-color .15s}
+.ln-item:hover{background:rgba(232,228,220,.05);border-color:rgba(232,228,220,.14)}
 .ln-item:hover .ln-item-title{color:#c9a961}
-.ln-item-title{font-family:Cinzel,Georgia,serif;font-size:20px;font-weight:600;margin:0 0 6px;transition:color .15s}
-.ln-item-blurb{font-size:15.5px;color:rgba(232,228,220,.72);margin:0;max-width:66ch}
+.ln-item-title{font-family:Cinzel,Georgia,serif;font-size:19px;font-weight:600;margin:0 0 6px;transition:color .15s;line-height:1.25}
+.ln-item-blurb{font-size:15px;color:rgba(232,228,220,.7);margin:0}
+/* The opening section carries the weight: full width, gold-tinted, larger. */
+.ln-section-lead .ln-list{grid-template-columns:1fr}
+.ln-section-lead .ln-item{background:rgba(201,169,97,.05);border-color:rgba(201,169,97,.2);padding:22px 24px}
+.ln-section-lead .ln-item-title{font-size:24px}
+.ln-section-lead .ln-item-blurb{font-size:16px;max-width:70ch}
+.ln-count{font-family:Inter,system-ui,sans-serif;font-size:11px;letter-spacing:.12em;color:rgba(232,228,220,.38);font-weight:400}
+@media (max-width:640px){.ln-list{grid-template-columns:1fr;gap:6px}.ln-item{padding:16px 18px}}
 .ln-app{text-align:center;margin:40px 0 0;padding:44px 24px;border-top:1px solid rgba(232,228,220,.09)}
 .ln-app-skull{width:56px;height:56px;object-fit:contain;margin:0 auto 16px;opacity:.9}
 .ln-app-copy{font-size:16px;color:rgba(232,228,220,.78);max-width:54ch;margin:0 auto 20px}

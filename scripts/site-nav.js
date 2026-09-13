@@ -30,26 +30,54 @@ const ITEMS = [
 
 const CTA = ['/', 'Get the app →'];
 
-// Four items plus a wordmark plus the CTA do not fit a phone. Measured on the
-// built pages: the bar is 74px at 768px wide and 126px at 390px, because it
-// wraps to two lines, which is 15% of an iPhone viewport spent on navigation
-// before any content. Below 720px the two section links are hidden and the
-// footer carries them, which is exactly where /learn was before this change.
-// Shared chrome CSS: the mobile nav rule, plus a focus ring.
+// Shared chrome CSS: the mobile menu, a focus ring, and the skip link.
 //
-// The focus ring is here because the site had none. On a near-black background
-// the browser default outline is close to invisible, and the one page that
-// styled focus at all did it by removing the outline from a textarea. Anyone
-// navigating by keyboard could not see where they were. :focus-visible keeps it
-// off mouse clicks, so nothing changes for pointer users.
+// THE MOBILE MENU. Four items plus a wordmark plus the CTA do not fit a phone:
+// measured on the built pages, the bar is 74px at 768px and 126px at 390px,
+// because it wraps. The first attempt at that was to hide the two section
+// links below 720px, which fixed the height by making half the site
+// unreachable on a phone. Only the hand-written homepage had a menu; the other
+// 117 pages had no way to show a link they had hidden. So: a real menu, the
+// links stay, and the panel opens on tap.
+//
+// THE FOCUS RING, because the site had none. On a near-black background the
+// browser default outline is close to invisible, and the one page that styled
+// focus at all did it by removing the outline from a textarea. :focus-visible
+// keeps it off mouse clicks, so nothing changes for pointer users.
 function navCss(prefix) {
-  return '@media (max-width:720px){.' + prefix + '-nav-secondary{display:none}}' +
+  const p = '.' + prefix;
+  return (
+    // Desktop: the toggle does not exist.
+    '@media (min-width:721px){' + p + '-nav-toggle{display:none}}' +
+    '@media (max-width:720px){' +
+      p + '-nav{flex-wrap:wrap}' +
+      p + '-nav-toggle{display:flex;flex-direction:column;justify-content:center;gap:5px;' +
+        'width:44px;height:44px;padding:0 10px;background:none;border:0;cursor:pointer}' +
+      p + '-nav-toggle span{display:block;height:2px;background:#e8e4dc;border-radius:2px;transition:.2s}' +
+      p + '-nav-open ' + p + '-nav-toggle span:nth-child(1){transform:translateY(7px) rotate(45deg)}' +
+      p + '-nav-open ' + p + '-nav-toggle span:nth-child(2){opacity:0}' +
+      p + '-nav-open ' + p + '-nav-toggle span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}' +
+      p + '-nav-right{display:none;flex-basis:100%;flex-direction:column;align-items:stretch;gap:0;padding:4px 0 10px}' +
+      p + '-nav-open ' + p + '-nav-right{display:flex}' +
+      p + '-nav-right ' + p + '-nav-link{padding:14px 2px;border-top:1px solid rgba(232,228,220,.1)}' +
+      p + '-nav-right ' + p + '-nav-cta{margin-top:14px;text-align:center;padding:13px 16px}' +
+    '}' +
     'a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{' +
     'outline:2px solid #c9a961;outline-offset:3px;border-radius:3px}' +
-    '.' + prefix + '-skip{position:absolute;left:-9999px;top:0;z-index:100;' +
+    p + '-skip{position:absolute;left:-9999px;top:0;z-index:100;' +
     'background:#c9a961;color:#0d0d0f;padding:10px 16px;border-radius:0 0 8px 0;' +
     'font-size:14px;text-decoration:none}' +
-    '.' + prefix + '-skip:focus{left:0}';
+    p + '-skip:focus{left:0}'
+  );
+}
+
+// Toggles the panel and keeps aria-expanded honest. Inlined next to the nav so
+// there is no extra request and no dependency on load order.
+function navScript(prefix) {
+  return '<script>(function(){var n=document.querySelector(".' + prefix + '-nav");' +
+    'if(!n)return;var b=n.querySelector(".' + prefix + '-nav-toggle");if(!b)return;' +
+    'b.addEventListener("click",function(){var o=n.classList.toggle("' + prefix + '-nav-open");' +
+    'b.setAttribute("aria-expanded",o?"true":"false");});})();</script>';
 }
 
 // A skip link, which the site had on none of its 118 pages. Visually hidden
@@ -63,14 +91,16 @@ function skipLink(prefix) {
 function navHtml(prefix, current) {
   const links = ITEMS
     .filter(([href]) => href !== current)
-    .map(([href, label], i) => '<a class="' + prefix + '-nav-link' +
-      (i > 0 ? ' ' + prefix + '-nav-secondary' : '') + '" href="' + href + '">' + label + '</a>')
+    .map(([href, label]) => '<a class="' + prefix + '-nav-link" href="' + href + '">' + label + '</a>')
     .join('');
+  const menuId = prefix + '-menu';
   return '<nav class="' + prefix + '-nav">' +
     '<a class="' + prefix + '-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="36" height="36"><span>Marcus</span></a>' +
-    '<div class="' + prefix + '-nav-right">' + links +
+    '<button class="' + prefix + '-nav-toggle" type="button" aria-expanded="false" aria-controls="' + menuId + '" aria-label="Menu">' +
+    '<span></span><span></span><span></span></button>' +
+    '<div class="' + prefix + '-nav-right" id="' + menuId + '">' + links +
     '<a class="' + prefix + '-nav-cta" href="' + CTA[0] + '">' + CTA[1] + '</a>' +
-    '</div></nav>';
+    '</div></nav>' + navScript(prefix);
 }
 
 // Fonts were render-blocking on every page: a synchronous stylesheet request
@@ -92,4 +122,4 @@ function fontLinks() {
     '<noscript><link rel="stylesheet" href="' + FONT_URL + '"></noscript>';
 }
 
-module.exports = { ITEMS, CTA, navHtml, navCss, fontLinks, skipLink, FONT_URL };
+module.exports = { ITEMS, CTA, navHtml, navCss, navScript, fontLinks, skipLink, FONT_URL };

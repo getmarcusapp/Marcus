@@ -708,6 +708,23 @@ function siteNav() {
     }
   }
 
+  // Every generated page needs a working mobile menu. The first fix for the
+  // bar wrapping on phones was to hide the two section links below 720px,
+  // which solved the height by making half the site unreachable on a phone:
+  // only the hand-written homepage had a menu to reveal them from.
+  const built = read('public/check-a-stoic-quote.html');
+  for (const [needle, why] of [
+    ['-nav-toggle', 'no mobile menu button'],
+    ['aria-expanded="false"', 'the menu button does not report its state'],
+    ['aria-controls=', 'the menu button is not associated with its panel'],
+  ]) {
+    if (!built.includes(needle)) fail.push(`public/check-a-stoic-quote.html: ${why}`);
+  }
+  const navSrc = read('scripts/site-nav.js');
+  if (/-nav-secondary/.test(navSrc)) {
+    fail.push('scripts/site-nav.js: still hides section links on phones instead of putting them in the menu');
+  }
+
   // The homepage keeps its own landing-page nav, but must offer a route in.
   const home = read('public/index.html');
   const navBlock = (home.match(/<div class="nav-links">[\s\S]*?<\/div>/) || [''])[0];
