@@ -239,7 +239,7 @@ const NAV =
 
 const FOOTER = footerHtml('tq', '/stoic-quotes');
 
-function shell({ title, desc, canonical, jsonLd, body }) {
+function shell({ title, desc, canonical, jsonLd, body, ogSlug }) {
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<title>' + esc(title) + ' | Marcus</title>' +
@@ -250,6 +250,8 @@ function shell({ title, desc, canonical, jsonLd, body }) {
     '<meta property="og:description" content="' + esc(desc) + '">' +
     '<meta property="og:url" content="' + canonical + '">' +
     '<meta property="og:type" content="article">' +
+    (ogSlug ? '<meta property="og:image" content="' + SITE + '/og/' + ogSlug + '.png">' +
+      '<meta name="twitter:card" content="summary_large_image">' : '') +
     '<link rel="preconnect" href="https://fonts.googleapis.com">' +
     '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
     '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">' +
@@ -317,7 +319,7 @@ function build() {
       APP_CTA +
       '</div></main>';
     fs.writeFileSync(path.join(OUT_DIR, page.slug + '.html'),
-      shell({ title: page.title, desc: page.blurb, canonical, jsonLd, body }), 'utf8');
+      shell({ title: page.title, desc: page.blurb, canonical, jsonLd, body, ogSlug: 'stoic-quotes-' + page.slug }), 'utf8');
     console.log('  ' + String(quotes.length).padStart(2) + ' quotes  /stoic-quotes/' + page.slug);
   }
 
@@ -355,6 +357,7 @@ function build() {
       title: 'Stoic Quotes, With Sources',
       desc: 'Themed collections of Stoic passages from Marcus Aurelius, Seneca and Epictetus, every one cited to a book and chapter.',
       canonical,
+      ogSlug: 'stoic-quotes',
       jsonLd: {
         '@context': 'https://schema.org', '@type': 'CollectionPage',
         headline: 'Stoic Quotes, With Sources', url: canonical, inLanguage: 'en-US',

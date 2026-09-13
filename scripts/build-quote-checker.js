@@ -341,6 +341,8 @@ function build() {
     '<meta property="og:description" content="' + esc(desc) + '">' +
     '<meta property="og:url" content="' + canonical + '">' +
     '<meta property="og:type" content="website">' +
+    '<meta property="og:image" content="' + SITE + '/og/check-a-stoic-quote.png">' +
+    '<meta name="twitter:card" content="summary_large_image">' +
     '<link rel="preconnect" href="https://fonts.googleapis.com">' +
     '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
     '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">' +

@@ -589,6 +589,59 @@ function quoteChecker() {
 // and /stoic-quotes shipped reachable from exactly one page on the site, so a
 // reader could not find them and a crawler had almost no reason to. Pages
 // nobody links to are pages nobody reads, however good they are.
+// Two things that were absent from the whole site and are invisible when they
+// are missing: a focus ring, and a social card.
+//
+// The focus ring, because on a near-black background the browser default is
+// close to invisible, so keyboard users could not see where they were. The
+// cards, because build-og.js exists precisely so a shared link says something,
+// and the seven newest pages, including the checker whose results are
+// shareable by URL, were going out as bare previews.
+function polish() {
+  const fail = [];
+  const pages = [];
+  const walk = d => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.html')) pages.push([p, fs.readFileSync(p, 'utf8')]);
+    }
+  };
+  walk(path.join(ROOT, 'public'));
+
+  for (const [p, html] of pages) {
+    // Editions pull the rule from the linked stylesheet rather than inline.
+    if (!/focus-visible/.test(html) && !/archive\.css/.test(html)) {
+      fail.push(`${path.relative(ROOT, p)}: no visible focus style, so it cannot be navigated by keyboard`);
+    }
+  }
+
+  // Every indexed page needs a card, and the card has to exist on disk.
+  const xml = read('public/sitemap.xml');
+  const locs = [...xml.matchAll(/<loc>https:\/\/getmarcus\.app(\/[^<]*)<\/loc>/g)].map(m => m[1]);
+  for (const loc of locs) {
+    const rel = loc === '/' ? 'index' : loc.replace(/^\//, '');
+    const file = fs.existsSync(path.join(ROOT, 'public', rel + '.html'))
+      ? path.join(ROOT, 'public', rel + '.html')
+      : path.join(ROOT, 'public', rel, 'index.html');
+    if (!fs.existsSync(file)) continue;
+    const html = fs.readFileSync(file, 'utf8');
+    // Any card is fine as long as the file is on disk. An earlier version
+    // accepted only /og/ paths and so flagged all twelve figure pages, which
+    // use the portrait: a better picture for a person than a typographic card.
+    const m = html.match(/og:image" content="https:\/\/getmarcus\.app(\/[^"]+)"/);
+    if (!m) {
+      fail.push(`${loc} has no og:image, so sharing it produces a bare preview`);
+      continue;
+    }
+    if (!fs.existsSync(path.join(ROOT, 'public', m[1].replace(/^\//, '')))) {
+      fail.push(`${loc} points at ${m[1]}, which is not on disk`);
+    }
+  }
+
+  return fail;
+}
+
 function siteNav() {
   const fail = [];
   const { ITEMS } = require(path.join(ROOT, 'scripts', 'site-nav.js'));
@@ -1289,6 +1342,7 @@ const CHECKS = [
   ['the quote checker returns the right verdict', quoteChecker],
   ['every page can be reached from the footer', siteFooter],
   ['the header nav is shared and complete', siteNav],
+  ['focus rings and social cards exist', polish],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],

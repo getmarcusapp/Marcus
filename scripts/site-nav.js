@@ -35,8 +35,17 @@ const CTA = ['/', 'Get the app →'];
 // wraps to two lines, which is 15% of an iPhone viewport spent on navigation
 // before any content. Below 720px the two section links are hidden and the
 // footer carries them, which is exactly where /learn was before this change.
+// Shared chrome CSS: the mobile nav rule, plus a focus ring.
+//
+// The focus ring is here because the site had none. On a near-black background
+// the browser default outline is close to invisible, and the one page that
+// styled focus at all did it by removing the outline from a textarea. Anyone
+// navigating by keyboard could not see where they were. :focus-visible keeps it
+// off mouse clicks, so nothing changes for pointer users.
 function navCss(prefix) {
-  return '@media (max-width:720px){.' + prefix + '-nav-secondary{display:none}}';
+  return '@media (max-width:720px){.' + prefix + '-nav-secondary{display:none}}' +
+    'a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{' +
+    'outline:2px solid #c9a961;outline-offset:3px;border-radius:3px}';
 }
 
 function navHtml(prefix, current) {

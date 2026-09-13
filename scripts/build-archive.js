@@ -37,7 +37,10 @@ const ICON_LINKS =
 // Shared 1200x630 brand social card (same one the landing page uses), so
 // shared meditation links render a full-width preview instead of a bare card.
 const OG_IMAGE =
-  '<meta property="og:image" content="' + SITE + '/og-image.png">' +
+  // build-og.js exists because a single shared card on every page says
+  // nothing. The archive had its own generated card and was still pointing at
+  // the legacy image.
+  '<meta property="og:image" content="' + SITE + '/og/meditations.png">' +
   '<meta property="og:image:width" content="1200">' +
   '<meta property="og:image:height" content="630">' +
   '<meta property="og:image:type" content="image/png">' +

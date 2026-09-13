@@ -131,10 +131,25 @@ const STATIC = [
   { slug: 'library', title: 'The Stoic Library', eyebrow: 'The books behind the practice' },
   { slug: 'misattributed-stoic-quotes', title: 'The Stoic quotes that are not Stoic', eyebrow: 'Attribution' },
   { slug: 'meditations', title: 'Daily Meditations', eyebrow: 'One reflection each morning' },
+  // The quotes cluster. The checker matters most here: its results are
+  // shareable by URL, so a bare preview is a wasted share on the one page
+  // built to be passed around.
+  { slug: 'check-a-stoic-quote', title: 'Check a Stoic quote', eyebrow: 'A free tool' },
+  { slug: 'stoic-quotes', title: 'Stoic quotes, with sources', eyebrow: 'Cited to a book and a chapter' },
 ];
 
+// Themed quote pages, read from their builder so adding one cannot leave it
+// sharing as a bare link.
+function themePages() {
+  return require('./build-themes').PAGES.map(p => ({
+    slug: 'stoic-quotes-' + p.slug,
+    title: p.title,
+    eyebrow: 'Sourced quotes',
+  }));
+}
+
 function build() {
-  const pages = [...STATIC, ...articles()];
+  const pages = [...STATIC, ...themePages(), ...articles()];
   for (const p of pages) render(card(p), p.slug);
   fs.rmSync(TMP, { recursive: true, force: true });
   console.log('Built OG cards: ' + pages.length + ' → public/og/*.png');
