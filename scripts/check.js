@@ -727,6 +727,47 @@ function artwork() {
   return fail;
 }
 
+// skull-gold.png is 500x677. Every <img> that gives it a square width and
+// height squashes it unless something restores the aspect, and two builders
+// shipped exactly that: a visibly warped logo in the nav and the CTA of every
+// page they generate. Seven other builders happened to write object-fit on
+// their own class, which is why it went unnoticed.
+function logoAspect() {
+  const fail = [];
+  const png = fs.readFileSync(path.join(ROOT, 'public', 'skull-gold.png'));
+  const natural = png.readUInt32BE(16) / png.readUInt32BE(20);
+
+  const walk = d => {
+    const out = [];
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const f = path.join(d, e.name);
+      if (e.isDirectory()) out.push(...walk(f));
+      else if (e.name.endsWith('.html')) out.push(f);
+    }
+    return out;
+  };
+
+  for (const file of walk(path.join(ROOT, 'public'))) {
+    const html = fs.readFileSync(file, 'utf8');
+    const rel = path.relative(ROOT, file);
+    // The global guard, an external stylesheet, or a per-class rule all count.
+    const guarded = html.includes('img[src="/skull-gold.png"]{object-fit:contain}') || /archive\.css/.test(html);
+    for (const tag of html.match(/<img[^>]*skull-gold\.png[^>]*>/g) || []) {
+      const w = (tag.match(/width="(\d+)"/) || [])[1];
+      const h = (tag.match(/height="(\d+)"/) || [])[1];
+      if (!w || !h) continue;
+      const ratio = Number(w) / Number(h);
+      if (Math.abs(ratio - natural) / natural <= 0.05) continue;   // honest dimensions
+      if (/object-fit:\s*contain/.test(tag)) continue;             // inline
+      const cls = (tag.match(/class="([a-z-]+)"/) || [])[1];
+      if (cls && new RegExp('\\.' + cls + '\\{[^}]*object-fit:contain').test(html)) continue;
+      if (guarded) continue;
+      fail.push(`${rel}: the logo is ${w}x${h} against a natural ${natural.toFixed(3)} ratio, with nothing restoring it`);
+    }
+  }
+  return fail;
+}
+
 function siteNav() {
   const fail = [];
   const { ITEMS } = require(path.join(ROOT, 'scripts', 'site-nav.js'));
@@ -1490,6 +1531,7 @@ const CHECKS = [
   ['the header nav is shared and complete', siteNav],
   ['focus rings and social cards exist', polish],
   ['article artwork exists and is credited', artwork],
+  ['the logo is never squashed', logoAspect],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],

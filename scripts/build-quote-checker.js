@@ -328,7 +328,7 @@ function build() {
     'out, they are on <a href="/stoic-quotes">sourced quotes</a>.</p>' +
 
     '<section class="qc-app">' +
-    '<img src="/skull-gold.png" alt="" width="52" height="52">' +
+    '<img src="/skull-gold.png" alt="" width="38" height="52">' +
     '<p>Marcus is a daily Stoic practice for iOS, and it reads from this same checked library. No quote in the app is there unless it survived the audit.</p>' +
     '<a class="qc-nav-cta" href="/">Explore the app →</a></section>' +
     '</main></div>';

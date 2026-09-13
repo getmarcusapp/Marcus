@@ -62,6 +62,11 @@ function navCss(prefix) {
       p + '-nav-right ' + p + '-nav-link{padding:14px 2px;border-top:1px solid rgba(232,228,220,.1)}' +
       p + '-nav-right ' + p + '-nav-cta{margin-top:14px;text-align:center;padding:13px 16px}' +
     '}' +
+    // skull-gold.png is 500x677, not square. Seven builders happened to write
+    // object-fit:contain on their own skull class; the two newest did not, so
+    // the logo shipped visibly squashed in their nav and their CTA. One rule
+    // here covers every instance, including any added later.
+    'img[src="/skull-gold.png"]{object-fit:contain}' +
     'a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{' +
     'outline:2px solid #c9a961;outline-offset:3px;border-radius:3px}' +
     p + '-skip{position:absolute;left:-9999px;top:0;z-index:100;' +
@@ -95,7 +100,7 @@ function navHtml(prefix, current) {
     .join('');
   const menuId = prefix + '-menu';
   return '<nav class="' + prefix + '-nav">' +
-    '<a class="' + prefix + '-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="36" height="36"><span>Marcus</span></a>' +
+    '<a class="' + prefix + '-brand" href="/"><img src="/skull-gold.png" alt="Marcus" width="27" height="36"><span>Marcus</span></a>' +
     '<button class="' + prefix + '-nav-toggle" type="button" aria-expanded="false" aria-controls="' + menuId + '" aria-label="Menu">' +
     '<span></span><span></span><span></span></button>' +
     '<div class="' + prefix + '-nav-right" id="' + menuId + '">' + links +

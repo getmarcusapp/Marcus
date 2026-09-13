@@ -262,7 +262,7 @@ function shell({ title, desc, canonical, jsonLd, body, ogSlug }) {
 
 const APP_CTA =
   '<section class="tq-app">' +
-  '<img src="/skull-gold.png" alt="" width="52" height="52">' +
+  '<img src="/skull-gold.png" alt="" width="38" height="52">' +
   '<p>Marcus turns these into a daily practice for iOS: a morning preparation, a daily reading matched to what you are working on, and an honest evening examination.</p>' +
   '<a class="tq-nav-cta" href="/">Explore the app →</a></section>';
 
