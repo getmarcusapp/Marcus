@@ -224,6 +224,22 @@ export const STOIC_QUOTES = [
     themes: ['action', 'identity'],
   },
   {
+    // Discourses I.24 opens the chapter on contending with difficulties, and
+    // goes straight on to the image of a trainer matching you against a rough
+    // young opponent. Added 2026-09-13 to replace a fabricated "Epictetus, as
+    // recorded in the Discourses" citation that had shipped in two editions;
+    // the line the newsletter needed was the real one this chapter begins with.
+    // Wording follows the standard Oldfather/Hard rendering. VERIFY against a
+    // printed Hard before this is quoted anywhere load-bearing.
+    id: 'epictetus-discourses-1-24-difficulties',
+    quote: "It is difficulties that show what men are.",
+    author: 'Epictetus',
+    work: 'Discourses',
+    source: 'I.24',
+    virtues: ['courage', 'wisdom'],
+    themes: ['adversity', 'character', 'training'],
+  },
+  {
     id: 'epictetus-discourses-4-1-freedom',
     quote: "He is free who lives as he wills, who is subject neither to compulsion, nor hindrance, nor force, whose movements to action are not impeded, whose desires attain their purpose, and who does not fall into that which he would avoid.",
     author: 'Epictetus',
