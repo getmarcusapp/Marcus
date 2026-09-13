@@ -610,9 +610,27 @@ function polish() {
   walk(path.join(ROOT, 'public'));
 
   for (const [p, html] of pages) {
+    const rel = path.relative(ROOT, p);
     // Editions pull the rule from the linked stylesheet rather than inline.
     if (!/focus-visible/.test(html) && !/archive\.css/.test(html)) {
-      fail.push(`${path.relative(ROOT, p)}: no visible focus style, so it cannot be navigated by keyboard`);
+      fail.push(`${rel}: no visible focus style, so it cannot be navigated by keyboard`);
+    }
+
+    // A skip link pointing at nothing is worse than no skip link: it promises
+    // a keyboard user an escape from the header and does not deliver one.
+    const hasSkip = html.includes('href="#main"');
+    const hasTarget = html.includes('id="main"');
+    if (!hasSkip) fail.push(`${rel}: no skip link`);
+    else if (!hasTarget) fail.push(`${rel}: skip link points at #main, which is not on the page`);
+
+    // Fonts must not block first paint. The noscript copy is supposed to be a
+    // synchronous stylesheet, so it is stripped before looking.
+    const noNoscript = html.replace(/<noscript>[\s\S]*?<\/noscript>/g, '');
+    for (const tag of noNoscript.match(/<link[^>]*fonts\.googleapis\.com\/css2[^>]*>/g) || []) {
+      if (tag.includes('rel="preload"') || tag.includes('media="print"')) continue;
+      if (tag.includes('rel="stylesheet"')) {
+        fail.push(`${rel}: loads fonts with a render-blocking stylesheet`);
+      }
     }
   }
 

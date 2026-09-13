@@ -30,7 +30,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
-const { navHtml, navCss } = require('./site-nav');
+const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -107,16 +107,14 @@ function build() {
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
     '<link rel="icon" type="image/png" href="/favicon.png">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +
-    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-    '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">' +
+    fontLinks() +
     '<style>' + CSS + '</style>' +
     '<script type="application/ld+json">' + JSON.stringify(jsonLd) + '</script>' +
     '</head><body>' +
 
-    navHtml('ab') +
+    skipLink('ab') + navHtml('ab') +
 
-    '<main class="ab-main">' +
+    '<main class="ab-main" id="main">' +
     '<header class="ab-head">' +
     (hasHeadshot ? '<img class="ab-photo" src="/img/author.jpg" alt="' + esc(AUTHOR.name) + '" width="120" height="120">' : '') +
     '<p class="ab-eyebrow">About</p>' +

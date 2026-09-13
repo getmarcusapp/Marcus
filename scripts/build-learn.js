@@ -18,7 +18,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
-const { navHtml, navCss } = require('./site-nav');
+const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -139,20 +139,18 @@ function build() {
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
     '<link rel="icon" type="image/png" href="/favicon.png">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +
-    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-    '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">' +
+    fontLinks() +
     '<style>' + CSS + '</style>' +
     '<script type="application/ld+json">' + JSON.stringify(jsonLd) + '</script>' +
     '</head><body>' +
-    navHtml('ln') +
+    skipLink('ln') + navHtml('ln') +
     '<header class="ln-hero"><div class="ln-hero-inner">' +
     '<p class="ln-eyebrow">Learn</p>' +
     '<h1 class="ln-title">Stoicism, as it was actually practiced</h1>' +
     '<p class="ln-hero-copy">Not a summary of the philosophy. The exercises the Stoics ran on themselves daily, ' +
     'the people who wrote them down, and an honest account of which famous quotations are not theirs at all.</p>' +
     '</div></header>' +
-    '<main class="ln-main">' + sections +
+    '<main class="ln-main" id="main">' + sections +
     '<section class="ln-app">' +
     '<img class="ln-app-skull" src="/skull-gold.png" alt="" width="64" height="64">' +
     '<p class="ln-app-copy">Marcus turns all of this into a daily practice for iOS: a morning preparation, ' +

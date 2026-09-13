@@ -45,7 +45,19 @@ const CTA = ['/', 'Get the app →'];
 function navCss(prefix) {
   return '@media (max-width:720px){.' + prefix + '-nav-secondary{display:none}}' +
     'a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{' +
-    'outline:2px solid #c9a961;outline-offset:3px;border-radius:3px}';
+    'outline:2px solid #c9a961;outline-offset:3px;border-radius:3px}' +
+    '.' + prefix + '-skip{position:absolute;left:-9999px;top:0;z-index:100;' +
+    'background:#c9a961;color:#0d0d0f;padding:10px 16px;border-radius:0 0 8px 0;' +
+    'font-size:14px;text-decoration:none}' +
+    '.' + prefix + '-skip:focus{left:0}';
+}
+
+// A skip link, which the site had on none of its 118 pages. Visually hidden
+// until focused, so it costs nothing to a mouse user and saves a keyboard user
+// tabbing through the whole header on every page. Targets #main, which every
+// builder now puts on its content region.
+function skipLink(prefix) {
+  return '<a class="' + prefix + '-skip" href="#main">Skip to content</a>';
 }
 
 function navHtml(prefix, current) {
@@ -61,4 +73,23 @@ function navHtml(prefix, current) {
     '</div></nav>';
 }
 
-module.exports = { ITEMS, CTA, navHtml, navCss };
+// Fonts were render-blocking on every page: a synchronous stylesheet request
+// to a third-party host sits in front of first paint. display=swap already
+// meant text drew in a fallback, so the blocking fetch was buying nothing but
+// delay. Loaded with media="print" and switched to all on load, with a
+// noscript copy so it still works without JavaScript.
+//
+// One URL for the whole site. There were two, differing in weights, and the
+// lighter one was on eight pages, which meant a second font fetch for anyone
+// crossing between them.
+const FONT_URL = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap';
+
+function fontLinks() {
+  return '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+    '<link rel="preload" as="style" href="' + FONT_URL + '">' +
+    '<link rel="stylesheet" href="' + FONT_URL + '" media="print" onload="this.media=\'all\';this.onload=null">' +
+    '<noscript><link rel="stylesheet" href="' + FONT_URL + '"></noscript>';
+}
+
+module.exports = { ITEMS, CTA, navHtml, navCss, fontLinks, skipLink, FONT_URL };

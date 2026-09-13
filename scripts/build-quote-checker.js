@@ -25,7 +25,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
-const { navHtml, navCss } = require('./site-nav');
+const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -238,7 +238,7 @@ const CLIENT = `
 `;
 
 const NAV =
-  navHtml('qc');
+  skipLink('qc') + navHtml('qc');
 
 const FOOTER = footerHtml('qc', '/check-a-stoic-quote');
 
@@ -299,7 +299,7 @@ function build() {
 
     '<div class="qc-result" id="qc-result" role="status" aria-live="polite"></div>' +
 
-    '<div class="qc-body">' +
+    '<main class="qc-body" id="main">' +
     '<h2 class="qc-h2">What it is checking against</h2>' +
     '<p class="qc-p">Two lists. The first is ' + STOIC_QUOTES.length + ' passages we have taken the trouble to cite, each to a work ' +
     'and a section you can open. The second is ' + MISATTRIBUTIONS.length + ' quotations that circulate under a Stoic name and belong ' +
@@ -329,7 +329,7 @@ function build() {
     '<img src="/skull-gold.png" alt="" width="52" height="52">' +
     '<p>Marcus is a daily Stoic practice for iOS, and it reads from this same checked library. No quote in the app is there unless it survived the audit.</p>' +
     '<a class="qc-nav-cta" href="/">Explore the app →</a></section>' +
-    '</div></div>';
+    '</main></div>';
 
   const html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
@@ -343,9 +343,7 @@ function build() {
     '<meta property="og:type" content="website">' +
     '<meta property="og:image" content="' + SITE + '/og/check-a-stoic-quote.png">' +
     '<meta name="twitter:card" content="summary_large_image">' +
-    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-    '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">' +
+    fontLinks() +
     '<style>' + CSS.trim() + '</style>' +
     '<script type="application/ld+json">' + JSON.stringify(jsonLd) + '</script>' +
     GA + '</head><body>' + NAV + body +

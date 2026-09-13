@@ -13,7 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
-const { navHtml, navCss } = require('./site-nav');
+const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const EDITIONS_DIR = path.join(ROOT, 'content', 'editions');
@@ -26,10 +26,7 @@ const GA = '<script src="/analytics.js"></script>';
 // on-site, CSRF-handled. Style it in Beehiiv → Grow → Subscribe Forms.
 const BEEHIIV_FORM = '<div class="dm-embed"><script async src="https://subscribe-forms.beehiiv.com/v3/loader.js" data-beehiiv-form="eb49b3c4-275e-419f-af73-fbde10987dc9"></script></div>';
 
-const FONT_LINKS =
-  '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-  '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-  '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">';
+const FONT_LINKS = fontLinks();
 const ICON_LINKS =
   '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
   '<link rel="icon" type="image/png" href="/favicon.png">' +
@@ -44,7 +41,7 @@ const OG_IMAGE =
   '<meta property="og:image:width" content="1200">' +
   '<meta property="og:image:height" content="630">' +
   '<meta property="og:image:type" content="image/png">' +
-  '<meta name="twitter:image" content="' + SITE + '/og-image.png">';
+  '<meta name="twitter:image" content="' + SITE + '/og/meditations.png">';
 
 function esc(s) {
   return String(s == null ? '' : s)
@@ -99,7 +96,7 @@ function pageHead(title, description, canonical, jsonLd, extraOg, robots) {
 
 // Fixed nav matching the main site: skull-gold wordmark + gold pill CTA.
 function nav() {
-  return navHtml('dm');
+  return skipLink('dm') + navHtml('dm');
 }
 
 function subscribeBlock() {
@@ -156,7 +153,7 @@ function renderEditionPage(rec) {
   // shareable; it simply stops defining the site.
   return pageHead(title, desc, canonical, jsonLd, '<meta property="og:type" content="article">', 'noindex, follow') +
     '<body>' + nav() +
-    '<main class="dm-main">' +
+    '<main class="dm-main" id="main">' +
     '<article class="dm-article">' +
     '<p class="dm-eyebrow">Daily Meditations &middot; ' + esc(rec.displayDate) + '</p>' +
     '<h1 class="dm-theme">' + esc(rec.theme) + '</h1>' +
@@ -207,7 +204,7 @@ function renderIndex(records) {
     'history that produced it, and an unforced line to the world as it is today. Two minutes. Free.</p>' +
     BEEHIIV_FORM +
     '</div></header>' +
-    '<main class="dm-main">' +
+    '<main class="dm-main" id="main">' +
     '<section class="dm-timeline">' + items + '</section>' +
     appCta() +
     '</main>' + footer() +

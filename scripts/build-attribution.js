@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
-const { navHtml, navCss } = require('./site-nav');
+const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -128,13 +128,11 @@ function build() {
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
     '<link rel="icon" type="image/png" href="/favicon.png">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +
-    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-    '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">' +
+    fontLinks() +
     '<style>' + CSS + '</style>' +
     '<script type="application/ld+json">' + JSON.stringify(jsonLd(MISATTRIBUTIONS)) + '</script>' +
     '</head><body>' +
-    navHtml('mq') +
+    skipLink('mq') + navHtml('mq') +
 
     '<header class="mq-hero"><div class="mq-hero-inner">' +
     '<p class="mq-eyebrow">Attribution</p>' +
@@ -144,7 +142,7 @@ function build() {
     'beginning&rsquo;s end. That is the last line of a Semisonic song.</p>' +
     '</div></header>' +
 
-    '<main class="mq-main">' +
+    '<main class="mq-main" id="main">' +
     '<section class="mq-intro">' +
     '<p>We found these by auditing our own app.</p>' +
     '<p>Marcus is a Stoic practice app, and its daily reading draws from a library of passages we had ' +

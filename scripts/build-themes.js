@@ -30,7 +30,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
-const { navHtml, navCss } = require('./site-nav');
+const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -235,7 +235,7 @@ img{max-width:100%;display:block}
 `;
 
 const NAV =
-  navHtml('tq');
+  skipLink('tq') + navHtml('tq');
 
 const FOOTER = footerHtml('tq', '/stoic-quotes');
 
@@ -252,9 +252,7 @@ function shell({ title, desc, canonical, jsonLd, body, ogSlug }) {
     '<meta property="og:type" content="article">' +
     (ogSlug ? '<meta property="og:image" content="' + SITE + '/og/' + ogSlug + '.png">' +
       '<meta name="twitter:card" content="summary_large_image">' : '') +
-    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-    '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">' +
+    fontLinks() +
     '<style>' + CSS.trim() + '</style>' +
     (jsonLd ? '<script type="application/ld+json">' + JSON.stringify(jsonLd) + '</script>' : '') +
     GA + '</head><body>' + NAV + body + FOOTER + '</body></html>';
@@ -308,12 +306,12 @@ function build() {
       })),
     };
     const body =
-      '<header class="tq-hero"><div class="tq-wrap">' +
+      '<header class="tq-hero" id="main"><div class="tq-wrap">' +
       '<p class="tq-eyebrow"><a href="/stoic-quotes">Sourced quotes</a></p>' +
       '<h1 class="tq-title">' + esc(page.title) + '</h1>' +
       '<p class="tq-intro">' + page.intro + '</p>' +
       '</div></header>' +
-      '<main class="tq-main"><div class="tq-wrap">' +
+      '<main class="tq-main" id="main"><div class="tq-wrap">' +
       '<p class="tq-note">' + page.note + '</p>' +
       quotes.map(quoteHtml).join('') +
       APP_CTA +
@@ -326,7 +324,7 @@ function build() {
   // Index
   const canonical = SITE + '/stoic-quotes';
   const body =
-    '<header class="tq-hero"><div class="tq-wrap">' +
+    '<header class="tq-hero" id="main"><div class="tq-wrap">' +
     '<p class="tq-eyebrow">Sourced quotes</p>' +
     '<h1 class="tq-title">Stoic Quotes, With Sources</h1>' +
     '<p class="tq-intro">Every passage here is cited to a book and a chapter, because most of what circulates as Stoic wisdom is not, ' +

@@ -21,7 +21,7 @@
 const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
-const { navHtml, navCss } = require('./site-nav');
+const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -247,14 +247,12 @@ function page(meta, bodyHtml, prev, next) {
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
     '<link rel="icon" type="image/png" href="/favicon.png">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +
-    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-    '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">' +
+    fontLinks() +
     '<style>' + CSS + '</style>' +
     '<script type="application/ld+json">' + JSON.stringify(jsonLd) + '</script>' +
     '</head><body>' +
-    navHtml('ar') +
-    '<article class="ar-main">' +
+    skipLink('ar') + navHtml('ar') +
+    '<article class="ar-main" id="main">' +
     '<header class="ar-head">' +
     '<p class="ar-eyebrow"><a href="/learn">The practice</a></p>' +
     '<h1 class="ar-title">' + esc(meta.title) + '</h1>' +

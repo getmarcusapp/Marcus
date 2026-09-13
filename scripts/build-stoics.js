@@ -23,7 +23,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { footerHtml } = require('./site-footer');
-const { navHtml, navCss } = require('./site-nav');
+const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -177,16 +177,14 @@ function head(opts) {
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
     '<link rel="icon" type="image/png" href="/favicon.png">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +
-    '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-    '<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">' +
+    fontLinks() +
     '<style>' + CSS + '</style>' +
     (opts.jsonLd ? '<script type="application/ld+json">' + JSON.stringify(opts.jsonLd) + '</script>' : '') +
     '</head><body>';
 }
 
 const NAV =
-  navHtml('st');
+  skipLink('st') + navHtml('st');
 
 const FOOTER =
   footerHtml('st');
@@ -240,7 +238,7 @@ function figurePage(fig, prev, next, books, bookshopUrl, amazonUrl) {
     jsonLd,
   }) +
     NAV +
-    '<article class="st-fig">' +
+    '<article class="st-fig" id="main">' +
     '<header class="st-fig-head">' +
     portrait(fig, 'st-portrait-lg') +
     '<div class="st-fig-headtext">' +
@@ -328,7 +326,7 @@ function indexPage(figures) {
     'alive writing privately to keep himself honest. Who each one was, what they taught, and ' +
     'the book worth reading first.</p>' +
     '</div></header>' +
-    '<main class="st-main">' + sectionsHtml +
+    '<main class="st-main" id="main">' + sectionsHtml +
     '<section class="st-credits">' +
     '<p>Portrait photographs are of ancient busts held in public collections, sourced via ' +
     'Wikimedia Commons. If you hold rights in one of these photographs and would like it ' +
