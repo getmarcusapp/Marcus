@@ -805,6 +805,38 @@ function misquoteDetector() {
     }
   }
 
+  // Every printed query has to be a usable phrase search. Truncating at a fixed
+  // character count cut six of them mid-word ("...is not an act, but a h"),
+  // which is not a phrase any search engine will match.
+  const qsrc = read('scripts/find-misquotes.js');
+  const body = qsrc.slice(qsrc.indexOf('function queries'), qsrc.indexOf('function report'));
+  let printed = [];
+  try {
+    printed = new Function(body + '; return queries;')()(list).split('\n');
+  } catch (e) {
+    fail.push('scripts/find-misquotes.js: the query builder could not be evaluated — ' + e.message);
+  }
+  for (const line of printed) {
+    const m = line.match(/^\s+"([^"]+)"/);
+    if (!m) continue;
+    const phrase = m[1];
+    // A trimmed phrase must end on a whole word from the original entry.
+    const source = list.find(e => String(e.text).replace(/["“”]/g, '').startsWith(phrase.slice(0, 20)));
+    if (!source) continue;
+    const full = String(source.text).replace(/["“”]/g, '');
+    if (!full.startsWith(phrase)) {
+      fail.push(`scripts/find-misquotes.js: query "${phrase.slice(-24)}" is not a prefix of its entry`);
+      continue;
+    }
+    // Mid-word means the cut did not land on a space. Testing for a short
+    // trailing token instead flags phrases that end on a real word ("but a",
+    // "privilege it"), which is what a first version of this did.
+    const next = full[phrase.length];
+    if (next !== undefined && next !== ' ' && next !== '.') {
+      fail.push(`scripts/find-misquotes.js: query ends mid-word — "...${phrase.slice(-26)}"`);
+    }
+  }
+
   // It researches. It does not contact.
   const src = read('scripts/find-misquotes.js');
   for (const [pat, why] of [

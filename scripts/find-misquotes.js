@@ -133,7 +133,15 @@ function queries(list) {
   for (const e of list) {
     const phrase = e.text.replace(/["“”]/g, '').replace(/\.$/, '');
     const who = e.credited.split(',')[0];
-    lines.push('  "' + phrase.slice(0, 70) + '" "' + who + '"');
+    // Trim on a word boundary, not at character 70. A phrase cut mid-word is
+    // not a phrase search any more, and six of these were being sent out as
+    // "...is not an act, but a h".
+    let q = phrase;
+    if (q.length > 70) {
+      q = q.slice(0, 70);
+      q = q.slice(0, q.lastIndexOf(' '));
+    }
+    lines.push('  "' + q + '" "' + who + '"');
   }
   lines.push('', 'Exclude your own site and the obvious aggregators:');
   lines.push('  -site:getmarcus.app -site:goodreads.com -site:pinterest.com -site:quotefancy.com');
