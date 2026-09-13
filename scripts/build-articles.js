@@ -22,6 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
 const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
+const { artHtml, artCss } = require('./site-artwork');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -260,6 +261,7 @@ function page(meta, bodyHtml, prev, next) {
     'By <a href="/about">Gio White</a><span>&middot;</span>' +
     '<a href="/about">How sources are checked</a></p>' +
     '</header>' +
+    artHtml(meta.slug, 'ar') +
     bodyHtml +
     pager +
     '<section class="ar-app">' +
@@ -310,6 +312,7 @@ img{max-width:100%;display:block}
 .ar-nav-link{text-decoration:none;font-size:14px;color:rgba(232,228,220,.72)}
 .ar-nav-cta{text-decoration:none;font-size:14px;color:#0d0d0f;background:#c9a961;padding:9px 16px;border-radius:999px;white-space:nowrap}
 .ar-main{max-width:680px;margin:0 auto;padding:56px 24px 8px}
+${artCss('ar')}
 .ar-head{margin-bottom:36px}
 .ar-eyebrow{font-family:Cinzel,Georgia,serif;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#c9a961;margin:0 0 14px}
 .ar-eyebrow a{text-decoration:none}

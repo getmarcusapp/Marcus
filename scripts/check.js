@@ -660,6 +660,55 @@ function polish() {
   return fail;
 }
 
+// Nine articles carry a painting from the app's gallery. Two things have to
+// hold: the file has to exist, and the credit has to be printed. This site
+// argues that a quotation without a citation has not been checked by anyone,
+// and an uncredited image is the same claim in another medium.
+function artwork() {
+  const fail = [];
+  const { BY_SLUG, artFor } = require(path.join(ROOT, 'scripts', 'site-artwork.js'));
+  for (const [slug, key] of Object.entries(BY_SLUG)) {
+    const a = artFor(slug);
+    if (!a || !a.file) {
+      fail.push(`scripts/site-artwork.js: ${slug} maps to ${key}, which has no entry`);
+      continue;
+    }
+    if (!fs.existsSync(path.join(ROOT, 'public', 'img', 'art', a.file))) {
+      fail.push(`public/img/art/${a.file} is missing, but ${slug} renders it`);
+    }
+    const page = path.join(ROOT, 'public', slug + '.html');
+    if (!fs.existsSync(page)) {
+      fail.push(`scripts/site-artwork.js: ${slug} has artwork but no page`);
+      continue;
+    }
+    const html = fs.readFileSync(page, 'utf8');
+    if (!html.includes('/img/art/' + a.file)) {
+      fail.push(`public/${slug}.html: the artwork is mapped but not rendered`);
+    }
+    // The credit must be VISIBLE, not just in the alt text. A first version
+    // looked for the artist anywhere in the page and passed with the
+    // figcaption deleted, because the same string sits in alt.
+    const cap = (html.match(/<figcaption>([^<]*)<\/figcaption>/) || [])[1] || '';
+    if (!cap.includes(a.artist)) {
+      fail.push(`public/${slug}.html: renders a painting with no visible credit to ${a.artist}`);
+    }
+    if (!/loading="lazy"/.test(html)) {
+      fail.push(`public/${slug}.html: the artwork is not lazy-loaded`);
+    }
+  }
+  // Nothing in the folder should be unused: these are 100KB each.
+  const used = new Set(Object.keys(BY_SLUG).map(s2 => artFor(s2).file));
+  const dir = path.join(ROOT, 'public', 'img', 'art');
+  if (fs.existsSync(dir)) {
+    for (const f of fs.readdirSync(dir)) {
+      if (f.endsWith('.jpg') && !used.has(f)) {
+        fail.push(`public/img/art/${f} is shipped but never rendered`);
+      }
+    }
+  }
+  return fail;
+}
+
 function siteNav() {
   const fail = [];
   const { ITEMS } = require(path.join(ROOT, 'scripts', 'site-nav.js'));
@@ -1378,6 +1427,7 @@ const CHECKS = [
   ['every page can be reached from the footer', siteFooter],
   ['the header nav is shared and complete', siteNav],
   ['focus rings and social cards exist', polish],
+  ['article artwork exists and is credited', artwork],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
   ['FAQ page and schema agree', faqSchema],
