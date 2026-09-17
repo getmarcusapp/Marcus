@@ -756,7 +756,12 @@ function sendOrder(list, allEntries) {
 // sites are ready and what is the letter" would drift, and the one that drifted
 // would be the one a human was working from.
 function readyGroups(state) {
-  const rows = Object.entries(state.sites).filter(([, x]) => x.targets > 0);
+  // EXCLUDE applies here too. Four sites were crawled before their hosts were
+  // excluded and stayed in the ready list afterwards: a Steemit post that
+  // cannot be edited, a t-shirt, a Bandcamp track and a quote-image generator.
+  // Handing those over as work contradicts the decision not to pursue them.
+  const rows = Object.entries(state.sites)
+    .filter(([u, x]) => x.targets > 0 && !EXCLUDE.some(e => u.includes(e)));
   const reachable = x => (x.emails && x.emails.length) || x.form || x.page;
   const ready = rows.filter(([, x]) => !x.sent && reachable(x));
   const list = det.loadMisattributions();
