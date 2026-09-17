@@ -1025,6 +1025,30 @@ function outreachPipeline() {
   if (!o.EXCLUDE.some(x => x === 'medium.com')) {
     fail.push('scripts/outreach.js: Medium is not excluded, and it 403s every request we make');
   }
+  //     The other direction, which is the dangerous one. An over-broad
+  //     exclusion removes a real target forever and nothing reports the loss.
+  //     I was one step from excluding quote-database sites as a class, which
+  //     would have silently discarded wisdomquotes.com: three documented
+  //     errors on one page and a named human, the strongest letter this tool
+  //     has produced. These hosts must stay reachable.
+  if (!Array.isArray(o.DELIBERATELY_INCLUDED) || !o.DELIBERATELY_INCLUDED.length) {
+    fail.push('scripts/outreach.js: DELIBERATELY_INCLUDED is missing, so nothing guards against over-exclusion');
+  } else {
+    for (const host of o.DELIBERATELY_INCLUDED) {
+      const url = 'https://www.' + host + '/some-page';
+      const hit = o.EXCLUDE.find(x => url.includes(x));
+      if (hit) {
+        fail.push(`scripts/outreach.js: EXCLUDE pattern "${hit}" blocks ${host}, which is a real target and must stay reachable`);
+      }
+    }
+    // And the exclusions that exist must actually bite, or the list is decoration.
+    for (const host of ['redbubble.com', 'steemit.com', 'instagram.com', 'brainly.com',
+                        'quoteinvestigator.com', 'en-wikiquote-org.translate.goog']) {
+      if (!o.EXCLUDE.some(x => ('https://www.' + host + '/p').includes(x))) {
+        fail.push(`scripts/outreach.js: ${host} is not excluded, and no correction is possible there`);
+      }
+    }
+  }
   //     Exercised through selectPending, not by grepping the run loop: the
   //     first version of this test looked for the string 'EXCLUDE.some' in a
   //     slice of the source and passed with the exclusion deleted, because the

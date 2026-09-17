@@ -135,7 +135,54 @@ const EXCLUDE = [
   'medium.com', 'quora.com', 'linkedin.com', 'stackexchange.com', 'stackoverflow.com',
   // A mirror of someone else's page. The error is not theirs to fix.
   'archive.org', 'webcache.googleusercontent.com',
+  // A Google Translate proxy of a page we already exclude. wikiquote.org was
+  // on this list and en-wikiquote-org.translate.goog walked straight past it.
+  'translate.goog',
+
+  // ── STRUCTURALLY UNCORRECTABLE ──────────────────────────────────────────
+  //
+  // The bare-phrase query finds far more pages, and a share of them are pages
+  // where no correction is possible at all. The line drawn here is
+  // "correction is structurally impossible", not "correction seems unlikely",
+  // because the two kinds of mistake do not cost the same: a wrong exclusion
+  // silently removes a real target forever, while a wrong inclusion costs one
+  // twelve-second fetch. So this list only contains cases where there is
+  // nothing a recipient could do even if they wanted to.
+  //
+  // Merch. A product listing is not an editorial claim about who said a thing,
+  // and nobody reprints stock over an attribution. 21 candidates, 4 worked,
+  // none usable.
+  'redbubble.com', 'etsy.com', 'teepublic.com', 'ebay.com', 'zazzle.com',
+  'society6.com', 'displate.com', 'cafepress.com', 'teespring.com', '1stees.com',
+  // Immutable by design. A Steem or Hive post is written to a blockchain and
+  // cannot be edited by its author, let alone by us.
+  'steemit.com', 'hive.blog', 'peakd.com',
+  // Short-form social. We cannot edit someone's post, the links are nofollow,
+  // and most of these disallow us anyway.
+  'instagram.com', 'threads.com', 'tiktok.com',
+  // Answers written by students, with no editor to write to.
+  'brainly.', 'answers.com', 'chegg.com',
+  // A track page or a song title. The quote is the name of the work.
+  'bandcamp.com', 'soundcloud.com', 'spotify.com',
+  // The reference works on misattribution. Every one of these comes back
+  // "already correct", which is a fetch spent confirming what we knew.
+  'quoteinvestigator.com', 'snopes.com', 'wist.info',
 ];
+
+// NOT EXCLUDED, DELIBERATELY, AND THE NEAR MISS IS WORTH RECORDING.
+//
+// I was about to exclude quote-database sites as a class: fifty candidates,
+// no editorial staff, machine-assembled, and six of the biggest were already
+// on the list above from an earlier round. Checking the outcomes first showed
+// the class had produced a hit WITH a published address, and it was
+// wisdomquotes.com — three documented errors on one page and a named human,
+// the strongest letter this tool has produced. Excluding the class would have
+// thrown it away and nothing would have reported the loss.
+//
+// Also staying: real publications with real desks (the Indian dailies,
+// dailystoic.com, success.com) and small independent blogs, which are most of
+// what is left and the whole point.
+const DELIBERATELY_INCLUDED = ['wisdomquotes.com', 'dailystoic.com', 'success.com', 'indiatimes.com'];
 
 // Vocabulary of a page DISCUSSING a misattribution rather than committing one.
 // The query below excludes these, because a phrase-plus-author search ranks the
@@ -705,5 +752,5 @@ async function main() {
   console.log(report(state));
 }
 
-module.exports = { draft, draftForSite, numberWord, wrapIndented, letterFor, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION, queryVariants, phraseOf, sendOrder };
+module.exports = { draft, draftForSite, numberWord, wrapIndented, letterFor, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION, queryVariants, phraseOf, sendOrder, DELIBERATELY_INCLUDED };
 if (require.main === module) main();
