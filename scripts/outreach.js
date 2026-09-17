@@ -832,68 +832,49 @@ function readyGroups(state) {
 }
 
 function report(state) {
-  const rows = Object.entries(state.sites).filter(([, s]) => s.targets > 0);
-  const reachable = s => s.emails.length || s.form || s.page;
-  const ready = rows.filter(([, s]) => !s.sent && reachable(s));
-  const noContact = rows.filter(([, s]) => !s.sent && !reachable(s));
-  const done = rows.filter(([, s]) => s.sent);
+  // Built on readyGroups, not a second copy of the same grouping. The two had
+  // already drifted: readyGroups filtered out hosts we cannot act on and this
+  // did not, so `report` said 52 sites ready while `export` said 49 from the
+  // same state. Having claimed that sharing the logic prevented exactly this,
+  // I had left a duplicate in place that proved otherwise.
+  const groups = readyGroups(state);
 
-  // Counted in sites as well as pages, because the letters are per site now
-  // and a summary saying "30 ready" above a list of 26 reads as a discrepancy.
-  const readyHosts = new Set(ready.map(([u]) => domainKey(u))).size;
+  const visible = ([u]) => !EXCLUDE.some(e => u.includes(e));
+  const rows = Object.entries(state.sites).filter(([u, x]) => x.targets > 0 && visible([u]));
+  const reachable = x => (x.emails && x.emails.length) || x.form || x.page;
+  const noContact = rows.filter(([, x]) => !x.sent && !reachable(x));
+  const done = rows.filter(([, x]) => x.sent);
+  const readyPages = groups.reduce((n, g) => n + g.pages, 0);
+
   const out = ['# Outreach', '',
-    `${readyHosts} site(s) ready to send, across ${ready.length} page(s).`,
+    `${groups.length} site(s) ready to send, across ${readyPages} page(s).`,
     `${noContact.length} page(s) with no contact found, ${done.length} already sent.`,
     `${Object.keys(state.candidates).length} candidate page(s) known.`, ''];
 
-  if (ready.length) {
-    // Grouped by host, so a site with several affected pages gets one letter.
-    const byHost = new Map();
-    for (const row of ready) {
-      const k = domainKey(row[0]);
-      if (!byHost.has(k)) byHost.set(k, []);
-      byHost.get(k).push(row);
-    }
-    const groups = [...byHost.entries()].map(([host, rows]) => {
-      // The contact is a property of the site, not the page, so merge what was
-      // found on any of its pages rather than trusting whichever page happened
-      // to be crawled first.
-      const emails = [...new Set(rows.flatMap(([, x]) => x.emails || []))].filter(a => !isJunk(a));
-      const merged = {
-        entries: [...new Set(rows.flatMap(([, x]) => x.entries || []))],
-        emails,
-        form: (rows.find(([, x]) => x.form) || [, {}])[1].form || null,
-        page: (rows.find(([, x]) => x.page) || [, {}])[1].page || null,
-        weak: rows.some(([, x]) => x.weak),
-      };
-      return [host, rows, merged];
-    });
-    const ranked = sendOrder(groups.map(g => [g[0], g[2]]), det.loadMisattributions());
-    const order = new Map(ranked.map((r, i) => [r[0], i]));
-    groups.sort((a, b) => order.get(a[0]) - order.get(b[0]));
-
+  if (groups.length) {
     out.push('## Ready', '',
       groups.length + ' site(s), best first. See sendOrder for what that means.', '');
-    for (const [host, rows, s] of groups) {
-      out.push('### ' + host);
-      out.push('- Contact: ' + (s.emails.join(', ')
-        || (s.form ? 'form at ' + s.form
-        : 'contact page at ' + s.page + ' (address is rendered by JavaScript, open it)')));
-      out.push('- Pages: ' + rows.length + '   Entries: ' + s.entries.join(', ') +
-        (s.weak ? '  **short phrase, confirm by eye**' : '') +
-        (s.entries.length > 1 ? '   (' + s.entries.length + ' errors)' : ''));
-      out.push('', '```', letterForDomain(rows), '```', '');
-      out.push('Mark done:  `node scripts/outreach.js sent ' + host + '`', '');
+    for (const g of groups) {
+      out.push('### ' + g.site);
+      out.push('- Contact: ' + (g.reach === 'email' ? g.contact
+        : g.reach === 'form' ? 'form at ' + g.contact
+        : 'contact page at ' + g.contact + ' (address is rendered by JavaScript, open it)'));
+      out.push('- Pages: ' + g.pages + '   Entries: ' + g.entries.join(', ') +
+        (g.weak ? '  **short phrase, confirm by eye**' : '') +
+        (g.errors > 1 ? '   (' + g.errors + ' errors)' : ''));
+      for (const u of g.urls) out.push('  - ' + u);
+      out.push('', '```', g.letter, '```', '');
+      out.push('Mark done:  `node scripts/outreach.js sent ' + g.site + '`', '');
     }
   }
   if (noContact.length) {
     out.push('## No published contact address', '');
-    for (const [url, s] of noContact) out.push('- ' + url + '  (' + s.entries.join(', ') + ')');
+    for (const [url, x] of noContact) out.push('- ' + url + '  (' + (x.entries || []).join(', ') + ')');
     out.push('');
   }
   if (done.length) {
     out.push('## Sent', '');
-    for (const [url, s] of done) out.push('- ' + url + '  ' + (s.sentAt || '').slice(0, 10));
+    for (const [url, x] of done) out.push('- ' + url + '  ' + (x.sentAt || '').slice(0, 10));
   }
   return out.join('\n');
 }

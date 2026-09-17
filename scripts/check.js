@@ -1297,6 +1297,34 @@ function outreachPipeline() {
     }
   }
 
+  //     report and export must agree on how many sites are ready. They had
+  //     drifted: readyGroups filtered hosts we cannot act on and report kept
+  //     its own copy of the grouping that did not, so the same state produced
+  //     "52 ready" from one and 49 from the other.
+  if (typeof o.readyGroups === 'function' && typeof o.report === 'function') {
+    const fake = {
+      candidates: {},
+      sites: {
+        'https://good.example/a': { targets: 1, entries: ['closing-time'], emails: ['x@y.com'], form: null, page: null },
+        // A host on EXCLUDE. Nothing can be done about it, so neither the
+        // report nor the export may offer it as work.
+        'https://redbubble.com/i/shirt': { targets: 1, entries: ['closing-time'], emails: ['z@w.com'], form: null, page: null },
+      },
+    };
+    const groups = o.readyGroups(fake);
+    const text = o.report(fake);
+    if (groups.some(g => g.site.includes('redbubble'))) {
+      fail.push('scripts/outreach.js: readyGroups offers a host from EXCLUDE as work');
+    }
+    if (/redbubble/.test(text)) {
+      fail.push('scripts/outreach.js: report offers a host from EXCLUDE as work');
+    }
+    const claimed = Number((text.match(/^(\d+) site\(s\) ready/m) || [])[1]);
+    if (claimed !== groups.length) {
+      fail.push(`scripts/outreach.js: report says ${claimed} sites ready and readyGroups says ${groups.length}; they must be the same answer`);
+    }
+  }
+
   // 10. The letter is derived from the stored entry ids at report time, not
   //     read from a copy frozen into state when the page was crawled. While
   //     state was the source of truth, a change to the wording reached only
