@@ -33,6 +33,7 @@
  *   node scripts/outreach.js run --file urls.txt skip discovery, use a list
  *   node scripts/outreach.js run --limit 20      cap how many sites are touched
  *   node scripts/outreach.js status              what has been found and sent
+ *   node scripts/outreach.js report              rewrite outreach.md from state
  *   node scripts/outreach.js sent <url>          mark one as contacted
  *
  * State lives in outreach-state.json, which is gitignored: it holds other
@@ -608,6 +609,16 @@ async function main() {
     await run(state, opts);
     fs.writeFileSync(opts.out, report(state) + '\n', 'utf8');
     console.error('\nWrote ' + opts.out);
+    return;
+  }
+  // Rewrite outreach.md from state without touching the network. The letters
+  // are derived from the stored entry ids, so this is how a change to the
+  // wording reaches pages that were already crawled: after the per-error
+  // letters were replaced with one per site, the file on disk still held the
+  // old ones, and only a full re-crawl would have refreshed it.
+  if (cmd === 'report') {
+    fs.writeFileSync(opts.out, report(state) + '\n', 'utf8');
+    console.error('Wrote ' + opts.out + ' from state. No pages were fetched.');
     return;
   }
   // status
