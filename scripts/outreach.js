@@ -34,6 +34,7 @@
  *   node scripts/outreach.js run --limit 20      cap how many sites are touched
  *   node scripts/outreach.js status              what has been found and sent
  *   node scripts/outreach.js report              rewrite outreach.md from state
+ *   node scripts/outreach.js export              the ready list as JSON
  *   node scripts/outreach.js sent <url>          mark one as contacted
  *
  * State lives in outreach-state.json, which is gitignored: it holds other
@@ -748,6 +749,55 @@ function sendOrder(list, allEntries) {
   return list.slice().sort((a, b) => score(b) - score(a));
 }
 
+// The ready list as data, one object per site, for anything that needs it in a
+// shape other than Markdown. Used to push rows into the Notion tracker.
+//
+// Shares groupReady with report() deliberately. Two implementations of "which
+// sites are ready and what is the letter" would drift, and the one that drifted
+// would be the one a human was working from.
+function readyGroups(state) {
+  const rows = Object.entries(state.sites).filter(([, x]) => x.targets > 0);
+  const reachable = x => (x.emails && x.emails.length) || x.form || x.page;
+  const ready = rows.filter(([, x]) => !x.sent && reachable(x));
+  const list = det.loadMisattributions();
+
+  const byHost = new Map();
+  for (const row of ready) {
+    const k = domainKey(row[0]);
+    if (!byHost.has(k)) byHost.set(k, []);
+    byHost.get(k).push(row);
+  }
+  const groups = [...byHost.entries()].map(([host, rs]) => {
+    const emails = [...new Set(rs.flatMap(([, x]) => x.emails || []))];
+    const merged = {
+      entries: [...new Set(rs.flatMap(([, x]) => x.entries || []))],
+      emails,
+      form: (rs.find(([, x]) => x.form) || [, {}])[1].form || null,
+      page: (rs.find(([, x]) => x.page) || [, {}])[1].page || null,
+      weak: rs.some(([, x]) => x.weak),
+    };
+    return { host, rows: rs, merged };
+  });
+
+  const ranked = sendOrder(groups.map(g => [g.host, g.merged]), list);
+  const rank = new Map(ranked.map((r, i) => [r[0], i]));
+  groups.sort((a, b) => rank.get(a.host) - rank.get(b.host));
+
+  return groups.map((g, i) => ({
+    site: g.host,
+    priority: groups.length - i,
+    errors: g.merged.entries.length,
+    pages: g.rows.length,
+    urls: g.rows.map(([u]) => u),
+    entries: g.merged.entries,
+    weak: g.merged.weak,
+    contact: g.merged.emails.length ? g.merged.emails.join(', ')
+      : g.merged.form ? g.merged.form : g.merged.page,
+    reach: g.merged.emails.length ? 'email' : g.merged.form ? 'form' : 'open by hand',
+    letter: letterForDomain(g.rows),
+  }));
+}
+
 function report(state) {
   const rows = Object.entries(state.sites).filter(([, s]) => s.targets > 0);
   const reachable = s => s.emails.length || s.form || s.page;
@@ -862,6 +912,13 @@ async function main() {
   // wording reaches pages that were already crawled: after the per-error
   // letters were replaced with one per site, the file on disk still held the
   // old ones, and only a full re-crawl would have refreshed it.
+  // JSON on stdout, for pushing into the tracker. Deliberately not a Notion
+  // client: the credentials for that are not in this repo and a script that
+  // could write to the workspace unattended is a bigger thing than this needs.
+  if (cmd === 'export') {
+    process.stdout.write(JSON.stringify(readyGroups(state), null, 2) + '\n');
+    return;
+  }
   if (cmd === 'report') {
     fs.writeFileSync(opts.out, report(state) + '\n', 'utf8');
     console.error('Wrote ' + opts.out + ' from state. No pages were fetched.');
@@ -871,5 +928,5 @@ async function main() {
   console.log(report(state));
 }
 
-module.exports = { draft, draftForSite, numberWord, wrapIndented, letterForDomain, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION, queryVariants, phraseOf, sendOrder, DELIBERATELY_INCLUDED, draftForDomain, domainKey, entryBlock };
+module.exports = { draft, draftForSite, numberWord, wrapIndented, letterForDomain, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION, queryVariants, phraseOf, sendOrder, DELIBERATELY_INCLUDED, draftForDomain, domainKey, entryBlock, readyGroups };
 if (require.main === module) main();
