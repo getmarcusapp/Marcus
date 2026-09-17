@@ -853,6 +853,69 @@ function misquoteDetector() {
 // The outreach pipeline. It touches other people's sites and handles their
 // contact addresses, so the things that must stay true are about conduct as
 // much as correctness.
+// A page must describe itself the same way everywhere.
+//
+// This has now been wrong twice. The homepage carried its title in four places
+// (<title>, og:title, twitter:title and the WebSite schema name) and a rename
+// would have updated one. /misattributed-stoic-quotes had a schema headline
+// still reading "The Stoic Quotes That Are Not Stoic" after the <title>
+// changed, so the page offered Google one name for a rich result and another
+// for the tab.
+//
+// The rule is deliberately narrow: og:title must match twitter:title, and an
+// Article headline must match the <title> with any " | Marcus" suffix removed.
+//
+// It does NOT require the social title to match the page title. The first
+// version did, and it flagged twelve Stoic pages plus /about, all of them
+// correct: those pages give a share card a human hook ("Cato the Younger —
+// Senator and exemplar") and search a descriptive title ("Cato the Younger —
+// Life, Teaching and Where to Start"). That is two audiences, not two stories.
+// A check that fires on good work trains you to ignore it.
+function selfDescription() {
+  const fail = [];
+  const strip = t => String(t).replace(/\s*\|\s*Marcus\s*$/, '').trim();
+  const dec = t => String(t)
+    .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
+    .replace(/&amp;/g, '&').replace(/&mdash;/g, '\u2014').replace(/&nbsp;/g, ' ');
+
+  const pages = fs.readdirSync(path.join(ROOT, 'public'))
+    .filter(f => f.endsWith('.html'))
+    .map(f => 'public/' + f);
+  for (const d of ['stoic-quotes', 'stoics']) {
+    const dir = path.join(ROOT, 'public', d);
+    if (fs.existsSync(dir)) {
+      for (const f of fs.readdirSync(dir)) {
+        if (f.endsWith('.html')) pages.push('public/' + d + '/' + f);
+      }
+    }
+  }
+
+  for (const rel of pages) {
+    const src = read(rel);
+    const title = (src.match(/<title>([^<]*)<\/title>/) || [])[1];
+    if (!title) continue;
+    const og = (src.match(/<meta property="og:title" content="([^"]*)"/) || [])[1];
+    const tw = (src.match(/<meta name="twitter:title" content="([^"]*)"/) || [])[1];
+    if (og && tw && dec(og) !== dec(tw)) {
+      fail.push(`${rel}: og:title and twitter:title disagree ("${dec(og)}" vs "${dec(tw)}")`);
+    }
+    const bare = strip(dec(title));
+    // Article / SoftwareApplication headline vs the title.
+    for (const m of src.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+      let data;
+      try { data = JSON.parse(m[1]); } catch { continue; }
+      const nodes = Array.isArray(data) ? data : (data['@graph'] || [data]);
+      for (const node of nodes) {
+        if (!node || node['@type'] !== 'Article' || !node.headline) continue;
+        if (strip(node.headline) !== bare) {
+          fail.push(`${rel}: schema headline "${node.headline}" does not match the title "${bare}"`);
+        }
+      }
+    }
+  }
+  return fail;
+}
+
 function outreachPipeline() {
   const fail = [];
   const src = read('scripts/outreach.js');
@@ -1838,6 +1901,7 @@ const CHECKS = [
   ['article artwork exists and is credited', artwork],
   ['the logo is never squashed', logoAspect],
   ['the misquote detector knows a correction from a claim', misquoteDetector],
+  ['a page describes itself the same way everywhere', selfDescription],
   ['the outreach pipeline drafts but never sends', outreachPipeline],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],

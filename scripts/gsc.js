@@ -29,6 +29,7 @@
  *   node scripts/gsc.js queries   [--days 28] [--limit 40]
  *   node scripts/gsc.js pages     [--days 28]
  *   node scripts/gsc.js striking  [--days 28]   queries ranking 11-20
+ *   node scripts/gsc.js page /misattributed-stoic-quotes
  *   node scripts/gsc.js summary   [--days 28]   all three, compact
  */
 const fs = require('fs');
@@ -176,6 +177,50 @@ async function main() {
     console.log('## Top pages by impressions\n');
     const short = rows.map(r => ({ ...r, keys: [r.keys[0].replace(/^https?:\/\/(www\.)?getmarcus\.app/, '') || '/'] }));
     console.log(table(short.slice(0, cmd === 'summary' ? 15 : limit), 'page', 46).join('\n') + '\n');
+  }
+  // Which queries a single page ranks for. Editing a page that already ranks
+  // without knowing what it ranks FOR is how you improve a page off its own
+  // position: the terms it is winning on are not always the terms you assumed.
+  if (cmd === 'page') {
+    const want = argv[1];
+    if (!want || want.startsWith('--')) throw new Error('usage: gsc.js page /some-path');
+    const target = want.startsWith('http') ? want : 'https://getmarcus.app' + want;
+    const rows = await query(token, property, {
+      ...range,
+      dimensions: ['query'],
+      rowLimit: 500,
+      dimensionFilterGroups: [{ filters: [{ dimension: 'page', operator: 'equals', expression: target }] }],
+    });
+    rows.sort((a, b) => b.impressions - a.impressions);
+    console.log('## Queries for ' + want + '\n');
+    console.log(table(rows.slice(0, limit), 'query', 46).join('\n'));
+    if (rows.length) {
+      const i = rows.reduce((s2, r) => s2 + r.impressions, 0);
+      const c = rows.reduce((s2, r) => s2 + r.clicks, 0);
+      console.log('\n  ' + rows.length + ' quer(ies), ' + i + ' impressions, ' + c + ' clicks.');
+    } else {
+      // An empty query list does NOT mean the page gets no traffic. Google
+      // withholds queries issued by too few people, so a low-volume page can
+      // report impressions against the page dimension and nothing at all
+      // against the query dimension. Reporting that as "no data" invites the
+      // conclusion that the page is dead when it may be ranking well.
+      const page = await query(token, property, {
+        ...range,
+        dimensions: ['page'],
+        rowLimit: 1,
+        dimensionFilterGroups: [{ filters: [{ dimension: 'page', operator: 'equals', expression: target }] }],
+      });
+      if (page.length) {
+        const r = page[0];
+        console.log('  The page has ' + r.impressions + ' impressions and ' + r.clicks +
+          ' click(s) at average position ' + r.position.toFixed(1) + ',');
+        console.log('  but Google withholds queries issued by too few people, so none are');
+        console.log('  listed. This is a volume threshold, not an absence of ranking.');
+      } else {
+        console.log('  This page has no impressions in the period. Check the path.');
+      }
+    }
+    return;
   }
   if (cmd === 'striking' || cmd === 'summary') {
     const rows = await fetchDim('query');

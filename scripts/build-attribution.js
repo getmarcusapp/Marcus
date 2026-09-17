@@ -18,6 +18,7 @@ const { footerHtml } = require('./site-footer');
 const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
+const { newestDate, firstGitDate } = require('./site-dates');
 const SITE = 'https://getmarcus.app';
 const SLUG = 'misattributed-stoic-quotes';
 const OUT = path.join(ROOT, 'public', SLUG + '.html');
@@ -68,12 +69,25 @@ function spell(n) {
 const capitalise = w => w.charAt(0).toUpperCase() + w.slice(1);
 
 function jsonLd(list) {
+  // Dates come from git, through the same helper the sitemap uses. A reference
+  // list that keeps growing needs both: datePublished is when the page began,
+  // dateModified is when an entry was last added or corrected, and the page had
+  // neither. The sitemap was already dating this URL from these exact files, so
+  // computing it any other way here would have told Google two different dates
+  // for one page.
+  const modified = newestDate('constants/misattributions.js', 'scripts/build-attribution.js');
+  const published = firstGitDate('constants/misattributions.js');
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: 'The Stoic Quotes That Are Not Stoic',
+    // Was 'The Stoic Quotes That Are Not Stoic', left behind when the <title>
+    // changed. A headline that disagrees with the title is the page describing
+    // itself two ways.
+    headline: list.length + ' Misattributed Stoic Quotes and Their Real Sources',
     description: capitalise(spell(list.length)) + ' quotations widely attributed to Marcus Aurelius, Seneca, Epictetus and others that belong to someone else, with what each one actually is.',
     url: SITE + '/' + SLUG,
+    ...(published ? { datePublished: published } : {}),
+    ...(modified ? { dateModified: modified } : {}),
     author: { '@type': 'Organization', name: 'Marcus' },
     publisher: { '@type': 'Organization', name: 'Marcus' },
     about: list.map(e => ({ '@type': 'Quotation', text: e.text })),
@@ -91,10 +105,27 @@ function build() {
     process.exit(1);
   }
 
-  const title = 'The Stoic Quotes That Are Not Stoic | Marcus';
-  const desc = 'Marcus Aurelius did not say "what we do in life echoes in eternity". Seneca did not write ' +
-    '"every new beginning comes from some other beginning\'s end". ' +
-    capitalise(spell(MISATTRIBUTIONS.length)) + ' misattributed quotations, and what each one actually is.';
+  // TITLE AND DESCRIPTION ARE A CLICK-THROUGH PROBLEM, NOT A RANKING ONE.
+  //
+  // Search Console, first 28 days: this page sits at average position 6.9 with
+  // 44 impressions and one click. 2.3% at position seven, where five to eight
+  // is ordinary. It is being shown and not chosen.
+  //
+  // Two reasons, both fixable here. The old title, "The Stoic Quotes That Are
+  // Not Stoic", is the better sentence but it never says "misattributed" — the
+  // word is in the URL, the H1's subject, and every entry on the page, and it
+  // was the one word missing from the line a searcher actually reads. And the
+  // old description ran to 217 characters, so Google truncated it mid-example
+  // and the payoff ("what each one actually is") was never displayed.
+  //
+  // The count is interpolated, not typed. The check arm that guards these
+  // matches the word "quotations", and "quotes" is what people search for, so a
+  // typed number in a title saying "quotes" would sit outside the guard and go
+  // stale the next time an entry is added.
+  const n = MISATTRIBUTIONS.length;
+  const title = n + ' Misattributed Stoic Quotes and Their Real Sources | Marcus';
+  const desc = 'Marcus Aurelius never said "what we do in life echoes in eternity". ' +
+    capitalise(spell(n)) + ' misattributed quotations, each traced to what it actually is.';
   const canonical = SITE + '/' + SLUG;
 
   const groupsHtml = GROUPS.map(g => {
@@ -117,12 +148,12 @@ function build() {
     '<link rel="canonical" href="' + canonical + '">' +
     '<meta property="og:type" content="article">' +
     '<meta property="og:site_name" content="Marcus">' +
-    '<meta property="og:title" content="The Stoic Quotes That Are Not Stoic">' +
+    '<meta property="og:title" content="' + esc(n + ' Misattributed Stoic Quotes') + '">' +
     '<meta property="og:description" content="' + esc(desc) + '">' +
     '<meta property="og:url" content="' + canonical + '">' +
     '<meta property="og:image" content="' + SITE + '/og/misattributed-stoic-quotes.png">' +
     '<meta name="twitter:card" content="summary_large_image">' +
-    '<meta name="twitter:title" content="The Stoic Quotes That Are Not Stoic">' +
+    '<meta name="twitter:title" content="' + esc(n + ' Misattributed Stoic Quotes') + '">' +
     '<meta name="twitter:description" content="' + esc(desc) + '">' +
     '<meta name="twitter:image" content="' + SITE + '/og/misattributed-stoic-quotes.png">' +
     '<link rel="icon" href="/favicon.ico" sizes="48x48">' +

@@ -16,6 +16,7 @@ const { footerHtml } = require('./site-footer');
 const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
 
 const ROOT = path.join(__dirname, '..');
+const { gitDate, newestDate } = require('./site-dates');
 const EDITIONS_DIR = path.join(ROOT, 'content', 'editions');
 const OUT_DIR = path.join(ROOT, 'public', 'meditations');
 const PUBLIC_DIR = path.join(ROOT, 'public');
@@ -325,20 +326,9 @@ function articleEntries() {
 // Google the field is unreliable here and it stops using it at all. The CI
 // checkout needs fetch-depth: 0 for this to work, since a shallow clone has no
 // per-file history (see .github/workflows/newsletter.yml).
-function gitDate(relPath) {
-  try {
-    const out = require('child_process')
-      .execSync('git log -1 --format=%cs -- ' + JSON.stringify(relPath), {
-        cwd: ROOT,
-        stdio: ['ignore', 'pipe', 'ignore'],
-      })
-      .toString()
-      .trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : null;
-  } catch {
-    return null;
-  }
-}
+// gitDate and newestDate now live in scripts/site-dates.js: build-attribution
+// needs the same answer for its Article schema, and two implementations of
+// "when did this page last change" is two dates for one URL.
 
 // Figure ids from constants/stoics.js. Scraped rather than evaluated: the
 // module carries require() calls for portrait assets that mean nothing here,
@@ -377,7 +367,7 @@ function buildSitemap(records) {
   // alone let a prose edit to the builder ship invisibly: the credit
   // paragraph on /misattributed-stoic-quotes was rewritten on 2026-08-23 and
   // its lastmod went on reading 2026-08-02.
-  const newestDate = (...paths) => paths.map(gitDate).filter(Boolean).sort().pop() || null;
+
 
   const stoicsDate = newestDate('constants/stoics.js', 'scripts/build-stoics.js');
   add(SITE + '/', gitDate('public/index.html'), 'weekly', '1.0');
