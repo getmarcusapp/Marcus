@@ -1,10 +1,10 @@
 ---
 slug: epictetus-discourses-enchiridion-or-art-of-living
-title: "Epictetus: Discourses, Enchiridion, or The Art of Living?"
-description: The three books sold under Epictetus's name are not the same kind of book, and one of them is not a translation. Which to read first, and which one you should never quote from.
+title: "Epictetus: Discourses vs Enchiridion vs The Art of Living"
+description: The three books sold under Epictetus's name are not the same kind of book, and one is not a translation. Which to read first, and which never to quote.
 pillar: practice
 published: 2026-08-02
-modified: 2026-08-02
+modified: 2026-09-17
 about: [{"name": "Enchiridion", "description": "The Handbook of Epictetus: a short condensation of his teaching assembled by his student Arrian, around fifty brief chapters.", "sameAs": "https://en.wikipedia.org/wiki/Enchiridion_of_Epictetus"}, {"name": "Discourses", "description": "Arrian's record of Epictetus teaching in his school at Nicopolis. Four of the original eight books survive."}]
 mentions: [{"name": "Epictetus", "sameAs": "https://en.wikipedia.org/wiki/Epictetus"}, {"name": "Arrian", "sameAs": "https://en.wikipedia.org/wiki/Arrian"}, {"name": "Sharon Lebell", "sameAs": "https://en.wikipedia.org/wiki/Epictetus"}]
 ---
