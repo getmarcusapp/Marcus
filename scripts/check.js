@@ -1134,6 +1134,23 @@ function outreachPipeline() {
     }
   }
 
+  //     The single-finding letter must wrap too. draft() predated
+  //     wrapIndented and never got it, so thirty-three of the forty-nine real
+  //     letters carried the source note as one unbroken 200-character line
+  //     while the grouped letters wrapped at 76. Every line-length assertion
+  //     here exercised a grouped letter, so nothing caught it.
+  {
+    const one = o.draft({ entry: list[0] }, 'https://example.org/a-fairly-long-path-to-a-quote-page');
+    const wide = one.split('\n').filter(t => {
+      const trimmed = t.trim();
+      if (/^https?:\/\/\S+$/.test(trimmed)) return false;
+      return t.length > 78;
+    });
+    if (wide.length) {
+      fail.push(`scripts/outreach.js: ${wide.length} prose line(s) of the single-finding letter exceed 78 characters, e.g. "${wide[0].slice(0, 44)}..."`);
+    }
+  }
+
   // 9. One letter per site, not one per error. wisdomquotes.com carries three
   //    documented misattributions on a single page, and the first version
   //    mapped draft() over them, which would have sent one address three

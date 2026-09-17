@@ -448,20 +448,26 @@ function draft(hit, pageUrl, total) {
   // Derived, not typed. A hardcoded twenty-six is the same stale-count bug
   // that had /about claiming twenty for months.
   const count = total || det.loadMisattributions().length;
+  // Wrapped, like the multi-entry letters. This function predates
+  // wrapIndented and never got it, so the single-finding letter -- which is
+  // thirty-three of the forty-nine -- was going out with the source note as
+  // one unbroken 200-character line while the grouped letters wrapped at 76.
+  // The line-length check only exercised the grouped ones, so nothing caught
+  // it.
   return [
     'Subject: A quotation on your page is not ' + who + "'s",
     '',
     'Hello,',
     '',
-    'You have this on ' + pageUrl + ':',
+    ...wrapIndented('You have this on ' + pageUrl + ':', '', 76),
     '',
-    '    "' + e.text + '" — ' + e.credited,
+    ...wrapIndented('"' + e.text + '" — ' + e.credited, '    ', 76),
     '',
-    (actually + (note ? ' ' + note : '')).trim(),
+    ...wrapIndented((actually + (note ? ' ' + note : '')).trim(), '', 76),
     '',
-    'I maintain a checked library of Stoic passages and audited it against its',
-    'sources one line at a time. This was one of ' + count + ' that did not survive.',
-    'The full entry, with the trail, is here:',
+    ...wrapIndented('I maintain a checked library of Stoic passages and audited it against ' +
+      'its sources one line at a time. This was one of ' + count +
+      ' that did not survive. The full entry, with the trail, is here:', '', 76),
     '',
     '    https://getmarcus.app/misattributed-stoic-quotes#' + e.id,
     '',
