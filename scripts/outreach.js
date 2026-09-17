@@ -700,10 +700,23 @@ function draftForDomain(pages, total) {
     for (const t of page.targets) lines.push(...entryBlock(t.entry, true, '    '));
   }
 
+  // TWO DIFFERENT COUNTS, AND CONFLATING THEM PUT A FALSE NUMBER IN THE LETTER.
+  //
+  // "Eight lines across the site" counts occurrences, and is right: one quote
+  // repeated on two pages is two lines, and both need fixing.
+  //
+  // "of 26 that did not survive" counts DISTINCT entries in the audit. On
+  // quoteambition.com, precious-privilege appears on two pages, so the letter
+  // claimed "eight of 26" when only seven of the twenty-six were involved.
+  //
+  // A letter whose entire premise is that someone else's number is wrong
+  // cannot carry one of its own.
+  const distinct = new Set(all.map(t => t.entry.id)).size;
   lines.push(
     ...wrapIndented('I maintain a checked library of Stoic passages and audited it against ' +
-      'its sources one line at a time. These were ' + word + ' of ' + count +
-      ' that did not survive.', '', 76),
+      'its sources one line at a time. ' + (distinct === 1
+        ? 'This was one of ' + count + ' that did not survive.'
+        : 'These were ' + numberWord(distinct) + ' of ' + count + ' that did not survive.'), '', 76),
     '',
     'No need to credit me, and no need to reply. I thought you would rather',
     'know.',

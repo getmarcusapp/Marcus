@@ -1197,6 +1197,27 @@ function outreachPipeline() {
       if (dlong.length) {
         fail.push(`scripts/outreach.js: ${dlong.length} prose line(s) of the domain letter exceed 78 characters`);
       }
+      //     Occurrences and distinct entries are different numbers, and the
+      //     letter uses both. "Three lines across the site" counts
+      //     occurrences: one quote on two pages is two lines and both need
+      //     fixing. "of 26 that did not survive" counts distinct entries in
+      //     the audit. quoteambition.com repeated precious-privilege on two
+      //     pages and the letter claimed "eight of 26" when seven of the
+      //     twenty-six were involved. A letter arguing that someone else's
+      //     number is wrong cannot carry one of its own.
+      const dup = [
+        { url: 'https://d.example/1', targets: [{ entry: three[0] }, { entry: three[1] }] },
+        { url: 'https://d.example/2', targets: [{ entry: three[0] }] },
+      ];
+      const dupLetter = o.draftForDomain(dup);
+      if (!/Three lines across/.test(dupLetter)) {
+        fail.push('scripts/outreach.js: the domain letter does not count repeated lines as separate occurrences');
+      }
+      if (!/two of \d+ that did not survive/.test(dupLetter)) {
+        const claim = (dupLetter.match(/\w+ of \d+ that did not survive/) || ['(none)'])[0];
+        fail.push(`scripts/outreach.js: the letter claims "${claim}" for two distinct entries repeated across pages; the "of N" count must be distinct entries`);
+      }
+
       // A domain with one affected page must read as a page letter, not gain a
       // pointless "across one page" framing.
       const single = o.draftForDomain([{ url: 'https://one.example/p', targets: [{ entry: three[0] }] }]);
