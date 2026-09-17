@@ -374,6 +374,96 @@ function draft(hit, pageUrl, total) {
   ].join('\n');
 }
 
+// ONE EMAIL PER SITE, NOT PER ERROR.
+//
+// The first version mapped draft() over the targets, so wisdomquotes.com,
+// which carries three documented misattributions on a single Seneca page,
+// produced three separate near-identical emails to one address. Sending those
+// is worse than sending nothing: it reads as a mail merge, which is exactly
+// the thing this file's header says destroys the only property that makes the
+// outreach work.
+//
+// It is also the weaker pitch. "Three lines on your page are misattributed,
+// here is each one with its real source" is a person who read the page. Three
+// copies of the same letter with the quotation swapped is a script.
+// Plain-text email, so the wrapping is ours to do. The source notes run past
+// 200 characters and under a four-space indent they arrive as one long line
+// with a horizontal scrollbar in most mail clients.
+function wrapIndented(text, indent, width) {
+  const w = (width || 76) - indent.length;
+  const out = [];
+  let line = '';
+  for (const word of String(text).split(/\s+/)) {
+    if (!line) { line = word; continue; }
+    if ((line + ' ' + word).length > w) { out.push(indent + line); line = word; }
+    else line += ' ' + word;
+  }
+  if (line) out.push(indent + line);
+  return out;
+}
+
+const NUMBER_WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+const numberWord = n => NUMBER_WORD[n] || String(n);
+
+function draftForSite(targets, pageUrl, total) {
+  if (targets.length === 1) return draft(targets[0], pageUrl, total);
+
+  const count = total || det.loadMisattributions().length;
+  const n = targets.length;
+  const word = numberWord(n);
+
+  // "not Seneca's" when every line is credited to the same person, which is
+  // the common case on an author page. A mixed page gets the neutral wording
+  // rather than a subject line naming only the first of several.
+  const authors = [...new Set(targets.map(t => String(t.entry.credited).split(',')[0]))];
+  const subject = authors.length === 1
+    ? word.charAt(0).toUpperCase() + word.slice(1) + ' quotations on your page are not ' + authors[0] + "'s"
+    : word.charAt(0).toUpperCase() + word.slice(1) + ' quotations on your page are misattributed';
+
+  const lines = [
+    'Subject: ' + subject,
+    '',
+    'Hello,',
+    '',
+  ];
+  const cap = word.charAt(0).toUpperCase() + word.slice(1);
+  lines.push(...wrapIndented(
+    authors.length === 1
+      ? cap + ' lines on ' + pageUrl + ' are attributed to ' + authors[0] + '. None of them are genuine:'
+      : cap + ' lines on ' + pageUrl + ' are credited to the wrong person:', '', 76));
+  lines.push('');
+
+  for (const t of targets) {
+    const e = t.entry;
+    const who = String(e.credited).split(',')[0];
+    const actually = e.actual
+      ? 'It is ' + e.actual + '.'
+      : 'It has no known source. It appears in no surviving text of ' + who + '.';
+    let note = String(e.note || '').split('. ').slice(0, 2).join('. ').trim();
+    if (note && !/[.!?]$/.test(note)) note += '.';
+    lines.push(...wrapIndented('"' + e.text + '"', '    ', 76));
+    // Only worth naming the credited author per item when the page mixes them;
+    // on a single-author page the intro has already said it.
+    if (authors.length > 1) lines.push(...wrapIndented('Credited to ' + e.credited + '.', '    ', 76));
+    lines.push(...wrapIndented((actually + (note ? ' ' + note : '')).trim(), '    ', 76));
+    lines.push('    https://getmarcus.app/misattributed-stoic-quotes#' + e.id);
+    lines.push('');
+  }
+
+  lines.push(
+    ...wrapIndented('I maintain a checked library of Stoic passages and audited it against ' +
+      'its sources one line at a time. These were ' + word + ' of ' + count +
+      ' that did not survive.', '', 76),
+    '',
+    'No need to credit me, and no need to reply. I thought you would rather',
+    'know.',
+    '',
+    'Gio White',
+    'getmarcus.app',
+  );
+  return lines.join('\n');
+}
+
 // ── pipeline ────────────────────────────────────────────────────────────────
 async function run(state, opts) {
   let urls;
@@ -427,7 +517,7 @@ async function run(state, opts) {
       emails: contact.emails.slice(0, 3),
       form: contact.form,
       page: contact.page,
-      drafts: targets.map(t => draft(t, url)),
+      drafts: [draftForSite(targets, url)],
       sent: false,
     };
     saveState(state);
@@ -438,6 +528,22 @@ async function run(state, opts) {
 }
 
 // ── report ──────────────────────────────────────────────────────────────────
+// The letter is a pure function of the entry ids and the URL, so it is derived
+// here rather than read from state. State holds a `drafts` array written when
+// the page was crawled, and while that was the source of truth every change to
+// the copy applied only to pages crawled afterwards: the four sites already
+// found kept their old letters, including the per-error ones that sent the same
+// address three nearly identical emails.
+function letterFor(url, site) {
+  const list = det.loadMisattributions();
+  const targets = (site.entries || [])
+    .map(id => list.find(e => e.id === id))
+    .filter(Boolean)
+    .map(entry => ({ entry }));
+  if (!targets.length) return (site.drafts || []).join('\n\n---\n\n');
+  return draftForSite(targets, url, list.length);
+}
+
 function report(state) {
   const rows = Object.entries(state.sites).filter(([, s]) => s.targets > 0);
   const reachable = s => s.emails.length || s.form || s.page;
@@ -457,7 +563,7 @@ function report(state) {
         || (s.form ? 'form at ' + s.form
         : 'contact page at ' + s.page + ' (address is rendered by JavaScript, open it)')));
       out.push('- Entries: ' + s.entries.join(', ') + (s.weak ? '  **short phrase, confirm by eye**' : ''));
-      out.push('', '```', s.drafts.join('\n\n---\n\n'), '```', '');
+      out.push('', '```', letterFor(url, s), '```', '');
       out.push('Mark done:  `node scripts/outreach.js sent ' + url + '`', '');
     }
   }
@@ -508,5 +614,5 @@ async function main() {
   console.log(report(state));
 }
 
-module.exports = { draft, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION };
+module.exports = { draft, draftForSite, numberWord, wrapIndented, letterFor, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION };
 if (require.main === module) main();

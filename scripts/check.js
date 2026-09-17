@@ -1017,6 +1017,59 @@ function outreachPipeline() {
   }
   if (!q.startsWith('"')) fail.push('scripts/outreach.js: the query no longer leads with the phrase search');
 
+  // 9. One letter per site, not one per error. wisdomquotes.com carries three
+  //    documented misattributions on a single page, and the first version
+  //    mapped draft() over them, which would have sent one address three
+  //    nearly identical emails.
+  const three = ['closing-time', 'luck-preparation', 'gem-friction']
+    .map(id => list.find(e => e.id === id)).filter(Boolean);
+  if (three.length !== 3) {
+    fail.push('scripts/check.js: the three entries this arm needs are no longer all in the list');
+  } else if (typeof o.draftForSite !== 'function') {
+    fail.push('scripts/outreach.js: does not export draftForSite');
+  } else {
+    const url = 'https://wisdomquotes.com/seneca-quotes/';
+    const letter = o.draftForSite(three.map(entry => ({ entry })), url);
+    if ((letter.match(/^Subject:/gm) || []).length !== 1) {
+      fail.push('scripts/outreach.js: a page with three errors produces more than one email to the same address');
+    }
+    for (const e of three) {
+      if (!letter.includes('#' + e.id)) {
+        fail.push(`scripts/outreach.js: the grouped letter omits ${e.id}, so one of the errors goes unreported`);
+      }
+    }
+    if (!/Three quotations/.test(letter)) {
+      fail.push('scripts/outreach.js: the grouped letter does not say how many errors it found');
+    }
+    // Plain-text email. Anything past ~78 arrives with a scrollbar.
+    const long = letter.split('\n').filter(l => l.length > 78);
+    if (long.length) {
+      fail.push(`scripts/outreach.js: ${long.length} line(s) of the letter exceed 78 characters, e.g. "${long[0].slice(0, 40)}..."`);
+    }
+    if (/ that did\n?$|^not survive/m.test(letter)) {
+      fail.push('scripts/outreach.js: the closing sentence wraps mid-phrase');
+    }
+  }
+
+  // 10. The letter is derived from the stored entry ids at report time, not
+  //     read from a copy frozen into state when the page was crawled. While
+  //     state was the source of truth, a change to the wording reached only
+  //     pages crawled after it.
+  if (typeof o.letterFor !== 'function') {
+    fail.push('scripts/outreach.js: does not export letterFor');
+  } else {
+    const derived = o.letterFor('https://x.example/p', {
+      entries: ['closing-time'],
+      drafts: ['STALE COPY FROZEN AT CRAWL TIME'],
+    });
+    if (derived.includes('STALE COPY')) {
+      fail.push('scripts/outreach.js: report reads the draft stored in state, so copy changes never reach pages already crawled');
+    }
+    if (!derived.includes('#closing-time')) {
+      fail.push('scripts/outreach.js: letterFor does not rebuild the letter from the stored entry ids');
+    }
+  }
+
   return fail;
 }
 
