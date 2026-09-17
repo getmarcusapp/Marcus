@@ -157,7 +157,14 @@ async function main() {
   console.log('# ' + property + '   ' + range.startDate + ' to ' + range.endDate +
     '  (' + days + ' days, ending 3 days back because the data lags)\n');
 
-  const fetchDim = dim => query(token, property, { ...range, dimensions: [dim], rowLimit: 500 });
+  // The API returns rows ordered by clicks descending. On a site with almost no
+  // clicks that ordering carries no information, and a table headed "by
+  // impressions" that is not sorted by impressions is a lie in the output: the
+  // first run of this printed 216 impressions above 11 above 44.
+  const fetchDim = async dim => {
+    const rows = await query(token, property, { ...range, dimensions: [dim], rowLimit: 500 });
+    return rows.sort((a, b) => b.impressions - a.impressions);
+  };
 
   if (cmd === 'queries' || cmd === 'summary') {
     const rows = await fetchDim('query');
