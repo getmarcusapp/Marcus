@@ -977,7 +977,10 @@ function outreachPipeline() {
   // 4. The junk filter must be anchored, not a substring match. A bare
   //    "example" discarded editor@example-quotes.test in testing.
   const legit = ['editor@example-quotes.test', 'hello@examplemedia.com', 'contact@stoicdomain.org'];
-  const junk = ['noreply@wix.com', 'yourname@example.com', 'postmaster@anything.com', 'logo@2x.png'];
+  const junk = ['noreply@wix.com', 'yourname@example.com', 'postmaster@anything.com', 'logo@2x.png',
+    // A theme vendor scraped from a WordPress footer. Writing to the company
+    // that sells the theme about a quotation on a customer's site is careless.
+    'support@pencidesign.com', 'hello@elementor.com', 'support@themeforest.net'];
   for (const a2 of legit) if (o.isJunk(a2)) fail.push(`scripts/outreach.js: the junk filter discards a legitimate address, ${a2}`);
   for (const a2 of junk) if (!o.isJunk(a2)) fail.push(`scripts/outreach.js: the junk filter keeps ${a2}`);
 

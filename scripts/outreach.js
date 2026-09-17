@@ -385,6 +385,12 @@ const JUNK_EMAIL = [
   /@(example|domain|email|yourdomain|company)\.(com|org|net)$/i,
   /^(your ?name|name|email|user|someone|firstname)@/i,
   /@(sentry|wix|wixpress|squarespace|godaddy|shopify|cloudflare)\./i,
+  // Theme and plugin vendors, scraped out of a WordPress footer or a theme
+  // credit line. motivationalwizard.com yielded support@pencidesign.com, which
+  // is the company that sells the theme: writing to them about a quotation on
+  // someone else's site wastes both their time and ours, and looks careless to
+  // the one recipient whose opinion matters.
+  /@(pencidesign|themeforest|envato|elementor|wpengine|kinsta|siteground|bluehost|hostgator|namecheap|jetpack|automattic|woocommerce|divi|elegantthemes|mythemeshop|themeisle)\./i,
   // Writing to an address that cannot receive a reply is worse than not writing.
   /^(no-?reply|donotreply|do-not-reply|postmaster|abuse|webmaster|admin|root)@/i,
   /\.(png|jpg|jpeg|gif|svg|webp)$/i,
@@ -786,7 +792,10 @@ function readyGroups(state) {
     byHost.get(k).push(row);
   }
   const groups = [...byHost.entries()].map(([host, rs]) => {
-    const emails = [...new Set(rs.flatMap(([, x]) => x.emails || []))];
+    // isJunk again here, not only where the address was found. State holds
+    // addresses scraped before a rule existed: support@pencidesign.com, a
+    // WordPress theme vendor, was already sitting in it when that rule landed.
+    const emails = [...new Set(rs.flatMap(([, x]) => x.emails || []))].filter(a => !isJunk(a));
     const merged = {
       entries: [...new Set(rs.flatMap(([, x]) => x.entries || []))],
       emails,
@@ -843,7 +852,7 @@ function report(state) {
       // The contact is a property of the site, not the page, so merge what was
       // found on any of its pages rather than trusting whichever page happened
       // to be crawled first.
-      const emails = [...new Set(rows.flatMap(([, x]) => x.emails || []))];
+      const emails = [...new Set(rows.flatMap(([, x]) => x.emails || []))].filter(a => !isJunk(a));
       const merged = {
         entries: [...new Set(rows.flatMap(([, x]) => x.entries || []))],
         emails,
