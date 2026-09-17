@@ -58,3 +58,10 @@ outreach.md
 
 # Local secrets (search API keys). Never committed.
 .env.local
+
+# Google service account keys. scripts/gsc.js refuses to load a key from inside
+# the repo, which is the real guard; this is the second one, in case a key lands
+# here before anything tries to read it.
+*service-account*.json
+*-gsc-*.json
+.gsc/
