@@ -497,6 +497,26 @@ function wrapIndented(text, indent, width) {
 const NUMBER_WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 const numberWord = n => NUMBER_WORD[n] || String(n);
 
+// One finding, rendered. Shared by the page letter and the domain letter so a
+// change to how a correction reads cannot apply to one and not the other.
+// `nameAuthor` is false when the surrounding text has already said whose name
+// the lines are under, which is the single-author case.
+function entryBlock(e, nameAuthor, indent) {
+  const who = String(e.credited).split(',')[0];
+  const actually = e.actual
+    ? 'It is ' + e.actual + '.'
+    : 'It has no known source. It appears in no surviving text of ' + who + '.';
+  let note = String(e.note || '').split('. ').slice(0, 2).join('. ').trim();
+  if (note && !/[.!?]$/.test(note)) note += '.';
+  const out = [];
+  out.push(...wrapIndented('"' + e.text + '"', indent, 76));
+  if (nameAuthor) out.push(...wrapIndented('Credited to ' + e.credited + '.', indent, 76));
+  out.push(...wrapIndented((actually + (note ? ' ' + note : '')).trim(), indent, 76));
+  out.push(indent + 'https://getmarcus.app/misattributed-stoic-quotes#' + e.id);
+  out.push('');
+  return out;
+}
+
 function draftForSite(targets, pageUrl, total) {
   if (targets.length === 1) return draft(targets[0], pageUrl, total);
 
@@ -525,22 +545,7 @@ function draftForSite(targets, pageUrl, total) {
       : cap + ' lines on ' + pageUrl + ' are credited to the wrong person:', '', 76));
   lines.push('');
 
-  for (const t of targets) {
-    const e = t.entry;
-    const who = String(e.credited).split(',')[0];
-    const actually = e.actual
-      ? 'It is ' + e.actual + '.'
-      : 'It has no known source. It appears in no surviving text of ' + who + '.';
-    let note = String(e.note || '').split('. ').slice(0, 2).join('. ').trim();
-    if (note && !/[.!?]$/.test(note)) note += '.';
-    lines.push(...wrapIndented('"' + e.text + '"', '    ', 76));
-    // Only worth naming the credited author per item when the page mixes them;
-    // on a single-author page the intro has already said it.
-    if (authors.length > 1) lines.push(...wrapIndented('Credited to ' + e.credited + '.', '    ', 76));
-    lines.push(...wrapIndented((actually + (note ? ' ' + note : '')).trim(), '    ', 76));
-    lines.push('    https://getmarcus.app/misattributed-stoic-quotes#' + e.id);
-    lines.push('');
-  }
+  for (const t of targets) lines.push(...entryBlock(t.entry, authors.length > 1, '    '));
 
   lines.push(
     ...wrapIndented('I maintain a checked library of Stoic passages and audited it against ' +
@@ -626,14 +631,86 @@ async function run(state, opts) {
 // the copy applied only to pages crawled afterwards: the four sites already
 // found kept their old letters, including the per-error ones that sent the same
 // address three nearly identical emails.
-function letterFor(url, site) {
+function letterForDomain(rows) {
   const list = det.loadMisattributions();
-  const targets = (site.entries || [])
-    .map(id => list.find(e => e.id === id))
-    .filter(Boolean)
-    .map(entry => ({ entry }));
-  if (!targets.length) return (site.drafts || []).join('\n\n---\n\n');
-  return draftForSite(targets, url, list.length);
+  const pages = rows.map(([url, site]) => ({
+    url,
+    targets: (site.entries || [])
+      .map(id => list.find(e => e.id === id))
+      .filter(Boolean)
+      .map(entry => ({ entry })),
+  }));
+  if (!pages.some(p => p.targets.length)) {
+    return rows.flatMap(([, site]) => site.drafts || []).join('\n\n---\n\n');
+  }
+  return draftForDomain(pages, list.length);
+}
+
+// ONE LETTER PER DOMAIN, NOT PER PAGE.
+//
+// Same mistake as the per-error letters, one level up. socratic-method.com had
+// eight candidate pages, and the report would have produced eight separate
+// letters to one webmaster. The whole argument for stopping at the draft is
+// that a specific person reading a specific page is what makes these land, and
+// eight near-identical letters to one address destroys that just as thoroughly
+// as three did.
+//
+// GROUPED BY HOSTNAME, NOT REGISTRABLE DOMAIN. davidlee204.substack.com and
+// another author's Substack are different people who happen to share a
+// platform, and merging them would write to one about the other's page. Only
+// a leading www. is folded, which is the same site by any reading.
+function domainKey(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
+}
+
+// pages: [{ url, targets: [{entry}] }]
+function draftForDomain(pages, total) {
+  const live = pages.filter(p => p.targets && p.targets.length);
+  if (live.length === 0) return '';
+  if (live.length === 1) return draftForSite(live[0].targets, live[0].url, total);
+
+  const count = total || det.loadMisattributions().length;
+  const all = live.flatMap(p => p.targets);
+  const n = all.length;
+  const word = numberWord(n);
+  const cap = word.charAt(0).toUpperCase() + word.slice(1);
+  const host = domainKey(live[0].url);
+  const authors = [...new Set(all.map(t => String(t.entry.credited).split(',')[0]))];
+
+  const lines = [
+    'Subject: ' + cap + ' misattributed quotations on ' + host,
+    '',
+    'Hello,',
+    '',
+  ];
+  lines.push(...wrapIndented(
+    cap + ' lines across ' + host + ', on ' + numberWord(live.length) +
+    ' different pages, are credited to people who did not write them:', '', 76));
+  lines.push('');
+
+  for (const page of live) {
+    lines.push(...wrapIndented('On ' + page.url + ':', '  ', 76));
+    // The author is always named per entry in a domain letter. The reader is
+    // being sent to several pages and cannot be assumed to hold which name
+    // went with which line.
+    // Four spaces, not six. The entry link runs to 77 characters on the
+    // longest id and cannot be wrapped without breaking it, so every space of
+    // indent in front of it is a space over the line budget.
+    for (const t of page.targets) lines.push(...entryBlock(t.entry, true, '    '));
+  }
+
+  lines.push(
+    ...wrapIndented('I maintain a checked library of Stoic passages and audited it against ' +
+      'its sources one line at a time. These were ' + word + ' of ' + count +
+      ' that did not survive.', '', 76),
+    '',
+    'No need to credit me, and no need to reply. I thought you would rather',
+    'know.',
+    '',
+    'Gio White',
+    'getmarcus.app',
+  );
+  return lines.join('\n');
 }
 
 // SEND ORDER. The list had been in whatever order the sites happened to be
@@ -678,21 +755,52 @@ function report(state) {
   const noContact = rows.filter(([, s]) => !s.sent && !reachable(s));
   const done = rows.filter(([, s]) => s.sent);
 
+  // Counted in sites as well as pages, because the letters are per site now
+  // and a summary saying "30 ready" above a list of 26 reads as a discrepancy.
+  const readyHosts = new Set(ready.map(([u]) => domainKey(u))).size;
   const out = ['# Outreach', '',
-    `${ready.length} ready to send, ${noContact.length} with no contact found, ${done.length} already sent.`,
+    `${readyHosts} site(s) ready to send, across ${ready.length} page(s).`,
+    `${noContact.length} page(s) with no contact found, ${done.length} already sent.`,
     `${Object.keys(state.candidates).length} candidate page(s) known.`, ''];
 
   if (ready.length) {
-    out.push('## Ready', '', 'Best first. See sendOrder for what that means.', '');
-    for (const [url, s] of sendOrder(ready, det.loadMisattributions())) {
-      out.push('### ' + url);
+    // Grouped by host, so a site with several affected pages gets one letter.
+    const byHost = new Map();
+    for (const row of ready) {
+      const k = domainKey(row[0]);
+      if (!byHost.has(k)) byHost.set(k, []);
+      byHost.get(k).push(row);
+    }
+    const groups = [...byHost.entries()].map(([host, rows]) => {
+      // The contact is a property of the site, not the page, so merge what was
+      // found on any of its pages rather than trusting whichever page happened
+      // to be crawled first.
+      const emails = [...new Set(rows.flatMap(([, x]) => x.emails || []))];
+      const merged = {
+        entries: [...new Set(rows.flatMap(([, x]) => x.entries || []))],
+        emails,
+        form: (rows.find(([, x]) => x.form) || [, {}])[1].form || null,
+        page: (rows.find(([, x]) => x.page) || [, {}])[1].page || null,
+        weak: rows.some(([, x]) => x.weak),
+      };
+      return [host, rows, merged];
+    });
+    const ranked = sendOrder(groups.map(g => [g[0], g[2]]), det.loadMisattributions());
+    const order = new Map(ranked.map((r, i) => [r[0], i]));
+    groups.sort((a, b) => order.get(a[0]) - order.get(b[0]));
+
+    out.push('## Ready', '',
+      groups.length + ' site(s), best first. See sendOrder for what that means.', '');
+    for (const [host, rows, s] of groups) {
+      out.push('### ' + host);
       out.push('- Contact: ' + (s.emails.join(', ')
         || (s.form ? 'form at ' + s.form
         : 'contact page at ' + s.page + ' (address is rendered by JavaScript, open it)')));
-      out.push('- Entries: ' + s.entries.join(', ') + (s.weak ? '  **short phrase, confirm by eye**' : '') +
-        (s.entries.length > 1 ? '   (' + s.entries.length + ' errors on one page)' : ''));
-      out.push('', '```', letterFor(url, s), '```', '');
-      out.push('Mark done:  `node scripts/outreach.js sent ' + url + '`', '');
+      out.push('- Pages: ' + rows.length + '   Entries: ' + s.entries.join(', ') +
+        (s.weak ? '  **short phrase, confirm by eye**' : '') +
+        (s.entries.length > 1 ? '   (' + s.entries.length + ' errors)' : ''));
+      out.push('', '```', letterForDomain(rows), '```', '');
+      out.push('Mark done:  `node scripts/outreach.js sent ' + host + '`', '');
     }
   }
   if (noContact.length) {
@@ -724,12 +832,23 @@ async function main() {
     return;
   }
   if (cmd === 'sent') {
-    const url = argv[1];
-    if (!state.sites[url]) { console.error('Not in state: ' + url); process.exit(1); }
-    state.sites[url].sent = true;
-    state.sites[url].sentAt = new Date().toISOString();
+    const what = argv[1];
+    if (!what) { console.error('usage: outreach.js sent <host-or-url>'); process.exit(1); }
+    // A hostname marks every affected page on that site, because one letter
+    // now covers all of them. Marking only the URL that happened to be listed
+    // would leave the others to resurface as unsent in the next report.
+    const exact = state.sites[what] ? [what] : [];
+    const byHost = exact.length ? exact : Object.keys(state.sites)
+      .filter(u => domainKey(u) === what.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''))
+      .filter(u => (state.sites[u].targets || 0) > 0);
+    if (!byHost.length) { console.error('Nothing in state for: ' + what); process.exit(1); }
+    for (const u of byHost) {
+      state.sites[u].sent = true;
+      state.sites[u].sentAt = new Date().toISOString();
+    }
     saveState(state);
-    console.error('Marked sent: ' + url);
+    console.error('Marked sent: ' + byHost.length + ' page(s)');
+    for (const u of byHost) console.error('  ' + u);
     return;
   }
   if (cmd === 'run') {
@@ -752,5 +871,5 @@ async function main() {
   console.log(report(state));
 }
 
-module.exports = { draft, draftForSite, numberWord, wrapIndented, letterFor, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION, queryVariants, phraseOf, sendOrder, DELIBERATELY_INCLUDED };
+module.exports = { draft, draftForSite, numberWord, wrapIndented, letterForDomain, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION, queryVariants, phraseOf, sendOrder, DELIBERATELY_INCLUDED, draftForDomain, domainKey, entryBlock };
 if (require.main === module) main();

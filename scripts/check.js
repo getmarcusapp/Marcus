@@ -1156,9 +1156,64 @@ function outreachPipeline() {
       fail.push('scripts/outreach.js: the grouped letter does not say how many errors it found');
     }
     // Plain-text email. Anything past ~78 arrives with a scrollbar.
-    const long = letter.split('\n').filter(l => l.length > 78);
+    //
+    // A line holding nothing but a URL is exempt. The entry links run to 77
+    // characters on the longest id, and wrapping one would break it into
+    // something a reader cannot click or copy, which is worse than a long
+    // line. So the budget applies to prose, and a URL is atomic.
+    const overlong = t => {
+      const trimmed = t.trim();
+      if (/^https?:\/\/\S+$/.test(trimmed)) return false;
+      return t.length > 78;
+    };
+    const long = letter.split('\n').filter(overlong);
     if (long.length) {
       fail.push(`scripts/outreach.js: ${long.length} line(s) of the letter exceed 78 characters, e.g. "${long[0].slice(0, 40)}..."`);
+    }
+
+    //     One letter per DOMAIN as well as per page. socratic-method.com has
+    //     eight candidate pages, which in crawl order would have produced
+    //     eight letters to one webmaster.
+    if (typeof o.draftForDomain !== 'function') {
+      fail.push('scripts/outreach.js: does not export draftForDomain');
+    } else {
+      const pages = [
+        { url: 'https://socratic-method.com/a', targets: [{ entry: three[0] }] },
+        { url: 'https://socratic-method.com/b', targets: [{ entry: three[1] }, { entry: three[2] }] },
+      ];
+      const dl = o.draftForDomain(pages);
+      if ((dl.match(/^Subject:/gm) || []).length !== 1) {
+        fail.push('scripts/outreach.js: a domain with two affected pages produces more than one letter');
+      }
+      for (const e of three) {
+        if (!dl.includes('#' + e.id)) {
+          fail.push(`scripts/outreach.js: the domain letter omits ${e.id}`);
+        }
+      }
+      for (const u of ['https://socratic-method.com/a', 'https://socratic-method.com/b']) {
+        if (!dl.includes(u)) fail.push(`scripts/outreach.js: the domain letter does not say which page carries the error (${u} missing)`);
+      }
+      const dlong = dl.split('\n').filter(overlong);
+      if (dlong.length) {
+        fail.push(`scripts/outreach.js: ${dlong.length} prose line(s) of the domain letter exceed 78 characters`);
+      }
+      // A domain with one affected page must read as a page letter, not gain a
+      // pointless "across one page" framing.
+      const single = o.draftForDomain([{ url: 'https://one.example/p', targets: [{ entry: three[0] }] }]);
+      if (single !== o.draftForSite([{ entry: three[0] }], 'https://one.example/p')) {
+        fail.push('scripts/outreach.js: a single-page domain does not fall back to the page letter');
+      }
+      if (o.draftForDomain([]) !== '') {
+        fail.push('scripts/outreach.js: draftForDomain invents a letter for a domain with no findings');
+      }
+      // Hostname grouping, not registrable domain: two Substack authors are
+      // two people who share a platform.
+      if (o.domainKey('https://a.substack.com/p') === o.domainKey('https://b.substack.com/p')) {
+        fail.push('scripts/outreach.js: domainKey merges two different authors on one platform');
+      }
+      if (o.domainKey('https://www.x.com/a') !== o.domainKey('https://x.com/b')) {
+        fail.push('scripts/outreach.js: domainKey treats www and bare host as different sites');
+      }
     }
     if (/ that did\n?$|^not survive/m.test(letter)) {
       fail.push('scripts/outreach.js: the closing sentence wraps mid-phrase');
@@ -1205,13 +1260,13 @@ function outreachPipeline() {
   //     read from a copy frozen into state when the page was crawled. While
   //     state was the source of truth, a change to the wording reached only
   //     pages crawled after it.
-  if (typeof o.letterFor !== 'function') {
-    fail.push('scripts/outreach.js: does not export letterFor');
+  if (typeof o.letterForDomain !== 'function') {
+    fail.push('scripts/outreach.js: does not export letterForDomain');
   } else {
-    const derived = o.letterFor('https://x.example/p', {
+    const derived = o.letterForDomain([['https://x.example/p', {
       entries: ['closing-time'],
       drafts: ['STALE COPY FROZEN AT CRAWL TIME'],
-    });
+    }]]);
     if (derived.includes('STALE COPY')) {
       fail.push('scripts/outreach.js: report reads the draft stored in state, so copy changes never reach pages already crawled');
     }
