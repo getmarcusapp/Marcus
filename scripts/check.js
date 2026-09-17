@@ -927,6 +927,96 @@ function outreachPipeline() {
   if (/\.\./.test(sample)) fail.push('scripts/outreach.js: the draft contains a doubled full stop');
   if (!sample.includes(list[0].id)) fail.push('scripts/outreach.js: the draft does not link the specific entry');
 
+  // 6. A permanent failure must be terminal. Batch two of the real run spent 7
+  //    of its 20 slots re-fetching the same seven URLs that had already
+  //    returned 403 or been disallowed in batch one, because the pending
+  //    filter only tested for `verifiedAt` and a failure record has none.
+  //
+  //    Tested through isTerminal rather than by reading the source, because
+  //    the first version of this arm asserted the presence of the string
+  //    'PERMANENT' and passed while the filter still ignored it.
+  if (typeof o.isTerminal !== 'function') {
+    fail.push('scripts/outreach.js: does not export isTerminal, so this cannot be checked');
+  } else {
+    const cases = [
+      [{ error: 'HTTP 403' }, true, 'a 403'],
+      [{ error: 'HTTP 404' }, true, 'a 404'],
+      [{ skipped: 'robots.txt', attempts: 1 }, true, 'a robots.txt refusal'],
+      [{ error: 'timeout', attempts: 1 }, false, 'a first timeout'],
+      [{ error: 'timeout', attempts: 2 }, true, 'a second timeout'],
+      [{ error: 'HTTP 502', attempts: 1 }, false, 'a first 502'],
+      [{ verifiedAt: 'x', targets: 0 }, true, 'an already-verified page'],
+      [{ sent: true }, true, 'a page already written to'],
+      [undefined, false, 'a page never touched'],
+    ];
+    for (const [rec, want, label] of cases) {
+      if (o.isTerminal(rec) !== want) {
+        fail.push(`scripts/outreach.js: isTerminal treats ${label} as ` +
+          (want ? 'retryable, so --limit is eaten by old failures' : 'terminal, so a recoverable page is abandoned'));
+      }
+    }
+  }
+
+  // 7. Hosts we cannot read must be filtered at the point of use, not only at
+  //    discovery: 23 candidates were already in state before the rule existed.
+  if (!o.EXCLUDE.some(x => x === 'medium.com')) {
+    fail.push('scripts/outreach.js: Medium is not excluded, and it 403s every request we make');
+  }
+  //     Exercised through selectPending, not by grepping the run loop: the
+  //     first version of this test looked for the string 'EXCLUDE.some' in a
+  //     slice of the source and passed with the exclusion deleted, because the
+  //     slice still held an unrelated line that mentioned it.
+  if (typeof o.selectPending !== 'function') {
+    fail.push('scripts/outreach.js: does not export selectPending, so slot selection cannot be checked');
+  } else {
+    const urls = [
+      'https://medium.com/@a/x',            // blocked host
+      'https://good.example/a',             // fresh
+      'https://good.example/b',             // permanently failed
+      'https://good.example/c',             // one timeout, retryable
+      'https://good.example/d',             // already verified
+    ];
+    const sites = {
+      'https://good.example/b': { error: 'HTTP 403' },
+      'https://good.example/c': { error: 'timeout', attempts: 1 },
+      'https://good.example/d': { verifiedAt: 'x', targets: 0 },
+    };
+    const r = o.selectPending(urls, sites, 10);
+    if (r.pending.includes('https://medium.com/@a/x')) {
+      fail.push('scripts/outreach.js: selectPending spends a slot on a host that 403s every request');
+    }
+    if (r.blocked !== 1) fail.push(`scripts/outreach.js: selectPending counted ${r.blocked} blocked hosts, expected 1`);
+    if (r.pending.includes('https://good.example/b')) {
+      fail.push('scripts/outreach.js: selectPending retries a permanent failure, so --limit is eaten by old failures');
+    }
+    if (r.pending.includes('https://good.example/d')) {
+      fail.push('scripts/outreach.js: selectPending re-fetches an already-verified page');
+    }
+    if (!r.pending.includes('https://good.example/a')) {
+      fail.push('scripts/outreach.js: selectPending skips a fresh candidate');
+    }
+    if (!r.pending.includes('https://good.example/c')) {
+      fail.push('scripts/outreach.js: selectPending abandons a page after one transient failure');
+    }
+    // The limit is a cap on pages touched, and the remainder must be reported
+    // rather than silently dropped.
+    const r2 = o.selectPending(urls, sites, 1);
+    if (r2.pending.length !== 1) fail.push('scripts/outreach.js: selectPending ignores --limit');
+    if (r2.queued !== 1) fail.push(`scripts/outreach.js: selectPending reported ${r2.queued} queued, expected 1`);
+  }
+
+  // 8. The discovery query must exclude the debunkers. A phrase-plus-author
+  //    search ranks pages explaining a misattribution above pages committing
+  //    one: 15 of the first 40 candidates came back 'already correct'.
+  const q = o.queryFor(list[0]);
+  for (const t of ['-misattributed', '-misquote']) {
+    if (!q.includes(t)) fail.push(`scripts/outreach.js: the discovery query does not exclude ${t.slice(1)} pages`);
+  }
+  if (!/-site:medium\.com/.test(q)) {
+    fail.push('scripts/outreach.js: the discovery query does not exclude medium.com at the source');
+  }
+  if (!q.startsWith('"')) fail.push('scripts/outreach.js: the query no longer leads with the phrase search');
+
   return fail;
 }
 

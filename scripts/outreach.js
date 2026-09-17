@@ -122,7 +122,26 @@ const EXCLUDE = [
   'getmarcus.app', 'goodreads.com', 'pinterest.', 'quotefancy.com', 'brainyquote.com',
   'azquotes.com', 'reddit.com', 'facebook.com', 'x.com', 'twitter.com', 'youtube.com',
   'amazon.', 'quotes.net', 'wikiquote.org',
+  // Platforms that cannot be acted on, so a candidate slot spent here is
+  // wasted. Measured over the first 40 candidates: every one of these
+  // returned 403 or was disallowed, nine slots for nothing.
+  //   - Medium and Quora refuse a non-browser user agent. We will not forge
+  //     one, so we cannot read the page, let alone verify it.
+  //   - LinkedIn and Quora disallow us in robots.txt.
+  //   - Their outbound links are nofollow, so even a successful correction
+  //     buys no link equity, and the author is reachable only through the
+  //     platform's own messaging.
+  'medium.com', 'quora.com', 'linkedin.com', 'stackexchange.com', 'stackoverflow.com',
+  // A mirror of someone else's page. The error is not theirs to fix.
+  'archive.org', 'webcache.googleusercontent.com',
 ];
+
+// Vocabulary of a page DISCUSSING a misattribution rather than committing one.
+// The query below excludes these, because a phrase-plus-author search ranks the
+// debunkers above the repeaters: of the first 40 candidates, 15 came back
+// "already correct" and every one was a quote-investigation page. Those are the
+// pages we least want, and they were crowding out the ones we want most.
+const DISCUSSION_TERMS = ['misattributed', 'misattribution', 'misquote', 'misquoted', 'fact-check'];
 
 async function search(query) {
   const provider = searchProvider();
@@ -146,10 +165,91 @@ async function search(query) {
   return { error: 'no search API key set (BRAVE_API_KEY or SERPER_API_KEY)' };
 }
 
+// Hosts worth naming in the query itself. EXCLUDE is still applied to every
+// result afterwards, because not every provider honours an operator, but
+// filtering at the source means the 20 results we get back are 20 we can use.
+const QUERY_EXCLUDE_SITES = [
+  'medium.com', 'quora.com', 'linkedin.com', 'reddit.com', 'goodreads.com',
+  'pinterest.com', 'quotefancy.com', 'brainyquote.com', 'azquotes.com',
+];
+
+// Bump this whenever queryFor changes in a way that changes WHICH pages come
+// back. Candidates record the version that found them, and selectPending works
+// the highest version first.
+//
+// Why that matters: v1 was phrase + credited author with no exclusions, and it
+// yielded 0 sendable pages out of 40 candidates touched, because it ranked the
+// debunkers and the 403-ing platforms above the pages actually committing the
+// error. When v2 landed there were 143 untouched v1 candidates sitting ahead of
+// it in insertion order, so without this the next seven batches would have gone
+// on working the queue we already know does not convert.
+//
+//   v1  "<phrase>" "<credited>"
+//   v2  ...plus -misattributed etc. and -site: for the hosts that block us
+const QUERY_VERSION = 2;
+
 function queryFor(entry) {
   let phrase = String(entry.text).replace(/["“”]/g, '').replace(/\.$/, '');
   if (phrase.length > 70) phrase = phrase.slice(0, phrase.slice(0, 70).lastIndexOf(' '));
-  return '"' + phrase + '" "' + String(entry.credited).split(',')[0] + '"';
+  const neg = DISCUSSION_TERMS.map(t => '-' + t)
+    .concat(QUERY_EXCLUDE_SITES.map(h => '-site:' + h))
+    .join(' ');
+  return '"' + phrase + '" "' + String(entry.credited).split(',')[0] + '" ' + neg;
+}
+
+// A 403 from Medium is not going to become a 200 tomorrow, and retrying a page
+// robots.txt disallows is both pointless and rude. Without this the --limit is
+// eaten by old failures: batch two spent 7 of its 20 slots re-fetching the
+// exact seven URLs that had already failed in batch one.
+//
+// Transient failures do get another go, because a timeout or a 502 says nothing
+// about the page. Two attempts, then it is left alone.
+const PERMANENT = /^(HTTP (401|403|404|410|451)|robots\.txt)$/;
+const MAX_ATTEMPTS = 2;
+
+function isTerminal(siteRecord) {
+  const s = siteRecord;
+  if (!s) return false;
+  if (s.sent || s.verifiedAt) return true;
+  const why = s.error || (s.skipped ? 'robots.txt' : null);
+  if (!why) return false;
+  if (PERMANENT.test(why)) return true;
+  return (s.attempts || 1) >= MAX_ATTEMPTS;
+}
+
+// Which candidates this run should touch.
+//
+// Extracted from the run loop so a check can exercise it directly. The first
+// version of that check asserted that the string `EXCLUDE.some` appeared in the
+// loop body, and it passed with the exclusion removed, because the slice it
+// searched still contained a different line mentioning EXCLUDE. Reading source
+// text is not testing behaviour.
+//
+// EXCLUDE is applied here, not only at discovery: 23 candidates were already in
+// state before those hosts were excluded, and a rule enforced only at discovery
+// would still have spent a slot on each. It also covers URLs given with --file.
+function selectPending(urls, sites, limit, candidates) {
+  const usable = [];
+  let blocked = 0;
+  for (const u of urls) {
+    if (EXCLUDE.some(x => u.includes(x))) { blocked++; continue; }
+    if (isTerminal(sites[u])) continue;
+    usable.push(u);
+  }
+  // Highest query version first. Stable within a version, so the order a
+  // provider returned results in is preserved and reruns are predictable.
+  if (candidates) {
+    const qv = u => (candidates[u] && candidates[u].qv) || 1;
+    const pos = new Map(usable.map((u, i) => [u, i]));
+    usable.sort((a, b) => (qv(b) - qv(a)) || (pos.get(a) - pos.get(b)));
+  }
+  const pending = usable.slice(0, limit || 40);
+  return {
+    pending,
+    blocked,
+    queued: usable.length - pending.length,
+    retries: pending.filter(u => sites[u]).length,
+  };
 }
 
 async function discover(state, opts) {
@@ -172,7 +272,7 @@ async function discover(state, opts) {
     for (const url of urls || []) {
       if (EXCLUDE.some(x => url.includes(x))) continue;
       if (state.candidates[url]) continue;
-      state.candidates[url] = { found: new Date().toISOString(), via: entry.id };
+      state.candidates[url] = { found: new Date().toISOString(), via: entry.id, qv: QUERY_VERSION };
       n++; added++;
     }
     process.stderr.write(n + ' new\n');
@@ -286,19 +386,26 @@ async function run(state, opts) {
     urls = Object.keys(state.candidates);
   }
 
-  // Never re-touch a site already verified or already written to.
-  const pending = urls.filter(u => {
-    const s = state.sites[u];
-    return !s || (!s.sent && !s.verifiedAt);
-  }).slice(0, opts.limit || 40);
+  // Never re-touch a site already verified, already written to, or permanently
+  // unreachable. See isTerminal.
+  const { pending, blocked, queued, retries } = selectPending(urls, state.sites, opts.limit, state.candidates);
+  if (blocked) console.error('\n' + blocked + ' candidate(s) skipped: host cannot be read or acted on.');
+  if (queued) console.error(queued + ' more candidate(s) queued for a later run.');
+  if (retries) console.error(retries + ' of these are retries of a transient failure.');
 
   console.error('\n' + pending.length + ' page(s) to check\n');
   for (const url of pending) {
     process.stderr.write('  ' + url.slice(0, 72) + ' ... ');
-    if (!(await allowed(url))) { state.sites[url] = { skipped: 'robots.txt' }; process.stderr.write('robots.txt\n'); continue; }
+    const priorAttempts = (state.sites[url] && state.sites[url].attempts) || 0;
+    if (!(await allowed(url))) { state.sites[url] = { skipped: 'robots.txt', attempts: priorAttempts + 1 }; process.stderr.write('robots.txt\n'); continue; }
     const res = await get(url);
     await sleep(PAUSE_MS);
-    if (!res.ok) { state.sites[url] = { error: res.error || ('HTTP ' + res.status) }; process.stderr.write('unreachable\n'); continue; }
+    if (!res.ok) {
+      const why = res.error || ('HTTP ' + res.status);
+      state.sites[url] = { error: why, attempts: priorAttempts + 1, failedAt: new Date().toISOString() };
+      process.stderr.write(why + (PERMANENT.test(why) ? ', will not retry\n' : '\n'));
+      continue;
+    }
 
     const text = det.norm(det.visibleText(res.body));
     const hits = det.loadMisattributions().map(e => det.analyse(e, text)).filter(Boolean);
@@ -401,5 +508,5 @@ async function main() {
   console.log(report(state));
 }
 
-module.exports = { draft, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk };
+module.exports = { draft, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION };
 if (require.main === module) main();
