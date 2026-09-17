@@ -1080,6 +1080,33 @@ function outreachPipeline() {
   }
   if (!q.startsWith('"')) fail.push('scripts/outreach.js: the query no longer leads with the phrase search');
 
+  //     Two query shapes, and the second must NOT name the credited author.
+  //     Naming the author is what surfaces the attribution investigations
+  //     rather than the pages committing the error; the bare phrase is the
+  //     only shape that finds a blog innocently reprinting the line.
+  if (typeof o.queryVariants !== 'function') {
+    fail.push('scripts/outreach.js: does not export queryVariants');
+  } else {
+    const entry = list.find(e => String(e.text).split(/\s+/).length >= 6) || list[0];
+    const variants = o.queryVariants(entry);
+    if (variants.length < 2) {
+      fail.push('scripts/outreach.js: only one query shape, so discovery is capped at what one phrasing can see');
+    } else {
+      const who = String(entry.credited).split(',')[0];
+      if (!variants[0].includes('"' + who + '"')) {
+        fail.push('scripts/outreach.js: the author-qualified query no longer names the author');
+      }
+      if (variants[1].includes('"' + who + '"')) {
+        fail.push('scripts/outreach.js: the second query shape still names the credited author, so it returns the same debunkers as the first');
+      }
+      for (const v of variants) {
+        if (!v.includes('-misattributed')) {
+          fail.push('scripts/outreach.js: a query shape does not exclude the debunker vocabulary');
+        }
+      }
+    }
+  }
+
   // 9. One letter per site, not one per error. wisdomquotes.com carries three
   //    documented misattributions on a single page, and the first version
   //    mapped draft() over them, which would have sent one address three
@@ -1111,6 +1138,42 @@ function outreachPipeline() {
     }
     if (/ that did\n?$|^not survive/m.test(letter)) {
       fail.push('scripts/outreach.js: the closing sentence wraps mid-phrase');
+    }
+  }
+
+  //     Send order. Thirty letters to write by hand in crawl order is thirty
+  //     coin flips about what to do first.
+  if (typeof o.sendOrder !== 'function') {
+    fail.push('scripts/outreach.js: does not export sendOrder, so the ready list cannot be ranked');
+  } else {
+    const site = (entries, extra) => Object.assign({ entries, emails: [], form: null, page: null }, extra);
+    const rows = [
+      ['https://d/', site(['closing-time'], { page: '/contact' })],
+      ['https://a/', site(['closing-time', 'luck-preparation', 'gem-friction'], { page: '/contact' })],
+      ['https://b/', site(['closing-time'], { emails: ['x@y.com'] })],
+      ['https://c/', site(['closing-time'], { form: '/c' })],
+    ];
+    // Captured BEFORE any call to sendOrder. The first version of the in-place
+    // assertion below read this after the ranking call above, so a sendOrder
+    // that sorted its argument had already reordered `rows` and the comparison
+    // passed trivially.
+    const untouched = rows.map(r => r[0]).join();
+    const order = o.sendOrder(rows, list).map(r => r[0]);
+    if (order[0] !== 'https://a/') {
+      fail.push('scripts/outreach.js: sendOrder does not put the page carrying three errors first');
+    }
+    if (order.indexOf('https://b/') > order.indexOf('https://c/')) {
+      fail.push('scripts/outreach.js: sendOrder ranks a contact form above a published address');
+    }
+    if (order[order.length - 1] !== 'https://d/') {
+      fail.push('scripts/outreach.js: sendOrder does not sort the hand-work case last');
+    }
+    // Ranking must not mutate or drop rows.
+    if (o.sendOrder(rows, list).length !== rows.length) {
+      fail.push('scripts/outreach.js: sendOrder changes how many sites are listed');
+    }
+    if (rows.map(r => r[0]).join() !== untouched) {
+      fail.push('scripts/outreach.js: sendOrder sorts its argument in place, so the caller order changes underneath it');
     }
   }
 

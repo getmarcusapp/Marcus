@@ -144,10 +144,15 @@ const EXCLUDE = [
 // pages we least want, and they were crowding out the ones we want most.
 const DISCUSSION_TERMS = ['misattributed', 'misattribution', 'misquote', 'misquoted', 'fact-check'];
 
-async function search(query) {
+async function search(query, page) {
   const provider = searchProvider();
+  const offset = page || 0;
   if (provider === 'brave') {
-    const u = 'https://api.search.brave.com/res/v1/web/search?count=20&q=' + encodeURIComponent(query);
+    // Only ever reading the first twenty results put a hard ceiling on the
+    // candidate pool: 26 entries times 20 is the whole universe this tool could
+    // ever see, and it had been reached. Brave pages with `offset`.
+    const u = 'https://api.search.brave.com/res/v1/web/search?count=20&offset=' + offset +
+      '&q=' + encodeURIComponent(query);
     const res = await fetch(u, { headers: { Accept: 'application/json', 'X-Subscription-Token': process.env.BRAVE_API_KEY } });
     if (!res.ok) return { error: 'brave HTTP ' + res.status };
     const j = await res.json();
@@ -157,7 +162,7 @@ async function search(query) {
     const res = await fetch('https://google.serper.dev/search', {
       method: 'POST',
       headers: { 'X-API-KEY': process.env.SERPER_API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: query, num: 20 }),
+      body: JSON.stringify({ q: query, num: 20, page: offset + 1 }),
     });
     if (!res.ok) return { error: 'serper HTTP ' + res.status };
     const j = await res.json();
@@ -187,15 +192,46 @@ const QUERY_EXCLUDE_SITES = [
 //
 //   v1  "<phrase>" "<credited>"
 //   v2  ...plus -misattributed etc. and -site: for the hosts that block us
-const QUERY_VERSION = 2;
+//   v3  ...plus a bare-phrase variant with no author, and two pages of
+//       results per query instead of one. v2 exhausted what one page of one
+//       query shape could see: 26 entries times 20 results was the entire
+//       universe the tool could reach, and it had reached it. 120 of the 122
+//       candidates still queued were v1, which is a queue we know converts at
+//       roughly a tenth of what v2 did.
+const QUERY_VERSION = 3;
 
-function queryFor(entry) {
+function phraseOf(entry) {
   let phrase = String(entry.text).replace(/["“”]/g, '').replace(/\.$/, '');
   if (phrase.length > 70) phrase = phrase.slice(0, phrase.slice(0, 70).lastIndexOf(' '));
-  const neg = DISCUSSION_TERMS.map(t => '-' + t)
+  return phrase;
+}
+
+function negatives() {
+  return DISCUSSION_TERMS.map(t => '-' + t)
     .concat(QUERY_EXCLUDE_SITES.map(h => '-site:' + h))
     .join(' ');
-  return '"' + phrase + '" "' + String(entry.credited).split(',')[0] + '" ' + neg;
+}
+
+function queryFor(entry) {
+  return '"' + phraseOf(entry) + '" "' + String(entry.credited).split(',')[0] + '" ' + negatives();
+}
+
+// TWO SHAPES, BECAUSE THEY FIND DIFFERENT PAGES.
+//
+// Naming the credited author is what surfaces the attribution investigations:
+// a page arguing about whether Aristotle said a thing mentions Aristotle far
+// more than a page that simply prints the line under his name. That was the v1
+// failure, and adding negatives only suppressed the worst of it.
+//
+// The bare phrase finds the pages that just publish it, which are the ones a
+// correction can actually help. It returns more noise, and that is acceptable:
+// the detector already rejects a page that does not credit the wrong person,
+// so noise costs a fetch, whereas a target we never see costs the whole point.
+function queryVariants(entry) {
+  return [
+    queryFor(entry),
+    '"' + phraseOf(entry) + '" ' + negatives(),
+  ];
 }
 
 // A 403 from Medium is not going to become a 200 tomorrow, and retrying a page
@@ -264,22 +300,30 @@ async function discover(state, opts) {
   // Short phrases match half the internet; they are searchable by hand but not
   // worth spending API quota on.
   const worth = list.filter(e => String(e.text).split(/\s+/).length >= 6);
+  const PAGES = 2;
+  outer:
   for (const entry of worth) {
-    const q = queryFor(entry);
-    process.stderr.write('  search: ' + q.slice(0, 62) + ' ... ');
-    const { urls, error } = await search(q);
-    if (error) { process.stderr.write(error + '\n'); break; }
-    let n = 0;
-    for (const url of urls || []) {
-      if (EXCLUDE.some(x => url.includes(x))) continue;
-      if (state.candidates[url]) continue;
-      state.candidates[url] = { found: new Date().toISOString(), via: entry.id, qv: QUERY_VERSION };
-      n++; added++;
+    for (const [shape, q] of queryVariants(entry).entries()) {
+      for (let page = 0; page < PAGES; page++) {
+        process.stderr.write('  ' + entry.id.slice(0, 26).padEnd(27) +
+          (shape ? 'bare  ' : 'author') + ' p' + (page + 1) + ' ... ');
+        const { urls, error } = await search(q, page);
+        if (error) { process.stderr.write(error + '\n'); break outer; }
+        let n = 0;
+        for (const url of urls || []) {
+          if (EXCLUDE.some(x => url.includes(x))) continue;
+          if (state.candidates[url]) continue;
+          state.candidates[url] = { found: new Date().toISOString(), via: entry.id, qv: QUERY_VERSION };
+          n++; added++;
+        }
+        process.stderr.write(n + ' new\n');
+        saveState(state);
+        await sleep(PAUSE_MS);
+        // An empty page means there is no second page worth asking for.
+        if (!(urls || []).length) break;
+        if (opts.limit && added >= opts.limit) break outer;
+      }
     }
-    process.stderr.write(n + ' new\n');
-    saveState(state);
-    await sleep(PAUSE_MS);
-    if (opts.limit && added >= opts.limit) break;
   }
   return added;
 }
@@ -545,6 +589,41 @@ function letterFor(url, site) {
   return draftForSite(targets, url, list.length);
 }
 
+// SEND ORDER. The list had been in whatever order the sites happened to be
+// crawled, which with thirty-odd letters to write by hand is thirty-odd
+// coin flips about what to do first.
+//
+// Ranked on three things that are actually measurable here, and nothing else.
+// There is no domain-authority number in this tool and there is not going to be
+// a made-up one: every proxy I could compute from a URL (its length, its TLD,
+// whether it looks like a "real" site) would be a guess dressed as a score.
+//
+//   1. How many errors the page carries. Three on one page is a different
+//      letter from one, and it is the letter that reads as a person who read
+//      the page. wisdomquotes.com with three is the strongest thing the tool
+//      has produced.
+//   2. How directly it can be reached. A published address beats a form, and a
+//      form beats "the address is behind JavaScript, open it yourself" — which
+//      is real work for the sender, so it sorts last.
+//   3. Whether every entry is `certain` rather than `strong`. A correction you
+//      can prove outright is a better first impression than one that rests on
+//      an absence of evidence.
+//
+// Deliberately NOT part of the score: a platform subdomain penalty. A
+// wordpress.com blog nofollows its links, so it is worth less as a link and
+// exactly as much as a correction, and this tool's stated purpose is the
+// correction. Sorting those down would be optimising for the link.
+function sendOrder(list, allEntries) {
+  const byId = new Map(allEntries.map(e => [e.id, e]));
+  const score = ([, s]) => {
+    const n = (s.entries || []).length;
+    const contact = (s.emails && s.emails.length) ? 3 : s.form ? 2 : 1;
+    const certain = (s.entries || []).every(id => (byId.get(id) || {}).confidence === 'certain');
+    return n * 10 + contact * 2 + (certain ? 1 : 0) - (s.weak ? 5 : 0);
+  };
+  return list.slice().sort((a, b) => score(b) - score(a));
+}
+
 function report(state) {
   const rows = Object.entries(state.sites).filter(([, s]) => s.targets > 0);
   const reachable = s => s.emails.length || s.form || s.page;
@@ -557,13 +636,14 @@ function report(state) {
     `${Object.keys(state.candidates).length} candidate page(s) known.`, ''];
 
   if (ready.length) {
-    out.push('## Ready', '');
-    for (const [url, s] of ready) {
+    out.push('## Ready', '', 'Best first. See sendOrder for what that means.', '');
+    for (const [url, s] of sendOrder(ready, det.loadMisattributions())) {
       out.push('### ' + url);
       out.push('- Contact: ' + (s.emails.join(', ')
         || (s.form ? 'form at ' + s.form
         : 'contact page at ' + s.page + ' (address is rendered by JavaScript, open it)')));
-      out.push('- Entries: ' + s.entries.join(', ') + (s.weak ? '  **short phrase, confirm by eye**' : ''));
+      out.push('- Entries: ' + s.entries.join(', ') + (s.weak ? '  **short phrase, confirm by eye**' : '') +
+        (s.entries.length > 1 ? '   (' + s.entries.length + ' errors on one page)' : ''));
       out.push('', '```', letterFor(url, s), '```', '');
       out.push('Mark done:  `node scripts/outreach.js sent ' + url + '`', '');
     }
@@ -625,5 +705,5 @@ async function main() {
   console.log(report(state));
 }
 
-module.exports = { draft, draftForSite, numberWord, wrapIndented, letterFor, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION };
+module.exports = { draft, draftForSite, numberWord, wrapIndented, letterFor, queryFor, findContact, allowed, EXCLUDE, report, loadState, isJunk, isTerminal, PERMANENT, DISCUSSION_TERMS, selectPending, QUERY_VERSION, queryVariants, phraseOf, sendOrder };
 if (require.main === module) main();
