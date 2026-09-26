@@ -23,8 +23,21 @@
  *                      site's article for that entry. Titles are written with
  *                      non-breaking spaces so a caption never splits them.
  *
- * `painting` is a key in scripts/site-artwork.js, so the on-screen credit comes
- * from the same place the website's credits do.
+ * `painting` is a key in scripts/site-artwork.js, and is what any segment
+ * without its own visual shows.
+ *
+ * Optional per segment:
+ *   visual: { art, zoom: 'in'|'out'|'tight', focus: 0..1 }   a gallery painting
+ *   visual: { gen: '...' }   a generated clip. Describe places, objects, hands
+ *                            and light. No legible text (it comes out garbled)
+ *                            and no faces (an invented face of a real person is
+ *                            a made-up fact). The renderer also passes both as
+ *                            negative prompts.
+ *   pauseBefore: seconds     silence before the line, holding the previous
+ *                            picture, so a reveal lands on the cut
+ *   sfx: '...'               a generated sound effect at the start of the line
+ * Optional per short:
+ *   music: '...'             prompt for the underscore; there is a default
  */
 const SHORTS = [
   {
@@ -32,15 +45,34 @@ const SHORTS = [
     hook: 'Marcus Aurelius never said this.',
     painting: 'premeditatio-malorum',
     segments: [
-      { quote: 'What we do in life echoes in eternity.' },
-      { say: "It's on gym walls, tattoos, and a million Marcus Aurelius posts." },
-      { say: 'He never wrote it.' },
-      { say: "It's from the 2000 film Gladiator." },
-      { say: 'Russell Crowe says it as Maximus, in a movie where Marcus Aurelius is a character.' },
-      { say: "That's how the line got attached to him." },
-      { say: "Here's what Marcus actually wrote about being remembered." },
-      { payoff: 'aurelius-meditations-2-17-life', excerpt: 'Lasting fame: uncertain.', cite: 'Meditations II.17' },
-      { say: "The man who supposedly said your deeds echo forever wrote that fame doesn't last." },
+      { quote: 'What we do in life echoes in eternity.',
+        visual: { art: 'premeditatio-malorum', zoom: 'in', focus: 0.25 } },
+      { say: "It's on gym walls, tattoos, and a million Marcus Aurelius posts.",
+        visual: { gen: 'A dim modern gym at dawn, chalk dust hanging in shafts of warm light, iron plates and ' +
+          'dumbbells on a rack, and a white marble bust of a bearded Roman emperor sitting on a high shelf ' +
+          'watching over the room. Slow cinematic dolly forward. Photoreal, shallow depth of field, moody.' } },
+      { say: 'He never wrote it.',
+        visual: { art: 'premeditatio-malorum', zoom: 'tight', focus: 0.3 } },
+      { say: "It's from the 2000 film Gladiator.", pauseBefore: 0.8,
+        sfx: 'a single deep cinematic boom with a soft low rumble tail, no music',
+        visual: { gen: 'An empty ancient Roman arena at dusk, seen from the sand floor. Wind lifts fine sand across ' +
+          'the ground. A single short sword stands upright in the sand in the foreground. Tall stone arches, ' +
+          'empty stands, golden low sun and long shadows. Slow push in. Photoreal, epic, no people.' } },
+      { say: 'Russell Crowe says it as Maximus, in a movie where Marcus Aurelius is a character.',
+        visual: { gen: 'Close-up of a battered bronze gladiator helmet lying on its side on arena sand, torchlight ' +
+          'flickering across the metal, sparks and embers drifting in the dark. Slow orbit. Photoreal, no people.' } },
+      { say: "That's how the line got attached to him.",
+        visual: { gen: 'The beam of an old film projector cutting through a dark room, dust swirling in the light, ' +
+          'the reel turning in silhouette. Slow drift. Photoreal, warm, cinematic, no people.' } },
+      { say: "Here's what Marcus actually wrote about being remembered.",
+        visual: { gen: 'Night inside a Roman military tent on campaign. An oil lamp flame on a wooden table, and a ' +
+          'hand writing slowly on a small wax tablet with a stylus. Close-up on the hand and the lamp only. ' +
+          'Warm flicker, deep shadows. Photoreal, intimate, slow.' } },
+      { payoff: 'aurelius-meditations-2-17-life', excerpt: 'Lasting fame: uncertain.', cite: 'Meditations II.17',
+        visual: { gen: 'Weathered, broken marble statues half-buried in long grass among ancient ruins, fog rolling ' +
+          'through at dawn, a toppled stone head in the foreground. Slow push in. Photoreal, melancholy.' } },
+      { say: "The man who supposedly said your deeds echo forever wrote that fame doesn't last.",
+        visual: { art: 'premeditatio-malorum', zoom: 'out', focus: 0.25 } },
     ],
   },
   {
