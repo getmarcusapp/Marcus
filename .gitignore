@@ -65,3 +65,7 @@ outreach.md
 *service-account*.json
 *-gsc-*.json
 .gsc/
+
+# Rendered shorts and their working files. Large, and regenerable from
+# scripts/shorts-scripts.js.
+shorts-out/

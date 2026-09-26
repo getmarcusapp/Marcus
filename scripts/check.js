@@ -916,6 +916,39 @@ function selfDescription() {
   return fail;
 }
 
+// The shorts claim, on screen, that every quotation was checked. So a script
+// whose hook has drifted from the misattribution entry, or whose payoff is not
+// word for word in the checked library, must fail here before it can fail in
+// public. An unverified payoff is allowed to exist but must be flagged, since
+// the renderer refuses it without --allow-unverified.
+function shortsScripts() {
+  const fail = [];
+  const { SHORTS } = require(path.join(ROOT, 'scripts', 'shorts-scripts.js'));
+  const { validate } = require(path.join(ROOT, 'scripts', 'shorts.js'));
+  for (const s of SHORTS) {
+    for (const p of validate(s)) {
+      if (!p.startsWith('UNVERIFIED')) fail.push(`scripts/shorts-scripts.js ${s.id}: ${p}`);
+    }
+    for (const seg of s.segments) {
+      if (seg.unverified && !validate(s).some(p => p.startsWith('UNVERIFIED'))) {
+        fail.push(`scripts/shorts.js: ${s.id} has an unverified payoff that validate() does not flag`);
+      }
+    }
+  }
+  // Prove the guard bites: a paraphrased hook and a paraphrased payoff.
+  const probe = JSON.parse(JSON.stringify(SHORTS[0]));
+  probe.segments = probe.segments.map(x => x.quote ? { quote: 'What we do in life echoes forever.' } : x);
+  if (!validate(probe).some(p => /word for word/.test(p))) {
+    fail.push('scripts/shorts.js: a paraphrased hook passed validation');
+  }
+  const probe2 = JSON.parse(JSON.stringify(SHORTS[0]));
+  probe2.segments = probe2.segments.map(x => x.payoff ? { ...x, excerpt: 'Fame never lasts.' } : x);
+  if (!validate(probe2).some(p => /verbatim/.test(p))) {
+    fail.push('scripts/shorts.js: a paraphrased payoff passed validation');
+  }
+  return fail;
+}
+
 function outreachPipeline() {
   const fail = [];
   const src = read('scripts/outreach.js');
@@ -2113,6 +2146,7 @@ const CHECKS = [
   ['the logo is never squashed', logoAspect],
   ['the misquote detector knows a correction from a claim', misquoteDetector],
   ['a page describes itself the same way everywhere', selfDescription],
+  ['every short quotes its source word for word', shortsScripts],
   ['the outreach pipeline drafts but never sends', outreachPipeline],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
