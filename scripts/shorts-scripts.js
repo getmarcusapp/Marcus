@@ -20,7 +20,8 @@
  *                      checking the wording against a printed translation.
  *   { say: '...' }     Narration. Free text, but every factual claim in it
  *                      should already be on the misattribution entry or the
- *                      site's article for that entry.
+ *                      site's article for that entry. Titles are written with
+ *                      non-breaking spaces so a caption never splits them.
  *
  * `painting` is a key in scripts/site-artwork.js, so the on-screen credit comes
  * from the same place the website's credits do.
@@ -49,7 +50,7 @@ const SHORTS = [
     segments: [
       { quote: "Every new beginning comes from some other beginning's end." },
       { say: 'Credited to Seneca on thousands of pages.' },
-      { say: "It's the last line of Closing Time, by Semisonic, 1998." },
+      { say: "It's the last line of Closing Time, a 1998 song by Semisonic." },
       { say: 'A song about a bar closing for the night.' },
       { say: "Dan Wilson wrote it, and he's said it was also about his daughter being born." },
       { say: 'Seneca did write about endings. This is him.' },
@@ -66,7 +67,7 @@ const SHORTS = [
     painting: 'virtue-wisdom',
     segments: [
       { quote: 'We are what we repeatedly do. Excellence, then, is not an act, but a habit.' },
-      { say: "That's Will Durant, a historian, in The Story of Philosophy, 1926." },
+      { say: "That's Will Durant, a historian, in The Story of Philosophy, 1926." },
       { say: 'He was summarizing Aristotle, and he said so.' },
       { say: 'The name just fell off along the way.' },
       { say: "Here's what Aristotle actually wrote." },
@@ -86,7 +87,7 @@ const SHORTS = [
     segments: [
       { quote: 'The secret of change is to focus all of your energy not on fighting the old, but on building the new.' },
       { say: 'Credited to Socrates everywhere. Here is the twist.' },
-      { say: "It's from Way of the Peaceful Warrior, a 1980 novel by Dan Millman." },
+      { say: "It's from Way of the Peaceful Warrior, a 1980 novel by Dan Millman." },
       { say: 'The narrator meets an old man working nights at a gas station, and nicknames him Socrates.' },
       { say: 'That Socrates says it.' },
       { say: 'The real one never wrote a single word down. Everything we have from him comes through other people.' },

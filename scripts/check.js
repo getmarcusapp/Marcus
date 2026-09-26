@@ -935,6 +935,32 @@ function shortsScripts() {
       }
     }
   }
+  // Captions. The first renders showed "It's from Gladiator, the" with the
+  // article stranded from its noun, and split "Marcus / Aurelius" and the title
+  // of Millman's novel across two cards.
+  const { chunk } = require(path.join(ROOT, 'scripts', 'shorts.js'));
+  const STRAND = /\b(a|an|the|of|to|in|by|for|and|with|from)$/i;
+  for (const s of SHORTS) {
+    for (const seg of s.segments) {
+      if (!seg.say) continue;
+      const cards = chunk(seg.say);
+      for (const c of cards) {
+        if (STRAND.test(c)) fail.push(`scripts/shorts.js ${s.id}: caption card ends on a word that needs what follows: "${c}"`);
+      }
+      for (let i = 1; i < cards.length; i++) {
+        if (/\b(Marcus|Dan|Will|Elbert|Russell)$/.test(cards[i - 1]) && /^[A-Z]/.test(cards[i])) {
+          fail.push(`scripts/shorts.js ${s.id}: a name is split across caption cards: "${cards[i - 1]}" / "${cards[i]}"`);
+        }
+      }
+    }
+  }
+  if (chunk("It's from Gladiator, the 2000 film.").some(c => STRAND.test(c))) {
+    fail.push('scripts/shorts.js: chunk() strands "the" again, the exact bug the first render had');
+  }
+  if (chunk('It is from Way\u00a0of\u00a0the\u00a0Peaceful\u00a0Warrior, a novel.').some(c => /^of\b|Way$/.test(c))) {
+    fail.push('scripts/shorts.js: chunk() splits a title bound with non-breaking spaces');
+  }
+
   // Prove the guard bites: a paraphrased hook and a paraphrased payoff.
   const probe = JSON.parse(JSON.stringify(SHORTS[0]));
   probe.segments = probe.segments.map(x => x.quote ? { quote: 'What we do in life echoes forever.' } : x);

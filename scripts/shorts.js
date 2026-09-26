@@ -174,15 +174,75 @@ function png(body, file, css = '') {
 // off, which is how most of these will be watched.
 const CAPTION_BOX = 'top:1360px;height:420px;display:flex;align-items:center;justify-content:center;padding:0 90px;text-align:center';
 
-function chunk(text) {
+// Captions break where a reader would pause, not every N words. A fixed cut put
+// "It's from Gladiator, the" on screen, split "Marcus / Aurelius", and left
+// single words like "born." stranded on their own card.
+//
+// So: split into clauses at punctuation first; divide each clause into as few
+// balanced pieces as fit (about 28 characters each) rather than filling greedily,
+// which is what strands the last word; then nudge any boundary that would split
+// a capitalised name or end on a word that needs what follows. A clause of one
+// or two words joins the previous card when it fits, so "1998." rides along
+// with the sentence it finishes instead of flashing up alone.
+const CLINGY = new Set(['a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by', 'for', 'and', 'but', 'or',
+  'as', 'with', 'from', 'his', 'her', 'their', 'your', 'my', 'its', "it's", 'is', 'was', 'that', 'who',
+  'which', 'about', 'every', 'what', "here's", 'this']);
+// Two lines of 60px Inter hold about 32 characters comfortably.
+const MAX = 32;
+const bare = w => w.toLowerCase().replace(/[^a-z']/g, '');
+const isCap = w => /^[A-Z]/.test(w) && !/[,.;:!?]$/.test(w);
+
+function balanced(ws) {
+  const chars = ws.join(' ').length;
+  const n = Math.max(1, Math.ceil(chars / MAX));
+  if (n === 1) return [ws];
+  const cuts = [];
+  for (let k = 1; k < n; k++) cuts.push(Math.round(ws.length * k / n));
+  const fixed = cuts.map(c => {
+    // Try the planned cut, then one either side, for a boundary that neither
+    // splits a name nor strands a clingy word.
+    for (const d of [0, 1, -1, 2, -2]) {
+      const x = c + d;
+      if (x <= 0 || x >= ws.length) continue;
+      const before = ws[x - 1], after = ws[x];
+      if (CLINGY.has(bare(before))) continue;
+      if (isCap(before) && /^[A-Z]/.test(after)) continue;
+      return x;
+    }
+    // No clean break anywhere near: keep the clause whole and let it wrap to
+    // two lines, rather than strand "It's from" before a title.
+    return null;
+  }).filter(c => c !== null);
   const out = [];
-  let cur = [];
-  for (const w of text.split(/\s+/)) {
-    if (cur.length && (cur.length >= 4 || (cur.join(' ') + ' ' + w).length > 26)) { out.push(cur.join(' ')); cur = []; }
-    cur.push(w);
-  }
-  if (cur.length) out.push(cur.join(' '));
+  let from = 0;
+  for (const c of [...new Set(fixed)].sort((a, b) => a - b)) { if (c > from) { out.push(ws.slice(from, c)); from = c; } }
+  out.push(ws.slice(from));
   return out;
+}
+
+function chunk(text) {
+  // Ordinary spaces only: a non-breaking space in a script binds a title into
+  // one unit, so "Way of the Peaceful Warrior" is never split across cards.
+  const ws = text.split(/ +/).filter(Boolean);
+  const clauses = [];
+  let cur = [];
+  for (const w of ws) {
+    cur.push(w);
+    if (/[,.;:!?]["'”’]?$/.test(w)) { clauses.push(cur); cur = []; }
+  }
+  if (cur.length) clauses.push(cur);
+  const out = [];
+  for (const cl of clauses) {
+    const pieces = balanced(cl);
+    const prev = out[out.length - 1];
+    if (prev && cl.length <= 2 && !/[.!?]["'”’]?$/.test(prev[prev.length - 1]) &&
+        (prev.join(' ') + ' ' + cl.join(' ')).length <= MAX + 6) {
+      prev.push(...cl);
+      continue;
+    }
+    out.push(...pieces);
+  }
+  return out.map(p => p.join(' '));
 }
 
 // ── build ───────────────────────────────────────────────────────────────────
@@ -236,8 +296,7 @@ async function render(short, opts) {
   const credit = [art.artist, art.work, art.date].filter(Boolean).join(', ');
   png(`
     <div class="abs" style="top:120px;text-align:center;font:500 26px Inter;letter-spacing:.32em;color:${GOLD}">MISATTRIBUTED</div>
-    <div class="abs" style="top:175px;height:270px;display:flex;align-items:center;justify-content:center;padding:0 80px;text-align:center;font:600 66px/1.18 Cinzel;color:${CREAM}">${esc(short.hook)}</div>
-    <div class="abs" style="top:${BAND.top + BAND.height + 18}px;text-align:center;padding:0 90px;font:400 22px/1.35 Inter;color:rgba(232,228,220,.45)">${esc(credit)}</div>`,
+    <div class="abs" style="top:175px;height:270px;display:flex;align-items:center;justify-content:center;padding:0 80px;text-align:center;font:600 66px/1.18 Cinzel;color:${CREAM}">${esc(short.hook)}</div>`,
     staticPng);
 
   let n = 0;
@@ -323,6 +382,10 @@ async function render(short, opts) {
     `DESCRIPTION`,
     `"${entry.text}" is commonly credited to ${entry.credited}. It's ${entry.actual}.`,
     ``, `The full trail: https://getmarcus.app/misattributed-stoic-quotes#${entry.id}`,
+    // The credit lives here rather than on screen, where it read as clutter.
+    // Public domain needs no credit, but a channel about naming sources
+    // correctly should still name the painter.
+    ``, `Image: ${credit}.`,
     ``, `VOICE`, voice === 'elevenlabs'
       ? 'ElevenLabs clone. Tick the AI / altered-or-synthetic content disclosure on YouTube and TikTok.'
       : 'macOS say, DRAFT ONLY. Not for posting.',
