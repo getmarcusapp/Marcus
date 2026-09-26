@@ -97,6 +97,12 @@ function validate(short) {
 // ── voice ───────────────────────────────────────────────────────────────────
 const spoken = seg => seg.quote || seg.say || seg.excerpt;
 
+// Intonation context is the adjacent sentence on each side and no more. It was
+// 400 characters either way, which in a 30-second script is the whole script,
+// so editing one line changed every sentence's cache key and re-voiced all of
+// them. One sentence either side is enough to carry the rhythm across the join.
+const neighbours = (all, i) => [i > 0 ? spoken(all[i - 1]) : '', i + 1 < all.length ? spoken(all[i + 1]) : ''];
+
 // Voiced sentences are cached by voice + text + context, so tweaking a caption
 // or the layout and re-rendering costs no ElevenLabs characters. Changing a
 // sentence, or its neighbours (they shape the intonation), re-voices only that.
@@ -105,7 +111,7 @@ const CACHE = path.join(OUT, '.voice-cache');
 async function synth(seg, i, all, file, voice) {
   const text = spoken(seg);
   const ctx = voice === 'elevenlabs'
-    ? [process.env.ELEVENLABS_VOICE_ID, all.slice(0, i).map(spoken).join(' ').slice(-400), all.slice(i + 1).map(spoken).join(' ').slice(0, 400)]
+    ? [process.env.ELEVENLABS_VOICE_ID, ...neighbours(all, i)]
     : ['say-Daniel-172'];
   const key = require('crypto').createHash('sha256').update(JSON.stringify([voice, text, ...ctx])).digest('hex').slice(0, 24);
   const cached = path.join(CACHE, key + '.wav');
@@ -128,8 +134,8 @@ async function synthUncached(seg, i, all, file, voice, text) {
         body: JSON.stringify({
           text,
           model_id: 'eleven_multilingual_v2',
-          previous_text: all.slice(0, i).map(spoken).join(' ').slice(-400),
-          next_text: all.slice(i + 1).map(spoken).join(' ').slice(0, 400),
+          previous_text: neighbours(all, i)[0],
+          next_text: neighbours(all, i)[1],
         }),
       });
     if (!res.ok) throw new Error('ElevenLabs HTTP ' + res.status + ': ' + (await res.text()).slice(0, 200));

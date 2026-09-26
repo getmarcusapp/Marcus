@@ -35,7 +35,7 @@ const SHORTS = [
       { quote: 'What we do in life echoes in eternity.' },
       { say: "It's on gym walls, tattoos, and a million Marcus Aurelius posts." },
       { say: 'He never wrote it.' },
-      { say: "It's from Gladiator, the 2000 film." },
+      { say: "It's from the 2000 film Gladiator." },
       { say: 'Russell Crowe says it as Maximus, in a movie where Marcus Aurelius is a character.' },
       { say: "That's how the line got attached to him." },
       { say: "Here's what Marcus actually wrote about being remembered." },
