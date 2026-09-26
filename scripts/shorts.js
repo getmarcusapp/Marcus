@@ -97,8 +97,25 @@ function validate(short) {
 // ── voice ───────────────────────────────────────────────────────────────────
 const spoken = seg => seg.quote || seg.say || seg.excerpt;
 
+// Voiced sentences are cached by voice + text + context, so tweaking a caption
+// or the layout and re-rendering costs no ElevenLabs characters. Changing a
+// sentence, or its neighbours (they shape the intonation), re-voices only that.
+const CACHE = path.join(OUT, '.voice-cache');
+
 async function synth(seg, i, all, file, voice) {
   const text = spoken(seg);
+  const ctx = voice === 'elevenlabs'
+    ? [process.env.ELEVENLABS_VOICE_ID, all.slice(0, i).map(spoken).join(' ').slice(-400), all.slice(i + 1).map(spoken).join(' ').slice(0, 400)]
+    : ['say-Daniel-172'];
+  const key = require('crypto').createHash('sha256').update(JSON.stringify([voice, text, ...ctx])).digest('hex').slice(0, 24);
+  const cached = path.join(CACHE, key + '.wav');
+  if (fs.existsSync(cached)) { fs.copyFileSync(cached, file); return; }
+  fs.mkdirSync(CACHE, { recursive: true });
+  await synthUncached(seg, i, all, file, voice, text);
+  fs.copyFileSync(file, cached);
+}
+
+async function synthUncached(seg, i, all, file, voice, text) {
   if (voice === 'elevenlabs') {
     // previous_text / next_text let ElevenLabs keep the intonation of a whole
     // paragraph while generating it a sentence at a time, which is what makes
@@ -289,7 +306,10 @@ async function render(short, opts) {
     last = next;
   });
   g.push(`[${last}]format=yuv420p[vout]`);
-  g.push(`[${audioIdx}:a]apad[aout]`);
+  // Normalised to -14 LUFS, where Shorts, Reels and TikTok sit. The raw
+  // voiceover averaged -28 dB, which on a phone plays noticeably quieter than
+  // whatever was scrolled past just before it.
+  g.push(`[${audioIdx}:a]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=44100,apad[aout]`);
 
   fs.mkdirSync(OUT, { recursive: true });
   const mp4 = path.join(OUT, `${short.id}.mp4`);
