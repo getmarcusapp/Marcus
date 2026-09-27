@@ -227,13 +227,17 @@ const NEGATIVE = 'text, letters, words, writing, captions, subtitles, signage, w
   'faces, visible faces, portraits, modern logos, cartoon, illustration, low quality';
 const clipLength = d => (d <= 4.4 ? '4s' : d <= 6.4 ? '6s' : '8s');
 
+const clipBody = (prompt, need, extraNegative) => ({
+  prompt, negative_prompt: [NEGATIVE, extraNegative].filter(Boolean).join(', '),
+  aspect_ratio: '9:16', resolution: '720p',
+  duration: clipLength(need), generate_audio: false,
+});
+const clipPath = (prompt, extraNegative, need) =>
+  cached('.gen-cache', hash([VIDEO_MODEL, clipBody(prompt, need, extraNegative)]), '.mp4');
+
 async function generateClip(prompt, need, extraNegative) {
-  const body = {
-    prompt, negative_prompt: [NEGATIVE, extraNegative].filter(Boolean).join(', '),
-    aspect_ratio: '9:16', resolution: '720p',
-    duration: clipLength(need), generate_audio: false,
-  };
-  const file = cached('.gen-cache', hash([VIDEO_MODEL, body]), '.mp4');
+  const body = clipBody(prompt, need, extraNegative);
+  const file = clipPath(prompt, extraNegative, need);
   if (fs.existsSync(file)) return file;
   const auth = { Authorization: 'Key ' + process.env.FAL_KEY, 'Content-Type': 'application/json' };
   const sub = await (await fetch(`https://queue.fal.run/${VIDEO_MODEL}`, { method: 'POST', headers: auth, body: JSON.stringify(body) })).json();
@@ -258,9 +262,12 @@ async function generateClip(prompt, need, extraNegative) {
 // by letter before it is used, which a moving clip cannot. The quote on a gym
 // wall has to be the real misattributed wording, or the shot is itself wrong.
 const IMAGE_MODEL = 'fal-ai/nano-banana-pro';
+const stillBody = prompt => ({ prompt, aspect_ratio: '9:16', resolution: '2K', output_format: 'jpeg', num_images: 1 });
+const stillPath = prompt => cached('.gen-cache', hash([IMAGE_MODEL, stillBody(prompt)]), '.jpg');
+
 async function generateStill(prompt) {
-  const body = { prompt, aspect_ratio: '9:16', resolution: '2K', output_format: 'jpeg', num_images: 1 };
-  const file = cached('.gen-cache', hash([IMAGE_MODEL, body]), '.jpg');
+  const body = stillBody(prompt);
+  const file = stillPath(prompt);
   if (fs.existsSync(file)) return file;
   const auth = { Authorization: 'Key ' + process.env.FAL_KEY, 'Content-Type': 'application/json' };
   const sub = await (await fetch(`https://queue.fal.run/${IMAGE_MODEL}`, { method: 'POST', headers: auth, body: JSON.stringify(body) })).json();
@@ -444,13 +451,20 @@ async function render(short, opts) {
   cuts.push(frame(voEnd));
   // A segment's visual may be a list, which splits its time evenly into a
   // quick montage ("gym walls, tattoos" is two pictures, not one).
-  const fallback = v => ((v.gen || v.still) && !canGen ? { art: short.painting, zoom: 'in', fellBack: true } : v);
+  // Without generation (--no-gen, or no key), anything already generated and
+  // cached is still used: --no-gen means "spend nothing", not "ignore what has
+  // already been paid for". Only uncached beats fall back to the painting.
+  const isCached = v => fs.existsSync(v.still ? stillPath(v.still) : clipPath(v.gen, v.negative, v.__need || 4));
+  const fallback = v => ((v.gen || v.still) && !canGen && !isCached(v)
+    ? { art: short.painting, zoom: 'in', fellBack: true } : v);
   const specs = [];
   const bounds = [];
   timeline.forEach(({ seg }, i) => {
-    const list = [].concat(seg.visual || { art: short.painting }).map(fallback);
+    const list = [].concat(seg.visual || { art: short.painting }).map(v => ({ ...v }));
     const a = cuts[i], b = cuts[i + 1];
     list.forEach((v, k) => {
+      if (v.gen) v.__need = (Math.round(a + (b - a) * (k + 1) / list.length) - Math.round(a + (b - a) * k / list.length)) / FPS;
+      v = fallback(v);
       specs.push(v);
       bounds.push([Math.round(a + (b - a) * k / list.length), Math.round(a + (b - a) * (k + 1) / list.length)]);
     });
@@ -548,11 +562,25 @@ async function render(short, opts) {
     if (f0 > at) seq.push({ f: blank, n: f0 - at });
     if (f1 > Math.max(f0, at)) { seq.push({ f: s.f, n: f1 - Math.max(f0, at) }); at = f1; }
   }
-  const textList = path.join(work, 'text.txt');
-  fs.writeFileSync(textList, seq.map(s => `file '${s.f}'\nduration ${(s.n / FPS).toFixed(4)}`).join('\n') +
-    `\nfile '${seq[seq.length - 1].f}'\n`);
+  // One symlink per frame, read as a numbered image sequence at exactly FPS.
+  // The first version fed the states to ffmpeg's concat demuxer with a
+  // duration each, which does not keep still images frame-exact: the
+  // Semisonic track came out as 805 frames claiming 32.1s where 873 frames and
+  // 29.1s were planned, so captions drifted steadily behind the pictures and
+  // "This is him." landed over the wrong painting. Laying it out frame by
+  // frame makes the length exact by construction.
+  const framesDir = path.join(work, 'frames');
+  fs.mkdirSync(framesDir, { recursive: true });
+  let fi = 0;
+  for (const s of seq) for (let k = 0; k < s.n; k++) {
+    fs.symlinkSync(s.f, path.join(framesDir, `f${String(fi++).padStart(6, '0')}.png`));
+  }
   const text = path.join(work, 'text.mov');
-  ff(['-f', 'concat', '-safe', '0', '-i', textList, '-vf', `fps=${FPS},format=rgba`, '-c:v', 'png', text]);
+  ff(['-framerate', String(FPS), '-i', path.join(framesDir, 'f%06d.png'), '-c:v', 'png', '-pix_fmt', 'rgba', text]);
+  const want = frame(total);
+  const got = Number(execFileSync('ffprobe', ['-v', 'error', '-count_frames', '-select_streams', 'v:0',
+    '-show_entries', 'stream=nb_read_frames', '-of', 'csv=p=0', text]).toString().trim());
+  if (Math.abs(got - want) > 1) throw new Error(`caption track is ${got} frames, expected ${want}: timing would drift`);
 
   // 5. Sound: voice, a music bed under it, and effects on marked beats.
   const audioIn = ['-i', vo];

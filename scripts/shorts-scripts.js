@@ -98,16 +98,34 @@ const SHORTS = [
     hook: 'This "Seneca quote" is a 90s bar song.',
     painting: 'negative-visualization',
     segments: [
-      { quote: "Every new beginning comes from some other beginning's end." },
-      { say: 'Credited to Seneca on thousands of pages.' },
-      { say: "It's the last line of Closing Time, a 1998 song by Semisonic." },
-      { say: 'A song about a bar closing for the night.' },
-      { say: "Dan Wilson wrote it, and he's said it was also about his daughter being born." },
-      { say: 'Seneca did write about endings. This is him.' },
+      { quote: "Every new beginning comes from some other beginning's end.",
+        visual: { art: 'negative-visualization', zoom: 'in', focus: 0.4 } },
+      { say: 'Credited to Seneca on thousands of pages.',
+        visual: { still: 'Photograph of a framed minimalist motivational print hanging on a warm cafe wall, ' +
+          'next to a potted plant. The print has elegant black serif text on cream paper that reads exactly: ' +
+          '"Every new beginning comes from some other beginning\'s end." and beneath it, smaller: "— Seneca". ' +
+          'Soft morning light, shallow depth of field. Photoreal. No people.', zoom: 'in', focus: 0.4 } },
+      { say: "It's the last line of Closing Time, a 1998 song by Semisonic.", pauseBefore: 0.8,
+        sfx: 'a record needle dropping onto a vinyl record, a soft thump then warm crackle, no music',
+        visual: { gen: 'A small neighbourhood bar at closing time in the late 1990s. Chairs being turned upside ' +
+          'down onto tables, a glowing jukebox in the corner, warm amber light, an empty wooden bar top with one ' +
+          'last glass. Slow dolly across the room. Photoreal, nostalgic, cinematic. No readable signs, no faces.',
+          negative: 'neon text, readable signs, logos, brand names, band, musicians, faces' } },
+      { say: 'A song about a bar closing for the night.',
+        visual: { gen: 'Inside an empty bar at night, the hanging lights over the bar switch off one by one, ' +
+          'leaving a single warm pendant lamp glowing over the counter. Static camera. Photoreal, quiet, cinematic. ' +
+          'No people.' } },
+      { say: "Dan Wilson wrote it, and he's said it was also about his daughter being born.",
+        visual: { gen: 'Extreme close-up of a newborn baby\'s tiny hand gripping an adult\'s index finger, soft ' +
+          'early-morning window light, white blanket, gentle movement. Photoreal, tender. Hands only, no faces.' } },
+      { say: 'Seneca did write about endings. This is him.',
+        visual: { art: 'memento-mori', zoom: 'in', focus: 0.3 } },
       {
         payoff: 'seneca-letter-101-each-day',
         excerpt: "Let us prepare our minds as if we'd come to the very end of life. Let us postpone nothing.",
         cite: 'Letters to Lucilius 101',
+        visual: { gen: 'An antique hourglass on a worn stone ledge beside a guttering candle at dusk, the last ' +
+          'grains of sand running through. Slow push in. Photoreal, still, contemplative.' },
       },
     ],
   },
