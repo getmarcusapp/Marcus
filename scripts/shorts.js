@@ -626,7 +626,9 @@ async function render(short, opts) {
       const fx = await elevenAudio('sfx', { text: seg.sfx, duration_seconds: 2.5, prompt_influence: 0.5 }, '.sfx-cache');
       audioIn.push('-i', fx);
       const ms = Math.max(0, Math.round((start - 0.08) * 1000));
-      mix.push(`[${ai}:a]aresample=44100,adelay=${ms}|${ms},volume=0.85[s${ai}]`);
+      // Per line, because effects differ a lot in loudness: the letterpress
+      // thunk at 0.85 drowned the voice where the Gladiator boom did not.
+      mix.push(`[${ai}:a]aresample=44100,adelay=${ms}|${ms},volume=${seg.sfxVolume ?? 0.85}[s${ai}]`);
       labels.push(`[s${ai}]`);
       ai++;
     }

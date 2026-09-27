@@ -40,6 +40,7 @@
  *   pauseBefore: seconds     silence before the line, holding the previous
  *                            picture, so a reveal lands on the cut
  *   sfx: '...'               a generated sound effect at the start of the line
+ *   sfxVolume: 0..1          its level (default 0.85; a letterpress needed 0.3)
  * Optional per short:
  *   music: '...'             prompt for the underscore; there is a default
  */
@@ -197,7 +198,7 @@ const SHORTS = [
       { say: 'Usually credited to Marcus Aurelius.',
         visual: { art: 'premeditatio-malorum', zoom: 'in', focus: 0.25 } },
       { say: "It's Elbert Hubbard, an American publisher, 1913.", pauseBefore: 0.7,
-        sfx: 'the heavy mechanical thunk of an old iron letterpress printing press, no music',
+        sfx: 'the heavy mechanical thunk of an old iron letterpress printing press, no music', sfxVolume: 0.3,
         visual: { gen: 'A small print shop in the 1910s, warm lamplight, a hand pulling the long iron lever of a ' +
           'letterpress printing press, a fresh sheet of paper, wooden type cases on the wall. Close-up on the ' +
           'hand and the press. Photoreal, cinematic. No faces, no readable text.',
@@ -214,8 +215,12 @@ const SHORTS = [
           negative: 'faces, modern bedding, pillows with patterns, electric light' },
       },
       { say: "He wasn't celebrating waking up. He was talking himself out of staying in bed.",
-        visual: { gen: 'Close-up of bare feet stepping down from a low wooden bed onto a cold stone floor at grey ' +
-          'dawn, a rough wool blanket trailing. Feet only. Photoreal, quiet.' } },
+        // The first version came out grey-white, like a corpse's feet. Warm,
+        // living skin and warm light are now asked for explicitly.
+        visual: { gen: 'Close-up of a man\'s bare feet stepping down from a low wooden bed onto a stone floor at ' +
+          'dawn, a rough wool blanket trailing. Healthy, warm, sun-tanned living skin, lit by warm golden light ' +
+          'from a doorway. Feet only. Photoreal, quiet, alive.',
+          negative: 'pale skin, grey skin, bluish skin, corpse, lifeless, dead, cold blue light' } },
     ],
   },
 ];
