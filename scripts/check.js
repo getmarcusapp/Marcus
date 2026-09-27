@@ -961,6 +961,18 @@ function shortsScripts() {
     fail.push('scripts/shorts.js: chunk() splits a title bound with non-breaking spaces');
   }
 
+  // The listening check must pass a spelled-out number and catch an invented
+  // phrase. Both cases come from a real transcript of the Hubbard line.
+  const { diffWords } = require(path.join(ROOT, 'scripts', 'shorts.js'));
+  const line = "It's Elbert Hubbard, an American publisher, 1913.";
+  const same = diffWords(line, "It's Elbert Hubbard, an American publisher, nineteen thirteen");
+  if (same.missing.length || same.extra.length) fail.push('scripts/shorts.js: listen flags "nineteen thirteen" as different from "1913"');
+  const off = diffWords(line, 'it actually comes from Elbert Hubbard, an American publisher from 1913');
+  if (!off.extra.includes('actually')) fail.push('scripts/shorts.js: listen misses words the voice added');
+  if (!diffWords('the line got attached', 'the lion got attached').missing.includes('line')) {
+    fail.push('scripts/shorts.js: listen misses a substituted word ("line" heard as "lion")');
+  }
+
   // Prove the guard bites: a paraphrased hook and a paraphrased payoff.
   const probe = JSON.parse(JSON.stringify(SHORTS[0]));
   probe.segments = probe.segments.map(x => x.quote ? { quote: 'What we do in life echoes forever.' } : x);

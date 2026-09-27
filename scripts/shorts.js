@@ -9,6 +9,7 @@
  *     --allow-unverified   render scripts whose payoff is not in the checked
  *                          library (only after checking it against print)
  *     --voice=say          force the Mac's built-in voice
+ *   node scripts/shorts.js listen <id> | --all   transcribe and check words + timing
  *     --no-gen             never call fal; generated beats fall back to the
  *                          short's painting (free, for layout work)
  *
@@ -449,7 +450,7 @@ async function render(short, opts) {
     const { wav, words } = await voiceSegment(short.segments, i, voice);
     const d = duration(wav);
     parts.push(wav);
-    timeline.push({ seg, start: t, end: t + d, words });
+    timeline.push({ seg, start: t, end: t + d, words, wav });
     t += d;
     const gap = seg.quote || 'payoff' in seg ? 0.55 : 0.22;
     parts.push(silence(gap));
@@ -658,6 +659,13 @@ async function render(short, opts) {
     '-c:v', 'libx264', '-profile:v', 'high', '-crf', '18', '-preset', 'medium',
     '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', mp4]);
 
+  // Kept beside the video so `listen` can compare what is heard with what the
+  // captions claim, without re-rendering.
+  fs.writeFileSync(path.join(OUT, `${short.id}.timeline.json`), JSON.stringify(timeline.map(x => ({
+    text: spoken(x.seg), start: x.start, end: x.end, wav: x.wav,
+    words: x.words.map(w => ({ text: w.text, at: x.start + w.start })),
+  })), null, 1));
+
   // 6. What to paste when posting, and the disclosure decision in writing.
   const credits = [...new Set(specs.filter(v => v.art).map(v => ART[v.art]))]
     .map(a => [a.artist, a.work, a.date].filter(Boolean).join(', '));
@@ -679,6 +687,108 @@ async function render(short, opts) {
   return { mp4, total, voice, states: states.length, gen: clips.filter(Boolean).length };
 }
 
+// ── listen ──────────────────────────────────────────────────────────────────
+// A transcript check, since I cannot hear the videos. It answers two things:
+// does each sentence say what the script says, and does each caption light up
+// when its word is actually spoken. It cannot say whether the video sounds
+// good, which stays a human judgment.
+//
+// The first question is asked of each sentence's clean recording, not of the
+// finished mix. Transcribing the mix with music under it, the transcriber
+// heard "it actually comes from Elbert Hubbard, an American publisher from
+// 1913" where the voice says, and the clean recording confirms, "It's Elbert
+// Hubbard, an American publisher, 1913." A check that trusts the mix would
+// report the transcriber's inventions as the voice's.
+// A recording that starts straight into a word makes the transcriber invent
+// a leading "And": the clean "That's how the quote got attached to him" came
+// back as "And that's how..." twice running, and correctly with 0.6s of
+// silence in front. Every clip is padded before it is sent.
+async function transcribe(file) {
+  const tmp = path.join(OUT, '.work', 'stt-' + hash([file, Math.random()]) + '.wav');
+  ff(['-i', file, '-vn', '-af', 'adelay=600:all=1', '-ac', '1', '-ar', '16000', '-c:a', 'pcm_s16le', tmp]);
+  const form = new FormData();
+  form.append('model_id', 'scribe_v1');
+  form.append('timestamps_granularity', 'word');
+  form.append('file', new Blob([fs.readFileSync(tmp)]), 'a.wav');
+  fs.rmSync(tmp);
+  const res = await fetch('https://api.elevenlabs.io/v1/speech-to-text',
+    { method: 'POST', headers: { 'xi-api-key': process.env.ELEVENLABS_API_KEY }, body: form });
+  if (!res.ok) throw new Error('speech-to-text HTTP ' + res.status + ': ' + (await res.text()).slice(0, 200));
+  const j = await res.json();
+  // Take the padding back out of the timestamps. Leaving it in made every
+  // word in the finished video look 0.6s late on the first run.
+  for (const w of j.words || []) { w.start -= 0.6; w.end -= 0.6; }
+  return j;
+}
+
+// Numbers are compared loosely ("1913" may come back as "nineteen thirteen"),
+// and punctuation not at all.
+const NUM = { '2000': 'two thousand', '1913': 'nineteen thirteen', '1998': 'nineteen ninety eight',
+  '1980': 'nineteen eighty', '1926': 'nineteen twenty six', '101': 'one hundred and one' };
+const listenWords = t => words(String(t).replace(/\u00a0/g, ' ').replace(/\b\d+\b/g, n => NUM[n] || n));
+
+function diffWords(want, got) {
+  // Longest common subsequence, then report what is missing and what is extra.
+  const a = listenWords(want), b = listenWords(got);
+  const L = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+  for (let i = a.length - 1; i >= 0; i--) for (let j = b.length - 1; j >= 0; j--) {
+    L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  }
+  const missing = [], extra = [];
+  let i = 0, j = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) missing.push(a[i++]); else extra.push(b[j++]);
+  }
+  missing.push(...a.slice(i)); extra.push(...b.slice(j));
+  return { missing, extra, ratio: a.length ? 1 - missing.length / a.length : 1 };
+}
+
+async function listen(id) {
+  const tl = JSON.parse(fs.readFileSync(path.join(OUT, `${id}.timeline.json`), 'utf8'));
+  console.log(`# ${id}\n\n## Does each sentence say what the script says? (clean voice, no music)\n`);
+  let problems = 0;
+  for (const [i, seg] of tl.entries()) {
+    const heard = (await transcribe(seg.wav)).text;
+    const d = diffWords(seg.text, heard);
+    const ok = !d.missing.length && !d.extra.length;
+    if (!ok) problems++;
+    console.log(`${ok ? '✓' : '✗'} ${i + 1}. ${seg.text}`);
+    if (!ok) {
+      console.log(`     heard:   ${heard}`);
+      if (d.missing.length) console.log(`     missing: ${d.missing.join(' ')}`);
+      if (d.extra.length) console.log(`     extra:   ${d.extra.join(' ')}`);
+    }
+  }
+  console.log('\n## Do the captions light up when the words are spoken? (finished video)\n');
+  const mix = await transcribe(path.join(OUT, `${id}.mp4`));
+  const heardW = (mix.words || []).filter(w => w.type === 'word')
+    .map(w => ({ w: listenWords(w.text)[0], at: w.start })).filter(x => x.w);
+  const expect = tl.flatMap(s => s.words.map(w => ({ w: listenWords(w.text)[0], at: w.at }))).filter(x => x.w);
+  // Walk both in order, pairing identical words within a two-second window.
+  const offs = [];
+  let j = 0;
+  for (const e of expect) {
+    for (let k = j; k < Math.min(heardW.length, j + 6); k++) {
+      if (heardW[k].w === e.w && Math.abs(heardW[k].at - e.at) < 2) { offs.push(heardW[k].at - e.at); j = k + 1; break; }
+    }
+  }
+  if (!offs.length) { console.log('✗ could not match any words to measure timing'); return; }
+  const sorted = [...offs].sort((x, y) => x - y);
+  const med = sorted[sorted.length >> 1];
+  const worst = sorted.reduce((m, x) => (Math.abs(x) > Math.abs(m) ? x : m), 0);
+  const late = offs.filter(x => Math.abs(x) > 0.25).length;
+  // A caption up to a quarter-second off is imperceptible; beyond that the
+  // highlight visibly leads or lags the voice.
+  const ok = Math.abs(med) <= 0.15 && late <= Math.ceil(offs.length * 0.1);
+  if (!ok) problems++;
+  console.log(`${ok ? '✓' : '✗'} matched ${offs.length} of ${expect.length} words; ` +
+    `median offset ${(med * 1000).toFixed(0)}ms, worst ${(worst * 1000).toFixed(0)}ms, ` +
+    `${late} more than 250ms off`);
+  console.log(`\n${problems ? '✗ ' + problems + ' problem(s)' : '✓ nothing found'}. ` +
+    'This checks words and timing only; music balance and how it sounds need a listen.\n');
+  return problems;
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const cmd = argv[0];
@@ -697,6 +807,12 @@ async function main() {
     }
     process.exit(bad ? 1 : 0);
   }
+  if (cmd === 'listen') {
+    const ids = argv.includes('--all') ? SHORTS.map(s => s.id).filter(i => fs.existsSync(path.join(OUT, `${i}.timeline.json`)))
+      : argv.slice(1).filter(a => !a.startsWith('--'));
+    for (const id of ids) { try { await listen(id); } catch (e) { console.error('✗ ' + id + ': ' + e.message); } }
+    return;
+  }
   if (cmd === 'render') {
     const ids = argv.includes('--all') ? SHORTS.map(s => s.id) : argv.slice(1).filter(a => !a.startsWith('--'));
     if (!ids.length) { console.error('usage: shorts.js render <id> | --all'); process.exit(1); }
@@ -711,5 +827,5 @@ async function main() {
   }
 }
 
-module.exports = { validate, words, chunk, wordTimes, startFromLevels };
+module.exports = { validate, words, chunk, wordTimes, startFromLevels, diffWords };
 if (require.main === module) main();

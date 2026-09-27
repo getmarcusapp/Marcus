@@ -78,7 +78,9 @@ const SHORTS = [
       { say: 'Russell Crowe says it as Maximus, in a movie where Marcus Aurelius is a character.',
         visual: { gen: 'Close-up of a battered bronze gladiator helmet lying on its side on arena sand, torchlight ' +
           'flickering across the metal, sparks and embers drifting in the dark. Slow orbit. Photoreal, no people.' } },
-      { say: "That's how the line got attached to him.",
+      // "line" came out close enough to "lion" that a transcript of the clean
+      // recording heard "lion". Reworded rather than hoped about.
+      { say: "That's how the quote got attached to him.",
         visual: { gen: 'The beam of an old film projector cutting through a dark room, dust swirling in the light, ' +
           'the reel turning in silhouette. Slow drift. Photoreal, warm, cinematic, no people.' } },
       { say: "Here's what Marcus actually wrote about being remembered.",
@@ -116,7 +118,9 @@ const SHORTS = [
         visual: { gen: 'Inside an empty bar at night, the hanging lights over the bar switch off one by one, ' +
           'leaving a single warm pendant lamp glowing over the counter. Static camera. Photoreal, quiet, cinematic. ' +
           'No people.' } },
-      { say: "Dan Wilson wrote it, and he's said it was also about his daughter being born.",
+      // "he's said" was heard as "he said" on every transcript: the contraction
+      // gets swallowed. Written out, it survives.
+      { say: 'Dan Wilson wrote it, and he has said it was also about his daughter being born.',
         visual: { gen: 'Extreme close-up of a newborn baby\'s tiny hand gripping an adult\'s index finger, soft ' +
           'early-morning window light, white blanket, gentle movement. Photoreal, tender. Hands only, no faces.' } },
       { say: 'Seneca did write about endings. This is him.',
@@ -159,7 +163,9 @@ const SHORTS = [
           'framed motivational poster with clean black sans-serif text on white that reads exactly: "The secret of ' +
           'change is to focus all of your energy not on fighting the old, but on building the new." and beneath ' +
           'it, smaller: "— Socrates". Desks and plants softly out of focus. Photoreal. No people.', zoom: 'in', focus: 0.4 } },
-      { say: 'Credited to Socrates everywhere. Here is the twist.',
+      // The voice contracts "Here is" to "Here's", so the caption now says what
+      // is heard.
+      { say: "Credited to Socrates everywhere. Here's the twist.",
         visual: { gen: 'Inside a dusty secondhand bookshop, tall wooden shelves packed with worn old paperbacks, ' +
           'late afternoon light and dust drifting in the air. Slow dolly down the aisle. Photoreal, warm, quiet. ' +
           'No people, no readable titles.' } },
