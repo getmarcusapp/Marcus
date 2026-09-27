@@ -702,19 +702,32 @@ async function render(short, opts) {
   const credits = [...new Set(specs.filter(v => v.art).map(v => ART[v.art]))]
     .map(a => [a.artist, a.work, a.date].filter(Boolean).join(', '));
   const generated = specs.some(v => v.gen || v.still);
+  // Two parts, clearly separated. The first version mixed text meant for the
+  // description with instructions meant for Gio ("Tick the AI disclosure"),
+  // which invited pasting the instructions into YouTube.
+  const disclosureLine = [
+    voice === 'elevenlabs' ? 'Narrated with an AI clone of my own voice' : null,
+    generated ? 'some footage is AI-generated' : null,
+  ].filter(Boolean).join('; ');
   fs.writeFileSync(path.join(OUT, `${short.id}.txt`), [
+    '════ PASTE INTO YOUTUBE ════', '',
     'TITLE', short.hook, '',
     'DESCRIPTION',
     `"${entry.text}" is commonly credited to ${entry.credited}. It's ${entry.actual}.`,
     '', `The full trail: https://getmarcus.app/misattributed-stoic-quotes#${entry.id}`,
     '', ...credits.map(c => `Image: ${c}.`),
-    '', 'DISCLOSURE',
-    voice === 'elevenlabs' ? 'Voice: ElevenLabs clone.' : 'Voice: macOS say. DRAFT ONLY, not for posting.',
-    generated ? `Footage: some clips generated with ${VIDEO_MODEL} and ${IMAGE_MODEL}.` : 'Footage: public-domain paintings only.',
-    (voice === 'elevenlabs' || generated) ? 'Tick the AI / altered-or-synthetic content disclosure on YouTube and TikTok.' : '',
-    '', `LENGTH ${total.toFixed(1)}s`,
-    specs.some(v => v.fellBack) ? 'NOTE: generated beats fell back to the painting (--no-gen or no FAL_KEY).' : '',
-  ].join('\n') + '\n');
+    ...(disclosureLine ? ['', `${disclosureLine[0].toUpperCase()}${disclosureLine.slice(1)}. Every quotation is checked against its source.`] : []),
+    '', 'Marcus, a daily Stoic practice for iOS: https://getmarcus.app',
+    '', 'PINNED COMMENT',
+    `Source and full trail: https://getmarcus.app/misattributed-stoic-quotes#${entry.id}`,
+    '', '', '════ FOR YOU, NOT FOR PASTING ════', '',
+    (voice === 'elevenlabs' || generated)
+      ? '- In YouTube Studio, under "Altered content", answer Yes. Same on TikTok (AI-generated content label).'
+      : '- No AI disclosure needed.',
+    voice === 'elevenlabs' ? null : '- Voice is macOS say. DRAFT ONLY, do not post.',
+    `- Length ${total.toFixed(1)}s.`,
+    specs.some(v => v.fellBack) ? '- Some generated beats fell back to the painting (--no-gen or no FAL_KEY). Not final.' : null,
+  ].filter(x => x !== null).join('\n') + '\n');
 
   return { mp4, total, voice, states: states.length, gen: clips.filter(Boolean).length };
 }
