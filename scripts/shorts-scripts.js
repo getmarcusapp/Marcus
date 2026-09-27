@@ -153,12 +153,31 @@ const SHORTS = [
     hook: 'Socrates never wrote anything. So who said this?',
     painting: 'evening-examination',
     segments: [
-      { quote: 'The secret of change is to focus all of your energy not on fighting the old, but on building the new.' },
-      { say: 'Credited to Socrates everywhere. Here is the twist.' },
-      { say: "It's from Way of the Peaceful Warrior, a 1980 novel by Dan Millman." },
-      { say: 'The narrator meets an old man working nights at a gas station, and nicknames him Socrates.' },
-      { say: 'That Socrates says it.' },
-      { say: 'The real one never wrote a single word down. Everything we have from him comes through other people.' },
+      { quote: 'The secret of change is to focus all of your energy not on fighting the old, but on building the new.',
+        visual: { still: 'Photograph of a modern open-plan office with glass walls. On a white wall hangs a large ' +
+          'framed motivational poster with clean black sans-serif text on white that reads exactly: "The secret of ' +
+          'change is to focus all of your energy not on fighting the old, but on building the new." and beneath ' +
+          'it, smaller: "— Socrates". Desks and plants softly out of focus. Photoreal. No people.', zoom: 'in', focus: 0.4 } },
+      { say: 'Credited to Socrates everywhere. Here is the twist.',
+        visual: { gen: 'Inside a dusty secondhand bookshop, tall wooden shelves packed with worn old paperbacks, ' +
+          'late afternoon light and dust drifting in the air. Slow dolly down the aisle. Photoreal, warm, quiet. ' +
+          'No people, no readable titles.' } },
+      { say: "It's from Way of the Peaceful Warrior, a 1980 novel by Dan Millman.", pauseBefore: 0.7,
+        sfx: 'a hardback book snapping shut, a single crisp thud, no music',
+        visual: { gen: 'A single worn, dog-eared 1980s paperback novel lying face down on the counter of an ' +
+          'empty American diner at night, a cup of coffee beside it, neon glow reflecting on the counter. ' +
+          'Slow push in. Photoreal, cinematic. No readable text, no cover art, no people.',
+          negative: 'book cover, title, readable text, faces' } },
+      { say: 'The narrator meets an old man working nights at a gas station, and nicknames him Socrates.',
+        visual: { gen: 'An old-fashioned American gas station at night in the 1960s, glowing under a flat ' +
+          'fluorescent canopy, two vintage fuel pumps, a small lit office, an empty street and the dark beyond. ' +
+          'Static wide shot, a moth circling the light. Photoreal, lonely, cinematic. No people, no readable signs.',
+          negative: 'readable signs, brand logos, faces, people' } },
+      { say: 'That Socrates says it.',
+        visual: { gen: 'Close-up at night of an old man\'s weathered hands wiping a vintage gas pump nozzle with ' +
+          'a cloth rag under fluorescent light. Hands only. Photoreal, quiet, cinematic.' } },
+      { say: 'The real one never wrote a single word down. Everything we have from him comes through other people.',
+        visual: { art: 'evening-examination', zoom: 'in', focus: 0.35 } },
     ],
   },
   {
@@ -166,16 +185,37 @@ const SHORTS = [
     hook: 'Marcus Aurelius\'s "good morning" quote was written in 1913.',
     painting: 'view-from-above',
     segments: [
-      { quote: 'When you arise in the morning, think of what a precious privilege it is to be alive.' },
-      { say: 'Usually credited to Marcus Aurelius.' },
-      { say: "It's Elbert Hubbard, an American publisher, 1913." },
-      { say: 'Marcus did write about mornings, just not like that. Here is the real one.' },
+      { quote: 'When you arise in the morning, think of what a precious privilege it is to be alive.',
+        // The first attempt put the print small on a nightstand, unreadable at
+        // phone size, and spelled the name "Marcas". Close-up now, and the name
+        // is spelled out letter by letter in the prompt.
+        visual: { still: 'Close-up photograph of a framed print standing on a wooden bedside table at sunrise, the ' +
+          'print filling most of the frame. Elegant black serif text on cream paper reads exactly: "When you arise ' +
+          'in the morning, think of what a precious privilege it is to be alive." Beneath it, smaller, the ' +
+          'attribution reads exactly "— Marcus Aurelius" (M-A-R-C-U-S A-U-R-E-L-I-U-S). Warm golden light ' +
+          'through linen curtains behind, a glass of water at the edge. Photoreal, shallow depth of field.', zoom: 'in', focus: 0.45 } },
+      { say: 'Usually credited to Marcus Aurelius.',
+        visual: { art: 'premeditatio-malorum', zoom: 'in', focus: 0.25 } },
+      { say: "It's Elbert Hubbard, an American publisher, 1913.", pauseBefore: 0.7,
+        sfx: 'the heavy mechanical thunk of an old iron letterpress printing press, no music',
+        visual: { gen: 'A small print shop in the 1910s, warm lamplight, a hand pulling the long iron lever of a ' +
+          'letterpress printing press, a fresh sheet of paper, wooden type cases on the wall. Close-up on the ' +
+          'hand and the press. Photoreal, cinematic. No faces, no readable text.',
+          negative: 'readable text, words, faces, modern printer' } },
+      { say: 'Marcus did write about mornings, just not like that. Here is the real one.',
+        visual: { art: 'view-from-above', zoom: 'in', focus: 0.3 } },
       {
         payoff: 'aurelius-meditations-5-1-do-the-work',
         excerpt: 'At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work — as a human being.',
         cite: 'Meditations V.1',
+        visual: { gen: 'Grey cold dawn inside a Roman army tent on campaign, second century. A low wooden camp bed ' +
+          'with a rough wool blanket being slowly pushed back, pale light through the open tent flap, breath ' +
+          'visible in the cold air. Photoreal, quiet, cinematic. No faces.',
+          negative: 'faces, modern bedding, pillows with patterns, electric light' },
       },
-      { say: "He wasn't celebrating waking up. He was talking himself out of staying in bed." },
+      { say: "He wasn't celebrating waking up. He was talking himself out of staying in bed.",
+        visual: { gen: 'Close-up of bare feet stepping down from a low wooden bed onto a cold stone floor at grey ' +
+          'dawn, a rough wool blanket trailing. Feet only. Photoreal, quiet.' } },
     ],
   },
 ];
