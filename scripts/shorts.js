@@ -240,8 +240,7 @@ async function generateClip(prompt, need, extraNegative) {
   const file = clipPath(prompt, extraNegative, need);
   if (fs.existsSync(file)) return file;
   const auth = { Authorization: 'Key ' + process.env.FAL_KEY, 'Content-Type': 'application/json' };
-  const sub = await (await fetch(`https://queue.fal.run/${VIDEO_MODEL}`, { method: 'POST', headers: auth, body: JSON.stringify(body) })).json();
-  if (!sub.request_id) throw new Error('fal submit failed: ' + JSON.stringify(sub).slice(0, 200));
+  const sub = await falSubmit(VIDEO_MODEL, body, auth);
   const started = Date.now();
   for (;;) {
     await new Promise(r => setTimeout(r, 4000));
@@ -257,6 +256,23 @@ async function generateClip(prompt, need, extraNegative) {
   return file;
 }
 
+// fal answers "User is locked. Reason: Exhausted balance" intermittently even
+// with money on the account: across four runs some requests went through and
+// the rest were refused, and a single request always succeeded, while the
+// dashboard showed $8.29 left. So requests go one at a time, and a lock is
+// retried with a growing wait before it is treated as real.
+async function falSubmit(model, body, auth) {
+  for (let attempt = 0; ; attempt++) {
+    const sub = await (await fetch(`https://queue.fal.run/${model}`, { method: 'POST', headers: auth, body: JSON.stringify(body) })).json();
+    if (sub.request_id) return sub;
+    const locked = /locked|exhausted balance/i.test(JSON.stringify(sub));
+    if (!locked || attempt >= 5) throw new Error('fal submit failed: ' + JSON.stringify(sub).slice(0, 200));
+    const wait = 15 * (attempt + 1);
+    console.log(`  fal says locked; retrying in ${wait}s (attempt ${attempt + 2} of 6)`);
+    await new Promise(r => setTimeout(r, wait * 1000));
+  }
+}
+
 // Stills are for the one thing video models cannot do: legible text. Nano
 // Banana Pro sets type accurately, and a still can be read and checked letter
 // by letter before it is used, which a moving clip cannot. The quote on a gym
@@ -270,8 +286,7 @@ async function generateStill(prompt) {
   const file = stillPath(prompt);
   if (fs.existsSync(file)) return file;
   const auth = { Authorization: 'Key ' + process.env.FAL_KEY, 'Content-Type': 'application/json' };
-  const sub = await (await fetch(`https://queue.fal.run/${IMAGE_MODEL}`, { method: 'POST', headers: auth, body: JSON.stringify(body) })).json();
-  if (!sub.request_id) throw new Error('fal submit failed: ' + JSON.stringify(sub).slice(0, 200));
+  const sub = await falSubmit(IMAGE_MODEL, body, auth);
   for (let tries = 0; ; tries++) {
     await new Promise(r => setTimeout(r, 3000));
     const st = await (await fetch(sub.status_url, { headers: auth })).json();
@@ -469,10 +484,14 @@ async function render(short, opts) {
       bounds.push([Math.round(a + (b - a) * k / list.length), Math.round(a + (b - a) * (k + 1) / list.length)]);
     });
   });
-  // Everything generated is requested together, since clips take a minute or two.
-  const clips = await Promise.all(specs.map((v, i) =>
-    v.gen ? generateClip(v.gen, (bounds[i][1] - bounds[i][0]) / FPS, v.negative)
-      : v.still ? generateStill(v.still) : null));
+  // One at a time. Parallel requests were faster, but they are what trips
+  // fal's lock (see falSubmit), and a half-generated short is worse than a
+  // slow one.
+  const clips = [];
+  for (const [i, v] of specs.entries()) {
+    clips.push(v.gen ? await generateClip(v.gen, (bounds[i][1] - bounds[i][0]) / FPS, v.negative)
+      : v.still ? await generateStill(v.still) : null);
+  }
   const visParts = [];
   for (const [i, v] of specs.entries()) {
     const n = Math.max(1, bounds[i][1] - bounds[i][0]);
