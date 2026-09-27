@@ -49,8 +49,10 @@ const LONGFORM = [
         visual: [
           { gen: 'A dusty vinyl record spinning slowly on an old turntable in a dim room, warm lamplight, shallow ' +
             'depth of field. Photoreal, no people.' },
-          { gen: 'A tall stack of worn modern paperback books on a wooden table beside a small ancient Roman ' +
-            'terracotta oil lamp, dust in the light. Slow push in. Photoreal, no people, no readable titles.' },
+          // Spines turned away: the first take printed garbled titles on them.
+          { gen: 'A tall stack of worn paperback books on a wooden table, seen from the page edges so only the ' +
+            'cream paper edges face the camera, beside a small ancient Roman terracotta oil lamp, dust in the ' +
+            'light. Slow push in. Photoreal, no people.', negative: 'book spines, titles, covers, lettering' },
         ] },
       { say: "So today: ten famous Stoic quotes, where each one actually came from, and what the real Stoics " +
           "wrote instead. At least one of these is probably on your wall.",
@@ -73,8 +75,10 @@ const LONGFORM = [
               'steam drifting. Slow push in. Photoreal, no people, no text.' } },
           { say: 'Now go looking for it. Seneca left us one hundred and twenty-four letters, a shelf of essays, ' +
               "and a handful of tragedies. It isn't in any of them.",
-            visual: { gen: 'Hands in shadow unrolling an ancient papyrus scroll on a wooden table by oil-lamp ' +
-              'light, the papyrus blank and aged. Close-up, slow. Photoreal, no faces.', negative: NEG_MODERN } },
+            visual: { gen: 'Hands in shadow unrolling an ancient papyrus scroll on a wooden table, lit by a small ' +
+              'flat terracotta Roman oil lamp with one flame at its spout, the papyrus blank and aged. Close-up, ' +
+              'slow. Photoreal, no faces.',
+              negative: NEG_MODERN + ', lantern, glass lantern, hurricane lamp, candle' } },
           { say: "The line is twentieth-century American. Who said it first is genuinely disputed, so I won't " +
               'pin it on anyone.',
             visual: { gen: 'A 1950s American office at night, an empty wooden desk with a brass desk lamp and a ' +
@@ -104,8 +108,12 @@ const LONGFORM = [
               "splitting the world in two: what is up to us, and what isn't.",
             visual: { art: 'view-from-above', zoom: 'out', focus: 0.35 } },
           { say: "But he said it in his own words, and they're sharper than this one.",
-            visual: { gen: 'A sharp bronze stylus resting on a closed wooden wax tablet on a stone table in ' +
-              'morning light. Close-up, slow push in. Photoreal, no people.', negative: NEG_MODERN } },
+            // The first take drew a fountain pen. A Roman stylus is a plain
+            // pointed metal rod with a flat spatula at the other end.
+            visual: { gen: 'A plain ancient Roman stylus, a thin pointed bronze rod with a small flat spatula at ' +
+              'one end, resting on an open wooden writing tablet filled with smooth dark wax, on a stone table in ' +
+              'morning light. Close-up, slow push in. Photoreal, no people.',
+              negative: NEG_MODERN + ', fountain pen, pen nib, quill, pencil, ballpoint' } },
         ],
       },
       {
@@ -319,8 +327,10 @@ const LONGFORM = [
         visual: { art: 'evening-examination', zoom: 'in', focus: 0.35 } },
       { say: "Because most of them were written to be quoted. They're smooth, they fit on a poster, and they " +
           'flatter you.',
-        visual: { gen: 'A wall of cheap framed motivational posters in a hallway, out of focus so no words are ' +
-          'readable, harsh fluorescent light. Slow dolly. Photoreal, no people, no readable text.' } },
+        // Not posters: the first take filled the frame with garbled slogans.
+        visual: { gen: 'Identical glossy prints sliding face down along a conveyor belt in a print factory, only ' +
+          'their plain white backs visible, harsh fluorescent light. Slow tracking shot. Photoreal, no people.',
+          negative: 'posters, slogans, lettering, printed words' } },
       { say: "The real Stoics were writing to themselves, or to their students, and it shows. They're blunter, " +
           'stranger, and much more useful on a bad day.',
         visual: { gen: 'An old leather-bound journal lying closed on a rough wooden desk by a window at dusk, a ' +

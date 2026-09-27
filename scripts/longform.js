@@ -445,15 +445,20 @@ async function render(lf, opts) {
 }
 
 // ── plan ────────────────────────────────────────────────────────────────────
-// Prices generation without voicing anything, from an estimate of each line's
-// length (about 15 characters a second in the clone), so it is free to run.
+// Prices generation without voicing anything, so it is free to run. A line
+// already recorded contributes its real length; a new one is estimated at 15
+// characters a second. Estimating every line put clips in the wrong length
+// bucket and reported 12 new clips where the render made 4.
 function plan(lf) {
   const items = flatten(lf);
-  let t = LEAD_IN;
+  const segs = items.filter(x => x.seg).map(x => x.seg);
+  const voice = process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID ? 'elevenlabs' : 'say';
+  let t = LEAD_IN, si = 0;
   const timeline = items.map((it, i) => {
     const start = t;
     if (it.card) { t += CARD; return { ...it, start }; }
-    t += (it.seg.pauseBefore || 0) + spoken(it.seg).length / 15;
+    const wav = S.cachedVoice(segs, si++, voice);
+    t += (it.seg.pauseBefore || 0) + (wav ? duration(wav) : spoken(it.seg).length / 15);
     const next = items[i + 1];
     t += it.seg.quote || 'payoff' in it.seg ? 0.8 : next && next.card ? 0.7 : 0.35;
     return { ...it, start };

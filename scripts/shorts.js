@@ -135,12 +135,18 @@ const neighbours = (all, i) => [i > 0 ? spoken(all[i - 1]) : '', ''];
 // Returns { wav, words: [{ text, start, end }] } with times relative to the
 // start of this sentence. The words are split on ordinary spaces only, the
 // same way chunk() splits, so the two line up token for token.
+const voiceKey = (all, i, voice) => hash(voice === 'elevenlabs'
+  ? ['el-ts', process.env.ELEVENLABS_VOICE_ID, spoken(all[i]), ...neighbours(all, i)]
+  : ['say-Daniel-172', spoken(all[i])]);
+// The recording for a line if it has already been made, without making it.
+function cachedVoice(all, i, voice) {
+  const wav = cached('.voice-cache', voiceKey(all, i, voice), '.wav');
+  return fs.existsSync(wav) ? wav : null;
+}
+
 async function voiceSegment(all, i, voice) {
   const text = spoken(all[i]);
-  const key = hash(voice === 'elevenlabs'
-    ? ['el-ts', process.env.ELEVENLABS_VOICE_ID, text, ...neighbours(all, i)]
-    : ['say-Daniel-172', text]);
-  const wav = cached('.voice-cache', key, '.wav');
+  const wav = cached('.voice-cache', voiceKey(all, i, voice), '.wav');
   const meta = cached('.voice-cache', key, '.json');
   if (!fs.existsSync(wav) || !fs.existsSync(meta)) {
     let align = null;
@@ -256,16 +262,33 @@ async function generateClip(prompt, need, extraNegative, aspect) {
   const started = Date.now();
   for (;;) {
     await new Promise(r => setTimeout(r, 4000));
-    const st = await (await fetch(sub.status_url, { headers: auth })).json();
+    // A dropped connection while polling is not a failed job: the first long
+    // render died on an undici "terminated" 28 clips in. Poll again.
+    // The timeout is checked first, so a poll that keeps failing still ends.
+    if (Date.now() - started > 8 * 60 * 1000) throw new Error('fal timed out after 8 minutes: ' + prompt.slice(0, 60));
+    let st;
+    try {
+      const r = await fetch(sub.status_url, { headers: auth });
+      const body = await r.text();
+      try { st = JSON.parse(body); } catch { console.log(`  fal status ${r.status}, not JSON: ${body.slice(0, 120)}`); continue; }
+    } catch (e) { console.log('  fal poll failed (' + e.message + '), retrying'); continue; }
     if (st.status === 'COMPLETED') break;
     if (st.status === 'FAILED' || st.error) throw new Error('fal failed: ' + JSON.stringify(st).slice(0, 200));
-    if (Date.now() - started > 8 * 60 * 1000) throw new Error('fal timed out after 8 minutes: ' + prompt.slice(0, 60));
   }
   const out = await (await fetch(sub.response_url, { headers: auth })).json();
   const url = out.video && out.video.url;
   if (!url) throw new Error('fal returned no video: ' + JSON.stringify(out).slice(0, 200));
-  fs.writeFileSync(file, Buffer.from(await (await fetch(url)).arrayBuffer()));
+  fs.writeFileSync(file, await download(url));
   return file;
+}
+
+async function download(url) {
+  for (let attempt = 0; ; attempt++) {
+    try { return Buffer.from(await (await fetch(url)).arrayBuffer()); } catch (e) {
+      if (attempt >= 4) throw e;
+      await new Promise(r => setTimeout(r, 5000 * (attempt + 1)));
+    }
+  }
 }
 
 // fal answers "User is locked. Reason: Exhausted balance" intermittently even
@@ -877,7 +900,7 @@ async function main() {
 module.exports = {
   validate, words, chunk, wordTimes, startFromLevels, diffWords,
   // Shared with scripts/longform.js, which renders the same way at 16:9.
-  voiceSegment, elevenAudio, musicStart, generateClip, clipPath, generateStill, stillPath,
+  voiceSegment, cachedVoice, elevenAudio, musicStart, generateClip, clipPath, generateStill, stillPath,
   transcribe, listenWords, ff, duration, artFile, hash, esc, OUT, FONTS, CHROME, FPS, BG, CREAM, GOLD,
 };
 if (require.main === module) main();
