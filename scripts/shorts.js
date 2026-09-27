@@ -124,7 +124,13 @@ const spoken = seg => seg.quote || seg.say || seg.excerpt;
 // 400 characters either way, which in a 30-second script is the whole script,
 // so editing one line changed every sentence's cache key and re-voiced all of
 // them. One sentence either side is enough to carry the rhythm across the join.
-const neighbours = (all, i) => [i > 0 ? spoken(all[i - 1]) : '', i + 1 < all.length ? spoken(all[i + 1]) : ''];
+//
+// And only the PREVIOUS sentence. Passing the next one as well told the model
+// the sentence continued, so it stopped mid-flow instead of letting the last
+// word land: "Usually credited to Marcus Aurelius." ended at -38.6 dB, cut off
+// mid-decay, which before the Hubbard pause sounded like the audio cutting
+// out. With only the previous sentence as context, every line ends naturally.
+const neighbours = (all, i) => [i > 0 ? spoken(all[i - 1]) : '', ''];
 
 // Returns { wav, words: [{ text, start, end }] } with times relative to the
 // start of this sentence. The words are split on ordinary spaces only, the
@@ -449,7 +455,16 @@ async function render(short, opts) {
     if (seg.pauseBefore) { parts.push(silence(seg.pauseBefore)); t += seg.pauseBefore; }
     const { wav, words } = await voiceSegment(short.segments, i, voice);
     const d = duration(wav);
-    parts.push(wav);
+    // 15ms fades at each edge, so a sentence never starts or stops on a click.
+    // And a longer fade where a tail still has energy in its last 60ms, as a
+    // backstop if a recording ever stops mid-decay again.
+    const tail = Number((String(require('child_process').spawnSync('ffmpeg', ['-v', 'info', '-ss',
+      Math.max(0, d - 0.06).toFixed(3), '-i', wav, '-af', 'astats', '-f', 'null', '-']).stderr)
+      .match(/RMS level dB: (-?[0-9.]+)/) || [0, -120])[1]);
+    const fo = tail > -55 ? 0.12 : 0.015;
+    const faded = path.join(work, `voice${i}.wav`);
+    ff(['-i', wav, '-af', `afade=t=in:d=0.015,afade=t=out:st=${Math.max(0, d - fo).toFixed(3)}:d=${fo}`, faded]);
+    parts.push(faded);
     timeline.push({ seg, start: t, end: t + d, words, wav });
     t += d;
     const gap = seg.quote || 'payoff' in seg ? 0.55 : 0.22;
@@ -646,15 +661,32 @@ async function render(short, opts) {
     }
   }
   // -14 LUFS is where Shorts, Reels and TikTok sit; the raw voice was -28 dB.
-  mix.push(`${labels.join('')}amix=inputs=${labels.length}:normalize=0:duration=longest,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=44100[aout]`);
+  mix.push(`${labels.join('')}amix=inputs=${labels.length}:normalize=0:duration=longest[aout]`);
+
+  // Loudness in two passes: mix, measure the whole thing, then apply ONE gain.
+  // Single-pass loudnorm adjusts gain continuously, like an automatic volume
+  // control: when the voice stopped before the Hubbard reveal it turned the
+  // music up, then clamped everything down when the press hit, so the audio
+  // seemed to cut out and come back. A fixed gain cannot pump. A brickwall
+  // limiter with a 50ms release catches the few peaks (the press, the boom)
+  // that the gain would push over -1.5 dBTP, and lets go immediately.
+  const premix = path.join(work, 'premix.wav');
+  ff([...audioIn, '-filter_complex', mix.map(m => m.replace(/\[(\d+):a\]/g, (_, n) => `[${n - 3}:a]`)).join(';'),
+    '-map', '[aout]', '-t', total.toFixed(3), '-ar', '44100', '-c:a', 'pcm_s16le', premix]);
+  const meas = require('child_process').spawnSync('ffmpeg', ['-v', 'info', '-i', premix,
+    '-af', 'loudnorm=I=-14:TP=-1.5:LRA=20:print_format=json', '-f', 'null', '-'], { maxBuffer: 1 << 26 });
+  // The JSON block is followed by more log lines, so take the last {...}.
+  const blocks = String(meas.stderr).match(/\{[^{}]*\}/g) || [];
+  const lj = JSON.parse(blocks[blocks.length - 1]);
+  const gain = -14 - Number(lj.input_i);
 
   fs.mkdirSync(OUT, { recursive: true });
   const mp4 = path.join(OUT, `${short.id}.mp4`);
-  ff(['-i', vis, '-loop', '1', '-framerate', String(FPS), '-t', total.toFixed(3), '-i', staticPng, '-i', text, ...audioIn,
+  ff(['-i', vis, '-loop', '1', '-framerate', String(FPS), '-t', total.toFixed(3), '-i', staticPng, '-i', text, '-i', premix,
     '-filter_complex', [
       `[0:v]tpad=stop_mode=clone:stop_duration=${END_CARD + 1}[bg]`,
       '[bg][1:v]overlay=0:0[b1]', '[b1][2:v]overlay=0:0:eof_action=repeat[b2]', '[b2]format=yuv420p[vout]',
-      ...mix].join(';'),
+      `[3:a]volume=${gain.toFixed(2)}dB,alimiter=limit=0.84:attack=5:release=50:level=false,aresample=44100[aout]`].join(';'),
     '-map', '[vout]', '-map', '[aout]', '-t', total.toFixed(3), '-r', String(FPS),
     '-c:v', 'libx264', '-profile:v', 'high', '-crf', '18', '-preset', 'medium',
     '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', mp4]);
