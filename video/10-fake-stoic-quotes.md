@@ -2,8 +2,8 @@
 
 Long-form script, draft 1. Narration only, in the voice clone. Visual notes in brackets.
 Every attribution comes from `constants/misattributions.js`, the same data as
-getmarcus.app/misattributed-stoic-quotes. Lines marked **VERIFY** need a check against
-the book before recording.
+getmarcus.app/misattributed-stoic-quotes. The renderable version is
+`scripts/longform-scripts.js`; if the two ever differ, that file is the one that ships.
 
 **Title options**
 1. 10 Famous Stoic Quotes They Never Said (pick)
@@ -38,7 +38,7 @@ So today: ten famous Stoic quotes, where each one actually came from, and what t
 
 You'll find this under Seneca's name in business books, locker rooms, and a very large number of LinkedIn posts.
 
-Now go looking for it. Seneca left us one hundred and twenty-four letters, a dozen essays, and a shelf of tragedies. It isn't in any of them.
+Now go looking for it. Seneca left us one hundred and twenty-four letters, a shelf of essays, and a handful of tragedies. It isn't in any of them.
 
 The line is twentieth-century American. Who said it first is genuinely disputed, so I won't pin it on anyone. But that's the first pattern on this list. When a good sentence has no author, a famous name moves in, because a famous name makes a sentence feel true.
 
@@ -112,7 +112,7 @@ He isn't celebrating the morning. He's arguing with himself to get up. It's less
 
 If you follow any Stoic account, you've seen this one. No translation of the Meditations contains it.
 
-Its closest ancestor is a tiny entry in book two, section fifteen, where Marcus quotes an earlier philosopher, Monimus the Cynic, to the effect that everything is what you suppose it to be. **VERIFY: II.15 wording in Hays; keep this as paraphrase, no quote marks.**
+Its closest ancestor is a tiny entry in book two, section fifteen, where Marcus quotes an earlier philosopher, Monimus the Cynic, to the effect that everything is what you suppose it to be.
 
 And the rewrite changes the meaning. Marcus is talking about judgment: the verdict you add on top of what happens. The viral version says your senses can't be trusted, which is not a Stoic position at all. The Stoics thought perception, handled carefully, could grasp the truth.
 
@@ -126,9 +126,9 @@ Now we're getting close. This one is a modern paraphrase of something Epictetus 
 
 [Text on screen, Enchiridion 5.]
 
-"Men are disturbed not by the things which happen, but by the opinions about the things."
+"It is not events that disturb people, it is their judgments concerning them."
 
-Notice the difference. The paraphrase is about reacting. Epictetus is about judging. For him, the opinion comes before the reaction, and the opinion is where the work happens. That distinction is the one modern cognitive therapy later built on.
+Notice the difference. The paraphrase is about reacting. Epictetus is about judging. For him, the judgment comes before the reaction, and the judgment is where the work happens. That distinction is the one modern cognitive therapy later built on.
 
 So the paraphrase isn't wrong, exactly. It's just not a quote, and it loses the most useful part.
 
@@ -160,7 +160,7 @@ And here's the part I love. The real Marcus spent a lot of the Meditations telli
 
 [Text on screen, Meditations II.17.]
 
-"Lasting fame: uncertain." **VERIFY: II.17 wording and translation; repo text reads "Lasting fame: uncertain." Confirm which translation.**
+"Lasting fame: uncertain."
 
 A man who wrote that doesn't go around announcing that his deeds will echo in eternity.
 
@@ -183,13 +183,6 @@ I built an app around that journal. It's called Marcus. Each morning you get a r
 And if there's a quote you've always wondered about, put it in the comments. I'll trace it, and the best ones will end up in the next video.
 
 ---
-
-## Before recording
-
-- [ ] **VERIFY** item 4: Meditations II.15 against Hays (kept as paraphrase either way).
-- [ ] **VERIFY** item 1 payoff: II.17 "Lasting fame: uncertain." Confirm the translation, or swap for a passage you have in front of you.
-- [ ] "Twelve essays" for Seneca: the Moral Essays are usually counted as twelve dialogues plus the longer works. Say "a dozen essays" only if you're comfortable with that; otherwise "his essays."
-- [ ] Read-through: aim for 8 to 10 minutes. About 1,400 words including the quotes read at each heading, so roughly 9 minutes at the clone's pace.
 
 ## Description draft
 

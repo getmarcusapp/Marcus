@@ -237,17 +237,19 @@ const NEGATIVE = 'text, letters, words, writing, captions, subtitles, signage, w
   'faces, visible faces, portraits, modern logos, cartoon, illustration, low quality';
 const clipLength = d => (d <= 4.4 ? '4s' : d <= 6.4 ? '6s' : '8s');
 
-const clipBody = (prompt, need, extraNegative) => ({
+// The aspect is a parameter for the long-form renderer (16:9). Its default
+// keeps every 9:16 body, and so every cache key already paid for, unchanged.
+const clipBody = (prompt, need, extraNegative, aspect = '9:16') => ({
   prompt, negative_prompt: [NEGATIVE, extraNegative].filter(Boolean).join(', '),
-  aspect_ratio: '9:16', resolution: '720p',
+  aspect_ratio: aspect, resolution: '720p',
   duration: clipLength(need), generate_audio: false,
 });
-const clipPath = (prompt, extraNegative, need) =>
-  cached('.gen-cache', hash([VIDEO_MODEL, clipBody(prompt, need, extraNegative)]), '.mp4');
+const clipPath = (prompt, extraNegative, need, aspect) =>
+  cached('.gen-cache', hash([VIDEO_MODEL, clipBody(prompt, need, extraNegative, aspect)]), '.mp4');
 
-async function generateClip(prompt, need, extraNegative) {
-  const body = clipBody(prompt, need, extraNegative);
-  const file = clipPath(prompt, extraNegative, need);
+async function generateClip(prompt, need, extraNegative, aspect) {
+  const body = clipBody(prompt, need, extraNegative, aspect);
+  const file = clipPath(prompt, extraNegative, need, aspect);
   if (fs.existsSync(file)) return file;
   const auth = { Authorization: 'Key ' + process.env.FAL_KEY, 'Content-Type': 'application/json' };
   const sub = await falSubmit(VIDEO_MODEL, body, auth);
@@ -288,12 +290,12 @@ async function falSubmit(model, body, auth) {
 // by letter before it is used, which a moving clip cannot. The quote on a gym
 // wall has to be the real misattributed wording, or the shot is itself wrong.
 const IMAGE_MODEL = 'fal-ai/nano-banana-pro';
-const stillBody = prompt => ({ prompt, aspect_ratio: '9:16', resolution: '2K', output_format: 'jpeg', num_images: 1 });
-const stillPath = prompt => cached('.gen-cache', hash([IMAGE_MODEL, stillBody(prompt)]), '.jpg');
+const stillBody = (prompt, aspect = '9:16') => ({ prompt, aspect_ratio: aspect, resolution: '2K', output_format: 'jpeg', num_images: 1 });
+const stillPath = (prompt, aspect) => cached('.gen-cache', hash([IMAGE_MODEL, stillBody(prompt, aspect)]), '.jpg');
 
-async function generateStill(prompt) {
-  const body = stillBody(prompt);
-  const file = stillPath(prompt);
+async function generateStill(prompt, aspect) {
+  const body = stillBody(prompt, aspect);
+  const file = stillPath(prompt, aspect);
   if (fs.existsSync(file)) return file;
   const auth = { Authorization: 'Key ' + process.env.FAL_KEY, 'Content-Type': 'application/json' };
   const sub = await falSubmit(IMAGE_MODEL, body, auth);
@@ -872,5 +874,10 @@ async function main() {
   }
 }
 
-module.exports = { validate, words, chunk, wordTimes, startFromLevels, diffWords };
+module.exports = {
+  validate, words, chunk, wordTimes, startFromLevels, diffWords,
+  // Shared with scripts/longform.js, which renders the same way at 16:9.
+  voiceSegment, elevenAudio, musicStart, generateClip, clipPath, generateStill, stillPath,
+  transcribe, listenWords, ff, duration, artFile, hash, esc, OUT, FONTS, CHROME, FPS, BG, CREAM, GOLD,
+};
 if (require.main === module) main();

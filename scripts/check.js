@@ -921,6 +921,38 @@ function selfDescription() {
 // word for word in the checked library, must fail here before it can fail in
 // public. An unverified payoff is allowed to exist but must be flagged, since
 // the renderer refuses it without --allow-unverified.
+function longformScripts() {
+  const fail = [];
+  const { LONGFORM } = require(path.join(ROOT, 'scripts', 'longform-scripts.js'));
+  const { validate, srt } = require(path.join(ROOT, 'scripts', 'longform.js'));
+  for (const lf of LONGFORM) {
+    for (const p of validate(lf)) fail.push(`scripts/longform-scripts.js ${lf.id}: ${p}`);
+  }
+  // The validator has to bite, or a passing check means nothing: a reworded
+  // hook and a payoff that is not in the library must both be refused.
+  const bent = JSON.parse(JSON.stringify(LONGFORM[0]));
+  const ch = bent.chapters.find(c => c.segments.some(s => s.quote));
+  ch.segments.find(s => s.quote).quote += ' Probably.';
+  bent.chapters[0].segments.push({ payoff: 'aurelius-meditations-5-20-impediment', excerpt: 'The obstacle is the way.', cite: '' });
+  const got = validate(bent);
+  if (!got.some(p => /word for word/.test(p))) fail.push('scripts/longform.js: validate() accepted a reworded quote');
+  if (!got.some(p => /verbatim/.test(p))) fail.push('scripts/longform.js: validate() accepted a payoff that is not in stoicQuotes.js');
+  // Captions file: cues in order, never overlapping, in SRT's own time format.
+  const cues = srt([
+    { seg: { say: 'Epictetus was born a slave in the first century, and taught philosophy in Greece.' }, start: 61.5,
+      words: 'Epictetus was born a slave in the first century, and taught philosophy in Greece.'.split(' ')
+        .map((t, i) => ({ text: t, start: i * 0.4, end: i * 0.4 + 0.35 })) },
+  ]).trim().split(/\n\n/);
+  const times = cues.map(c => c.split('\n')[1]);
+  if (!times.every(t => /^\d\d:\d\d:\d\d,\d{3} --> \d\d:\d\d:\d\d,\d{3}$/.test(t))) fail.push('scripts/longform.js: srt() times are not HH:MM:SS,mmm');
+  const sec = t => { const [h, m, r] = t.split(':'); return h * 3600 + m * 60 + Number(r.replace(',', '.')); };
+  for (let i = 1; i < times.length; i++) {
+    if (sec(times[i].split(' --> ')[0]) < sec(times[i - 1].split(' --> ')[1])) fail.push('scripts/longform.js: srt() cues overlap');
+  }
+  if (!times[0].startsWith('00:01:01,500')) fail.push(`scripts/longform.js: srt() first cue starts at ${times[0]}, expected 00:01:01,500`);
+  return fail;
+}
+
 function shortsScripts() {
   const fail = [];
   const { SHORTS } = require(path.join(ROOT, 'scripts', 'shorts-scripts.js'));
@@ -2185,6 +2217,7 @@ const CHECKS = [
   ['the misquote detector knows a correction from a claim', misquoteDetector],
   ['a page describes itself the same way everywhere', selfDescription],
   ['every short quotes its source word for word', shortsScripts],
+  ['the long-form video quotes its sources word for word', longformScripts],
   ['the outreach pipeline drafts but never sends', outreachPipeline],
   ['every require() points at a real file', assetRefs],
   ['the Stoics are in chronological order', chronology],
