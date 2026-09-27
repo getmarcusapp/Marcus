@@ -198,15 +198,39 @@ async function elevenAudio(kind, body, dir) {
   return file;
 }
 
+// Where a music track reaches its normal level: RMS in quarter-second
+// windows, and the first window within 8 dB of the median. Never so late that
+// less than `need` seconds remain.
+function musicStart(file, need) {
+  // ametadata prints to ffmpeg's log, which is stderr.
+  const r = require('child_process').spawnSync('ffmpeg', ['-v', 'info', '-i', file, '-af',
+    'aresample=44100,astats=metadata=1:reset=11025,ametadata=print:key=lavfi.astats.Overall.RMS_level',
+    '-f', 'null', '-'], { maxBuffer: 1 << 26 });
+  return startFromLevels(String(r.stderr), duration(file), need);
+}
+function startFromLevels(log, dur, need) {
+  const lv = [...String(log).matchAll(/RMS_level=(-?[0-9.]+|-inf)/g)]
+    .map(m => (m[1] === '-inf' ? -120 : Number(m[1])));
+  if (!lv.length) return 0;
+  const med = [...lv].sort((a, b) => a - b)[Math.floor(lv.length / 2)];
+  // ffmpeg prints a reading every audio frame (about 26ms for mp3), not once
+  // per reset window, so time comes from the count, not from the window size.
+  // Assuming 0.25s per reading was the first version of this and it put the
+  // start past the clamp every time.
+  const i = lv.findIndex(x => x >= med - 8);
+  return Math.max(0, Math.min(i * (dur / lv.length), dur - need));
+}
+
 // ── generated clips ─────────────────────────────────────────────────────────
 // Negative prompt carries the two rules that hold for every clip.
 const NEGATIVE = 'text, letters, words, writing, captions, subtitles, signage, watermark, logo, ' +
   'faces, visible faces, portraits, modern logos, cartoon, illustration, low quality';
 const clipLength = d => (d <= 4.4 ? '4s' : d <= 6.4 ? '6s' : '8s');
 
-async function generateClip(prompt, need) {
+async function generateClip(prompt, need, extraNegative) {
   const body = {
-    prompt, negative_prompt: NEGATIVE, aspect_ratio: '9:16', resolution: '720p',
+    prompt, negative_prompt: [NEGATIVE, extraNegative].filter(Boolean).join(', '),
+    aspect_ratio: '9:16', resolution: '720p',
     duration: clipLength(need), generate_audio: false,
   };
   const file = cached('.gen-cache', hash([VIDEO_MODEL, body]), '.mp4');
@@ -226,6 +250,32 @@ async function generateClip(prompt, need) {
   const url = out.video && out.video.url;
   if (!url) throw new Error('fal returned no video: ' + JSON.stringify(out).slice(0, 200));
   fs.writeFileSync(file, Buffer.from(await (await fetch(url)).arrayBuffer()));
+  return file;
+}
+
+// Stills are for the one thing video models cannot do: legible text. Nano
+// Banana Pro sets type accurately, and a still can be read and checked letter
+// by letter before it is used, which a moving clip cannot. The quote on a gym
+// wall has to be the real misattributed wording, or the shot is itself wrong.
+const IMAGE_MODEL = 'fal-ai/nano-banana-pro';
+async function generateStill(prompt) {
+  const body = { prompt, aspect_ratio: '9:16', resolution: '2K', output_format: 'jpeg', num_images: 1 };
+  const file = cached('.gen-cache', hash([IMAGE_MODEL, body]), '.jpg');
+  if (fs.existsSync(file)) return file;
+  const auth = { Authorization: 'Key ' + process.env.FAL_KEY, 'Content-Type': 'application/json' };
+  const sub = await (await fetch(`https://queue.fal.run/${IMAGE_MODEL}`, { method: 'POST', headers: auth, body: JSON.stringify(body) })).json();
+  if (!sub.request_id) throw new Error('fal submit failed: ' + JSON.stringify(sub).slice(0, 200));
+  for (let tries = 0; ; tries++) {
+    await new Promise(r => setTimeout(r, 3000));
+    const st = await (await fetch(sub.status_url, { headers: auth })).json();
+    if (st.status === 'COMPLETED') break;
+    if (st.status === 'FAILED' || st.error || tries > 100) throw new Error('fal image failed: ' + JSON.stringify(st).slice(0, 200));
+  }
+  const out = await (await fetch(sub.response_url, { headers: auth })).json();
+  const url = out.images && out.images[0] && out.images[0].url;
+  if (!url) throw new Error('fal returned no image: ' + JSON.stringify(out).slice(0, 200));
+  fs.writeFileSync(file, Buffer.from(await (await fetch(url)).arrayBuffer()));
+  console.log('  new still, check its text before posting: ' + path.relative(ROOT, file));
   return file;
 }
 
@@ -344,7 +394,8 @@ function chunk(text) {
 // ── build ───────────────────────────────────────────────────────────────────
 const DEFAULT_MUSIC = 'Sparse, dark cinematic underscore for a short documentary about ancient Rome. ' +
   'A low sustained cello drone, soft felt piano notes, distant air. Slow, contemplative, ' +
-  'restrained. No drums, no vocals, no melody that competes with speech.';
+  'restrained. No drums, no vocals, no melody that competes with speech. ' +
+  'Begins immediately at full presence from the very first second: no fade-in, no intro, no build.';
 const ZOOM = { in: [1.0, 1.08], out: [1.08, 1.0], tight: [1.28, 1.36] };
 
 async function render(short, opts) {
@@ -391,16 +442,26 @@ async function render(short, opts) {
   const frame = x => Math.round(x * FPS);
   const cuts = timeline.map((x, i) => (i === 0 ? 0 : frame(x.start)));
   cuts.push(frame(voEnd));
-  const specs = timeline.map(({ seg }) => {
-    const v = seg.visual || { art: short.painting };
-    return v.gen && !canGen ? { art: short.painting, zoom: 'in', fellBack: true } : v;
+  // A segment's visual may be a list, which splits its time evenly into a
+  // quick montage ("gym walls, tattoos" is two pictures, not one).
+  const fallback = v => ((v.gen || v.still) && !canGen ? { art: short.painting, zoom: 'in', fellBack: true } : v);
+  const specs = [];
+  const bounds = [];
+  timeline.forEach(({ seg }, i) => {
+    const list = [].concat(seg.visual || { art: short.painting }).map(fallback);
+    const a = cuts[i], b = cuts[i + 1];
+    list.forEach((v, k) => {
+      specs.push(v);
+      bounds.push([Math.round(a + (b - a) * k / list.length), Math.round(a + (b - a) * (k + 1) / list.length)]);
+    });
   });
-  // Generated clips are requested together, since each takes a minute or two.
+  // Everything generated is requested together, since clips take a minute or two.
   const clips = await Promise.all(specs.map((v, i) =>
-    v.gen ? generateClip(v.gen, (cuts[i + 1] - cuts[i]) / FPS) : null));
+    v.gen ? generateClip(v.gen, (bounds[i][1] - bounds[i][0]) / FPS, v.negative)
+      : v.still ? generateStill(v.still) : null));
   const visParts = [];
   for (const [i, v] of specs.entries()) {
-    const n = Math.max(1, cuts[i + 1] - cuts[i]);
+    const n = Math.max(1, bounds[i][1] - bounds[i][0]);
     const f = path.join(work, `vis${i}.mp4`);
     const enc = ['-frames:v', String(n), '-r', String(FPS), '-an', '-c:v', 'libx264', '-crf', '16',
       '-preset', 'medium', '-pix_fmt', 'yuv420p', f];
@@ -413,7 +474,7 @@ async function render(short, opts) {
     } else {
       const [z0, z1] = ZOOM[v.zoom || 'in'];
       const focus = v.focus ?? 0.3;
-      ff(['-loop', '1', '-framerate', String(FPS), '-i', artFile(v.art), '-vf',
+      ff(['-loop', '1', '-framerate', String(FPS), '-i', v.still ? clips[i] : artFile(v.art), '-vf',
         `scale=${W * 2}:${H * 2}:force_original_aspect_ratio=increase,crop=${W * 2}:${H * 2}:(iw-${W * 2})/2:(ih-${H * 2})*${focus},` +
         `zoompan=z='${z0}+(${z1 - z0})*on/${n}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W}x${H}:fps=${FPS}`,
         ...enc]);
@@ -500,9 +561,17 @@ async function render(short, opts) {
   let ai = 4;
   if (eleven) {
     const music = await elevenAudio('music',
-      { prompt: short.music || DEFAULT_MUSIC, music_length_ms: Math.ceil(total + 1) * 1000 }, '.music-cache');
+      { prompt: short.music || DEFAULT_MUSIC, music_length_ms: Math.ceil(total + 12) * 1000 }, '.music-cache');
     audioIn.push('-i', music);
-    mix.push(`[${ai}:a]aresample=44100,volume=0.2,afade=t=in:d=1.5,afade=t=out:st=${(total - 2.5).toFixed(2)}:d=2.5[m]`);
+    // The generated tracks open as slow crescendos, near silence for several
+    // seconds, so under the voice the music seemed to start at twelve. Asking
+    // for no intro did not stop it, and a silence threshold only trimmed a
+    // second because one early note crossed it. So the track starts where its
+    // loudness first reaches its own normal level. The extra 12s requested
+    // above is the headroom that trim eats into.
+    const off = musicStart(music, total);
+    mix.push(`[${ai}:a]aresample=44100,atrim=start=${off.toFixed(2)},asetpts=PTS-STARTPTS,` +
+      `volume=0.2,afade=t=in:d=0.4,afade=t=out:st=${(total - 2.5).toFixed(2)}:d=2.5[m]`);
     labels.push('[m]');
     ai++;
     for (const { seg, start } of timeline) {
@@ -532,7 +601,7 @@ async function render(short, opts) {
   // 6. What to paste when posting, and the disclosure decision in writing.
   const credits = [...new Set(specs.filter(v => v.art).map(v => ART[v.art]))]
     .map(a => [a.artist, a.work, a.date].filter(Boolean).join(', '));
-  const generated = specs.some(v => v.gen);
+  const generated = specs.some(v => v.gen || v.still);
   fs.writeFileSync(path.join(OUT, `${short.id}.txt`), [
     'TITLE', short.hook, '',
     'DESCRIPTION',
@@ -541,7 +610,7 @@ async function render(short, opts) {
     '', ...credits.map(c => `Image: ${c}.`),
     '', 'DISCLOSURE',
     voice === 'elevenlabs' ? 'Voice: ElevenLabs clone.' : 'Voice: macOS say. DRAFT ONLY, not for posting.',
-    generated ? `Footage: some clips generated with ${VIDEO_MODEL}.` : 'Footage: public-domain paintings only.',
+    generated ? `Footage: some clips generated with ${VIDEO_MODEL} and ${IMAGE_MODEL}.` : 'Footage: public-domain paintings only.',
     (voice === 'elevenlabs' || generated) ? 'Tick the AI / altered-or-synthetic content disclosure on YouTube and TikTok.' : '',
     '', `LENGTH ${total.toFixed(1)}s`,
     specs.some(v => v.fellBack) ? 'NOTE: generated beats fell back to the painting (--no-gen or no FAL_KEY).' : '',
@@ -582,5 +651,5 @@ async function main() {
   }
 }
 
-module.exports = { validate, words, chunk, wordTimes };
+module.exports = { validate, words, chunk, wordTimes, startFromLevels };
 if (require.main === module) main();

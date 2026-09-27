@@ -28,6 +28,10 @@
  *
  * Optional per segment:
  *   visual: { art, zoom: 'in'|'out'|'tight', focus: 0..1 }   a gallery painting
+ *   visual: { still: '...' } a generated still, for shots that need legible
+ *                            text. Read it before posting.
+ *   visual: [ ..., ... ]     several, splitting the line's time evenly
+ *   negative: '...'          (on a gen visual) things this clip must not show
  *   visual: { gen: '...' }   a generated clip. Describe places, objects, hands
  *                            and light. No legible text (it comes out garbled)
  *                            and no faces (an invented face of a real person is
@@ -48,16 +52,28 @@ const SHORTS = [
       { quote: 'What we do in life echoes in eternity.',
         visual: { art: 'premeditatio-malorum', zoom: 'in', focus: 0.25 } },
       { say: "It's on gym walls, tattoos, and a million Marcus Aurelius posts.",
-        visual: { gen: 'A dim modern gym at dawn, chalk dust hanging in shafts of warm light, iron plates and ' +
-          'dumbbells on a rack, and a white marble bust of a bearded Roman emperor sitting on a high shelf ' +
-          'watching over the room. Slow cinematic dolly forward. Photoreal, shallow depth of field, moody.' } },
+        // Two stills, because the line names two places and both need the words
+        // themselves legible. Check the lettering in each before posting.
+        visual: [
+          { still: 'Photograph of a gritty modern gym at dawn. On a dark painted concrete wall, large hand-painted ' +
+              'white serif lettering reads exactly: "WHAT WE DO IN LIFE ECHOES IN ETERNITY" and beneath it, smaller: ' +
+              '"— MARCUS AURELIUS". Squat rack and iron plates in the foreground, chalk dust in warm window light. ' +
+              'Photoreal, moody, shallow depth of field. No people.', zoom: 'in', focus: 0.35 },
+          { still: 'Close-up photograph of a muscular forearm with a black-ink script tattoo that reads exactly: ' +
+              '"What we do in life echoes in eternity". Only the forearm and hand, resting on a gym bench, soft ' +
+              'natural light, shallow depth of field. Photoreal. No face.', zoom: 'in', focus: 0.5 },
+        ] },
       { say: 'He never wrote it.',
         visual: { art: 'premeditatio-malorum', zoom: 'tight', focus: 0.3 } },
       { say: "It's from the 2000 film Gladiator.", pauseBefore: 0.8,
         sfx: 'a single deep cinematic boom with a soft low rumble tail, no music',
         visual: { gen: 'An empty ancient Roman arena at dusk, seen from the sand floor. Wind lifts fine sand across ' +
-          'the ground. A single short sword stands upright in the sand in the foreground. Tall stone arches, ' +
-          'empty stands, golden low sun and long shadows. Slow push in. Photoreal, epic, no people.' } },
+          'the ground. In the foreground, lying flat on the sand and filling the lower third of the frame, a ' +
+          'single Roman gladius: a short, wide, straight double-edged blade no longer than a forearm, a ' +
+          'rounded wooden hand guard, a ribbed grip and a round pommel, and no cross-guard. Sand drifts over ' +
+          'the blade. Tall stone arches and empty stands behind, golden low sun and long shadows. ' +
+          'Slow push in. Photoreal, epic, no people.',
+        negative: 'longsword, medieval sword, cross-guard, crossguard, broadsword, katana, spear, pole, stake, upright sword' } },
       { say: 'Russell Crowe says it as Maximus, in a movie where Marcus Aurelius is a character.',
         visual: { gen: 'Close-up of a battered bronze gladiator helmet lying on its side on arena sand, torchlight ' +
           'flickering across the metal, sparks and embers drifting in the dark. Slow orbit. Photoreal, no people.' } },
@@ -65,9 +81,11 @@ const SHORTS = [
         visual: { gen: 'The beam of an old film projector cutting through a dark room, dust swirling in the light, ' +
           'the reel turning in silhouette. Slow drift. Photoreal, warm, cinematic, no people.' } },
       { say: "Here's what Marcus actually wrote about being remembered.",
-        visual: { gen: 'Night inside a Roman military tent on campaign. An oil lamp flame on a wooden table, and a ' +
-          'hand writing slowly on a small wax tablet with a stylus. Close-up on the hand and the lamp only. ' +
-          'Warm flicker, deep shadows. Photoreal, intimate, slow.' } },
+        visual: { gen: 'Night inside a Roman military tent on campaign, second century. On a rough wooden table a ' +
+          'small terracotta Roman oil lamp, shaped like a flat round dish with a spout, burns with a single ' +
+          'small flame at the spout. Beside it a hand writes slowly on a wooden wax tablet with a bronze stylus. ' +
+          'Close-up on the hand and the lamp only. Warm flicker, deep shadows. Photoreal, intimate, slow.',
+        negative: 'lantern, glass lantern, hurricane lamp, candle, candlestick, metal lamp, electric light, paper, pen' } },
       { payoff: 'aurelius-meditations-2-17-life', excerpt: 'Lasting fame: uncertain.', cite: 'Meditations II.17',
         visual: { gen: 'Weathered, broken marble statues half-buried in long grass among ancient ruins, fog rolling ' +
           'through at dawn, a toppled stone head in the foreground. Slow push in. Photoreal, melancholy.' } },
