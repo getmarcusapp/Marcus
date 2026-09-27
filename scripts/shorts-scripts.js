@@ -197,7 +197,7 @@ const SHORTS = [
           'through linen curtains behind, a glass of water at the edge. Photoreal, shallow depth of field.', zoom: 'in', focus: 0.45 } },
       { say: 'Usually credited to Marcus Aurelius.',
         visual: { art: 'premeditatio-malorum', zoom: 'in', focus: 0.25 } },
-      { say: "It's Elbert Hubbard, an American publisher, 1913.", pauseBefore: 0.7,
+      { say: "It's Elbert Hubbard, an American publisher, 1913.", pauseBefore: 0.4,
         sfx: 'the heavy mechanical thunk of an old iron letterpress printing press, no music', sfxVolume: 0.3,
         visual: { gen: 'A small print shop in the 1910s, warm lamplight, a hand pulling the long iron lever of a ' +
           'letterpress printing press, a fresh sheet of paper, wooden type cases on the wall. Close-up on the ' +

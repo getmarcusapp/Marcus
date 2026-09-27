@@ -46,7 +46,10 @@ const { execFileSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'shorts-out');
-const W = 1080, H = 1920, FPS = 30;
+// 24fps: the generated footage is 24fps, and converting it to 30 meant
+// repeating every fourth frame, which read as a stutter on anything moving
+// (21 repeats in 105 frames on the letterpress lever pull).
+const W = 1080, H = 1920, FPS = 24;
 const BG = '#0c0b0f', CREAM = '#e8e4dc', GOLD = '#c9a961';
 const LEAD_IN = 0.6;
 const END_CARD = 3.0;
@@ -501,8 +504,12 @@ async function render(short, opts) {
     if (v.gen) {
       const have = duration(clips[i]);
       const k = Math.min(Math.max((n / FPS) / have, 1), 1.5);
+      // When a clip must be slowed to fill its beat, interpolate the new
+      // frames rather than repeating old ones, which is what a plain setpts
+      // plus fps does and what makes slowed footage judder.
+      const slow = k > 1.02 ? `setpts=${k.toFixed(4)}*PTS,minterpolate=fps=${FPS}:mi_mode=mci:mc_mode=aobmc:vsbmc=1` : `fps=${FPS}`;
       ff(['-i', clips[i], '-vf',
-        `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setpts=${k.toFixed(4)}*PTS,fps=${FPS},tpad=stop_mode=clone:stop_duration=10`,
+        `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},${slow},tpad=stop_mode=clone:stop_duration=10`,
         ...enc]);
     } else {
       const [z0, z1] = ZOOM[v.zoom || 'in'];
@@ -534,7 +541,7 @@ async function render(short, opts) {
   const states = [];
   let pn = 0;
   const shot = body => { const f = path.join(work, `T${pn++}.png`); png(body, f); return f; };
-  for (const [i, { seg, start, words }] of timeline.entries()) {
+  for (const [i, { seg, start, end, words }] of timeline.entries()) {
     const until = i + 1 < timeline.length ? timeline[i + 1].start : voEnd;
     if (seg.quote) {
       states.push({ from: start, to: until, f: shot(`<div class="abs" style="${CAPTION_BOX};flex-direction:column">
@@ -558,7 +565,11 @@ async function render(short, opts) {
     for (const [ci, card] of cards.entries()) {
       for (let k = 0; k < card.length; k++, w++) {
         const from = ci === 0 && k === 0 ? start : start + words[w].start;
-        const to = w + 1 < words.length ? start + words[w + 1].start : until;
+        // The last word clears shortly after the voice stops rather than
+        // holding until the next line. Across a normal gap that changes
+        // nothing; across a pause it stops the frame freezing with stale text,
+        // which read as the video stalling rather than as suspense.
+        const to = w + 1 < words.length ? start + words[w + 1].start : Math.min(until, end + 0.3);
         const html = card.map((tok, j) => j === k
           ? `<span style="color:${GOLD}">${esc(tok)}</span>` : esc(tok)).join(' ');
         // The inner div matters: inside a flex container each text run and
