@@ -39,7 +39,9 @@ const LONGFORM = [
           'hand-painted white serif lettering reads exactly: "WHAT WE DO IN LIFE ECHOES IN ETERNITY" and beneath ' +
           'it, smaller: "— MARCUS AURELIUS". Squat rack and iron plates in the foreground, chalk dust in warm ' +
           'window light. Photoreal, moody, shallow depth of field. No people.', zoom: 'in', focus: 0.4 } },
-      { say: "It's on gym walls, on tattoos, on a thousand motivational posters.",
+      // Names him. The quote card shows the attribution but the voice never
+      // said it, so "He never said it" had no one to refer to.
+      { say: "It's credited to Marcus Aurelius on gym walls, on tattoos, and on a thousand motivational posters.",
         visual: { gen: 'Slow dolly along a dim, empty modern gym at dawn, iron plates and a barbell on the floor, ' +
           'chalk dust floating in shafts of window light. Photoreal, moody, no people.' } },
       { say: 'He never said it.', pauseBefore: 0.3,

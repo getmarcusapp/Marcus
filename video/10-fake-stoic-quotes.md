@@ -20,9 +20,9 @@ getmarcus.app/misattributed-stoic-quotes. The renderable version is
 
 [Gym-wall still, slow push in. Quote typed on screen.]
 
-"What we do in life echoes in eternity." Marcus Aurelius.
+"What we do in life echoes in eternity."
 
-It's on gym walls, on tattoos, on a thousand motivational posters.
+It's credited to Marcus Aurelius on gym walls, on tattoos, and on a thousand motivational posters.
 
 He never said it.
 

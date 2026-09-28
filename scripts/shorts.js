@@ -146,7 +146,8 @@ function cachedVoice(all, i, voice) {
 
 async function voiceSegment(all, i, voice) {
   const text = spoken(all[i]);
-  const wav = cached('.voice-cache', voiceKey(all, i, voice), '.wav');
+  const key = voiceKey(all, i, voice);
+  const wav = cached('.voice-cache', key, '.wav');
   const meta = cached('.voice-cache', key, '.json');
   if (!fs.existsSync(wav) || !fs.existsSync(meta)) {
     let align = null;
