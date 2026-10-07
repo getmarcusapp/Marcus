@@ -20,13 +20,6 @@
 - Saved lines: any passage the app shows can be kept, and a kept line resurfaces about one day in three.
 - The Stoics: a reference gallery of twelve figures, in chronological order, each with what they taught and where to start reading.
 
-## Daily Meditations (free newsletter and archive)
-
-> One Stoic reflection each morning: a verified passage from the Stoics, the moment in history that produced it, and an unforced line to the world today. Free.
-
-- Archive index: https://getmarcus.app/meditations
-- Each edition is a standalone article with the passage, its historical context, and a reflective question.
-
 ## Key pages
 
 - Home: https://getmarcus.app
@@ -50,6 +43,5 @@
 - Misattributed Stoic quotes: https://getmarcus.app/misattributed-stoic-quotes
 - Examples: "what we do in life echoes in eternity" is from the film Gladiator (2000), not Marcus Aurelius. "Every new beginning comes from some other beginning's end" is Semisonic, "Closing Time" (1998), not Seneca. "We are what we repeatedly do. Excellence, then, is not an act, but a habit" is Will Durant paraphrasing Aristotle, not Aristotle.
 - Quotations shown in the app carry a verse-level citation where one could be established; passages that could not be sourced were removed rather than kept.
-- Daily Meditations archive: https://getmarcus.app/meditations
 - Privacy policy: https://getmarcus.app/privacy
 - Sitemap: https://getmarcus.app/sitemap.xml

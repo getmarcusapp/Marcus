@@ -118,7 +118,6 @@ const PILLARS = [
     pages: [
       { href: '/stoics', title: 'The Stoics', blurb: 'Twelve figures in the order they lived, from a shipwrecked merchant to an emperor. What each taught and where to start.', published: true },
       { href: '/library', title: 'The Library', blurb: 'Twenty-four books: primary sources in the best translations, modern interpreters, and adjacent thinkers.', published: true },
-      { href: '/meditations', title: 'Daily Meditations', blurb: 'One short Stoic reflection each morning, tied to something happening in the world. Free.', published: true },
     ],
   },
 ];

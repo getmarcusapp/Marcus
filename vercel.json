@@ -3,6 +3,10 @@
   "buildCommand": null,
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/meditations", "destination": "/", "permanent": false },
+    { "source": "/meditations/:path*", "destination": "/", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/dispatches.json",

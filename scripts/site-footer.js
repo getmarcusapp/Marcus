@@ -18,7 +18,6 @@ const LINKS = [
   ['/stoic-quotes', 'Sourced quotes'],
   ['/check-a-stoic-quote', 'Check a quote'],
   ['/misattributed-stoic-quotes', 'Attribution'],
-  ['/meditations', 'Daily Meditations'],
   ['/about', 'About'],
 ];
 

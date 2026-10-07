@@ -21,6 +21,13 @@ const EDITIONS_DIR = path.join(ROOT, 'content', 'editions');
 const OUT_DIR = path.join(ROOT, 'public', 'meditations');
 const PUBLIC_DIR = path.join(ROOT, 'public');
 const SITE = 'https://getmarcus.app';
+// The newsletter is PAUSED (2026-10-07): it was not finding readers and the
+// generator was costing real API money. While this is false the archive is not
+// built, /meditations is left out of the sitemap, and vercel.json redirects it
+// home. The editions in content/editions and the generator are kept, so
+// resuming is: set this true, remove the redirect, re-add the footer and Learn
+// links, and re-enable the "Daily Meditations" workflow in GitHub Actions.
+const PUBLISH_ARCHIVE = false;
 // Analytics — consent-gated GA4 loader shared by every page (see public/analytics.js).
 const GA = '<script src="/analytics.js"></script>';
 // Beehiiv v3 subscribe form (daily-meditations publication). Renders inline,
@@ -371,7 +378,7 @@ function buildSitemap(records) {
 
   const stoicsDate = newestDate('constants/stoics.js', 'scripts/build-stoics.js');
   add(SITE + '/', gitDate('public/index.html'), 'weekly', '1.0');
-  add(SITE + '/meditations', newest, 'daily', '0.9');
+  if (PUBLISH_ARCHIVE) add(SITE + '/meditations', newest, 'daily', '0.9');
   add(SITE + '/library', newestDate('constants/library.js', 'scripts/build-library.js'), 'monthly', '0.8');
   add(SITE + '/learn', gitDate('scripts/build-learn.js'), 'monthly', '0.8');
   add(SITE + '/about', gitDate('scripts/build-about.js'), 'yearly', '0.6');
@@ -432,6 +439,12 @@ function build() {
     } catch (e) { console.warn('Skipping unparseable ' + f + ': ' + e.message); return null; }
   }).filter(Boolean).sort((a, b) => (a.isoDate < b.isoDate ? 1 : -1));
 
+  if (!PUBLISH_ARCHIVE) {
+    fs.rmSync(OUT_DIR, { recursive: true, force: true });
+    console.log('Archive paused (PUBLISH_ARCHIVE = false): public/meditations/ removed, sitemap only.');
+    buildSitemap(records);
+    return;
+  }
   fs.mkdirSync(OUT_DIR, { recursive: true });
   // Clean stale pages first, so a vetoed edition (its JSON deleted) or a
   // renamed slug (theme changed on a same-day re-run) can't linger as an
@@ -450,4 +463,5 @@ function build() {
   buildSitemap(records);
 }
 
-build();
+if (require.main === module) build();
+module.exports = { PUBLISH_ARCHIVE };

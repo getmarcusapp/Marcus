@@ -245,6 +245,36 @@ function misattributionCount() {
 // guard that fires most often was the one guaranteeing no edition and no email.
 // The 2026-08-29 edition had already been lost the same way and nobody noticed
 // for two days, because from an inbox a failed run looks like a quiet one.
+// The newsletter was paused on 2026-10-07. While PUBLISH_ARCHIVE is false the
+// site must carry no trace of it: a signup form for a newsletter that never
+// sends is worse than no form, and a footer link into a removed archive is a
+// dead end on every page.
+function newsletterPaused() {
+  const fail = [];
+  const src = read('scripts/build-archive.js');
+  const on = /const PUBLISH_ARCHIVE = true/.test(src);
+  if (!on && !/const PUBLISH_ARCHIVE = false/.test(src)) return ['scripts/build-archive.js: no PUBLISH_ARCHIVE switch'];
+  if (on) return fail;
+  const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e =>
+    e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
+  for (const f of walk(path.join(ROOT, 'public')).filter(f => /\.(html|txt|xml)$/.test(f))) {
+    const t = fs.readFileSync(f, 'utf8');
+    const rel = path.relative(ROOT, f);
+    if (/beehiiv/i.test(t)) fail.push(`${rel}: still embeds the Beehiiv signup form`);
+    if (/\bnewsletter\b/i.test(t)) fail.push(`${rel}: still mentions the newsletter`);
+    if (/href="\/meditations[\/"]|getmarcus\.app\/meditations\b/.test(t)) fail.push(`${rel}: still links to the paused /meditations archive`);
+  }
+  if (fs.existsSync(path.join(ROOT, 'public', 'meditations'))) fail.push('public/meditations/: the archive is paused but its pages are still published');
+  if (require(path.join(ROOT, 'scripts', 'site-footer.js')).LINKS.some(([h]) => h === '/meditations')) {
+    fail.push('scripts/site-footer.js: the footer still links to /meditations');
+  }
+  const redirects = (JSON.parse(read('vercel.json')).redirects || []).map(r => r.source);
+  if (!redirects.includes('/meditations') || !redirects.includes('/meditations/:path*')) {
+    fail.push('vercel.json: /meditations is not redirected, so links in sent editions would 404');
+  }
+  return fail;
+}
+
 function newsletterFallback() {
   const fail = [];
   const gen = read('scripts/generate-newsletter.js');
@@ -2201,6 +2231,7 @@ function compassCopy() {
 const CHECKS = [
   ['copy counts agree with the data', copyCounts],
   ['the misattribution count matches the list', misattributionCount],
+  ['the paused newsletter leaves no trace on the site', newsletterPaused],
   ['the newsletter can fail without going quiet', newsletterFallback],
   ['the newsletter reserve bank is clean and rationed', reserveBank],
   ['no duplicate quotes across surfaces', quoteDuplicates],
