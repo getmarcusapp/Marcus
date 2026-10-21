@@ -551,6 +551,86 @@ function themePages() {
 // against the real corpus: a line we have published as false must come back
 // false, a line we have cited must come back cited, and a line we do not hold
 // must come back as "we cannot find it" rather than as "fake".
+// The ChatGPT/Claude app (api/mcp.js) answers from its own copy of the
+// library and its own copy of the matcher. Three ways that goes wrong, all
+// silent: the data falls behind the constants, the matcher drifts from the
+// site's, or the server stops speaking the protocol. Any of them means the app
+// tells someone a real quote is unknown, or a fake one is fine.
+function mcpServer() {
+  const fail = [];
+  const { source, OUT } = require(path.join(ROOT, 'scripts', 'build-mcp-data.js'));
+  if (!fs.existsSync(OUT) || fs.readFileSync(OUT, 'utf8') !== source()) {
+    fail.push('api/_data/quotes.js is out of date with constants/; run node scripts/build-mcp-data.js');
+  }
+  // Parity with the site's matcher, on everything we hold and some we do not.
+  const { CLIENT, loadModule } = require(path.join(ROOT, 'scripts', 'build-quote-checker.js'));
+  const { STOIC_QUOTES } = loadModule('stoicQuotes.js', ['STOIC_QUOTES']);
+  const { MISATTRIBUTIONS } = loadModule('misattributions.js', ['MISATTRIBUTIONS']);
+  const D = {
+    corpus: STOIC_QUOTES.map(q => [q.quote, q.author, q.work, q.source || '']),
+    mis: MISATTRIBUTIONS.map(m => [m.text, m.credited, m.actual || '', m.note, m.confidence, m.id]),
+  };
+  const site = new Function('D', CLIENT.slice(CLIENT.indexOf('function norm'), CLIENT.indexOf('var elInput')) +
+    '; return {norm,stripAttr,best};')(D);
+  const siteVerdict = raw => {
+    const input = site.norm(site.stripAttr(raw));
+    if (input.split(' ').length < 2) return 'short';
+    const m = site.best(input, D.mis, r => r[0]), v = site.best(input, D.corpus, r => r[0]);
+    if (m.score >= 0.82) return 'misattributed';
+    if (v.score >= 0.82) return 'verified';
+    return Math.max(m.score, v.score) >= 0.45 ? 'close' : 'not_found';
+  };
+  const lib = new Function(read('api/_lib/match.js').replace(/export\s+function/g, 'function') +
+    '; return { verdict };')();
+  const appData = {
+    corpus: STOIC_QUOTES.map(q => ({ quote: q.quote })),
+    mis: MISATTRIBUTIONS.map(m => ({ text: m.text })),
+  };
+  const inputs = [
+    ...STOIC_QUOTES.map(q => q.quote),
+    ...MISATTRIBUTIONS.flatMap(m => [m.text, m.text + ' — ' + m.credited]),
+    "It's not what happens to you but how you react to it",
+    'The obstacle is the way',
+    'A screaming comes across the sky.',
+    'Know thyself',
+    'Waste no more time arguing what a good man should be',
+  ];
+  for (const t of inputs) {
+    const a = siteVerdict(t), b = lib.verdict(t, appData).kind;
+    if (a !== b) fail.push(`api/_lib/match.js: the app says "${b}" where the site says "${a}" for "${t.slice(0, 50)}"`);
+  }
+  // The server itself, loaded as the ES module Vercel runs.
+  const probe = `
+    const { handle } = await import(${JSON.stringify(path.join(ROOT, 'api', 'mcp.js'))});
+    const call = (name, args) => handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } }, 'probe');
+    console.log(JSON.stringify({
+      init: handle({ jsonrpc: '2.0', id: 0, method: 'initialize', params: { protocolVersion: '2025-06-18' } }),
+      tools: handle({ jsonrpc: '2.0', id: 0, method: 'tools/list' }),
+      fake: call('check_quote', { quote: 'What we do in life echoes in eternity. — Marcus Aurelius' }),
+      unknown: call('check_quote', { quote: 'A screaming comes across the sky.' }),
+      empty: call('check_quote', {}),
+      find: call('find_quotes', { topic: 'grief', author: 'Seneca' }),
+      note: handle({ jsonrpc: '2.0', method: 'notifications/initialized' }),
+    }));`;
+  const r = require('child_process').spawnSync(process.execPath, ['--input-type=module', '--no-warnings', '-e', probe], { encoding: 'utf8' });
+  let o;
+  try { o = JSON.parse(r.stdout); } catch { return fail.concat(['api/mcp.js: does not load as an ES module: ' + String(r.stderr).trim().split('\n').slice(-1)[0]]); }
+  if (o.init.result.protocolVersion !== '2025-06-18') fail.push('api/mcp.js: initialize does not echo a supported protocol version');
+  const tools = o.tools.result.tools;
+  if (tools.map(t => t.name).join() !== 'check_quote,find_quotes') fail.push('api/mcp.js: tools/list is not check_quote and find_quotes');
+  if (tools.some(t => !t.annotations || t.annotations.readOnlyHint !== true)) fail.push('api/mcp.js: a tool is not marked read-only');
+  if (o.fake.result.structuredContent.verdict !== 'misattributed' || !/utm_source=probe/.test(o.fake.result.content[0].text)) {
+    fail.push('api/mcp.js: the Gladiator line does not come back misattributed with a tagged source link');
+  }
+  if (o.unknown.result.structuredContent.verdict !== 'not_found' || !/not a verdict/.test(o.unknown.result.content[0].text)) {
+    fail.push('api/mcp.js: a line we do not hold must come back not_found and say it is not a verdict');
+  }
+  if (!o.empty.result.isError) fail.push('api/mcp.js: a missing quote is not reported as a tool error');
+  if (!(o.find.result.structuredContent.quotes || []).length) fail.push('api/mcp.js: find_quotes finds nothing for grief by Seneca');
+  if (o.note !== null) fail.push('api/mcp.js: a notification got a reply');
+  return fail;
+}
+
 function quoteChecker() {
   const fail = [];
   const { CLIENT, loadModule, SLUG } = require(path.join(ROOT, 'scripts', 'build-quote-checker.js'));
@@ -2240,6 +2320,7 @@ const CHECKS = [
   ['no duplicate passages in the reading corpus', corpusDuplicates],
   ['the themed quote pages are sourced and distinct', themePages],
   ['the quote checker returns the right verdict', quoteChecker],
+  ['the ChatGPT/Claude app agrees with the site and speaks MCP', mcpServer],
   ['every page can be reached from the footer', siteFooter],
   ['the header nav is shared and complete', siteNav],
   ['focus rings and social cards exist', polish],
