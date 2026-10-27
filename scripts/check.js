@@ -628,6 +628,13 @@ function mcpServer() {
   if (!o.empty.result.isError) fail.push('api/mcp.js: a missing quote is not reported as a tool error');
   if (!(o.find.result.structuredContent.quotes || []).length) fail.push('api/mcp.js: find_quotes finds nothing for grief by Seneca');
   if (o.note !== null) fail.push('api/mcp.js: a notification got a reply');
+  // The setup page states the library's size; it must be the size served.
+  const page = fs.existsSync(path.join(ROOT, 'public', 'quote-checker-for-ai.html'))
+    ? read('public/quote-checker-for-ai.html') : '';
+  if (!page) fail.push('public/quote-checker-for-ai.html has not been built (the directories require it)');
+  else if (!page.includes(STOIC_QUOTES.length + ' cited passages') || !page.includes(MISATTRIBUTIONS.length + ' <a href="/misattributed-stoic-quotes">')) {
+    fail.push('public/quote-checker-for-ai.html states a library size the server does not have; run node scripts/build-ai-checker.js');
+  }
   return fail;
 }
 
@@ -1684,7 +1691,7 @@ function siteFooter() {
   const { LINKS } = require(path.join(ROOT, 'scripts', 'site-footer.js'));
 
   // Every builder takes its footer from the shared module.
-  const BUILDERS = ['articles', 'attribution', 'learn', 'library', 'about', 'stoics', 'themes', 'quote-checker', 'archive'];
+  const BUILDERS = ['articles', 'attribution', 'learn', 'library', 'about', 'stoics', 'themes', 'quote-checker', 'archive', 'ai-checker'];
   for (const b of BUILDERS) {
     const src = read('scripts/build-' + b + '.js');
     if (/<footer class="/.test(src)) {

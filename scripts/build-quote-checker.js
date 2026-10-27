@@ -327,6 +327,10 @@ function build() {
     '<a href="/misattributed-stoic-quotes">the Stoic quotes that are not Stoic</a>. If you would rather browse passages that do check ' +
     'out, they are on <a href="/stoic-quotes">sourced quotes</a>.</p>' +
 
+    '<h2 class="qc-h2">Use it inside ChatGPT or Claude</h2>' +
+    '<p class="qc-p">The same checker works as a connector for AI assistants, so the next time one offers you a Stoic quote it can ' +
+    'check it first. <a href="/quote-checker-for-ai">How to connect it</a>.</p>' +
+
     '<section class="qc-app">' +
     '<img src="/skull-gold.png" alt="" width="38" height="52">' +
     '<p>Marcus is a daily Stoic practice for iOS, and it reads from this same checked library. No quote in the app is there unless it survived the audit.</p>' +
