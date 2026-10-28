@@ -269,7 +269,7 @@ const SHORTS = [
         visual: { gen: 'Dozens of glowing phone screens floating in a dark room, softly out of focus, colored light ' +
           'flickering as feeds scroll. Photoreal. No readable text, no faces.' } },
       { say: 'It is one of the most shared Marcus quotes online. No translation of the Meditations contains it.',
-        visual: { art: 'virtue-wisdom', zoom: 'in', focus: 0.3 } },
+        visual: { art: 'evening-examination', zoom: 'in', focus: 0.4 } },
       { say: 'And it flips what the Stoics believed.', pauseBefore: 0.4,
         visual: { gen: 'A perfectly still mountain lake at dawn reflecting snowy peaks, then a breeze ripples the ' +
           'surface and the reflection breaks apart. Photoreal, no people.' } },
