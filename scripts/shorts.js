@@ -741,7 +741,7 @@ async function render(short, opts) {
     '════ PASTE INTO YOUTUBE ════', '',
     'TITLE', short.hook, '',
     'DESCRIPTION',
-    `"${entry.text}" is commonly credited to ${entry.credited}. It's ${entry.actual}.`,
+    describeEntry(entry),
     '', `The full trail: https://getmarcus.app/misattributed-stoic-quotes#${entry.id}`,
     '', ...credits.map(c => `Image: ${c}.`),
     ...(disclosureLine ? ['', `${disclosureLine[0].toUpperCase()}${disclosureLine.slice(1)}. Every quotation is checked against its source.`] : []),
@@ -758,6 +758,14 @@ async function render(short, opts) {
   ].filter(x => x !== null).join('\n') + '\n');
 
   return { mp4, total, voice, states: states.length, gen: clips.filter(Boolean).length };
+}
+
+// The description's first line. An entry with no known source has actual:
+// null, and the first version printed "It's null." into three descriptions
+// meant for pasting straight into YouTube.
+function describeEntry(entry) {
+  return `"${entry.text}" is commonly credited to ${entry.credited}. ` +
+    (entry.actual ? `It's ${entry.actual}.` : 'No known source contains it.');
 }
 
 // ── listen ──────────────────────────────────────────────────────────────────
@@ -901,7 +909,7 @@ async function main() {
 }
 
 module.exports = {
-  validate, words, chunk, wordTimes, startFromLevels, diffWords,
+  validate, words, chunk, wordTimes, startFromLevels, diffWords, describeEntry,
   // Shared with scripts/longform.js, which renders the same way at 16:9.
   voiceSegment, cachedVoice, elevenAudio, musicStart, generateClip, clipPath, generateStill, stillPath,
   transcribe, listenWords, ff, duration, artFile, hash, esc, OUT, FONTS, CHROME, FPS, BG, CREAM, GOLD,

@@ -303,6 +303,118 @@ const SHORTS = [
         visual: { art: 'evening-examination', zoom: 'out', focus: 0.35 } },
     ],
   },
+  // ── Third batch (November 2026): hook-first, with the real line as payoff. ─
+  {
+    id: 'luck-preparation',
+    hook: 'Seneca never said this. Nobody knows who did.',
+    painting: 'dichotomy-of-control',
+    segments: [
+      { say: 'Seneca never said this. Nobody knows who did.',
+        visual: { art: 'dichotomy-of-control', zoom: 'tight', focus: 0.3 } },
+      { quote: 'Luck is what happens when preparation meets opportunity.',
+        visual: { gen: 'An empty locker room at night, one light on, a folded towel on a wooden bench, steam ' +
+          'drifting slowly. Slow push in. Photoreal, no people, no text.' } },
+      { say: "It's in business books and locker rooms under his name. It is in none of his letters or essays.",
+        visual: { art: 'evening-examination', zoom: 'in', focus: 0.4 } },
+      { say: 'Seneca did write about preparation. Like this.', pauseBefore: 0.4,
+        visual: { gen: 'An ancient wooden sailing ship at dawn on a calm grey sea, sails slack, waiting for wind, ' +
+          'mist on the water. Slow drift. Photoreal, no people.', negative: 'modern boats, engines, flags with text' } },
+      { payoff: 'seneca-letter-71-good-character',
+        excerpt: 'If a man knows not to which port he is sailing, no wind is favorable.',
+        cite: 'Letters to Lucilius 71',
+        visual: { art: 'dichotomy-of-control', zoom: 'out', focus: 0.3 } },
+    ],
+  },
+  {
+    id: 'circumstances-reveal-the-man',
+    hook: 'Epictetus never said this. He said it better.',
+    painting: 'view-from-above',
+    segments: [
+      { say: 'Epictetus never said this. He said it better.',
+        visual: { art: 'view-from-above', zoom: 'tight', focus: 0.35 } },
+      { quote: 'Circumstances do not make the man, they only reveal him to himself.',
+        visual: { gen: 'A rough iron chain lying on worn ancient stone steps in harsh Mediterranean sunlight, dust ' +
+          'drifting in the air. Slow push in. Photoreal, no people.', negative: 'modern objects, plastic' } },
+      { say: 'It was published in 1903, in a self-help book by James Allen called As a Man Thinketh.',
+        visual: { gen: 'A small cloth-bound book lying closed on a lace doily beside a china teacup in an English ' +
+          'parlor, grey window light, rain on the glass. Photoreal, no people, no readable text.' } },
+      { say: "Epictetus was born a slave. Here's what he actually said.", pauseBefore: 0.4,
+        visual: { art: 'view-from-above', zoom: 'in', focus: 0.35 } },
+      { payoff: 'epictetus-discourses-1-24-difficulties',
+        excerpt: 'It is difficulties that show what men are.',
+        cite: 'Discourses I.24',
+        visual: { gen: 'Waves crashing against a dark sea rock at dusk, spray flying, the rock unmoved. Slow motion. ' +
+          'Photoreal, no people.' } },
+      { say: 'Eight words. No poster needed.',
+        visual: { art: 'view-from-above', zoom: 'out', focus: 0.35 } },
+    ],
+  },
+  {
+    id: 'cultivate-garden',
+    hook: 'Seneca never said this. It mocks what he believed.',
+    painting: 'present-moment',
+    segments: [
+      { say: 'Seneca never said this. It mocks what he believed.',
+        visual: { art: 'present-moment', zoom: 'in', focus: 0.5 } },
+      { quote: "One must cultivate one's garden.",
+        visual: { gen: 'Close-up of hands in rough linen sleeves turning dark soil with an old iron spade in a small ' +
+          'walled garden at golden hour. Only hands and soil. Photoreal, no faces.' } },
+      { say: "It's the last line of Candide, by Voltaire, from 1759.",
+        visual: { gen: 'An eighteenth-century French salon by candlelight, a gilded writing desk with a quill and a ' +
+          'closed leather book. Slow push in. Photoreal, no people.' } },
+      { say: 'Candide mocks the belief that everything happens for the best, that a wise providence runs the world.',
+        pauseBefore: 0.3,
+        visual: { gen: 'A starry night sky slowly wheeling over ancient Greek temple ruins, stars turning in long ' +
+          'arcs. Photoreal, no people.' } },
+      { say: 'The Stoics believed exactly that. Putting Seneca on this line is signing the critic’s review with ' +
+          'the author’s name.',
+        visual: { art: 'present-moment', zoom: 'out', focus: 0.5 } },
+    ],
+  },
+  {
+    id: 'obstacle-is-the-way',
+    hook: "Marcus Aurelius didn't say this. He said it better.",
+    painting: 'premeditatio-malorum',
+    segments: [
+      { say: "Marcus Aurelius didn't say this. He said it better.",
+        visual: { art: 'premeditatio-malorum', zoom: 'tight', focus: 0.45 } },
+      { quote: 'The obstacle is the way.',
+        visual: { gen: 'A large mossy boulder in a clear mountain stream, water parting around it and flowing on. ' +
+          'Slow push in. Photoreal, no people.' } },
+      { say: "Those five words are the title of Ryan Holiday's 2014 book, and he is open about where they came from.",
+        visual: { art: 'virtue-justice', zoom: 'in', focus: 0.3 } },
+      { say: 'Here is the original, from book five.', pauseBefore: 0.4,
+        visual: { gen: 'Water from a stream flowing over and around a fallen log, carving a new channel through ' +
+          'pebbles. Close, slow motion. Photoreal, no people.' } },
+      { payoff: 'aurelius-meditations-5-20-impediment',
+        excerpt: 'The impediment to action advances action. What stands in the way becomes the way.',
+        cite: 'Meditations V.20',
+        visual: { art: 'premeditatio-malorum', zoom: 'out', focus: 0.45 } },
+    ],
+  },
+  {
+    id: 'fortune-favours-the-bold',
+    hook: 'Seneca never said this. A poet did.',
+    painting: 'negative-visualization',
+    segments: [
+      { say: 'Seneca never said this. A poet did.',
+        visual: { art: 'negative-visualization', zoom: 'in', focus: 0.4 } },
+      { quote: 'Fortune favours the bold.',
+        visual: { gen: 'A Roman trireme cutting through rough dark seas under storm clouds, oars rising together, ' +
+          'spray over the bow. Wide shot. Photoreal, epic, no visible faces.',
+          negative: 'modern boats, engines, text, flags with text' } },
+      { say: "It's Virgil, in the Aeneid. Epic poetry, not philosophy.",
+        visual: { gen: 'An ancient papyrus scroll partly unrolled on a marble table by oil-lamp light, the papyrus ' +
+          'blank and aged. Close-up, slow. Photoreal, no people.', negative: 'modern objects, lantern, candle' } },
+      { say: 'Seneca had a harder view of fortune.', pauseBefore: 0.4,
+        visual: { art: 'negative-visualization', zoom: 'out', focus: 0.4 } },
+      { payoff: 'seneca-providence-fire',
+        excerpt: 'Fire is the test of gold; adversity, of strong men.',
+        cite: 'On Providence 5',
+        visual: { gen: 'Molten gold being poured from a glowing crucible in a dark ancient forge, sparks rising. ' +
+          'Close-up, slow motion. Photoreal, no faces.' } },
+    ],
+  },
 ];
 
 module.exports = { SHORTS };

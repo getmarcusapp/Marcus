@@ -1084,6 +1084,13 @@ function shortsScripts() {
       }
     }
   }
+  // Descriptions are pasted into YouTube as-is, so a missing source must read
+  // as a sentence, never as "null".
+  const { describeEntry } = require(path.join(ROOT, 'scripts', 'shorts.js'));
+  const { loadMisattributions } = require(path.join(ROOT, 'scripts', 'find-misquotes.js'));
+  for (const e of loadMisattributions()) {
+    if (/\b(null|undefined)\b/.test(describeEntry(e))) fail.push(`scripts/shorts.js: the description for ${e.id} prints "${describeEntry(e).slice(-40)}"`);
+  }
   // Captions. The first renders showed "It's from Gladiator, the" with the
   // article stranded from its noun, and split "Marcus / Aurelius" and the title
   // of Millman's novel across two cards.
