@@ -4,7 +4,7 @@ title: "The Best Stoic Apps in 2026: An Honest Comparison"
 description: Five Stoicism apps compared on what they actually do, what they cost, and what they do with your data. We make one of them, and say so.
 pillar: practice
 published: 2026-10-28
-modified: 2026-10-28
+modified: 2026-10-29
 about: [{"name": "Stoicism", "sameAs": "https://en.wikipedia.org/wiki/Stoicism"}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}]
 ---
@@ -74,7 +74,7 @@ A free quote app with nothing to buy. Quotes arrive as notifications. It has a 4
 Ours. Marcus is a daily practice rather than a library or a journal: the routine the Stoics actually describe, laid out across the day. It launched in 2026, so it is small. At the time of writing it had six ratings, all five stars, which is a promising sample and not yet a meaningful one.
 
 - **What it does:** a morning preparation built on your Stoic Compass (what you are working on and who you are trying to become), a daily reading chosen from a cited library, morning and evening journals, an emotion log with Stoic reframes, a weekly review, seven short guided meditations, and an evening examination modeled on the one Seneca describes.
-- **Cost:** a 7-day free trial, then $7.99 a month or $39.99 a year.
+- **Cost:** your first day is free with no trial or card needed. After that, a 7-day free trial, then $7.99 a month or $39.99 a year, or $79.99 once for lifetime access with nothing to renew.
 - **AI and privacy:** your journal never leaves your device, and there is no AI reading your entries. AI is used in one place: to choose the day's reading from the library and write a short reflection on it. Your Compass is the only thing you have written that is sent for that, and your journal entries never are. Every passage the app shows is cited to a work and a section, and we audited the library in 2026 and [published what we found](/misattributed-stoic-quotes).
 - **Where it falls short:** no Android version, no widgets yet, and no cloud sync. Your practice lives on one phone, and you back it up yourself.
 - **Best for:** people who want to practice Stoicism every day, not read about it.
