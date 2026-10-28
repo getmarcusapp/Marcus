@@ -69,3 +69,6 @@ outreach.md
 # Rendered shorts and their working files. Large, and regenerable from
 # scripts/shorts-scripts.js.
 shorts-out/
+
+# public-domain translations cached by scripts/audit-quotes.js
+scripts/.corpus/

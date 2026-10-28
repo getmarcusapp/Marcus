@@ -66,3 +66,6 @@ api/
 shorts-out/
 video/
 content/
+
+# quote-audit corpus cache
+scripts/.corpus/
