@@ -418,6 +418,53 @@ const SHORTS = [
           'Close-up, slow motion. Photoreal, no faces.' } },
     ],
   },
+  // ── From the October 2026 audit of the app's own quotes. ──────────────────
+  {
+    id: 'present-moment-chosen',
+    hook: 'Marcus Aurelius never said this. A 1997 bestseller did.',
+    painting: 'present-moment',
+    segments: [
+      { say: 'Marcus Aurelius never said this. A 1997 bestseller did.',
+        visual: { art: 'premeditatio-malorum', zoom: 'tight', focus: 0.45 } },
+      { quote: 'Whatever the present moment contains, accept it as if you had chosen it.',
+        visual: { gen: 'A calm lake at dawn, mist drifting over the water, a single wooden rowboat moored at a small ' +
+          'jetty. Slow push in. Photoreal, still, no people.' } },
+      { say: "It's Eckhart Tolle, from The Power of Now. It is in no translation of the Meditations.",
+        visual: { gen: 'A modern living room at golden hour, a paperback book lying face down on a linen sofa beside a ' +
+          'cup of tea, sunlight through sheer curtains. Photoreal, no people, no readable text.' } },
+      { say: 'The Stoics did teach something like it. Here is Epictetus.', pauseBefore: 0.4,
+        visual: { art: 'dichotomy-of-control', zoom: 'in', focus: 0.3 } },
+      { payoff: 'epictetus-enchiridion-8-wish',
+        excerpt: 'Do not seek to have everything that happens happen as you wish, but wish for everything to happen ' +
+          'as it actually does happen, and your life will be serene.',
+        cite: 'Enchiridion 8',
+        visual: { gen: 'A river flowing steadily around smooth stones in morning light, the water never stopping. ' +
+          'Slow motion, close. Photoreal, no people.' } },
+    ],
+  },
+  {
+    id: 'attention-become',
+    hook: 'Epictetus never said this. A 1995 book did.',
+    painting: 'view-from-above',
+    segments: [
+      { say: 'Epictetus never said this. A 1995 book did.',
+        visual: { art: 'view-from-above', zoom: 'tight', focus: 0.35 } },
+      { quote: 'You become what you give your attention to.',
+        visual: { gen: 'Abstract close-up of many glowing phone screens in a dark room, softly out of focus, colored ' +
+          'light flickering as they scroll. Photoreal, no readable text, no faces.' } },
+      { say: "It's Sharon Lebell's The Art of Living, an interpretation of Epictetus in her own words, " +
+          'not a translation.',
+        visual: { gen: 'A small modern paperback book lying open on a wooden desk by a window, soft afternoon light, ' +
+          'pages blank. Photoreal, no people, no readable text.' } },
+      { say: 'Here is what Epictetus actually said.', pauseBefore: 0.4,
+        visual: { art: 'view-from-above', zoom: 'in', focus: 0.35 } },
+      { payoff: 'epictetus-discourses-3-23-be-then-do',
+        excerpt: 'First say to yourself what you would be; and then do what you have to do.',
+        cite: 'Discourses III.23',
+        visual: { gen: 'Close-up of hands lacing worn leather boots on a stone step at dawn, ready to set out. ' +
+          'Hands only, photoreal, no faces.' } },
+    ],
+  },
 ];
 
 module.exports = { SHORTS };
