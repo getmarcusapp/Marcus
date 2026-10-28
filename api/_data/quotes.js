@@ -2622,6 +2622,54 @@ export const DATA = {
    "actual": "",
    "note": "Circulates as both Seneca and Confucius, which on its own is a warning sign: a line claimed by two traditions a continent apart usually belongs to neither.",
    "confidence": "strong"
+  },
+  {
+   "id": "present-moment-chosen",
+   "text": "Whatever the present moment contains, accept it as if you had chosen it.",
+   "credited": "Marcus Aurelius",
+   "actual": "Eckhart Tolle, The Power of Now (1997)",
+   "note": "A line from a modern spiritual bestseller, where it continues \"Always work with it, not against it.\" It sounds like amor fati, which is how it drifted to Marcus, but it is in no translation of the Meditations.",
+   "confidence": "strong"
+  },
+  {
+   "id": "begin-is-half",
+   "text": "Begin. To begin is half the work. Let half still remain. Again begin this, and thou wilt have finished.",
+   "credited": "Marcus Aurelius",
+   "actual": "Ausonius, Epigrams",
+   "note": "Incipe: dimidium facti est coepisse. A fourth-century Latin poet, about two hundred years after Marcus, working an old proverb into an epigram. The archaic English helps it pass for the Meditations, which it is not in.",
+   "confidence": "certain"
+  },
+  {
+   "id": "attention-become",
+   "text": "You become what you give your attention to.",
+   "credited": "Epictetus",
+   "actual": "Sharon Lebell, The Art of Living (1995)",
+   "note": "Lebell’s book is an interpretation of Epictetus in her own words, not a translation, and its sentences are routinely quoted as his. Wikiquote lists this one among the misattributions.",
+   "confidence": "strong"
+  },
+  {
+   "id": "all-things-change",
+   "text": "If you realize that all things change, there is nothing you will try to hold on to.",
+   "credited": "Epictetus",
+   "actual": "Stephen Mitchell's version of the Tao Te Ching, chapter 74 (1988)",
+   "note": "A modern English rendering of the Tao Te Ching, and a free one: Mitchell himself calls it a version rather than a translation. So the line is not Epictetus, and is only loosely Lao Tzu.",
+   "confidence": "strong"
+  },
+  {
+   "id": "loftier-building",
+   "text": "The loftier the building, the deeper the foundation.",
+   "credited": "Epictetus",
+   "actual": "",
+   "note": "Not in Epictetus. Quote sites usually move it to Thomas à Kempis, but it is not in the Imitation of Christ either. The image is old: Augustine, in a sermon, says the greater the building is to be, the deeper the builder digs. No one has found this wording in either.",
+   "confidence": "strong"
+  },
+  {
+   "id": "know-nothing",
+   "text": "I know that I know nothing.",
+   "credited": "Socrates",
+   "actual": "",
+   "note": "Not in the Apology, or anywhere in Plato. The nearest passage is Apology 21d, where Socrates says of a man reputed wise that he thinks he knows and does not, while \"I neither know nor think that I know\" (Jowett). That is a claim to know the limits of one’s knowledge, which is subtler than the slogan.",
+   "confidence": "certain"
   }
  ]
 };

@@ -50,7 +50,7 @@ const PILLARS = [
     title: 'Sources and attribution',
     intro: 'A great deal of what circulates as Stoic wisdom is not. This is the part of the site that checks.',
     pages: [
-      { href: '/misattributed-stoic-quotes', title: 'The Stoic quotes that are not Stoic', blurb: 'Twenty-six quotations credited to Marcus Aurelius, Seneca, Epictetus and others that belong to a screenwriter, a songwriter, Voltaire and Kant. Found by auditing our own library.', published: true },
+      { href: '/misattributed-stoic-quotes', title: 'The Stoic quotes that are not Stoic', blurb: 'Quotations credited to Marcus Aurelius, Seneca, Epictetus and others that belong to a screenwriter, a songwriter, Voltaire, Kant and Eckhart Tolle. Found by auditing our own library.', published: true },
       { href: '/check-a-stoic-quote', title: 'Check a Stoic quote', blurb: 'Paste a line attributed to Marcus Aurelius, Seneca or Epictetus and find out whether it is theirs. Free, runs in your browser, nothing is sent anywhere.', published: true },
       { href: '/stoic-quotes', title: 'Stoic quotes, with sources', blurb: 'Six themed collections \u2014 death, perception, anxiety, discipline, character, other people \u2014 every passage cited to a book and a chapter.', published: true },
       { href: '/did-marcus-aurelius-say-echoes-in-eternity', title: 'Did Marcus Aurelius say "what we do in life echoes in eternity"?', blurb: 'No. It is from Gladiator, and Marcus argued the opposite: that being remembered is worthless and oblivion comes fast.', published: true },

@@ -54,6 +54,6 @@ So the quote is not a loose paraphrase of Marcus. It is a different philosophy, 
 
 If you want the idea Marcus actually held, IV.3 is the one: "our perturbations come only from the opinion which is within." It is checkable, it is his, and it is more useful, because it points at something you can do about it.
 
-For the same idea from Epictetus, see [what he actually said about reactions](/did-epictetus-say-its-not-what-happens-to-you). The full list of [Stoic quotes that are not Stoic](/misattributed-stoic-quotes#everything-we-hear-is-an-opinion) has twenty-five more, and our [quote checker](/check-a-stoic-quote) will tell you whether a line is in our library before you share it.
+For the same idea from Epictetus, see [what he actually said about reactions](/did-epictetus-say-its-not-what-happens-to-you). The full list of [Stoic quotes that are not Stoic](/misattributed-stoic-quotes#everything-we-hear-is-an-opinion) has the rest, and our [quote checker](/check-a-stoic-quote) will tell you whether a line is in our library before you share it.
 
 **Sources:** Marcus Aurelius, *Meditations* II.15 and IV.3, trans. George Long (1862), Project Gutenberg #15877; Thomas Colligan, "Did the Stoics Really Say That?", Modern Stoicism, August 18, 2018; PolitiFact fact-check of the quotation, September 26, 2019.
