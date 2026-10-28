@@ -52,7 +52,9 @@ const OUT = path.join(ROOT, 'shorts-out');
 // (21 repeats in 105 frames on the letterpress lever pull).
 const W = 1080, H = 1920, FPS = 24;
 const BG = '#0c0b0f', CREAM = '#e8e4dc', GOLD = '#c9a961';
-const LEAD_IN = 0.6;
+// No silent lead-in. It was 0.6s, so every short opened on a still frame with
+// no sound while the viewer's thumb was already moving; 62% swiped away.
+const LEAD_IN = 0;
 const END_CARD = 3.0;
 const CHROME = process.env.CHROME_PATH ||
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';

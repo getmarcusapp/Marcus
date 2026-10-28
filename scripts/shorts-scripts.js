@@ -229,6 +229,80 @@ const SHORTS = [
           negative: 'pale skin, grey skin, bluish skin, corpse, lifeless, dead, cold blue light' } },
     ],
   },
+  // ── Second batch (November 2026): the twist comes FIRST. ──────────────────
+  // The first four opened on the quote, read calmly over a painting after a
+  // silent lead-in, and 62% of viewers swiped away before the reveal arrived.
+  // These open on the claim at frame zero, and are the three most widely
+  // shared misattributions on the list.
+  {
+    id: 'not-what-happens',
+    hook: 'Epictetus never said this.',
+    painting: 'dichotomy-of-control',
+    segments: [
+      { say: 'Epictetus never said this.',
+        visual: { art: 'dichotomy-of-control', zoom: 'tight', focus: 0.3 } },
+      { quote: "It's not what happens to you, but how you react to it that matters.",
+        visual: { gen: 'Heavy rain streaming down a tall window at night, a calm room inside lit by one small oil ' +
+          'lamp on the sill, lightning far away. Static camera. Photoreal, quiet. No people.' } },
+      { say: "It's on mugs, posters, and a million Instagram posts. It's a modern paraphrase.",
+        visual: { art: 'view-from-above', zoom: 'in', focus: 0.35 } },
+      { say: "Here's what he actually wrote.", pauseBefore: 0.4,
+        visual: { gen: 'Waves crashing against a dark sea rock at dusk, white spray flying, the rock unmoved. ' +
+          'Slow motion. Photoreal, no people.' } },
+      { payoff: 'epictetus-enchiridion-5-disturbed',
+        excerpt: 'It is not events that disturb people, it is their judgments concerning them.',
+        cite: 'Enchiridion 5',
+        visual: { art: 'dichotomy-of-control', zoom: 'out', focus: 0.3 } },
+      { say: 'Not your reaction. Your judgment. That is the part the paraphrase leaves out.',
+        visual: { gen: 'A single candle flame burning perfectly still in a dark stone room, then a slight draft ' +
+          'makes it flicker and steady again. Close-up. Photoreal, no people.' } },
+    ],
+  },
+  {
+    id: 'everything-we-hear-is-an-opinion',
+    hook: 'Marcus Aurelius never wrote this.',
+    painting: 'premeditatio-malorum',
+    segments: [
+      { say: 'Marcus Aurelius never wrote this.',
+        visual: { art: 'premeditatio-malorum', zoom: 'tight', focus: 0.45 } },
+      { quote: 'Everything we hear is an opinion, not a fact. Everything we see is a perspective, not the truth.',
+        visual: { gen: 'Dozens of glowing phone screens floating in a dark room, softly out of focus, colored light ' +
+          'flickering as feeds scroll. Photoreal. No readable text, no faces.' } },
+      { say: 'It is one of the most shared Marcus quotes online. No translation of the Meditations contains it.',
+        visual: { art: 'virtue-wisdom', zoom: 'in', focus: 0.3 } },
+      { say: 'And it flips what the Stoics believed.', pauseBefore: 0.4,
+        visual: { gen: 'A perfectly still mountain lake at dawn reflecting snowy peaks, then a breeze ripples the ' +
+          'surface and the reflection breaks apart. Photoreal, no people.' } },
+      { say: 'They trusted what you see. What they distrusted was the verdict you add on top of it.',
+        visual: { art: 'premeditatio-malorum', zoom: 'out', focus: 0.45 } },
+    ],
+  },
+  {
+    id: 'fighting-a-hard-battle',
+    hook: 'Seneca never said this.',
+    painting: 'evening-examination',
+    segments: [
+      { say: 'Seneca never said this.',
+        visual: { art: 'evening-examination', zoom: 'tight', focus: 0.35 } },
+      { quote: 'Be kind, for everyone you meet is fighting a hard battle.',
+        visual: { gen: 'A Victorian study at night, snow falling past a tall window, a fire burning low in the ' +
+          'grate, an inkwell and quill on a writing desk. Slow push in. Photoreal, warm. No people.' } },
+      { say: 'It comes from 1897, from a Scottish minister writing as Ian Maclaren.',
+        visual: { gen: 'A small stone church in a snowy Scottish glen at dusk, warm light in the windows, smoke ' +
+          'rising from the chimney. Slow drift. Photoreal, no people.' } },
+      { say: 'A Stoic did say something like it. Just less gently.', pauseBefore: 0.4,
+        visual: { art: 'premeditatio-malorum', zoom: 'in', focus: 0.45 } },
+      { payoff: 'aurelius-meditations-2-1-difficult-people',
+        excerpt: 'Begin the morning by saying to thyself, I shall meet with the busybody, the ungrateful, arrogant, ' +
+          'deceitful, envious, unsocial.',
+        cite: 'Meditations II.1',
+        visual: { gen: 'Dawn over a Roman military camp on a misty river, rows of leather tents, a standard ' +
+          'silhouetted on a hill. Slow pan. Photoreal, no faces.',
+          negative: 'modern objects, plastic, electric light' } },
+      { say: 'Expect difficult people. Be decent anyway.',
+        visual: { art: 'evening-examination', zoom: 'out', focus: 0.35 } },
+    ],
+  },
 ];
 
 module.exports = { SHORTS };
