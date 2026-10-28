@@ -1,10 +1,10 @@
 ---
 slug: did-aristotle-say-we-are-what-we-repeatedly-do
-title: Did Aristotle Say "We Are What We Repeatedly Do"?
+title: “We Are What We Repeatedly Do”: Not Aristotle, but Will Durant
 description: No. The sentence is Will Durant's, written in 1926 as a summary of Aristotle. Unusually for a misquote, it is a good summary, which is why it has been so hard to dislodge.
 pillar: practice
 published: 2026-08-30
-modified: 2026-08-30
+modified: 2026-10-28
 about: [{"name": "Habituation", "description": "The claim, argued in Aristotle's Nicomachean Ethics and inherited by the Stoics, that virtue is acquired by repeated practice rather than by understanding, and that character is the residue of what a person has done often."}]
 mentions: [{"name": "Aristotle", "sameAs": "https://en.wikipedia.org/wiki/Aristotle"}, {"name": "Will Durant", "sameAs": "https://en.wikipedia.org/wiki/Will_Durant"}, {"name": "Nicomachean Ethics", "sameAs": "https://en.wikipedia.org/wiki/Nicomachean_Ethics"}]
 ---

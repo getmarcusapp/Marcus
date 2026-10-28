@@ -1,10 +1,10 @@
 ---
 slug: did-socrates-say-the-secret-of-change
-title: Did Socrates Say "The Secret of Change Is to Focus All Your Energy"?
+title: “The Secret of Change”: Not Socrates, but Dan Millman
 description: A character named Socrates did, in a 1980 novel by Dan Millman. The real one wrote nothing at all, which is worth remembering every time a tidy aphorism arrives with his name on it.
 pillar: practice
 published: 2026-08-30
-modified: 2026-08-30
+modified: 2026-10-28
 about: [{"name": "The Socratic problem", "description": "The difficulty that Socrates left no writings, so everything attributed to him comes through Plato, Xenophon or Aristophanes, and the historical man cannot be cleanly separated from the character each of them wrote."}]
 mentions: [{"name": "Socrates", "sameAs": "https://en.wikipedia.org/wiki/Socrates"}, {"name": "Dan Millman", "sameAs": "https://en.wikipedia.org/wiki/Dan_Millman"}, {"name": "Xenophon", "sameAs": "https://en.wikipedia.org/wiki/Xenophon"}]
 ---

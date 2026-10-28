@@ -1,10 +1,10 @@
 ---
 slug: did-marcus-aurelius-say-echoes-in-eternity
-title: Did Marcus Aurelius Say "What We Do in Life Echoes in Eternity"?
+title: “What We Do in Life Echoes in Eternity”: Gladiator, Not Marcus
 description: No. It is a line from Gladiator, written in the late 1990s. Marcus repeatedly argued the opposite: that posthumous fame is worthless and you will be forgotten quickly.
 pillar: practice
 published: 2026-08-02
-modified: 2026-08-02
+modified: 2026-10-28
 about: [{"name": "Posthumous fame", "description": "A recurring subject in the Meditations, where Marcus Aurelius argues that being remembered after death is worthless and that oblivion comes quickly to everyone."}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}, {"name": "Gladiator", "sameAs": "https://en.wikipedia.org/wiki/Gladiator_(2000_film)"}]
 ---

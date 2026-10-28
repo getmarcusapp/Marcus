@@ -1,10 +1,10 @@
 ---
 slug: did-epictetus-say-its-not-what-happens-to-you
-title: Did Epictetus Say "It's Not What Happens to You, but How You React"?
+title: “It's Not What Happens to You”: What Epictetus Really Said
 description: The idea is his. The sentence is not. It is a modern paraphrase of Enchiridion 5, and it moves the work from judgment to reaction, which is a bigger change than it looks.
 pillar: practice
 published: 2026-08-30
-modified: 2026-08-30
+modified: 2026-10-28
 about: [{"name": "Enchiridion 5", "description": "The passage in Epictetus's handbook holding that people are disturbed not by events but by their judgments about events, followed by an account of where a student learns to place the blame."}]
 mentions: [{"name": "Epictetus", "sameAs": "https://en.wikipedia.org/wiki/Epictetus"}, {"name": "Enchiridion", "sameAs": "https://en.wikipedia.org/wiki/Enchiridion_of_Epictetus"}, {"name": "Charles R. Swindoll", "sameAs": "https://en.wikipedia.org/wiki/Charles_R._Swindoll"}]
 ---
