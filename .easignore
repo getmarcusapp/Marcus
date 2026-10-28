@@ -60,3 +60,9 @@ public/
 
 # server functions (deployed to Vercel with the site, not part of the app build)
 api/
+
+# video tooling and renders (scripts/shorts.js, scripts/longform.js): gigabytes
+# of footage that pushed the archive past EAS's 2 GB limit in October 2026
+shorts-out/
+video/
+content/
