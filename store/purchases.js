@@ -8,6 +8,11 @@ export async function initializePurchases() {
   try {
     Purchases.setLogLevel(LOG_LEVEL.WARN);
     await Purchases.configure({ apiKey: RC_API_KEY });
+    // Apple Search Ads attribution: hands RevenueCat the AdServices token so
+    // a trial or purchase can be traced to the campaign and keyword that
+    // produced the install. Without it, ad spend can only be judged on
+    // installs, which is not what it is buying. No-op off iOS 14.3+.
+    Purchases.enableAdServicesAttributionTokenCollection().catch(() => {});
   } catch (e) {
     console.log('RevenueCat init error:', e);
   }
