@@ -2556,7 +2556,7 @@ export const DATA = {
    "text": "Fortune favours the bold.",
    "credited": "Seneca",
    "actual": "Virgil, Aeneid X.284",
-   "note": "Audentis Fortuna iuvat. Roman, and contemporary-ish with Seneca, but epic poetry rather than philosophy.",
+   "note": "Audentis Fortuna iuvat: Turnus rallying his men in the Aeneid, and an old proverb even then (Cicero calls it one). Seneca does quote it, once, in Letters 94.28, as a familiar verse whose source he does not name, which is likely how his name attached. He did not write it, and his own view of fortune was harder: it seeks out the bravest to test them (On Providence 3).",
    "confidence": "certain"
   },
   {

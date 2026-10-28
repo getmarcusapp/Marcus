@@ -2,6 +2,7 @@
 slug: did-epictetus-say-its-not-what-happens-to-you
 title: “It's Not What Happens to You”: What Epictetus Really Said
 description: The idea is his. The sentence is not. It is a modern paraphrase of Enchiridion 5, and it moves the work from judgment to reaction, which is a bigger change than it looks.
+entry: not-what-happens
 pillar: practice
 published: 2026-08-30
 modified: 2026-10-28

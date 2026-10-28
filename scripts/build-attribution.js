@@ -38,6 +38,23 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// Entries with a dedicated article link to it. Articles declare the entry
+// they cover with an `entry:` line in their frontmatter, so writing a new one
+// links it from here on the next build. Until this existed, the page with the
+// most authority on the subject linked to none of the deep dives.
+function articleFor() {
+  const dir = path.join(ROOT, 'content', 'articles');
+  const map = {};
+  for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.md'))) {
+    const head = fs.readFileSync(path.join(dir, f), 'utf8').split('\n---\n')[0];
+    const entry = (head.match(/^entry:\s*(\S+)/m) || [])[1];
+    const slug = (head.match(/^slug:\s*(\S+)/m) || [])[1];
+    if (entry && slug) map[entry] = slug;
+  }
+  return map;
+}
+const ARTICLES = articleFor();
+
 function entryHtml(e) {
   const verdict = e.actual
     ? '<p class="mq-actual"><span class="mq-label">Actually</span>' + esc(e.actual) + '</p>'
@@ -48,6 +65,7 @@ function entryHtml(e) {
     '<p class="mq-credited"><span class="mq-label">Usually credited to</span>' + esc(e.credited) + '</p>' +
     verdict +
     '<p class="mq-note">' + esc(e.note) + '</p>' +
+    (ARTICLES[e.id] ? '<p class="mq-more"><a href="/' + ARTICLES[e.id] + '">The full story &rarr;</a></p>' : '') +
     '</article>';
 }
 
@@ -268,6 +286,7 @@ img{max-width:100%;display:block}
 .mq-credited{font-size:15px;color:rgba(232,228,220,.66);margin:0 0 12px}
 .mq-actual{font-size:16px;color:#c9a961;margin:0 0 14px}
 .mq-actual-none{color:rgba(232,228,220,.72)}
+.mq-more{margin:10px 0 0;font-size:15px}.mq-more a{color:#c9a961}
 .mq-note{font-size:15.5px;color:rgba(232,228,220,.76);margin:0;max-width:66ch}
 .mq-thanks{margin-top:64px}
 .mq-thanks p{font-size:16px;color:rgba(232,228,220,.72);margin:0;max-width:66ch}

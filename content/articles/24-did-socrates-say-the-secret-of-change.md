@@ -2,6 +2,7 @@
 slug: did-socrates-say-the-secret-of-change
 title: “The Secret of Change”: Not Socrates, but Dan Millman
 description: A character named Socrates did, in a 1980 novel by Dan Millman. The real one wrote nothing at all, which is worth remembering every time a tidy aphorism arrives with his name on it.
+entry: secret-of-change
 pillar: practice
 published: 2026-08-30
 modified: 2026-10-28

@@ -2,6 +2,7 @@
 slug: did-marcus-aurelius-say-echoes-in-eternity
 title: “What We Do in Life Echoes in Eternity”: Gladiator, Not Marcus
 description: No. It is a line from Gladiator, written in the late 1990s. Marcus repeatedly argued the opposite: that posthumous fame is worthless and you will be forgotten quickly.
+entry: echoes-in-eternity
 pillar: practice
 published: 2026-08-02
 modified: 2026-10-28

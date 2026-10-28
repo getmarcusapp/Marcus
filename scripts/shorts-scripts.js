@@ -393,20 +393,23 @@ const SHORTS = [
     ],
   },
   {
+    // Corrected before posting: the first version said "Seneca never said
+    // this", but Seneca does quote the line, once, in Letters 94.28. He did
+    // not write it; Virgil did. The hook now says exactly that.
     id: 'fortune-favours-the-bold',
-    hook: 'Seneca never said this. A poet did.',
+    hook: "Seneca didn't write this. He quoted it.",
     painting: 'negative-visualization',
     segments: [
-      { say: 'Seneca never said this. A poet did.',
+      { say: "Seneca didn't write this. He quoted it.",
         visual: { art: 'negative-visualization', zoom: 'in', focus: 0.4 } },
       { quote: 'Fortune favours the bold.',
         visual: { gen: 'A Roman trireme cutting through rough dark seas under storm clouds, oars rising together, ' +
           'spray over the bow. Wide shot. Photoreal, epic, no visible faces.',
           negative: 'modern boats, engines, text, flags with text' } },
-      { say: "It's Virgil, in the Aeneid. Epic poetry, not philosophy.",
+      { say: "The line is Virgil's, from the Aeneid, and it was an old proverb even then.",
         visual: { gen: 'An ancient papyrus scroll partly unrolled on a marble table by oil-lamp light, the papyrus ' +
           'blank and aged. Close-up, slow. Photoreal, no people.', negative: 'modern objects, lantern, candle' } },
-      { say: 'Seneca had a harder view of fortune.', pauseBefore: 0.4,
+      { say: 'Seneca cites it once, in a letter. His own view of fortune was harder.', pauseBefore: 0.4,
         visual: { art: 'negative-visualization', zoom: 'out', focus: 0.4 } },
       { payoff: 'seneca-providence-fire',
         excerpt: 'Fire is the test of gold; adversity, of strong men.',

@@ -638,6 +638,26 @@ function mcpServer() {
   return fail;
 }
 
+// Articles that cover a misattribution say so with an `entry:` line, and the
+// attribution page links to them from that. A typo there would drop the link
+// silently, so every declared entry must exist and appear linked.
+function articleEntries() {
+  const fail = [];
+  const { loadMisattributions } = require(path.join(ROOT, 'scripts', 'find-misquotes.js'));
+  const ids = new Set(loadMisattributions().map(e => e.id));
+  const hub = read('public/misattributed-stoic-quotes.html');
+  const dir = path.join(ROOT, 'content', 'articles');
+  for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.md'))) {
+    const head = fs.readFileSync(path.join(dir, f), 'utf8').split('\n---\n')[0];
+    const entry = (head.match(/^entry:\s*(\S+)/m) || [])[1];
+    const slug = (head.match(/^slug:\s*(\S+)/m) || [])[1];
+    if (!entry) continue;
+    if (!ids.has(entry)) fail.push(`content/articles/${f}: entry "${entry}" is not in constants/misattributions.js`);
+    else if (!hub.includes('href="/' + slug + '"')) fail.push(`public/misattributed-stoic-quotes.html: does not link ${entry} to /${slug}; rebuild it`);
+  }
+  return fail;
+}
+
 function quoteChecker() {
   const fail = [];
   const { CLIENT, loadModule, SLUG } = require(path.join(ROOT, 'scripts', 'build-quote-checker.js'));
@@ -2334,6 +2354,7 @@ const CHECKS = [
   ['no duplicate passages in the reading corpus', corpusDuplicates],
   ['the themed quote pages are sourced and distinct', themePages],
   ['the quote checker returns the right verdict', quoteChecker],
+  ['every misattribution article is linked from the list', articleEntries],
   ['the ChatGPT/Claude app agrees with the site and speaks MCP', mcpServer],
   ['every page can be reached from the footer', siteFooter],
   ['the header nav is shared and complete', siteNav],

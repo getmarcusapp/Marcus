@@ -2,6 +2,7 @@
 slug: who-said-everyone-you-meet-is-fighting-a-hard-battle
 title: “Be Kind, Everyone Is Fighting a Hard Battle”: Who Said It
 description: Not Seneca, not Plato, not Philo. A Scottish minister writing a Christmas message in 1897, and he did not write it in these words either. The line has been quietly rewritten ever since.
+entry: fighting-a-hard-battle
 pillar: practice
 published: 2026-08-30
 modified: 2026-10-28

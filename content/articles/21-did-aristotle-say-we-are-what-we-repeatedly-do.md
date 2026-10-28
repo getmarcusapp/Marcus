@@ -2,6 +2,7 @@
 slug: did-aristotle-say-we-are-what-we-repeatedly-do
 title: “We Are What We Repeatedly Do”: Not Aristotle, but Will Durant
 description: No. The sentence is Will Durant's, written in 1926 as a summary of Aristotle. Unusually for a misquote, it is a good summary, which is why it has been so hard to dislodge.
+entry: we-are-what-we-repeatedly-do
 pillar: practice
 published: 2026-08-30
 modified: 2026-10-28

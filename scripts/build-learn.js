@@ -58,6 +58,8 @@ const PILLARS = [
       { href: '/did-epictetus-say-its-not-what-happens-to-you', title: 'Did Epictetus say "it\u2019s not what happens to you, but how you react"?', blurb: 'The idea is his, the sentence is not. A paraphrase of Enchiridion 5 that moved the work from judgment to reaction, and threw away the best part of the passage.', published: true },
       { href: '/who-said-everyone-you-meet-is-fighting-a-hard-battle', title: 'Who said "be kind, for everyone you meet is fighting a hard battle"?', blurb: 'A Scottish minister in 1897, and he wrote "be pitiful". A century of anonymous editing sanded off every marker of its date, which is how it ended up credited to Seneca.', published: true },
       { href: '/did-socrates-say-the-secret-of-change', title: 'Did Socrates say "the secret of change is to focus all your energy"?', blurb: 'A character called Socrates did, in a 1980 novel. The real one wrote nothing at all, which is worth remembering every time a tidy aphorism arrives with his name on it.', published: true },
+      { href: '/who-said-luck-is-what-happens-when-preparation-meets-opportunity', title: 'Did Seneca say "luck is what happens when preparation meets opportunity"?', blurb: 'No. It is an American saying, printed unsigned in 1912 and in its modern wording in a 1928 loan-company ad. Seneca\u2019s name arrived around 1999.', published: true },
+      { href: '/did-marcus-aurelius-say-the-obstacle-is-the-way', title: 'Did Marcus Aurelius say "the obstacle is the way"?', blurb: 'The idea is his, Meditations V.20. The five words are the title of Ryan Holiday\u2019s 2014 book, and the original is about difficult people.', published: true },
     ],
   },
   {
