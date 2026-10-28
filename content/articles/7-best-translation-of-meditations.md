@@ -1,10 +1,10 @@
 ---
 slug: best-translation-of-meditations
-title: Which Translation of Meditations Should You Read?
-description: Hays, Hard, Hammond, Waterfield and the free public-domain versions compared. Which to buy, which to avoid as a first read, and why the free Kindle edition sounds like the King James Bible.
+title: "The Best Translation of Meditations: Hays, Hard, Hammond or Long?"
+description: The best version of Marcus Aurelius's Meditations to read, compared. Hays, Hard, Hammond, Waterfield and the free Long and Casaubon, with the same passage in three translations side by side.
 pillar: practice
 published: 2026-08-02
-modified: 2026-08-02
+modified: 2026-10-28
 about: [{"name": "Meditations", "description": "The private notebook of Marcus Aurelius, written in Greek on campaign and never intended for publication.", "sameAs": "https://en.wikipedia.org/wiki/Meditations"}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}, {"name": "Gregory Hays", "sameAs": "https://en.wikipedia.org/wiki/Meditations"}]
 ---
@@ -13,7 +13,7 @@ Marcus wrote in Greek, for himself, with no intention of being read. That makes 
 
 Which is why people who bought the wrong edition often conclude the *Meditations* is dry. Usually they downloaded the free one.
 
-## The short answer
+## What is the best translation of Meditations?
 
 **Buy the Gregory Hays translation** (Modern Library, 2002) if you are reading it for practice rather than scholarship. It is the one we recommend in our [Library](/library), and for most readers it is not close.
 
@@ -23,11 +23,31 @@ Read on if you want to know what you are trading away, because Hays does trade s
 
 Almost every free ebook of the *Meditations* is **George Long's 1862 translation**, because it is long out of copyright. It is a serious piece of Victorian scholarship and it is the reason many people believe Marcus wrote like a bishop.
 
-> Begin the morning by saying to thyself, I shall meet with the busy-body, the ungrateful, arrogant, deceitful, envious, unsocial.
+> Begin the morning by saying to thyself, I shall meet with the busybody, the ungrateful, arrogant, deceitful, envious, unsocial.
 
 That is Long. It is accurate. It is also 160 years old, and the archaism is Long's, not Marcus's. Marcus wrote plain, urgent, sometimes ungrammatical notes to himself. Meric Casaubon's 1634 version, also free, is further away still.
 
 If you have tried the *Meditations* and found it stiff, this is very likely what happened. It is not the book.
+
+## The same passage, three ways
+
+Book V opens with Marcus talking himself out of bed. Here is how three translators, across almost four centuries, rendered the first lines.
+
+Meric Casaubon, 1634:
+
+> In the morning when thou findest thyself unwilling to rise, consider with thyself presently, it is to go about a man's work that I am stirred up.
+
+George Long, 1862:
+
+> In the morning when thou risest unwillingly, let this thought be present—I am rising to the work of a human being.
+
+Gregory Hays, 2002:
+
+> At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work — as a human being.
+
+Same Greek, same idea: you were made to work, so get up. The difference is distance. Casaubon and Long sound like scripture; Hays sounds like a man talking to himself, which is what the book is.
+
+We have left out Hard, Hammond and Waterfield here, not because they are worse but because we only quote what we can check word for word, and their texts are not freely available to check against. The free versions are on Project Gutenberg if you want to compare further passages yourself.
 
 ## The main modern options
 
