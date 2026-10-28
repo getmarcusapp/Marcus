@@ -60,6 +60,8 @@ const PILLARS = [
       { href: '/did-socrates-say-the-secret-of-change', title: 'Did Socrates say "the secret of change is to focus all your energy"?', blurb: 'A character called Socrates did, in a 1980 novel. The real one wrote nothing at all, which is worth remembering every time a tidy aphorism arrives with his name on it.', published: true },
       { href: '/who-said-luck-is-what-happens-when-preparation-meets-opportunity', title: 'Did Seneca say "luck is what happens when preparation meets opportunity"?', blurb: 'No. It is an American saying, printed unsigned in 1912 and in its modern wording in a 1928 loan-company ad. Seneca\u2019s name arrived around 1999.', published: true },
       { href: '/did-marcus-aurelius-say-the-obstacle-is-the-way', title: 'Did Marcus Aurelius say "the obstacle is the way"?', blurb: 'The idea is his, Meditations V.20. The five words are the title of Ryan Holiday\u2019s 2014 book, and the original is about difficult people.', published: true },
+      { href: '/did-marcus-aurelius-say-everything-we-hear-is-an-opinion', title: 'Did Marcus Aurelius say "everything we hear is an opinion"?', blurb: 'No translation contains it. It rewrites two short lines into something close to the opposite of Stoicism.', published: true },
+      { href: '/who-said-fortune-favours-the-bold', title: 'Did Seneca say "fortune favours the bold"?', blurb: 'Virgil wrote it, from an older Latin proverb. Seneca quotes it once, and his own view of fortune was the reverse: it tests the brave.', published: true },
     ],
   },
   {
