@@ -4,7 +4,7 @@ title: The Stoic Evening Examination
 description: Seneca put himself on trial every night, as a judge who does not frighten the defendant. The three questions, where they come from, and the two ways the practice fails.
 pillar: practice
 published: 2026-08-02
-modified: 2026-08-02
+modified: 2026-10-29
 about: [{"name": "Evening examination", "description": "The nightly Stoic review of the days conduct, described by Seneca in On Anger III.36 and given as three questions by Epictetus in Discourses III.10."}]
 mentions: [{"name": "Seneca", "sameAs": "https://en.wikipedia.org/wiki/Seneca_the_Younger"}, {"name": "Epictetus", "sameAs": "https://en.wikipedia.org/wiki/Epictetus"}, {"name": "Pythagoras", "sameAs": "https://en.wikipedia.org/wiki/Pythagoras"}]
 order: 2
@@ -22,9 +22,13 @@ That sentence is the entire technique. Everything below is commentary on it.
 
 The evening review is older than Stoicism and the Stoics knew it. Epictetus sets it out in *Discourses* III.10 by quoting three questions from the Pythagorean *Golden Verses*:
 
-> Do not allow sleep to close your wearied eyes
-> until you have gone over the day three times:
-> Where did I go wrong? What did I do? What duty is left undone?
+> Let sleep not come upon thy languid eyes
+> Before each daily action thou hast scann'd;
+> What's done amiss, what done, what left undone;
+> From first to last examine all, and then
+> Blame what is wrong, in what is right rejoice.
+>
+> — Epictetus, *Discourses* III.10, quoting the *Golden Verses*, trans. George Long
 
 Worth noting, since it is nearly always got wrong online: **Epictetus is quoting.** These are not his lines, and a great deal of the internet attributes them to him without the quotation marks. The Stoics inherited the exercise from the Pythagoreans and made it central.
 
@@ -75,6 +79,20 @@ Ten minutes, at the end of the day, in the same slot every night.
 5. **Reread weekly.** Seven entries in a row expose the thing no single entry can: everyone has one recurring failure and one recurring evasion, and both are invisible from inside a single day.
 
 That last step is the one almost nobody does, and it is where most of the compounding happens.
+
+## From my own practice
+
+Every night I ask myself five questions:
+
+- What did I do well?
+- What did I do badly?
+- What did I leave undone that was mine to do?
+- What am I carrying that I need to set down before I sleep?
+- Who, or what, deserves my thanks today?
+
+The first three are the *Golden Verses* in plain language. The fourth is the "set it down" step above, asked as a question. The fifth adds thanks.
+
+It shapes the next day. When I've left something undone, that's usually the first thing I take care of in the morning.
 
 ## The two ways it fails
 

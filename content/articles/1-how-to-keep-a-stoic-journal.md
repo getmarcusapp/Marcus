@@ -4,7 +4,7 @@ title: How to Keep a Stoic Journal
 description: The most famous book in Stoicism is a private notebook. What made it a Stoic one, the evening examination and morning preparation in full, and how to keep the practice going.
 pillar: practice
 published: 2026-08-02
-modified: 2026-08-02
+modified: 2026-10-29
 about: [{"name": "Stoic journaling", "description": "The Stoic practice of daily written self-examination, structured by questions about ones own conduct rather than by events or feelings."}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}, {"name": "Seneca", "sameAs": "https://en.wikipedia.org/wiki/Seneca_the_Younger"}, {"name": "Epictetus", "sameAs": "https://en.wikipedia.org/wiki/Epictetus"}]
 order: 1
@@ -32,9 +32,13 @@ This is the core, and it is the oldest documented form. Start here if you start 
 
 Epictetus gives it in *Discourses* III.10, quoting three questions from the Pythagorean *Golden Verses* — worth noting that he is quoting, not coining, since half the internet attributes these to Epictetus himself:
 
-> Where did I go wrong?
-> What did I do?
-> What duty is left undone?
+> Let sleep not come upon thy languid eyes
+> Before each daily action thou hast scann'd;
+> What's done amiss, what done, what left undone;
+> From first to last examine all, and then
+> Blame what is wrong, in what is right rejoice.
+>
+> — Epictetus, *Discourses* III.10, quoting the *Golden Verses*, trans. George Long
 
 Three questions, in that order, about the day now behind you. Ten minutes. In practice each one does distinct work:
 
@@ -69,6 +73,10 @@ The failure mode of Stoic journaling is not writing badly. It is stopping.
 **Never break the chain twice.** Missing one day is nothing. Missing two is how practices end. If you want a rule, make it that one.
 
 **Expect the first two weeks to feel like nothing.** The value is cumulative and it arrives sideways: you catch yourself mid-reaction one afternoon, weeks in, and recognize the thing you wrote about on Tuesday. That is the return, and it does not come in the first entry.
+
+**From my own practice:** life gets in the way. You wake up late after a rough night with the kids, you're rushing to get them out the door for school, and then there's an accident on the way to work. In moments like that, I'm not opening an app to write about what's in my control and what I have to let go.
+
+But once the practice takes hold, you don't need to. You start reminding yourself automatically, and you come back to it when you have time. The app's reminders help me come back, too.
 
 ## A week of it
 

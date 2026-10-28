@@ -128,6 +128,14 @@ function build() {
       : '') +
     '</p>' +
 
+    '<p class="ab-p">My introduction was Ryan Holiday\u2019s <em>The Obstacle Is the Way</em>, in 2014. Years later, a ' +
+    'lecture series by Donald Robertson gave me the push to build a framework for my own practice, and that ' +
+    'framework became Marcus.</p>' +
+    '<p class="ab-p">I couldn\u2019t find an app that was true to the practice. Everything I tried was either a journal or ' +
+    'a collection of quotes. I wanted a morning and evening examination that asked the questions the Stoics asked ' +
+    'themselves every day, and something that helped me put space between what happens and how I respond: to be more ' +
+    'intentional, and less reactive.</p>' +
+
     '<h2 class="ab-h2">What I am not</h2>' +
     '<p class="ab-p">I am not a classicist. I do not read Greek or Latin, I hold no degree in ancient ' +
     'philosophy, and nothing here should be taken on my authority.</p>' +

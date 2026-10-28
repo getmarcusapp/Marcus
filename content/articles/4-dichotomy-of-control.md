@@ -4,7 +4,7 @@ title: The Dichotomy of Control
 description: Epictetus opens his handbook with it and everything else follows. What is actually on the "up to us" list, the trichotomy objection, and the way the idea gets misused.
 pillar: practice
 published: 2026-08-02
-modified: 2026-08-02
+modified: 2026-10-29
 about: [{"name": "Dichotomy of control", "description": "The Stoic division of everything into what is up to us, meaning our own judgments and choices, and what is not.", "sameAs": "https://en.wikipedia.org/wiki/Enchiridion_of_Epictetus"}, {"name": "Prohairesis", "description": "The faculty of moral choice in Epictetus: the capacity to assent to or refuse an impression, and the only thing wholly in a persons possession."}]
 mentions: [{"name": "Epictetus", "sameAs": "https://en.wikipedia.org/wiki/Epictetus"}, {"name": "William B. Irvine", "sameAs": "https://en.wikipedia.org/wiki/William_B._Irvine"}]
 order: 4
@@ -78,6 +78,12 @@ Each morning, take the day as it is actually scheduled and split it:
 Two minutes. The value is not insight — you knew most of it already — but the act of separating, which does not happen on its own.
 
 Then in the evening, check: where did I spend today? Most people discover they spent it almost entirely on the second list.
+
+## From my own practice
+
+I have young kids. Parenting isn't always easy, and patience doesn't come naturally to me. The dichotomy of control has made me a better father and husband.
+
+When my kids are misbehaving, I remind myself how little of it I actually control. What I do control is my own patience and understanding, and recognizing that has made me better at both.
 
 ## Further reading
 
