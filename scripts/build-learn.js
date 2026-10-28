@@ -117,6 +117,7 @@ const PILLARS = [
     intro: 'The voices behind the practice, and the translations worth actually owning.',
     pages: [
       { href: '/stoics', title: 'The Stoics', blurb: 'Twelve figures in the order they lived, from a shipwrecked merchant to an emperor. What each taught and where to start.', published: true },
+      { href: '/best-stoic-apps', title: 'The best Stoic apps, compared', blurb: 'Five apps on what they do, what they cost, and what they do with your data. We make one of them, and say so.', published: true },
       { href: '/library', title: 'The Library', blurb: 'Twenty-four books: primary sources in the best translations, modern interpreters, and adjacent thinkers.', published: true },
     ],
   },
