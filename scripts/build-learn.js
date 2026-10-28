@@ -62,6 +62,10 @@ const PILLARS = [
       { href: '/did-marcus-aurelius-say-the-obstacle-is-the-way', title: 'Did Marcus Aurelius say "the obstacle is the way"?', blurb: 'The idea is his, Meditations V.20. The five words are the title of Ryan Holiday\u2019s 2014 book, and the original is about difficult people.', published: true },
       { href: '/did-marcus-aurelius-say-everything-we-hear-is-an-opinion', title: 'Did Marcus Aurelius say "everything we hear is an opinion"?', blurb: 'No translation contains it. It rewrites two short lines into something close to the opposite of Stoicism.', published: true },
       { href: '/who-said-fortune-favours-the-bold', title: 'Did Seneca say "fortune favours the bold"?', blurb: 'Virgil wrote it, from an older Latin proverb. Seneca quotes it once, and his own view of fortune was the reverse: it tests the brave.', published: true },
+      { href: '/who-said-know-thyself', title: 'Did Socrates say "know thyself"?', blurb: 'He quoted it, and said so. It was carved at the Temple of Apollo at Delphi, and the ancients could not agree who first said it.', published: true },
+      { href: '/did-socrates-say-i-know-that-i-know-nothing', title: 'Did Socrates say "I know that I know nothing"?', blurb: 'Not in Plato. Socrates says something narrower and more useful; the slogan is Cicero\u2019s, three centuries later.', published: true },
+      { href: '/who-said-everything-in-moderation-including-moderation', title: 'Who said "everything in moderation, including moderation"?', blurb: 'A 1920s joke about an ancient maxim. Not Marcus Aurelius, and not Wilde, Twain or Julia Child either.', published: true },
+      { href: '/who-said-a-gem-cannot-be-polished-without-friction', title: 'Who said "a gem cannot be polished without friction"?', blurb: 'Neither Seneca nor Confucius. The earliest printing we found is a chapter title in a Victorian novel set in China.', published: true },
     ],
   },
   {
