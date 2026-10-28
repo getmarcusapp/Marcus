@@ -6,7 +6,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getOfferings, purchasePackage, restorePurchases } from '../store/purchases';
-import { useEntitlement } from '../lib/useEntitlement';
+import { useEntitlement, startFreeDay, freeDayState } from '../lib/useEntitlement';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { GoldPrimary } from '../components/GoldButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -39,8 +39,11 @@ export default function PaywallScreen() {
   // alreadySubscribed = real RevenueCat trial or paid. Excludes dev/beta
   // overrides so testers still see the purchase flow when they hit the
   // paywall during onboarding.
-  const { trialDaysLeft, subscriptionPeriod } = useEntitlement();
-  const alreadySubscribed = subscriptionPeriod === 'TRIAL' || subscriptionPeriod === 'NORMAL';
+  const { trialDaysLeft, subscriptionPeriod, isLifetime } = useEntitlement();
+  const alreadySubscribed = isLifetime || subscriptionPeriod === 'TRIAL' || subscriptionPeriod === 'NORMAL';
+  // Whether this person can still take their one free day (see useEntitlement).
+  const [freeDay, setFreeDay] = useState(null);
+  useEffect(() => { freeDayState().then(setFreeDay); }, []);
 
   function openSubscriptionSettings() {
     // iOS deep link to the user's App Store subscriptions page — the
@@ -80,6 +83,10 @@ export default function PaywallScreen() {
 
   function getPackageByType(type) {
     if (!offerings?.availablePackages) return null;
+    if (type === 'lifetime') {
+      return offerings.availablePackages.find(pkg =>
+        pkg.packageType === 'LIFETIME' || pkg.identifier === '$rc_lifetime');
+    }
     return offerings.availablePackages.find(pkg =>
       type === 'annual'
         ? pkg.packageType === 'ANNUAL' || pkg.packageType === 'TWO_MONTH' ||
@@ -101,7 +108,10 @@ export default function PaywallScreen() {
     setPurchasing(false);
 
     if (result.success && result.entitled) {
-      track('trial_started', { plan: selectedPackage, from: params?.from || 'direct' });
+      // A lifetime purchase is not a trial; counting it as one would make
+      // the trial funnel lie.
+      track(selectedPackage === 'lifetime' ? 'lifetime_purchased' : 'trial_started',
+        { plan: selectedPackage, from: params?.from || 'direct' });
       // Don't write has_premium here — RevenueCat is the source of truth
       // for real subscriptions, and writing it would short-circuit the
       // trial-state detection (the user would never see "X days left").
@@ -149,6 +159,8 @@ export default function PaywallScreen() {
 
   // Live store prices only. When offerings fail to load (offline, App Store
   // hiccup) the plan section renders a retry state instead of fake prices.
+  const lifetimePkg = getPackageByType('lifetime');
+  const lifetimePrice = lifetimePkg?.product?.priceString;
   const annualPrice = annualPkg?.product?.priceString;
   const monthlyPrice = monthlyPkg?.product?.priceString;
   const annualPerDay = perDayLabel(annualPkg);
@@ -222,7 +234,9 @@ export default function PaywallScreen() {
 
         {/* Purchase flow — hidden for users who already have access (trial
             or paid). They see a Manage Subscription button instead. */}
-        {alreadySubscribed ? (
+        {isLifetime ? (
+          <Text style={s.ctaNote}>Marcus is yours for life. There is nothing to renew or manage.</Text>
+        ) : alreadySubscribed ? (
           <>
             <GoldPrimary style={s.cta} onPress={openSubscriptionSettings}>
               <Text style={s.ctaText}>Manage subscription</Text>
@@ -296,6 +310,27 @@ export default function PaywallScreen() {
             </TouchableOpacity>
             )}
 
+            {/* Lifetime — one payment, no trial and no renewal. Last, so the
+                annual trial stays the default and the first thing read. */}
+            {lifetimePkg && (
+            <TouchableOpacity
+              style={[s.planCard, selectedPackage === 'lifetime' && s.planCardSelected]}
+              onPress={() => setSelectedPackage('lifetime')}
+              activeOpacity={0.8}
+            >
+              <View style={s.planTop}>
+                <View style={[s.planRadio, selectedPackage === 'lifetime' && s.planRadioSelected]} />
+                <Text style={[s.planName, selectedPackage === 'lifetime' && s.planNameSelected]}>Lifetime</Text>
+              </View>
+              <Text style={[s.planPrice, selectedPackage === 'lifetime' && s.planPriceSelected]}>
+                {lifetimePrice}<Text style={s.planPeriod}> once</Text>
+              </Text>
+              <Text style={[s.planNote, selectedPackage === 'lifetime' && s.planNoteSelected]}>
+                Pay once. Keep it for good.
+              </Text>
+            </TouchableOpacity>
+            )}
+
           </View>
         )}
 
@@ -310,12 +345,14 @@ export default function PaywallScreen() {
           {purchasing ? (
             <ActivityIndicator color="#000" />
           ) : (
-            <Text style={s.ctaText}>Start 7-day free trial →</Text>
+            <Text style={s.ctaText}>{selectedPackage === 'lifetime' ? 'Unlock for life →' : 'Start 7-day free trial →'}</Text>
           )}
         </GoldPrimary>
 
         <Text style={s.ctaNote}>
-          No charge until day 7. Cancel anytime.
+          {selectedPackage === 'lifetime'
+            ? 'One payment. No subscription, nothing renews.'
+            : 'No charge until day 7. Cancel anytime.'}
         </Text>
         </>
         )}
@@ -334,8 +371,14 @@ export default function PaywallScreen() {
         <TouchableOpacity
           style={[s.skipBtn, purchasing && { opacity: 0.4 }]}
           disabled={purchasing}
-          onPress={() => {
+          onPress={async () => {
             if (!alreadySubscribed) track('paywall_declined', { from: params?.from || 'direct' });
+            // The one free day, offered instead of a read-only app to anyone
+            // who has never had it. The decline route then lands on a
+            // practice they can actually do.
+            if (!alreadySubscribed && freeDay === 'available' && await startFreeDay()) {
+              track('free_day_started', { from: params?.from || 'direct' });
+            }
             // Prefer the explicit `from` param if the paywall was opened
             // from a specific surface (More · Subscription, locked features,
             // etc.). Falls back to postPaywallRoute for the onboarding flow
@@ -345,7 +388,12 @@ export default function PaywallScreen() {
           }}
           activeOpacity={0.7}
         >
-          <Text style={s.skipBtnText}>{alreadySubscribed ? 'Done' : 'Continue without trial'}</Text>
+          <Text style={s.skipBtnText}>
+            {alreadySubscribed ? 'Done'
+              : freeDay === 'available' ? "Not yet. Try today's practice free"
+              : freeDay === 'today' ? "Back to today's practice"
+              : 'Continue without trial'}
+          </Text>
         </TouchableOpacity>
 
         <Text style={s.legal}>

@@ -73,11 +73,13 @@ export default function MoreScreen() {
   const [practiceMs, setPracticeMs] = useState(0);
   const playerInset = useMiniPlayerInset();
   const scrollRef = useRef(null);
-  const { hasAccess, trialDaysLeft } = useEntitlement();
+  const { hasAccess, trialDaysLeft, isFreeDay, isLifetime } = useEntitlement();
 
   // Subscription row copy varies by state so the user always knows where
   // they stand. Hidden while entitlement is still loading.
-  const subSub = trialDaysLeft !== null
+  const subSub = isLifetime ? 'Lifetime · yours for good'
+    : isFreeDay ? "Today's practice is free"
+    : trialDaysLeft !== null
     ? (trialDaysLeft === 0
         ? 'Free trial ends today'
         : `${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left in free trial`)
@@ -174,7 +176,7 @@ export default function MoreScreen() {
                 activeOpacity={0.7}
               >
                 <View style={s.rowContent}>
-                  <Text style={s.rowLabel}>{hasAccess ? 'Subscription' : 'Start free trial'}</Text>
+                  <Text style={s.rowLabel}>{isLifetime ? 'Marcus Premium' : hasAccess && !isFreeDay ? 'Subscription' : 'Start free trial'}</Text>
                   <Text style={s.rowSub}>{subSub}</Text>
                 </View>
                 <Ionicons name="diamond-outline" size={20} color={colors.accent} style={{ marginLeft: 12 }} />

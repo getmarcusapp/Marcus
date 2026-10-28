@@ -129,7 +129,7 @@ export default function PracticeScreen() {
   const medProgress = medDuration > 0 ? medPosition / medDuration : 0;
   const medHasLoaded = medDuration > 0;
 
-  const { hasAccess, trialDaysLeft } = useEntitlement();
+  const { hasAccess, trialDaysLeft, isFreeDay } = useEntitlement();
   // Play/pause any meditation (featured card or gallery card) through the
   // shared singleton player, gated on entitlement.
   function playMed(med) {
@@ -268,8 +268,10 @@ export default function PracticeScreen() {
         setTimeout(() => haptics.success(), 400);
         await AsyncStorage.setItem('last_sealed_date', today);
         track('day_sealed');
-        // Ask for a rating once ever, on the third sealed day — deep enough
-        // that the habit is real, early enough to catch peak goodwill. iOS
+        // Ask for a rating once ever, on the FIRST sealed day. It was the
+        // third, and sealing needed a trial, so almost nobody ever reached it:
+        // six ratings in three months. The first sealed evening is the peak of
+        // goodwill, and with the free first day everyone can get there. iOS
         // decides whether the sheet actually shows, so this stays polite.
         // Lazy require: expo-store-review resolves its native module at
         // import time, which crashes the bundle on builds that don't ship
@@ -280,7 +282,7 @@ export default function PracticeScreen() {
           if (!asked) {
             const s = await getStreak();
             const StoreReview = require('expo-store-review');
-            if ((s.sealedDays || 0) >= 3 && await StoreReview.hasAction()) {
+            if ((s.sealedDays || 0) >= 1 && await StoreReview.hasAction()) {
               await AsyncStorage.setItem('rating_prompt_shown', 'true');
               ratingJustAsked = true;
               // Let the seal moment land first; the sheet interrupts less
@@ -824,14 +826,16 @@ export default function PracticeScreen() {
               activation isn't buried under More → Subscription. Hidden for
               paying subscribers and while entitlement is still loading
               (hasAccess === null). */}
-          {(trialDaysLeft !== null || hasAccess === false) && (
+          {(trialDaysLeft !== null || hasAccess === false || isFreeDay) && (
             <TouchableOpacity
               style={s.trialBanner}
               onPress={() => router.push('/paywall')}
               activeOpacity={0.7}
             >
               <Text style={s.trialBannerText}>
-                {trialDaysLeft !== null
+                {isFreeDay
+                  ? "Today's practice is free · Start your 7-day trial"
+                  : trialDaysLeft !== null
                   ? (trialDaysLeft === 0
                       ? 'Free trial ends today · Manage subscription'
                       : `Free trial · ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`)
