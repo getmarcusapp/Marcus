@@ -222,7 +222,7 @@ export const mementoMoriQuotes = [
   { text: "Death is not an evil. What is it then? The one law mankind has that is free of all discrimination.", author: "Seneca", source: "Letters" },
   { text: "Perfecting yourself is the foundation of perfecting everything else.", author: "Epictetus", source: "Discourses" },
   { text: "Ask yourself at day's end: What did I do well? What did I do badly? What did I leave undone? Walk through each in turn.", author: "Epictetus", source: "Discourses" },
-  { text: "Let us go to our sleep with joy and gladness; let us say, I have lived, and have run the course that Fortune set for me.", author: "Seneca", source: "Letters", ref: "Letters 12.9" },
+  { text: "Let us go to our sleep with joy and gladness; let us say: I have lived; the course which Fortune set for me is finished.", author: "Seneca", source: "Letters", ref: "Letters 12.9" },
   { text: "Reflect often upon the rapidity with which all existing things pass away and are carried out of sight.", author: "Marcus Aurelius", source: "Meditations", ref: "Meditations V.23" },
   { text: "Hold every hour in your grasp. Lay hold of today, and you will depend less upon tomorrow.", author: "Seneca", source: "Letters", ref: "Letters 1.2" },
   { text: "Today I escaped anxiety. Or no, I discarded it, because it was within me.", author: "Marcus Aurelius", source: "Meditations", ref: "Meditations IX.13" },
