@@ -13,7 +13,15 @@
  * read analytics with the App Manager key (403), and attach an app's FIRST
  * non-consumable in-app purchase to a version (STATE_ERROR.FIRST_NON_CONSUMABLE
  * _MUST_BE_SUBMITTED_ON_VERSION). That one is a checkbox in the web UI.
+ *
+ * EVERY SUBMISSION needs REVIEW_NOTE_APPLE_PAY in its review notes. RevenueCat's
+ * SDK links PassKit, App Review sees it, and without the note asks "where is
+ * Apple Pay?" under Guideline 2.1. It rejected 1.4.1 for exactly this in October
+ * 2026 (and a build in July). Apple's message says to state it for each version.
  */
+const REVIEW_NOTE_APPLE_PAY = 'Apple Pay: Marcus does not use Apple Pay and has no Apple Pay functionality. ' +
+  'The PassKit framework in the binary is linked by the RevenueCat SDK (react-native-purchases), which the app ' +
+  'uses only to sell its auto-renewable subscriptions and one non-consumable through StoreKit In-App Purchase.';
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -50,7 +58,7 @@ async function api(p, opts = {}) {
   return { status: r.status, body: ct.includes('json') ? await r.json() : Buffer.from(await r.arrayBuffer()) };
 }
 
-module.exports = { api };
+module.exports = { api, REVIEW_NOTE_APPLE_PAY };
 if (require.main === module) {
   api(process.argv[2]).then(r => console.log(r.status, JSON.stringify(r.body, null, 1)));
 }
