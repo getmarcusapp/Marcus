@@ -2,7 +2,7 @@
   "expo": {
     "name": "Marcus",
     "slug": "Marcus",
-    "version": "1.4.1",
+    "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -26,9 +26,12 @@
         ]
       },
       "entitlements": {
-        "com.apple.developer.in-app-payments": [],
-        "com.apple.developer.healthkit": true
-      }
+        "com.apple.developer.healthkit": true,
+        "com.apple.security.application-groups": [
+          "group.com.harvana.marcus"
+        ]
+      },
+      "appleTeamId": "XWU4687M29"
     },
     "scheme": "marcus",
     "plugins": [
@@ -42,7 +45,16 @@
         }
       ],
       "expo-font",
-      "./plugins/withFmtConsteval"
+      "./plugins/withFmtConsteval",
+      "@bacons/apple-targets",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.4"
+          }
+        }
+      ]
     ],
     "extra": {
       "router": {},

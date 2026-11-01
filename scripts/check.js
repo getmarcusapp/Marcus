@@ -658,6 +658,47 @@ function articleEntries() {
   return fail;
 }
 
+// The widget and the app talk through one App Group. If its identifier
+// differs anywhere, the widget silently shows its fallback forever, so all
+// four places must agree. And the widget is handed quotes by date, so the
+// date helper must agree with the one the Practice screen uses today.
+function widgetSetup() {
+  const fail = [];
+  const app = JSON.parse(read('app.json')).expo;
+  const groups = (app.ios.entitlements || {})['com.apple.security.application-groups'] || [];
+  const group = groups[0];
+  if (!group) return ['app.json: no App Group entitlement, so the widget can never read the app\'s quotes'];
+  if (!/APP_GROUP = "/.test(read('targets/widget/MarcusWidget.swift')) || !read('targets/widget/MarcusWidget.swift').includes(`"${group}"`)) {
+    fail.push(`targets/widget/MarcusWidget.swift: App Group is not ${group}`);
+  }
+  if (!read('lib/widget.js').includes(`'${group}'`)) fail.push(`lib/widget.js: App Group is not ${group}`);
+  if (!/application-groups': config\.ios\.entitlements/.test(read('targets/widget/expo-target.config.js'))) {
+    fail.push('targets/widget/expo-target.config.js: the widget does not take its App Group from app.json');
+  }
+  if ((app.ios.entitlements || {})['com.apple.developer.in-app-payments']) {
+    fail.push('app.json: the Apple Pay entitlement is back; App Review rejects builds that declare it without using it');
+  }
+  const src = read('constants/quotes.js').replace(/export\s+(const|function)/g, '$1');
+  const m = {};
+  new Function('m', src + ';m.q={morningQuotes,getDailyQuote,getQuoteForDate}')(m);
+  if (m.q.getQuoteForDate(m.q.morningQuotes, new Date()) !== m.q.getDailyQuote(m.q.morningQuotes)) {
+    fail.push('constants/quotes.js: getQuoteForDate(today) disagrees with getDailyQuote, so the widget would show a different quote from the app');
+  }
+  // Every day of a year, through both daylight-saving changes, must move to
+  // the next quote: no day repeated, none skipped. (The cycle restarts on
+  // January 1 by design, so the loop stays inside one year.)
+  const pool = m.q.morningQuotes;
+  for (let i = 1; i < 365; i++) {
+    const a = pool.indexOf(m.q.getQuoteForDate(pool, new Date(2026, 0, i)));
+    const b = pool.indexOf(m.q.getQuoteForDate(pool, new Date(2026, 0, i + 1)));
+    if (b !== (a + 1) % pool.length) {
+      fail.push(`constants/quotes.js: the quote for ${new Date(2026, 0, i + 1).toDateString()} does not follow the day before`);
+      break;
+    }
+  }
+  return fail;
+}
+
 function quoteChecker() {
   const fail = [];
   const { CLIENT, loadModule, SLUG } = require(path.join(ROOT, 'scripts', 'build-quote-checker.js'));
@@ -2354,6 +2395,7 @@ const CHECKS = [
   ['no duplicate passages in the reading corpus', corpusDuplicates],
   ['the themed quote pages are sourced and distinct', themePages],
   ['the quote checker returns the right verdict', quoteChecker],
+  ['the widget and the app share one App Group and one quote', widgetSetup],
   ['every misattribution article is linked from the list', articleEntries],
   ['the ChatGPT/Claude app agrees with the site and speaks MCP', mcpServer],
   ['every page can be reached from the footer', siteFooter],

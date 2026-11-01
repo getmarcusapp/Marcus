@@ -1,0 +1,136 @@
+import SwiftUI
+import WidgetKit
+
+// The app group shared with the main app. lib/widget.js writes an array of
+// { date: "yyyy-MM-dd", text, author, ref } under QUOTES_KEY.
+private let APP_GROUP = "group.com.harvana.marcus"
+private let QUOTES_KEY = "widgetQuotes"
+
+struct QuoteEntry: TimelineEntry {
+  let date: Date
+  let text: String
+  let author: String
+  let ref: String
+}
+
+// Shown before the app has ever run, and in the widget gallery. A real,
+// cited line, because a placeholder quote is still a quote.
+private let fallback = QuoteEntry(
+  date: Date(),
+  text: "First, say to yourself what you would be; and then do what you have to do.",
+  author: "Epictetus",
+  ref: "Discourses III.23"
+)
+
+private func dayKey(_ d: Date) -> String {
+  let f = DateFormatter()
+  f.calendar = Calendar(identifier: .gregorian)
+  f.locale = Locale(identifier: "en_US_POSIX")
+  f.timeZone = .current
+  f.dateFormat = "yyyy-MM-dd"
+  return f.string(from: d)
+}
+
+private func storedQuotes() -> [String: QuoteEntry] {
+  // ExtensionStorage stores arrays as JSON bytes, not as a plist array.
+  guard let data = UserDefaults(suiteName: APP_GROUP)?.data(forKey: QUOTES_KEY),
+        let raw = (try? JSONSerialization.jsonObject(with: data)) as? [[String: Any]] else { return [:] }
+  var out: [String: QuoteEntry] = [:]
+  for item in raw {
+    guard let day = item["date"] as? String, let text = item["text"] as? String,
+          let author = item["author"] as? String else { continue }
+    out[day] = QuoteEntry(date: Date(), text: text, author: author, ref: (item["ref"] as? String) ?? "")
+  }
+  return out
+}
+
+struct Provider: TimelineProvider {
+  func placeholder(in context: Context) -> QuoteEntry { fallback }
+
+  func getSnapshot(in context: Context, completion: @escaping (QuoteEntry) -> Void) {
+    let q = storedQuotes()[dayKey(Date())] ?? fallback
+    completion(QuoteEntry(date: Date(), text: q.text, author: q.author, ref: q.ref))
+  }
+
+  // One entry per day, switching at local midnight, for as many days as the
+  // app has written. If the app has not been opened for a while, the last
+  // stored quote stays up rather than falling back mid-stream.
+  func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteEntry>) -> Void) {
+    let quotes = storedQuotes()
+    let cal = Calendar.current
+    let start = cal.startOfDay(for: Date())
+    var entries: [QuoteEntry] = []
+    var last = quotes[dayKey(start)] ?? fallback
+    for i in 0..<14 {
+      guard let day = cal.date(byAdding: .day, value: i, to: start) else { continue }
+      if let q = quotes[dayKey(day)] { last = q }
+      entries.append(QuoteEntry(date: i == 0 ? Date() : day, text: last.text, author: last.author, ref: last.ref))
+    }
+    completion(Timeline(entries: entries, policy: .atEnd))
+  }
+}
+
+struct MarcusWidgetView: View {
+  @Environment(\.widgetFamily) var family
+  var entry: QuoteEntry
+
+  var attribution: String {
+    entry.ref.isEmpty ? entry.author.uppercased() : "\(entry.author) · \(entry.ref)".uppercased()
+  }
+
+  var body: some View {
+    switch family {
+    case .accessoryRectangular:
+      VStack(alignment: .leading, spacing: 2) {
+        Text("\u{201C}\(entry.text)\u{201D}")
+          .font(.system(size: 13, design: .serif))
+          .lineLimit(3)
+          .minimumScaleFactor(0.8)
+        Text(entry.author.uppercased())
+          .font(.system(size: 9, weight: .semibold))
+          .opacity(0.75)
+      }
+      .containerBackground(for: .widget) { Color.clear }
+    case .accessoryInline:
+      Text(entry.author + ": " + entry.text)
+        .containerBackground(for: .widget) { Color.clear }
+    default:
+      VStack(alignment: family == .systemSmall ? .leading : .center, spacing: family == .systemSmall ? 6 : 10) {
+        if family != .systemSmall {
+          Image("skull").resizable().scaledToFit().frame(height: 26)
+        }
+        Text("\u{201C}\(entry.text)\u{201D}")
+          .font(.system(size: family == .systemSmall ? 14 : 16, design: .serif))
+          .italic()
+          .foregroundColor(Color("cream"))
+          .multilineTextAlignment(family == .systemSmall ? .leading : .center)
+          // No line limit: a long passage shrinks to fit rather than being cut
+          // off mid-sentence, which would misquote it.
+          .minimumScaleFactor(0.5)
+          .layoutPriority(1)
+        Text(attribution)
+          .font(.system(size: 9, weight: .semibold))
+          .tracking(1.2)
+          .foregroundColor(Color("gold"))
+          .lineLimit(1)
+          .minimumScaleFactor(0.7)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: family == .systemSmall ? .topLeading : .center)
+      .containerBackground(for: .widget) { Color("background") }
+    }
+  }
+}
+
+@main
+struct MarcusWidget: Widget {
+  let kind = "MarcusWidget"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: Provider()) { entry in
+      MarcusWidgetView(entry: entry).widgetURL(URL(string: "marcus://"))
+    }
+    .configurationDisplayName("Today's passage")
+    .description("The day's quote from Marcus, with its source.")
+    .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryRectangular, .accessoryInline])
+  }
+}

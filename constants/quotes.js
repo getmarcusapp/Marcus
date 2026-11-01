@@ -161,7 +161,15 @@ export const mementoMoriQuotes = [
 ];
 
 export function getDailyQuote(pool, offset = 0) {
-  const today = new Date();
-  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+  return getQuoteForDate(pool, new Date(), offset);
+}
+
+// The quote for any day, so the widget can be handed the next two weeks in
+// advance and change at midnight without the app running.
+export function getQuoteForDate(pool, date, offset = 0) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  // Rounded, not floored: across a daylight-saving change a day is 23 or 25
+  // hours long, and flooring would repeat or skip a quote.
+  const dayOfYear = Math.round((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
   return pool[(dayOfYear + offset) % pool.length];
 }

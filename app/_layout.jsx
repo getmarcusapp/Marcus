@@ -18,6 +18,7 @@ import { initAnalytics, track } from '../lib/analytics';
 import { getUnreadCount, subscribeDispatches, refreshDispatches } from '../lib/dispatches';
 import { useFonts, Inter_300Light, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_300Light_Italic } from '@expo-google-fonts/inter';
 import { Cinzel_400Regular } from '@expo-google-fonts/cinzel';
+import { syncWidget } from '../lib/widget';
 
 function TabIcon({ name, color, size = 22 }) {
   return <Ionicons name={name} size={size} color={color} />;
@@ -216,9 +217,13 @@ export default function Layout() {
     // foreground (existing), and the app-lock background/foreground
     // transitions (new). Re-lock kicks in if the app was backgrounded
     // for more than the threshold defined in lib/appLock.js.
+    // The widget's fourteen days of quotes, topped up at launch and on every
+    // return to the foreground (lib/widget.js).
+    syncWidget();
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') {
         setAppBlurred(false);
+        syncWidget();
         scheduleAllNotifications();
         handleForeground();
         refreshDispatches().catch(() => {});
