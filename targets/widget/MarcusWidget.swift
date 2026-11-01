@@ -95,12 +95,12 @@ struct MarcusWidgetView: View {
       Text(entry.author + ": " + entry.text)
         .containerBackground(for: .widget) { Color.clear }
     default:
-      VStack(alignment: family == .systemSmall ? .leading : .center, spacing: family == .systemSmall ? 6 : 10) {
+      VStack(alignment: family == .systemSmall ? .leading : .center, spacing: family == .systemSmall ? 6 : (family == .systemLarge ? 18 : 10)) {
         if family != .systemSmall {
-          Image("skull").resizable().scaledToFit().frame(height: 26)
+          Image("skull").resizable().scaledToFit().frame(height: family == .systemLarge ? 40 : 26)
         }
         Text("\u{201C}\(entry.text)\u{201D}")
-          .font(.system(size: family == .systemSmall ? 14 : 16, design: .serif))
+          .font(.system(size: family == .systemSmall ? 14 : (family == .systemMedium ? 17 : 24), design: .serif))
           .italic()
           .foregroundColor(Color("cream"))
           .multilineTextAlignment(family == .systemSmall ? .leading : .center)
@@ -109,7 +109,7 @@ struct MarcusWidgetView: View {
           .minimumScaleFactor(0.5)
           .layoutPriority(1)
         Text(attribution)
-          .font(.system(size: 9, weight: .semibold))
+          .font(.system(size: family == .systemLarge ? 11 : 9, weight: .semibold))
           .tracking(1.2)
           .foregroundColor(Color("gold"))
           .lineLimit(1)
