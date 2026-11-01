@@ -1160,7 +1160,7 @@ export const DATA = {
   },
   {
    "id": "epictetus-discourses-1-15-progress",
-   "quote": "No great thing is created suddenly, any more than a bunch of grapes or a fig. If you tell me that you desire a fig, I answer that there must be time. Let it first blossom, then bear fruit, then ripen.",
+   "quote": "No great thing is created suddenly, any more than a bunch of grapes or a fig. If you tell me that you desire a fig, I answer you that there must be time. Let it first blossom, then bear fruit, then ripen.",
    "author": "Epictetus",
    "work": "Discourses",
    "section": "I.15",
