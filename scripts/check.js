@@ -699,6 +699,27 @@ function widgetSetup() {
   return fail;
 }
 
+// Popular paraphrases the October audit replaced with the translators' own
+// words. They slipped back in once, hard-coded on the welcome screen, so the
+// screens and the homepage are searched for them directly.
+function noKnownParaphrases() {
+  const PARAPHRASES = [
+    'Waste no more time arguing',
+    'When you have failed, return again',
+  ];
+  const files = [
+    ...fs.readdirSync(path.join(ROOT, 'app')).filter(f => f.endsWith('.jsx') && f !== 'settings-developer.jsx').map(f => 'app/' + f),
+    ...fs.readdirSync(path.join(ROOT, 'components')).filter(f => f.endsWith('.jsx')).map(f => 'components/' + f),
+    'public/index.html',
+  ];
+  const fail = [];
+  for (const f of files) {
+    const text = read(f);
+    for (const p of PARAPHRASES) if (text.includes(p)) fail.push(`${f}: "${p}…" is a paraphrase; use the translator's words`);
+  }
+  return fail;
+}
+
 function quoteChecker() {
   const fail = [];
   const { CLIENT, loadModule, SLUG } = require(path.join(ROOT, 'scripts', 'build-quote-checker.js'));
@@ -2396,6 +2417,7 @@ const CHECKS = [
   ['the themed quote pages are sourced and distinct', themePages],
   ['the quote checker returns the right verdict', quoteChecker],
   ['the widget and the app share one App Group and one quote', widgetSetup],
+  ['app screens and the homepage quote translators, not paraphrases', noKnownParaphrases],
   ['every misattribution article is linked from the list', articleEntries],
   ['the ChatGPT/Claude app agrees with the site and speaks MCP', mcpServer],
   ['every page can be reached from the footer', siteFooter],

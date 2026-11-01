@@ -22,7 +22,7 @@ const MEDITATION_NOTES = {
   'premeditatio': {
     artist: 'Roman sculpture',
     work: 'Bust of Marcus Aurelius (Capitoline Museums, Rome)',
-    why: 'Marcus Aurelius literally practiced premeditatio malorum every morning — documented in Meditations II.1. Showing the man himself on the meditation he taught feels right rather than circular.',
+    why: 'Meditations II.1 opens with exactly this morning rehearsal of the difficult people the day will bring. Showing the man himself on the meditation he taught feels right rather than circular.',
   },
   'evening-examination': {
     artist: 'Caravaggio',
