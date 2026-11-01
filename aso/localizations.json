@@ -1,0 +1,14 @@
+{
+ "es-MX": {
+  "_why": "The US App Store also indexes Spanish (Mexico) keywords. English keywords here add US search terms that do not fit the en-US field. Text stays English so US users who see it read it.",
+  "name": "Marcus: Stoic Journal & Quotes",
+  "subtitle": "Morning & Evening Reflection",
+  "keywords": "meditation,gratitude,mindfulness,calm,anxiety,wellbeing,selfcare,mental,health,focus,resilience"
+ },
+ "en-GB": {
+  "_why": "English (U.K.) listing, shown across the UK, Australia, Canada and most English-speaking storefronts.",
+  "name": "Marcus: Stoic Journal & Quotes",
+  "subtitle": "Daily Stoicism & Philosophy",
+  "keywords": "aurelius,seneca,epictetus,meditations,wisdom,mindset,diary,reflection,gratitude,memento,mori,virtue"
+ }
+}
