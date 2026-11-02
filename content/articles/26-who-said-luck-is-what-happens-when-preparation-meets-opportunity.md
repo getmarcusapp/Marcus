@@ -5,7 +5,7 @@ description: The saying is American, first printed unsigned in 1912 and in its m
 entry: luck-preparation
 pillar: practice
 published: 2026-10-28
-modified: 2026-10-28
+modified: 2026-11-01
 about: [{"name": "Luck is what happens when preparation meets opportunity", "description": "A twentieth-century American proverb, widely misattributed to Seneca."}]
 mentions: [{"name": "Seneca the Younger", "sameAs": "https://en.wikipedia.org/wiki/Seneca_the_Younger"}, {"name": "Demetrius the Cynic", "sameAs": "https://en.wikipedia.org/wiki/Demetrius_the_Cynic"}]
 ---
@@ -36,9 +36,9 @@ So the honest summary is: an American proverb, documented from 1912, given a Rom
 
 He did write about the idea, more than once. The line closest in spirit is in his letters:
 
-> If a man knows not to which port he is sailing, no wind is favorable.
+> When a man does not know what harbour he is making for, no wind is the right wind.
 >
-> — Seneca, *Letters to Lucilius* 71
+> — Seneca, *Letters to Lucilius* 71.3, trans. Richard M. Gummere
 
 It is a harder thought than the proverb. The proverb promises that preparation gets rewarded. Seneca's point is that without a settled aim, nothing that happens to you can count as good fortune, because you would not recognize it.
 
@@ -58,4 +58,4 @@ If you want Seneca, use Letter 71 and cite it. A quotation with a work and a num
 
 This one is on our [list of misattributed Stoic quotes](/misattributed-stoic-quotes#luck-preparation), alongside a Seneca line that turned out to be [a 1998 song](/did-marcus-aurelius-say-echoes-in-eternity) and an Epictetus line that is [a modern paraphrase](/did-epictetus-say-its-not-what-happens-to-you). If you have a quote you are unsure about, our [quote checker](/check-a-stoic-quote) will tell you whether it is in our library.
 
-**Sources:** Barry Popik, "Luck is what happens when preparation meets opportunity" (barrypopik.com, 2011); Wikiquote, Seneca the Younger, Disputed, and its talk page (2010); Seneca, *On Benefits* VII.1, trans. Aubrey Stewart (1887), on Wikisource.
+**Sources:** Barry Popik, "Luck is what happens when preparation meets opportunity" (barrypopik.com, 2011); Wikiquote, Seneca the Younger, Disputed, and its talk page (2010); Seneca, *On Benefits* VII.1, trans. Aubrey Stewart (1887), on Wikisource; Seneca, *Moral Letters to Lucilius* 71.3, trans. Richard M. Gummere (1917–25), on Wikisource.

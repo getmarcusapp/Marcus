@@ -247,7 +247,7 @@ const LONGFORM = [
               "say. Here's the original.",
             visual: { art: 'virtue-moderation', zoom: 'in', focus: 0.3 } },
           { payoff: 'epictetus-enchiridion-5-disturbed',
-            excerpt: 'It is not events that disturb people, it is their judgments concerning them.',
+            excerpt: 'It is not events that disturb people, it is their judgements concerning them.',
             cite: 'Epictetus, Enchiridion 5',
             visual: { gen: 'Waves crashing against a dark sea rock at dusk, spray flying, the rock unmoved. Slow ' +
               'motion. Photoreal, no people.' } },

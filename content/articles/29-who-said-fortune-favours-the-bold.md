@@ -5,7 +5,7 @@ entry: fortune-favours-the-bold
 description: The famous form is Virgil's, Aeneid X.284, and the idea was an old Roman proverb before him. Seneca quotes it once, as a familiar verse. His own view of fortune was much harder.
 pillar: practice
 published: 2026-10-28
-modified: 2026-10-28
+modified: 2026-11-01
 about: [{"name": "Audentes fortuna iuvat", "description": "Latin proverb, 'fortune favours the bold', in its best-known form from Virgil's Aeneid X.284."}]
 mentions: [{"name": "Virgil", "sameAs": "https://en.wikipedia.org/wiki/Virgil"}, {"name": "Seneca the Younger", "sameAs": "https://en.wikipedia.org/wiki/Seneca_the_Younger"}, {"name": "Terence", "sameAs": "https://en.wikipedia.org/wiki/Terence"}]
 ---
@@ -48,9 +48,9 @@ Here is where the attribution goes from imprecise to misleading. Seneca's own vi
 
 In *On Providence*, he argues that fortune deliberately seeks out the bravest people as its opponents, the way a gladiator wants a worthy adversary: *fortissimos sibi pares quaerit*, it seeks the bravest as its equals. His examples are men who suffered for their courage: Mucius, Regulus, Socrates, Cato. Later in the same essay comes the line that sums it up:
 
-> Fire is the test of gold; adversity, of strong men.
+> Fire tries gold, misfortune tries brave men.
 >
-> — Seneca, *On Providence* 5
+> — Seneca, *On Providence* V, trans. Aubrey Stewart
 
 The proverb says boldness is rewarded. Seneca says boldness gets you tested, and that the testing is the point. You can hold either view. They are not the same, and only the second is his.
 
@@ -62,4 +62,4 @@ If you want Seneca, quote *On Providence*. It is the harder thought and the more
 
 This is on our [list of misattributed Stoic quotes](/misattributed-stoic-quotes#fortune-favours-the-bold), along with another Seneca line that turned out to be [an American proverb from 1912](/who-said-luck-is-what-happens-when-preparation-meets-opportunity). To check a quote before you share it, use the [quote checker](/check-a-stoic-quote).
 
-**Sources:** Virgil, *Aeneid* X.276–286 (The Latin Library), trans. John Dryden (1697), Project Gutenberg #228; Terence, *Phormio* 203; Cicero, *Tusculan Disputations* 2.11, trans. C. D. Yonge, Project Gutenberg #14988; Pliny the Younger, *Letters* 6.16, trans. William Melmoth, Project Gutenberg #2811; Seneca, *Letters to Lucilius* 94.28, trans. Richard M. Gummere (Loeb), on Wikisource; Seneca, *On Providence* 3.4 and 5.
+**Sources:** Virgil, *Aeneid* X.276–286 (The Latin Library), trans. John Dryden (1697), Project Gutenberg #228; Terence, *Phormio* 203; Cicero, *Tusculan Disputations* 2.11, trans. C. D. Yonge, Project Gutenberg #14988; Pliny the Younger, *Letters* 6.16, trans. William Melmoth, Project Gutenberg #2811; Seneca, *Letters to Lucilius* 94.28, trans. Richard M. Gummere (Loeb), on Wikisource; Seneca, *On Providence* 3.4 and 5, trans. Aubrey Stewart, *Minor Dialogues* (1889), Project Gutenberg #64576.

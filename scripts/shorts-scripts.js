@@ -127,7 +127,10 @@ const SHORTS = [
         visual: { art: 'memento-mori', zoom: 'in', focus: 0.3 } },
       {
         payoff: 'seneca-letter-101-each-day',
-        excerpt: "Let us prepare our minds as if we'd come to the very end of life. Let us postpone nothing.",
+        // The published cut (Oct 2026) used a popular rendering no translation
+        // confirms: "Let us prepare our minds as if we'd come to the very end of
+        // life." Gummere's words since the November audit.
+        excerpt: "Let us so order our minds as if we had come to the very end. Let us postpone nothing.",
         cite: 'Letters to Lucilius 101',
         visual: { gen: 'An antique hourglass on a worn stone ledge beside a guttering candle at dusk, the last ' +
           'grains of sand running through. Slow push in. Photoreal, still, contemplative.' },
@@ -250,7 +253,7 @@ const SHORTS = [
         visual: { gen: 'Waves crashing against a dark sea rock at dusk, white spray flying, the rock unmoved. ' +
           'Slow motion. Photoreal, no people.' } },
       { payoff: 'epictetus-enchiridion-5-disturbed',
-        excerpt: 'It is not events that disturb people, it is their judgments concerning them.',
+        excerpt: 'It is not events that disturb people, it is their judgements concerning them.', // Dobbin
         cite: 'Enchiridion 5',
         visual: { art: 'dichotomy-of-control', zoom: 'out', focus: 0.3 } },
       { say: 'Not your reaction. Your judgment. That is the part the paraphrase leaves out.',
@@ -320,7 +323,9 @@ const SHORTS = [
         visual: { gen: 'An ancient wooden sailing ship at dawn on a calm grey sea, sails slack, waiting for wind, ' +
           'mist on the water. Slow drift. Photoreal, no people.', negative: 'modern boats, engines, flags with text' } },
       { payoff: 'seneca-letter-71-good-character',
-        excerpt: 'If a man knows not to which port he is sailing, no wind is favorable.',
+        // Published cut: the popular "If a man knows not to which port he is sailing,
+        // no wind is favorable", which no translation confirms. Gummere since November.
+        excerpt: 'When a man does not know what harbour he is making for, no wind is the right wind.',
         cite: 'Letters to Lucilius 71',
         visual: { art: 'dichotomy-of-control', zoom: 'out', focus: 0.3 } },
     ],
@@ -412,7 +417,9 @@ const SHORTS = [
       { say: 'Seneca cites it once, in a letter. His own view of fortune was harder.', pauseBefore: 0.4,
         visual: { art: 'negative-visualization', zoom: 'out', focus: 0.4 } },
       { payoff: 'seneca-providence-fire',
-        excerpt: 'Fire is the test of gold; adversity, of strong men.',
+        // Published cut: the popular "Fire is the test of gold; adversity, of
+        // strong men", which no translation confirms. Stewart since November.
+        excerpt: 'Fire tries gold, misfortune tries brave men.',
         cite: 'On Providence 5',
         visual: { gen: 'Molten gold being poured from a glowing crucible in a dark ancient forge, sparks rising. ' +
           'Close-up, slow motion. Photoreal, no faces.' } },

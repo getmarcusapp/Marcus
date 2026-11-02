@@ -76,7 +76,6 @@ const PAGES = [
       'seneca-letter-101-each-day',
       'seneca-letter-47-fortune',
       'seneca-letter-1-time',
-      'musonius-each-day-last',
     ],
   },
   {
@@ -172,7 +171,6 @@ const PAGES = [
       'cicero-de-officiis-honesty',
       'seneca-letter-71-good-character',
       'epictetus-enchiridion-17-actor',
-      'musonius-philosophy-correctness',
     ],
   },
   {
@@ -192,7 +190,6 @@ const PAGES = [
       'aurelius-meditations-4-18-neighbor',
       'aurelius-meditations-9-29-do-the-good',
       'aurelius-meditations-9-29-do-good',
-      'epictetus-discourses-1-1-hindrance',
       'seneca-on-anger-delay',
       'seneca-on-anger-3-36-self-examination',
       'cicero-friendship-light',
