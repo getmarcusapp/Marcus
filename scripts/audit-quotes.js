@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 /**
- * Word-level audit of the app's quote lists (constants/quotes.js) against
- * public-domain translations.
+ * Word-level audit of the app's quote lists against public-domain
+ * translations.
  *
- *   node scripts/audit-quotes.js            report to stdout
+ *   node scripts/audit-quotes.js            constants/quotes.js (the daily pool)
+ *   node scripts/audit-quotes.js --stoic    constants/stoicQuotes.js (the reading
+ *                                           corpus and the quote checker)
  *   node scripts/audit-quotes.js --json     machine-readable
  *
  * The August 2026 audit checked WHO said each line. It did not check that the
@@ -43,13 +45,35 @@ const CORPORA = {
     { ...gut(871), label: 'Crossley, Golden Sayings (1903)' },
     { ...gut(39855), label: 'Rolleston, Teaching (1888)' },
     { ...gut(45109), label: 'Enchiridion (Gutenberg #45109)' },
+    { name: 'archive-cu31924029001606', url: 'https://archive.org/download/cu31924029001606/cu31924029001606_djvu.txt', label: 'Higginson (1866)' },
   ],
   Seneca: [
     { name: 'gummere-letters', wikisourceLetters: true, label: 'Gummere, Letters (1917-25)' },
     { ...gut(64576), label: 'Stewart, Minor Dialogues (1889)' },
     { ...gut(3794), label: 'Stewart, On Benefits (1887)' },
   ],
+  // The reading corpus reaches beyond the Stoics.
+  Plato: [{ ...gut(1656), label: 'Jowett, Apology' }, { ...gut(1657), label: 'Jowett, Crito' }, { ...gut(1497), label: 'Jowett, Republic' }],
+  Cicero: [{ ...gut(14988), label: 'Yonge, Tusculan Disputations' }, { ...gut(47001), label: 'Miller, De Officiis (1913)' },
+    { ...gut(2808), label: 'Shuckburgh, Friendship and Old Age' }],
+  Boethius: [{ ...gut(14328), label: 'James, Consolation (1897)' }],
+  Aristotle: [{ ...gut(8438), label: 'Chase, Nicomachean Ethics' }, { ...gut(6762), label: 'Ellis, Politics' }],
+  Montaigne: [{ ...gut(3600), label: 'Cotton, Essays' }],
+  Emerson: [{ ...gut(2944), label: 'Essays, First Series' }],
+  Thoreau: [{ ...gut(205), label: 'Walden' }],
+  'Lao Tzu': [{ ...gut(216), label: 'Legge, Tao Teh King' }],
+  Confucius: [{ ...gut(3330), label: 'Legge, Analects' }],
+  Buddha: [{ ...gut(2017), label: 'Müller, Dhammapada' }],
+  'Bhagavad Gita': [{ ...gut(2388), label: 'Arnold, Song Celestial' }],
 };
+
+function loadStoicQuotes() {
+  const src = fs.readFileSync(path.join(ROOT, 'constants', 'stoicQuotes.js'), 'utf8')
+    .replace(/export\s+(const|function)/g, '$1');
+  const m = {};
+  new Function('m', src + ';m.q=STOIC_QUOTES')(m);
+  return m.q.map((q, i) => ({ ...q, text: q.quote, ref: `${q.work} ${q.source || ''}`.trim(), list: q.id, index: i }));
+}
 
 function loadQuotes() {
   const src = fs.readFileSync(path.join(ROOT, 'constants', 'quotes.js'), 'utf8')
@@ -130,11 +154,15 @@ function authorKey(a) {
   if (/Marcus Aurelius/.test(a)) return 'Marcus Aurelius';
   if (/Epictetus/.test(a)) return 'Epictetus';
   if (/^Seneca/.test(a)) return 'Seneca';
+  if (/^Socrates|^Plato/.test(a)) return 'Plato';
+  for (const k of ['Cicero', 'Boethius', 'Aristotle', 'Montaigne', 'Emerson', 'Thoreau', 'Lao Tzu', 'Confucius', 'Buddha', 'Bhagavad Gita'])
+    if (a.includes(k)) return k;
   return null;
 }
 
 (async () => {
-  const quotes = loadQuotes();
+  const STOIC = process.argv.includes('--stoic');
+  const quotes = STOIC ? loadStoicQuotes() : loadQuotes();
   const corpora = {};
   for (const [author, list] of Object.entries(CORPORA)) {
     corpora[author] = [];
@@ -156,7 +184,7 @@ function authorKey(a) {
   });
   if (process.argv.includes('--json')) { console.log(JSON.stringify(rows, null, 1)); return; }
   const by = g => rows.filter(r => r.grade === g);
-  console.log(`# Quote audit: ${rows.length} quotes in constants/quotes.js\n`);
+  console.log(`# Quote audit: ${rows.length} quotes in constants/${STOIC ? 'stoicQuotes' : 'quotes'}.js\n`);
   for (const g of ['verbatim', 'close', 'not found', 'no corpus']) console.log(`  ${g.padEnd(10)} ${by(g).length}`);
   for (const g of ['not found', 'close']) {
     console.log(`\n## ${g}\n`);
