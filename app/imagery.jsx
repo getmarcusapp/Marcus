@@ -94,7 +94,7 @@ const HERO_ENTRIES = [
     title: 'Emotional Mastery',
     artist: 'Caravaggio',
     work: 'Narcissus (1597–99)',
-    why: 'Emotional logging is self-examination through reflection. Narcissus looks into the water and meets himself — the visual metaphor for the space between stimulus and response.',
+    why: 'Emotional logging is self-examination through reflection. Narcissus looks into the water and meets himself — the visual metaphor for the pause between an impression and your response to it.',
   },
   {
     image: require('../assets/heroes/read.jpg'),

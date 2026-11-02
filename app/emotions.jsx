@@ -308,7 +308,7 @@ export default function EmotionsScreen() {
               {hintOpen && (
                 <View style={s.hintBox}>
                   <Text style={s.hintText}>
-                    Marcus focuses on disturbing emotions because that's where the practice has work to do. Joy and contentment need no Stoic intervention; anger, anxiety, and shame do. Logging them here gives you the space between stimulus and response.
+                    Marcus focuses on disturbing emotions because that's where the practice has work to do. Joy and contentment need no Stoic intervention; anger, anxiety, and shame do. Logging them here gives you a pause between what happens and what you do.
                   </Text>
                 </View>
               )}

@@ -706,6 +706,9 @@ function noKnownParaphrases() {
   const PARAPHRASES = [
     'Waste no more time arguing',
     'When you have failed, return again',
+    // Not Frankl (Covey, by way of Rollo May). Retired from the copy in
+    // November even where it went uncredited: this brand can't echo it.
+    'stimulus and response',
   ];
   const files = [
     ...fs.readdirSync(path.join(ROOT, 'app')).filter(f => f.endsWith('.jsx') && f !== 'settings-developer.jsx').map(f => 'app/' + f),
@@ -715,7 +718,7 @@ function noKnownParaphrases() {
   const fail = [];
   for (const f of files) {
     const text = read(f);
-    for (const p of PARAPHRASES) if (text.includes(p)) fail.push(`${f}: "${p}…" is a paraphrase; use the translator's words`);
+    for (const p of PARAPHRASES) if (text.toLowerCase().includes(p.toLowerCase())) fail.push(`${f}: "${p}…" is retired wording (a paraphrase or a misattribution)`);
   }
   return fail;
 }

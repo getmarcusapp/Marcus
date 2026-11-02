@@ -28,7 +28,7 @@ const sections = [
   },
   {
     title: 'The emotion logger',
-    content: 'Between stimulus and response there is a space. The emotion logger is that space made visible.\n\nWhen a strong emotion arises (anger, anxiety, frustration, shame), log it immediately. Name the emotion, rate the intensity, describe the trigger, and note your automatic reaction.\n\nThen read the Stoic reframe and write your chosen response. The difference between your automatic reaction and your chosen response is where the practice lives.\n\nYour logged triggers feed into the weekly review, where patterns become visible.',
+    content: 'Between what happens and what you do, there is a moment to choose. The emotion logger is that moment made visible.\n\nWhen a strong emotion arises (anger, anxiety, frustration, shame), log it immediately. Name the emotion, rate the intensity, describe the trigger, and note your automatic reaction.\n\nThen read the Stoic reframe and write your chosen response. The difference between your automatic reaction and your chosen response is where the practice lives.\n\nYour logged triggers feed into the weekly review, where patterns become visible.',
   },
   {
     title: 'Cognitive distortions: the nine',

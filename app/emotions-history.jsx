@@ -152,7 +152,7 @@ export default function EmotionsHistoryScreen() {
           ) : filteredHistory.length === 0 ? (
             <View style={s.empty}>
               <Image source={require('../assets/heroes/emotions.jpg')} style={s.emptyImage} resizeMode="cover" />
-              <Text style={s.emptyEyebrow}>The space between stimulus and response</Text>
+              <Text style={s.emptyEyebrow}>The pause before you respond</Text>
               <Text style={s.emptyTitle}>Nothing logged yet</Text>
               <Text style={s.emptyText}>
                 When a strong emotion arises, open the logger before you react. Name it, rate it, describe what triggered it. Then read the Stoic reframe. The practice lives in that pause.
