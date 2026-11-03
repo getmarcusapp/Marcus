@@ -98,16 +98,23 @@ struct MarcusWidgetView: View {
     case .accessoryRectangular:
       // Never the long passage: a short one that fits whole.
       let text = entry.shortText ?? entry.text
-      VStack(alignment: .leading, spacing: 2) {
-        Text("\u{201C}\(text)\u{201D}")
-          .font(.system(size: 14, design: .serif))
-          .lineLimit(4)
-          .minimumScaleFactor(0.7)
-        Text((entry.shortAuthor ?? entry.author).uppercased())
-          .font(.system(size: 9, weight: .semibold))
-          .opacity(0.75)
+      // Full-size, heavier type on Apple's frosted backing: thin serif over a
+      // photo was barely legible. Passages are capped at 60 characters so the
+      // type never has to shrink.
+      ZStack {
+        AccessoryWidgetBackground().clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        VStack(alignment: .leading, spacing: 1) {
+          Text("\u{201C}\(text)\u{201D}")
+            .font(.system(size: 15, weight: .semibold, design: .serif))
+            .lineLimit(3)
+            .minimumScaleFactor(0.85)
+          Text((entry.shortAuthor ?? entry.author).uppercased())
+            .font(.system(size: 10, weight: .bold))
+            .widgetAccentable()
+        }
+        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
       }
-      .frame(maxWidth: .infinity, alignment: .leading)
       .containerBackground(for: .widget) { Color.clear }
     case .accessoryInline:
       // One line: the attribution comes along when it fits.
@@ -120,7 +127,9 @@ struct MarcusWidgetView: View {
     case .accessoryCircular:
       ZStack {
         AccessoryWidgetBackground()
-        Image("skull").resizable().scaledToFit().padding(9)
+        // A single-colour template: the lock screen draws images as a
+        // silhouette, and the gold artwork came out as a grey block.
+        Image("skullMono").renderingMode(.template).resizable().scaledToFit().padding(12)
           .widgetAccentable()
       }
       .containerBackground(for: .widget) { Color.clear }

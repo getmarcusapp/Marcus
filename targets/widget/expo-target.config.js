@@ -22,6 +22,7 @@ module.exports = config => ({
   },
   images: {
     skull: '../../assets/skull-gold.png',
+    skullMono: './skull-mono.png',
   },
   entitlements: {
     'com.apple.security.application-groups': config.ios.entitlements['com.apple.security.application-groups'],
