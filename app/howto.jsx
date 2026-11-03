@@ -47,6 +47,11 @@ const sections = [
     content: 'Seven short audio sessions, voiced. Each runs less than five minutes. Optional alongside the daily practice, surfaced contextually for the time of day.\n\nView From Above: Rise above your circumstances to see them at scale.\n\nPremeditatio Malorum: Look at what might go wrong before the day begins, so it cannot surprise you. Best in the morning.\n\nThe Evening Examination: Three honest questions. Then put the day down.\n\nNegative Visualization: Imagine the absence of what you love, to see it clearly.\n\nThe Present Moment: Pure attention training. Not staying. Returning.\n\nMemento Mori: Remember that you will die. Not to grieve, but to live differently.\n\nThe Dichotomy of Control: Sort what is yours to control from what is not, and set the rest down.\n\nUse them on the way to work, before journaling, or whenever you need to return to yourself. They are not required for your streak. They are a tool.',
   },
   {
+    id: 'widgets',
+    title: 'Widgets',
+    content: 'Marcus can put the day\'s passage where you will see it without opening the app: on your Home Screen and on your Lock Screen.\n\nHome Screen: Touch and hold an empty spot until the apps jiggle, tap Edit, then Add Widget. Search for Marcus and pick a size. Small, medium, and large all show the same passage as your Practice tab, and change at midnight.\n\nLock Screen: Touch and hold the Lock Screen, tap Customize, then choose the Lock Screen. Tap Add Widgets and choose Marcus. The rectangle shows a short passage, the circle is a skull that opens the app, and the line above the clock holds a one-line passage.\n\nThe Lock Screen is small, and a quotation cut off to fit is a misquotation. So on days when the day\'s passage is too long, the Lock Screen shows a shorter one instead.\n\nOpen Marcus at least once every two weeks and the widgets stay current on their own.',
+  },
+  {
     title: 'About streaks',
     content: 'Marcus tracks three streak metrics:\n\nCurrent streak: Your active run of consecutive days completing the full daily practice: compass, daily reading, morning journal, and evening journal. A day must be fully sealed (all four) to count.\n\nLongest streak: Your best ever run. This never resets.\n\nTotal days practiced: Your cumulative count of fully sealed days, ever.\n\nGrace day: Missing a single day does not break your streak. Marcus carries you forward. If you miss two days in a row, the current streak resets. Your longest and total are preserved.\n\nIf you break your current streak, the app won\'t berate you. The Stoic response to a missed day is simple: begin again.',
   },
@@ -67,12 +72,22 @@ export default function HowToScreen() {
   const fromLabel = params?.fromLabel || 'More';
   const [openSection, setOpenSection] = useState(null);
   const scrollRef = useRef(null);
+  const sectionY = useRef({});
+  const bodyY = useRef(0);
   const playerInset = useMiniPlayerInset();
 
+  // ?section=widgets opens that section, so a Dispatch can link straight to it.
+  const wanted = params?.section ? sections.findIndex(x => x.id === params.section) : -1;
   useFocusEffect(useCallback(() => {
-    setOpenSection(null);
+    setOpenSection(wanted >= 0 ? wanted : null);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, []));
+    if (wanted < 0) return;
+    const t = setTimeout(() => {
+      const y = sectionY.current[wanted];
+      if (y != null) scrollRef.current?.scrollTo({ y: Math.max(0, y - 12), animated: true });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [wanted]));
 
   return (
     <SafeAreaView style={s.safe}>
@@ -90,10 +105,11 @@ export default function HowToScreen() {
           <Text style={s.sub}>Everything you need to know about your Stoic practice</Text>
         </View>
 
-        <View style={s.body}>
+        <View style={s.body} onLayout={e => { bodyY.current = e.nativeEvent.layout.y; }}>
           {sections.map((section, idx) => (
             <TouchableOpacity
               key={idx}
+              onLayout={e => { sectionY.current[idx] = bodyY.current + e.nativeEvent.layout.y; }}
               style={[s.sectionBlock, openSection === idx && s.sectionBlockOpen]}
               onPress={() => setOpenSection(openSection === idx ? null : idx)}
               activeOpacity={0.8}
