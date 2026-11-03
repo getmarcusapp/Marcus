@@ -2,7 +2,9 @@ import SwiftUI
 import WidgetKit
 
 // The app group shared with the main app. lib/widget.js writes an array of
-// { date: "yyyy-MM-dd", text, author, ref } under QUOTES_KEY.
+// { date: "yyyy-MM-dd", text, author, ref, shortText, shortAuthor, tinyText,
+// tinyAuthor } under QUOTES_KEY. The short and tiny passages are for the lock
+// screen, which is too small for a long passage and must never cut one off.
 private let APP_GROUP = "group.com.harvana.marcus"
 private let QUOTES_KEY = "widgetQuotes"
 
@@ -11,6 +13,15 @@ struct QuoteEntry: TimelineEntry {
   let text: String
   let author: String
   let ref: String
+  var shortText: String? = nil
+  var shortAuthor: String? = nil
+  var tinyText: String? = nil
+  var tinyAuthor: String? = nil
+
+  func at(_ d: Date) -> QuoteEntry {
+    QuoteEntry(date: d, text: text, author: author, ref: ref, shortText: shortText,
+               shortAuthor: shortAuthor, tinyText: tinyText, tinyAuthor: tinyAuthor)
+  }
 }
 
 // Shown before the app has ever run, and in the widget gallery. A real,
@@ -19,7 +30,9 @@ private let fallback = QuoteEntry(
   date: Date(),
   text: "First, say to yourself what you would be; and then do what you have to do.",
   author: "Epictetus",
-  ref: "Discourses III.23"
+  ref: "Discourses III.23",
+  tinyText: "Confine thyself to the present.",
+  tinyAuthor: "Marcus Aurelius"
 )
 
 private func dayKey(_ d: Date) -> String {
@@ -39,7 +52,9 @@ private func storedQuotes() -> [String: QuoteEntry] {
   for item in raw {
     guard let day = item["date"] as? String, let text = item["text"] as? String,
           let author = item["author"] as? String else { continue }
-    out[day] = QuoteEntry(date: Date(), text: text, author: author, ref: (item["ref"] as? String) ?? "")
+    out[day] = QuoteEntry(date: Date(), text: text, author: author, ref: (item["ref"] as? String) ?? "",
+                          shortText: item["shortText"] as? String, shortAuthor: item["shortAuthor"] as? String,
+                          tinyText: item["tinyText"] as? String, tinyAuthor: item["tinyAuthor"] as? String)
   }
   return out
 }
@@ -49,7 +64,7 @@ struct Provider: TimelineProvider {
 
   func getSnapshot(in context: Context, completion: @escaping (QuoteEntry) -> Void) {
     let q = storedQuotes()[dayKey(Date())] ?? fallback
-    completion(QuoteEntry(date: Date(), text: q.text, author: q.author, ref: q.ref))
+    completion(q.at(Date()))
   }
 
   // One entry per day, switching at local midnight, for as many days as the
@@ -64,7 +79,7 @@ struct Provider: TimelineProvider {
     for i in 0..<14 {
       guard let day = cal.date(byAdding: .day, value: i, to: start) else { continue }
       if let q = quotes[dayKey(day)] { last = q }
-      entries.append(QuoteEntry(date: i == 0 ? Date() : day, text: last.text, author: last.author, ref: last.ref))
+      entries.append(last.at(i == 0 ? Date() : day))
     }
     completion(Timeline(entries: entries, policy: .atEnd))
   }
@@ -81,19 +96,34 @@ struct MarcusWidgetView: View {
   var body: some View {
     switch family {
     case .accessoryRectangular:
+      // Never the long passage: a short one that fits whole.
+      let text = entry.shortText ?? entry.text
       VStack(alignment: .leading, spacing: 2) {
-        Text("\u{201C}\(entry.text)\u{201D}")
-          .font(.system(size: 13, design: .serif))
-          .lineLimit(3)
-          .minimumScaleFactor(0.8)
-        Text(entry.author.uppercased())
+        Text("\u{201C}\(text)\u{201D}")
+          .font(.system(size: 14, design: .serif))
+          .lineLimit(4)
+          .minimumScaleFactor(0.7)
+        Text((entry.shortAuthor ?? entry.author).uppercased())
           .font(.system(size: 9, weight: .semibold))
           .opacity(0.75)
       }
+      .frame(maxWidth: .infinity, alignment: .leading)
       .containerBackground(for: .widget) { Color.clear }
     case .accessoryInline:
-      Text(entry.author + ": " + entry.text)
-        .containerBackground(for: .widget) { Color.clear }
+      // One line: the attribution comes along when it fits.
+      let tiny = "\u{201C}\(entry.tinyText ?? "Confine thyself to the present.")\u{201D}"
+      ViewThatFits {
+        Text(tiny + " \u{2014} " + (entry.tinyAuthor ?? "Marcus Aurelius"))
+        Text(tiny)
+      }
+      .containerBackground(for: .widget) { Color.clear }
+    case .accessoryCircular:
+      ZStack {
+        AccessoryWidgetBackground()
+        Image("skull").resizable().scaledToFit().padding(9)
+          .widgetAccentable()
+      }
+      .containerBackground(for: .widget) { Color.clear }
     default:
       VStack(alignment: family == .systemSmall ? .leading : .center, spacing: family == .systemSmall ? 6 : (family == .systemLarge ? 18 : 10)) {
         if family != .systemSmall {
@@ -131,6 +161,6 @@ struct MarcusWidget: Widget {
     }
     .configurationDisplayName("Today's passage")
     .description("The day's quote from Marcus, with its source.")
-    .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryRectangular, .accessoryInline])
+    .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryRectangular, .accessoryInline, .accessoryCircular])
   }
 }
