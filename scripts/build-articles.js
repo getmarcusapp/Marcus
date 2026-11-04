@@ -159,6 +159,21 @@ function renderMarkdown(md) {
   return out.join('');
 }
 
+// A card for the app, placed after the second section, where a reader who is
+// still here is engaged; the end-of-page card is seen by the few who finish.
+// Not on the app comparison page, where it would turn a comparison into a pitch.
+const APP_STORE = 'https://apps.apple.com/app/id6789749038';
+function withAppCard(html, slug) {
+  if (slug === 'best-stoic-apps') return html;
+  const card = '<aside class="ar-appcard">' +
+    '<img src="/img/app-reading-phone.png" alt="The Marcus app showing a daily reading" width="180" height="367" loading="lazy" decoding="async">' +
+    '<div><p class="ar-appcard-label">Marcus for iPhone</p>' +
+    '<p class="ar-appcard-copy">One real passage from the Stoics each morning, checked against its translation, then a morning intention and an evening review.</p>' +
+    '<a class="ar-nav-cta" href="' + APP_STORE + '">Download on the App Store</a></div></aside>';
+  let n = 0;
+  return html.replace(/<h2 /g, m => (++n === 3 ? card + m : m));
+}
+
 function page(meta, bodyHtml, prev, next) {
   const canonical = SITE + '/' + meta.slug;
   const ogImage = SITE + '/og/' + meta.slug + '.png';
@@ -290,7 +305,10 @@ function page(meta, bodyHtml, prev, next) {
     '<a href="/about">How sources are checked</a></p>' +
     '</header>' +
     artHtml(meta.slug, 'ar') +
-    bodyHtml +
+    // The description, written for search results, doubles as the answer for
+    // a reader who only skims: it is the article in two sentences.
+    '<aside class="ar-brief"><p class="ar-brief-label">In brief</p><p>' + esc(meta.description) + '</p></aside>' +
+    withAppCard(bodyHtml, meta.slug) +
     pager +
     '<section class="ar-app">' +
     '<img class="ar-app-skull" src="/skull-gold.png" alt="" width="64" height="64">' +
@@ -351,7 +369,16 @@ ${artCss('ar')}
 .ar-p{font-size:17.5px;color:rgba(232,228,220,.86);margin:0 0 22px}
 .ar-h2{font-family:Cinzel,Georgia,serif;font-size:25px;line-height:1.3;letter-spacing:.03em;font-weight:400;color:#e8e4dc;margin:60px 0 20px;padding-bottom:12px;border-bottom:1px solid rgba(201,169,97,.28)}
 .ar-h3{font-family:Cinzel,Georgia,serif;font-size:19px;font-weight:600;margin:36px 0 12px;color:#e8e4dc}
-.ar-quote{margin:0 0 26px;padding:0 0 0 22px;border-left:2px solid #c9a961}
+.ar-quote{margin:0 0 26px;padding:18px 22px;border-left:3px solid #c9a961;background:linear-gradient(90deg,rgba(201,169,97,.10),rgba(201,169,97,.03));border-radius:0 10px 10px 0}
+.ar-brief{margin:0 0 36px;padding:18px 22px;border:1px solid rgba(201,169,97,.35);border-radius:12px;background:linear-gradient(135deg,rgba(201,169,97,.14),rgba(120,88,46,.06))}
+.ar-brief p{margin:0;font-size:16.5px;line-height:1.55;color:#e8e4dc}
+.ar-brief .ar-brief-label{font-family:Cinzel,Georgia,serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#c9a961;margin-bottom:6px}
+.ar-appcard{display:flex;gap:24px;align-items:center;margin:44px 0;padding:22px 24px;border-radius:16px;border:1px solid rgba(201,169,97,.28);background:radial-gradient(120% 140% at 0% 0%,rgba(120,88,46,.35),rgba(20,15,10,.6) 60%,rgba(13,13,15,.9))}
+.ar-appcard img{width:120px;height:auto;flex:0 0 auto;filter:drop-shadow(0 12px 24px rgba(0,0,0,.6))}
+.ar-appcard-label{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#c9a961;margin:0 0 8px}
+.ar-appcard-copy{font-size:16px;line-height:1.5;color:#e8e4dc;margin:0 0 16px}
+.ar-appcard .ar-nav-cta{display:inline-block}
+@media (max-width:560px){.ar-appcard{gap:16px;padding:18px}.ar-appcard img{width:88px}}
 .ar-quote span{display:block;font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;font-style:italic;font-size:20px;line-height:1.55;color:#e8e4dc}
 .ar-figs{display:flex;gap:14px;margin:8px 0 32px;overflow-x:auto;padding-bottom:4px}
 .ar-figs figure{margin:0;flex:0 0 auto;width:108px}

@@ -12,15 +12,23 @@
  * claim in a different medium, so every picture prints its artist, its title
  * and its date under it.
  *
- * ONLY WHERE THE FIT IS REAL. Nine articles get a painting. The others get
- * nothing, deliberately: a picture chosen because a page looked bare is
- * decoration, and this site does not do decoration. Friedrich's wanderer on the
- * view from above earns its place; the same painting on "Is Stoicism a
- * religion?" would not.
+ * EVERY ARTICLE, BUT EVERY PAIRING EARNS ITS PLACE. Until November 2026 only
+ * nine articles had a painting, on the theory that a picture chosen because a
+ * page looked bare is decoration. Gio overruled that: an article with no image
+ * reads as a wall and loses people before the first heading, and that is a
+ * worse failure than a painting that is merely apt. So every article has one,
+ * but the rule of fit stands: each is chosen for the subject (the painting
+ * that inspired Gladiator on the Gladiator article; Delphi on "Know thyself"),
+ * never for the palette alone, and the reason is written beside it below.
  *
- * The files are copies of assets/meditations/img and assets/virtues, resized to
- * 1200px and recompressed for the web. Regenerate with:
- *   sips -Z 1200 --setProperty formatOptions 45 <src> --out public/img/art/<name>
+ * Paintings and old engravings only. A painting is public domain once its
+ * artist is; a museum photograph of a statue usually is not, because the
+ * photographer holds rights in it. Each file below was checked on Wikimedia
+ * Commons as Public domain or CC0, and its description page is noted.
+ *
+ * Sources: assets/meditations/img, assets/virtues and assets/heroes (the app's
+ * own gallery), plus Wikimedia Commons. Resized to 1200px:
+ *   sips -s format jpeg -Z 1200 --setProperty formatOptions 70 <src> --out public/img/art/<name>
  */
 
 // Artist, work and why, lifted from app/imagery.jsx so the two cannot drift.
@@ -91,6 +99,31 @@ const ART = {
     work: 'Iustitia',
     date: 'sixteenth century',
   },
+  // ── The app's own screen paintings (assets/heroes), credits as in app/imagery.jsx
+  'philosopher-in-meditation': { file: 'philosopher-in-meditation.jpg', artist: 'Rembrandt van Rijn', work: 'The Philosopher in Meditation, Louvre', date: '1632' },
+  'the-astronomer': { file: 'the-astronomer.jpg', artist: 'Johannes Vermeer', work: 'The Astronomer, Louvre', date: '1668' },
+  'saint-paul-writing': { file: 'saint-paul-writing.jpg', artist: 'Valentin de Boulogne', work: 'Saint Paul Writing His Epistles, Museum of Fine Arts, Houston', date: 'c. 1618' },
+  'narcissus': { file: 'narcissus.jpg', artist: 'Caravaggio', work: 'Narcissus', date: '1597–99' },
+  'two-men-moon': { file: 'two-men-moon.jpg', artist: 'Caspar David Friedrich', work: 'Two Men Contemplating the Moon', date: '1819–20' },
+  'aristotle-homer': { file: 'aristotle-homer.jpg', artist: 'Rembrandt van Rijn', work: 'Aristotle with a Bust of Homer, Metropolitan Museum of Art', date: '1653' },
+  'penitent-magdalen': { file: 'penitent-magdalen.jpg', artist: 'Georges de La Tour', work: 'The Penitent Magdalen, Metropolitan Museum of Art', date: 'c. 1640' },
+  // ── Wikimedia Commons, each marked Public domain (Death of Socrates: CC0)
+  'fates': { file: 'fates.jpg', artist: 'Francisco Goya', work: 'Atropos (The Fates), Museo del Prado', date: '1820–23' },
+  'dying-seneca': { file: 'dying-seneca.jpg', artist: 'Peter Paul Rubens', work: 'The Dying Seneca, Alte Pinakothek, Munich', date: 'c. 1612–13' },
+  'epictetus-house': { file: 'epictetus-house.jpg', artist: 'Frontispiece engraving', work: 'The Morals of Epictetus (London)', date: '1697' },
+  'epictetus-1670': { file: 'epictetus-1670.jpg', artist: 'Romeyn de Hooghe', work: 'Frontispiece to an edition of the Enchiridion, Amsterdam', date: '1670' },
+  'hard-times': { file: 'hard-times.jpg', artist: 'Hubert von Herkomer', work: 'Hard Times, Manchester Art Gallery', date: '1885' },
+  'death-of-socrates': { file: 'death-of-socrates.jpg', artist: 'Jacques-Louis David', work: 'The Death of Socrates, Metropolitan Museum of Art', date: '1787' },
+  'fishermen-at-sea': { file: 'fishermen-at-sea.jpg', artist: 'J. M. W. Turner', work: 'Fishermen at Sea, Tate', date: '1796' },
+  'marcus-bread': { file: 'marcus-bread.jpg', artist: 'Joseph-Marie Vien', work: 'Marcus Aurelius Distributing Bread to the People', date: '1765' },
+  'vesuvius': { file: 'vesuvius.jpg', artist: 'Pierre-Jacques Volaire', work: 'The Eruption of Vesuvius, Art Institute of Chicago', date: '1771' },
+  'priestess-of-delphi': { file: 'priestess-of-delphi.jpg', artist: 'John Collier', work: 'Priestess of Delphi, Art Gallery of South Australia', date: '1891' },
+  'school-of-athens': { file: 'school-of-athens.jpg', artist: 'Raphael', work: 'The School of Athens, Apostolic Palace, Vatican', date: '1509–11' },
+  'iron-forge': { file: 'iron-forge.jpg', artist: 'Joseph Wright of Derby', work: 'An Iron Forge, Tate', date: '1772' },
+  'last-words-marcus': { file: 'last-words-marcus.jpg', artist: 'Eugène Delacroix', work: 'The Last Words of the Emperor Marcus Aurelius, Musée des Beaux-Arts de Lyon', date: '1844' },
+  'pollice-verso': { file: 'pollice-verso.jpg', artist: 'Jean-Léon Gérôme', work: 'Pollice Verso, Phoenix Art Museum', date: '1872' },
+  // Our own product, on the one page that compares apps.
+  'marcus-app': { file: 'marcus-app.jpg', artist: 'Marcus', work: 'the daily reading, Practice Complete and home-screen widget', date: '' },
 };
 
 // A page whose subject is four things can show four pictures. This is the only
@@ -120,6 +153,46 @@ const BY_SLUG = {
   'how-to-keep-a-stoic-journal': 'present-moment',
   // Seneca's three books on anger argue for restraint over expression.
   'stoicism-and-anger': 'virtue-moderation',
+  // Goya's three Fates hold the thread; amor fati is loving what they spin.
+  'amor-fati': 'fates',
+  // Rembrandt's scholar by the window: the first light of a working day.
+  'stoic-morning-routine': 'philosopher-in-meditation',
+  // The Stoic god was the order of the cosmos; Vermeer's astronomer studies it.
+  'is-stoicism-a-religion': 'the-astronomer',
+  // Seneca's death, as Tacitus tells it, is where many readers first meet him.
+  'where-to-start-with-seneca': 'dying-seneca',
+  // A man writing at his desk, which is what the Meditations are.
+  'how-to-read-meditations': 'saint-paul-writing',
+  // Narcissus examining his own image: CBT and the Stoics both start there.
+  'stoicism-and-cbt': 'narcissus',
+  // Two figures in silent contemplation, East and West of the same question.
+  'stoicism-vs-buddhism': 'two-men-moon',
+  // The article says the line is Durant, not Aristotle. Here is Aristotle.
+  'did-aristotle-say-we-are-what-we-repeatedly-do': 'aristotle-homer',
+  // "Epictetus lived at Rome in a little house": the article's own detail.
+  'did-epictetus-say-its-not-what-happens-to-you': 'epictetus-house',
+  'epictetus-discourses-enchiridion-or-art-of-living': 'epictetus-1670',
+  // The title says it.
+  'who-said-everyone-you-meet-is-fighting-a-hard-battle': 'hard-times',
+  'did-socrates-say-the-secret-of-change': 'death-of-socrates',
+  // The harbour and the wind of Letter 71.
+  'who-said-luck-is-what-happens-when-preparation-meets-opportunity': 'fishermen-at-sea',
+  'did-marcus-aurelius-say-the-obstacle-is-the-way': 'marcus-bread',
+  'did-marcus-aurelius-say-everything-we-hear-is-an-opinion': 'premeditatio-malorum',
+  // Pliny sailed toward Vesuvius saying fortune favours the brave.
+  'who-said-fortune-favours-the-bold': 'vesuvius',
+  'who-said-know-thyself': 'priestess-of-delphi',
+  // Socrates is in it, among the philosophers who argued about knowledge.
+  'did-socrates-say-i-know-that-i-know-nothing': 'school-of-athens',
+  'who-said-everything-in-moderation-including-moderation': 'virtue-moderation',
+  // Gems are polished by friction; men, says the proverb, by trials. A forge.
+  'who-said-a-gem-cannot-be-polished-without-friction': 'iron-forge',
+  // Feeling without being ruled by it: the Magdalen at her candle.
+  'stoicism-is-not-suppressing-emotions': 'penitent-magdalen',
+  'best-translation-of-meditations': 'last-words-marcus',
+  // The painting Ridley Scott showed the studio when pitching Gladiator.
+  'did-marcus-aurelius-say-echoes-in-eternity': 'pollice-verso',
+  'best-stoic-apps': 'marcus-app',
 };
 
 function artFor(slug) {
@@ -152,7 +225,7 @@ function artHtml(slug, prefix) {
   if (!a) return '';
   const credit = [a.artist, a.work, a.date].filter(Boolean).join(', ');
   return '<figure class="' + prefix + '-art">' +
-    '<img src="/img/art/' + a.file + '" alt="' + credit.replace(/"/g, '&quot;') + '" loading="lazy" decoding="async">' +
+    '<img src="/img/art/' + a.file + '" alt="' + credit.replace(/"/g, '&quot;') + '" fetchpriority="high" decoding="async">' +
     '<figcaption>' + credit + '</figcaption>' +
     '</figure>';
 }

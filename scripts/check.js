@@ -911,8 +911,11 @@ function artwork() {
         fail.push(`public/${slug}.html: renders ${key} with no visible credit to ${a.artist}`);
       }
     }
-    if (!/loading="lazy"/.test(html)) {
-      fail.push(`public/${slug}.html: the artwork is not lazy-loaded`);
+    // The lead painting sits just under the title, so it is the page's largest
+    // above-the-fold image: lazy-loading it delays Largest Contentful Paint.
+    // It must be marked as the priority image instead; anything else lazy.
+    if (!/loading="lazy"|fetchpriority="high"/.test(html)) {
+      fail.push(`public/${slug}.html: the artwork is neither lazy-loaded nor marked as the priority image`);
     }
   }
 
