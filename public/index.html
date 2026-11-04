@@ -89,6 +89,12 @@
           "price": "39.99",
           "priceCurrency": "USD",
           "category": "annual subscription"
+        },
+        {
+          "@type": "Offer",
+          "price": "79.99",
+          "priceCurrency": "USD",
+          "category": "one-time purchase"
         }
       ]
     },
@@ -150,6 +156,22 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Your data stays on your device regardless of your subscription status. Cancelling removes access to premium features going forward. It does not delete anything. Your journal entries, your emotion log, your compass, your streak history: all of it remains on your phone, yours to keep."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is there a one-time purchase instead of a subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Lifetime is $79.99, paid once through Apple, with no renewal. It unlocks the same app as the monthly and annual plans, for good."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I try Marcus without starting a trial?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. If you are not ready for a trial, you can take one free day of the full practice: the reading, both journals and the meditations. Nothing to cancel afterwards."
           }
         },
         {
@@ -1015,11 +1037,11 @@
   }
   .pricing-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
     margin-bottom: 20px;
   }
-  @media (max-width: 500px) { .pricing-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .pricing-grid { grid-template-columns: 1fr; } }
   .price-card {
     border: 1px solid var(--border);
     border-radius: 14px;
@@ -1335,7 +1357,7 @@
           <path d="M23.8 22.5c1.9 0 5.3-2.6 9.8-2.6 7.7 0 10.8 5.5 10.8 5.5s-5.9 3-5.9 10.4c0 8.3 7.4 11.2 7.4 11.2s-5.2 14.6-12.2 14.6c-3.2 0-5.7-2.2-9.1-2.2-3.4 0-6.8 2.2-9.1 2.2-6.5 0-14.7-13.8-14.7-24.9 0-10.9 6.8-16.6 13.2-16.6 4.1 0 7.3 2.4 9.8 2.4z" fill="#FFFFFF"/>
         </svg>
       </a>
-      <p class="appstore-note">7-day free trial &middot; $7.99/mo or $39.99/yr &middot; No account required</p>
+      <p class="appstore-note">7-day free trial &middot; $7.99/mo, $39.99/yr or $79.99 once &middot; No account required</p>
     </div>
   </div>
   <div class="hero-phone">
@@ -1519,6 +1541,11 @@
         <p class="feature-title">Daily Reading</p>
         <p class="feature-body">Every morning, a real Stoic quote chosen for you and grounded in your Compass. Marcus Aurelius, Epictetus, Seneca, and the broader Stoic tradition, accurately attributed and drawn from a <a href="/stoic-quotes">library of sourced Stoic quotes</a>. Then a space to write your own insight before the day begins.</p>
       </div>
+        <div class="feature">
+          <p class="feature-label">Before you open it</p>
+          <p class="feature-title">Home and Lock Screen Widgets</p>
+          <p class="feature-body">The day&rsquo;s passage on your Home Screen, in three sizes, and a shorter one on your Lock Screen, so the practice meets you before anything else does. When the day&rsquo;s passage is too long for the Lock Screen, you get a shorter one rather than a quotation cut off mid-sentence.</p>
+        </div>
 
       <div class="feature">
         <p class="feature-label">Morning practice</p>
@@ -1541,8 +1568,13 @@
       <div class="feature">
         <p class="feature-label">Emotional mastery</p>
         <p class="feature-title">Emotion Logger</p>
-        <p class="feature-body">Between what happens and what you do, there is a moment to choose. This is that moment. Log your triggers, examine your automatic reactions, and identify which of seven cognitive distortions is at work. The same CBT techniques validated by modern psychology — framed in the language Epictetus used two thousand years before CBT existed.</p>
+        <p class="feature-body">Between what happens and what you do, there is a moment to choose. This is that moment. Log your triggers, examine your automatic reactions, and identify which of nine cognitive distortions is at work. The same CBT techniques validated by modern psychology — framed in the language Epictetus used two thousand years before CBT existed.</p>
       </div>
+        <div class="feature">
+          <p class="feature-label">Listen</p>
+          <p class="feature-title">Guided Meditations</p>
+          <p class="feature-body">Seven voiced sessions, each under five minutes, for the Stoic exercises that work better heard than read: the View From Above, Premeditatio Malorum, the Evening Examination, Negative Visualization, the Present Moment, Memento Mori and the Dichotomy of Control.</p>
+        </div>
 
       <div class="feature">
         <p class="feature-label">Weekly reckoning</p>
@@ -1745,8 +1777,15 @@
         <p class="price-note">Billed $39.99/year &middot; Save 58% vs monthly. 77&cent; a week for a daily practice that compounds over years.</p>
         <a class="price-cta" href="https://apps.apple.com/app/id6789749038">Download free trial</a>
       </div>
+      <div class="price-card">
+        <p class="price-period">Lifetime</p>
+        <p class="price-amount">$79.99</p>
+        <p class="price-unit">once</p>
+        <p class="price-note">Pay once, keep the practice for good. No subscription, no renewal. The same app as the other plans.</p>
+        <a class="price-cta" href="https://apps.apple.com/app/id6789749038">Download</a>
+      </div>
     </div>
-    <p class="pricing-note">7-day free trial &middot; iOS &middot; No account required &middot; Your journal never leaves your device</p>
+    <p class="pricing-note">7-day free trial on monthly and annual &middot; Or try one day of the full practice free, no trial needed &middot; iOS &middot; No account required &middot; Your journal never leaves your device</p>
   </div>
 </section>
 
@@ -1877,6 +1916,16 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
     </div>
 
     <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is there a one-time purchase instead of a subscription?</div>
+      <div class="faq-answer">Yes. Lifetime is $79.99, paid once through Apple, with no renewal. It unlocks the same app as the monthly and annual plans, for good.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Can I try Marcus without starting a trial?</div>
+      <div class="faq-answer">Yes. If you are not ready for a trial, you can take one free day of the full practice: the reading, both journals and the meditations. Nothing to cancel afterwards.</div>
+    </div>
+
+    <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">Is the 7-day trial actually free? Do I need a credit card?</div>
       <div class="faq-answer">Yes. It is a genuine free trial through Apple. You download the app, begin the practice, and are not charged until the trial ends. Apple handles billing. You can cancel before the trial ends and will not be charged anything. No credit card details are entered anywhere other than your existing Apple ID.</div>
     </div>
@@ -1906,7 +1955,7 @@ function ssGoto(i) { ssCurrent = i; ssRender(); }
       <path d="M23.8 22.5c1.9 0 5.3-2.6 9.8-2.6 7.7 0 10.8 5.5 10.8 5.5s-5.9 3-5.9 10.4c0 8.3 7.4 11.2 7.4 11.2s-5.2 14.6-12.2 14.6c-3.2 0-5.7-2.2-9.1-2.2-3.4 0-6.8 2.2-9.1 2.2-6.5 0-14.7-13.8-14.7-24.9 0-10.9 6.8-16.6 13.2-16.6 4.1 0 7.3 2.4 9.8 2.4z" fill="#FFFFFF"/>
     </svg>
   </a>
-      <p class="appstore-note">7-day free trial &middot; $7.99/month or $39.99/year &middot; iOS</p>
+      <p class="appstore-note">7-day free trial &middot; $7.99/month, $39.99/year or $79.99 lifetime &middot; iOS</p>
     </div>
 </section>
 
