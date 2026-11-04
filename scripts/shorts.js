@@ -102,7 +102,10 @@ function validate(short) {
       }
       const src = STOIC_QUOTES.find(q => q.id === seg.payoff);
       if (!src) { problems.push(`payoff id "${seg.payoff}" is not in stoicQuotes.js`); continue; }
-      if (!words(src.quote).join(' ').includes(words(seg.excerpt).join(' '))) {
+      // Verbatim in the wording the app shows, or in another credited translation
+      // of the same passage (src.alts): published videos quote Long and Hays.
+      const wordings = [src.quote, ...(src.alts || []).map(a => a.text)];
+      if (!wordings.some(t => words(t).join(' ').includes(words(seg.excerpt).join(' ')))) {
         problems.push(`payoff excerpt does not appear verbatim in ${seg.payoff}`);
       }
     }

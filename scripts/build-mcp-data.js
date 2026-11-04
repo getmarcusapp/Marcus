@@ -26,6 +26,7 @@ function data() {
   return {
     corpus: STOIC_QUOTES.map(q => ({
       id: q.id, quote: q.quote, author: q.author, work: q.work || '', section: q.source || '',
+      translator: q.translator || '', alts: q.alts || [],
       themes: q.themes || [], virtues: q.virtues || [],
     })),
     mis: MISATTRIBUTIONS.map(m => ({

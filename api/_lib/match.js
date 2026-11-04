@@ -17,7 +17,11 @@ export function norm(t) {
 
 // Strip a trailing attribution: people paste the card, dash and all.
 export function stripAttr(t) {
-  const out = String(t || '').replace(/\s*[—–-]{1,2}\s*[^—–-]{0,70}$/, '');
+  // Only a trailing dash followed by something shaped like a credit (a capital,
+  // no sentence inside it) is an attribution. Translators also use dashes
+  // mid-sentence: "Reject the view — and straightway, you are whole."
+  const out = String(t || '').replace(/\s*[—–-]{1,2}\s*([A-Z][^—–?!]{0,70})$/, (m, tail) =>
+    /[.?!]\s+[A-Z]/.test(tail) ? m : '');
   return out.trim().split(/\s+/).filter(Boolean).length >= 2 ? out : String(t || '');
 }
 
@@ -57,7 +61,10 @@ export function verdict(raw, data) {
   const input = norm(stripAttr(raw));
   if (input.split(' ').length < 2) return { kind: 'short' };
   const m = best(input, data.mis, r => r.text);
-  const v = best(input, data.corpus, r => r.quote);
+  // Each passage matches in the wording we show or in any other translation of
+  // it we hold (alts); the row returned carries the wording that matched.
+  const rows = data.corpus.flatMap(r => [r, ...(r.alts || []).map(a => ({ ...r, quote: a.text, translator: a.translator }))]);
+  const v = best(input, rows, r => r.quote);
   if (m.score >= 0.82) return { kind: 'misattributed', row: m.row, score: m.score };
   if (v.score >= 0.82) return { kind: 'verified', row: v.row, score: v.score };
   const near = m.score > v.score ? { row: m.row, score: m.score, bad: true } : { row: v.row, score: v.score, bad: false };

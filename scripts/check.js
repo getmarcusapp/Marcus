@@ -101,7 +101,8 @@ const passageKey = t => norm(t).replace(/\\n/g, ' ').replace(/[^a-z0-9]+/g, ' ')
 
 // Two entries may legitimately share a ref when a section holds more than one
 // distinct aphorism. Listed by ref, with the count that is correct for it.
-const SHARED_REFS = { 'Seneca|Letters 1.3': 2, 'Epictetus|Enchiridion 1': 2 };
+// Meditations V.16 holds two separate sayings: the soul takes the dye of its thoughts, and 'where life is possible, so is right life'.
+const SHARED_REFS = { 'Seneca|Letters 1.3': 2, 'Epictetus|Enchiridion 1': 2, 'Marcus Aurelius|Meditations V.16': 2 };
 
 // Pairs that score above the threshold but are genuinely different passages.
 // Each is here because it was read and judged, not because it was noisy.
@@ -749,7 +750,8 @@ function quoteChecker() {
   const { STOIC_QUOTES } = loadModule('stoicQuotes.js', ['STOIC_QUOTES']);
   const { MISATTRIBUTIONS } = loadModule('misattributions.js', ['MISATTRIBUTIONS']);
   const D = {
-    corpus: STOIC_QUOTES.map(q => [q.quote, q.author, q.work, q.source || '']),
+    corpus: STOIC_QUOTES.flatMap(q => [[q.quote, q.author, q.work, q.source || '', q.translator || ''],
+      ...(q.alts || []).map(a => [a.text, q.author, q.work, q.source || '', a.translator])]),
     mis: MISATTRIBUTIONS.map(m => [m.text, m.credited, m.actual || '', m.note, m.confidence, m.id]),
   };
   const body = CLIENT.slice(CLIENT.indexOf('function norm'), CLIENT.indexOf('var elInput'));
@@ -784,6 +786,11 @@ function quoteChecker() {
   for (const q of STOIC_QUOTES) {
     if (verdict(q.quote) !== 'verified') {
       fail.push(`quote checker: ${q.id} is in the corpus but does not come back as verified`);
+    }
+    // Long's and Hays's wording of a passage must still verify after the app
+    // moved Marcus to Rendall: that is what people paste.
+    for (const a of q.alts || []) {
+      if (verdict(a.text) !== 'verified') fail.push(`quote checker: ${q.id} in ${a.translator}'s wording does not come back as verified`);
     }
   }
 

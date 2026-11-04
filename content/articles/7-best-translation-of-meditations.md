@@ -4,7 +4,7 @@ title: "The Best Translation of Meditations: Hays, Hard, Hammond or Long?"
 description: The best version of Marcus Aurelius's Meditations to read, compared. Hays, Hard, Hammond, Staniforth, Waterfield, Hicks and the free Long, Casaubon and Haines, with the same passage in three translations side by side.
 pillar: practice
 published: 2026-08-02
-modified: 2026-11-04
+modified: 2026-11-05
 about: [{"name": "Meditations", "description": "The private notebook of Marcus Aurelius, written in Greek on campaign and never intended for publication.", "sameAs": "https://en.wikipedia.org/wiki/Meditations"}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}, {"name": "Gregory Hays", "sameAs": "https://en.wikipedia.org/wiki/Meditations"}]
 ---
@@ -29,6 +29,7 @@ Read on if you want to know what you are trading away, because Hays does trade s
 | Robin Waterfield | Basic Books, 2021 | Modern, heavily annotated | Readers who want commentary |
 | Maxwell Staniforth | Penguin Classics, 1964 | Mid-century, readable, a little dated | A secondhand copy you already own |
 | C. Scot Hicks and David V. Hicks | *The Emperor's Handbook*, Scribner, 2002 | Loose and conversational | Readers who found the others stiff |
+| Gerald Rendall | 1898, free | Plain “you” English, a little Victorian | Reading free without the thees and thous |
 | George Long | 1862, free | Victorian, thee and thou | Reading free, online |
 | C. R. Haines | Loeb Classical Library, 1916, free | Literal, Greek on the facing page | Checking the Greek |
 | Meric Casaubon | 1634, free | Seventeenth-century English | Curiosity |
@@ -51,7 +52,7 @@ If you have tried the *Meditations* and found it stiff, this is very likely what
 
 ## The same passage, three ways
 
-Book V opens with Marcus talking himself out of bed. Here is how three translators, across almost four centuries, rendered the first lines.
+Book V opens with Marcus talking himself out of bed. Here is how four translators, across almost four centuries, rendered the first lines.
 
 Meric Casaubon, 1634:
 
@@ -61,11 +62,15 @@ George Long, 1862:
 
 > In the morning when thou risest unwillingly, let this thought be present—I am rising to the work of a human being.
 
+Gerald Rendall, 1898:
+
+> In the morning, when you feel loth to rise, fall back upon the thought 'I am rising for man's work.'
+
 Gregory Hays, 2002:
 
 > At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work — as a human being.
 
-Same Greek, same idea: you were made to work, so get up. The difference is distance. Casaubon and Long sound like scripture; Hays sounds like a man talking to himself, which is what the book is.
+Same Greek, same idea: you were made to work, so get up. The difference is distance. Casaubon and Long sound like scripture; Rendall, only a generation after Long, already drops the thee and thou; Hays sounds like a man talking to himself, which is what the book is.
 
 We have left out Hard, Hammond and Waterfield here, not because they are worse but because we only quote what we can check word for word, and their texts are not freely available to check against. The free versions are on Project Gutenberg if you want to compare further passages yourself.
 
@@ -117,7 +122,7 @@ A deliberately free, conversational rendering, closer to paraphrase than the oth
 
 **Reading it for study or comparison:** Hammond or Waterfield, and ideally alongside one of the others.
 
-**Reading it for free:** Long is legitimate and costs nothing. Know that the distance you feel is Victorian English, not Marcus. If you read Greek, or want to check what Marcus actually wrote, Haines's Loeb edition is also free and prints the Greek opposite the English.
+**Reading it for free:** Gerald Rendall's 1898 translation is the free one we would choose: it says "you" where Long says "thou", and it is what the Marcus app quotes. Long is legitimate and costs nothing too; know that the distance you feel there is Victorian English, not Marcus. If you read Greek, or want to check what Marcus actually wrote, Haines's Loeb edition is also free and prints the Greek opposite the English.
 
 A reasonable approach many people land on: Hays to read, Hard to keep.
 

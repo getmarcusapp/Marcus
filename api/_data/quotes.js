@@ -4,10 +4,17 @@ export const DATA = {
  "corpus": [
   {
    "id": "aurelius-meditations-2-1-difficult-people",
-   "quote": "Begin the morning by saying to thyself, I shall meet with the busybody, the ungrateful, arrogant, deceitful, envious, unsocial. All these things happen to them by reason of their ignorance of what is good and evil.",
+   "quote": "When you wake, say to yourself — To-day I shall encounter meddling, ingratitude, violence, cunning, malice, self-seeking; all of them the results of men not knowing what is good and what is evil.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "II.1",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Begin the morning by saying to thyself, I shall meet with the busybody, the ungrateful, arrogant, deceitful, envious, unsocial. All these things happen to them by reason of their ignorance of what is good and evil.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "premeditatio",
     "difficult people",
@@ -20,10 +27,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-5-1-do-the-work",
-   "quote": "At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work — as a human being. What do I have to complain of, if I'm going to do what I was born for?",
+   "quote": "In the morning, when you feel loth to rise, fall back upon the thought 'I am rising for man's work. Why make a grievance of setting about that for which I was born, and for sake of which I have been brought into the world?'",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "V.1",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work — as a human being. What do I have to complain of, if I'm going to do what I was born for?",
+     "translator": "Gregory Hays"
+    }
+   ],
    "themes": [
     "duty",
     "morning",
@@ -36,10 +50,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-5-20-impediment",
-   "quote": "The impediment to action advances action. What stands in the way becomes the way.",
+   "quote": "For the understanding modifies and converts every hindrance to action into furtherance of its prime aim; so that checks to action actually advance it, and obstacles in the way promote progress.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "V.20",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "The impediment to action advances action. What stands in the way becomes the way.",
+     "translator": "Gregory Hays"
+    }
+   ],
    "themes": [
     "obstacles",
     "resilience"
@@ -51,10 +72,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-6-6-revenge",
-   "quote": "The best way of avenging thyself is not to become like [the wrong-doer].",
+   "quote": "Not to do likewise is the best revenge.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VI.6",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "The best way of avenging thyself is not to become like [the wrong-doer].",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "anger",
     "character"
@@ -66,10 +94,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-7-59-fountain",
-   "quote": "Look within. Within is the fountain of good, and it will ever bubble up, if thou wilt ever dig.",
+   "quote": "Dig within. Within is the fountain of good; ever dig, and it will ever well forth water.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VII.59",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Look within. Within is the fountain of good, and it will ever bubble up, if thou wilt ever dig.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "inner life",
     "self-knowledge"
@@ -80,10 +115,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-8-47-judgment",
-   "quote": "If thou art pained by any external thing, it is not this thing that disturbs thee, but thy own judgment about it. And it is in thy power to wipe out this judgment now.",
+   "quote": "If you are pained by anything without, it is not the thing agitates you, but your own judgment concerning the thing; and this it is in your own power to efface.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VIII.47",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "If thou art pained by any external thing, it is not this thing that disturbs thee, but thy own judgment about it. And it is in thy power to wipe out this judgment now.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "perception",
     "control"
@@ -95,10 +137,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-10-16-be-good",
-   "quote": "No longer talk at all about the kind of man that a good man ought to be, but be such.",
+   "quote": "No more mere talk of what the good man should be. Be it!",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "X.16",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "No longer talk at all about the kind of man that a good man ought to be, but be such.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "action",
     "virtue"
@@ -110,10 +159,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-4-3-retreat",
-   "quote": "Men seek retreats for themselves, houses in the country, seashores, and mountains; and thou too art wont to desire such things very much. But this is altogether a mark of the most common sort of men, for it is in thy power whenever thou shalt choose to retire into thyself.",
+   "quote": "Men seek retirement in country house, on shore or hill; and you too know full well what that yearning means. Surely a very simple wish; for at what hour you will, you can retire into yourself.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "IV.3",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Men seek retreats for themselves, houses in the country, sea-shores, and mountains; and thou too art wont to desire such things very much. But this is altogether a mark of the most common sort of men, for it is in thy power whenever thou shalt choose to retire into thyself.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "inner life",
     "solitude"
@@ -125,10 +181,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-4-7-injury",
-   "quote": "Take away thy opinion, and then there is taken away the complaint, \"I have been harmed.\" Take away the complaint, \"I have been harmed,\" and the harm is taken away.",
+   "quote": "Get rid of the assumption, and therewith you get rid of the sense 'I am an injured man'; get rid of the sense of injury, you get rid of the injury itself.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "IV.7",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Take away thy opinion, and then there is taken away the complaint, \"I have been harmed.\" Take away the complaint, \"I have been harmed,\" and the harm is taken away.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "perception",
     "forgiveness"
@@ -140,10 +203,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-2-14-present",
-   "quote": "Though thou shouldest be going to live three thousand years and as many times ten thousand years, still remember that no man loses any other life than this which he now lives, nor lives any other than this which he now loses.",
+   "quote": "Though you live three thousand years, ay or three million, no man, remember, can lose another life than that which he now lives, or live another than that which he now loses.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "II.14",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Though thou shouldest be going to live three thousand years and as many times ten thousand years, still remember that no man loses any other life than this which he now lives, nor lives any other than this which he now loses.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "present",
     "mortality"
@@ -154,10 +224,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-3-10-quickly-leave",
-   "quote": "Cast away opinion: thou art saved. Who then hinders thee from casting it away?",
+   "quote": "Reject the view — and straightway, you are whole. Who hinders the rejection?",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "XII.25",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Cast away opinion: thou art saved. Who then hinders thee from casting it away?",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "perception",
     "freedom"
@@ -169,10 +246,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-12-17-not-vexed",
-   "quote": "If it is not right, do not do it; if it is not true, do not say it.",
+   "quote": "If it is not your duty, do not do it: if it is not true, do not say it.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "XII.17",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "If it is not right, do not do it; if it is not true, do not say it.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "integrity",
     "discipline"
@@ -184,10 +268,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-9-29-do-the-good",
-   "quote": "Do not waste the remainder of thy life in thoughts about others, when thou dost not refer thy thoughts to some object of common utility.",
+   "quote": "Do not waste what is left of life in regarding other men, except when bent upon some unselfish gain.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "III.4",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Do not waste the remainder of thy life in thoughts about others, when thou dost not refer thy thoughts to some object of common utility.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "focus",
     "community"
@@ -199,10 +290,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-7-69-perfection",
-   "quote": "The perfection of moral character consists in this: in passing every day as the last, and in being neither violently excited, nor torpid, nor playing the hypocrite.",
+   "quote": "Herein is the way of perfection — to live out each day as one's last, with no fever, no torpor, and no acting a part.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VII.69",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "The perfection of moral character consists in this: in passing every day as the last, and in being neither violently excited, nor torpid, nor playing the hypocrite.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "mortality",
     "character"
@@ -215,10 +313,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-2-5-roman",
-   "quote": "Every moment think steadily as a Roman and a man to do what thou hast in hand with perfect and simple dignity, and feeling of affection, and freedom, and justice, and to give thyself relief from all other thoughts.",
+   "quote": "Every hour staunchly, as a Roman and a man, resolve to do the work in hand, with scrupulous and unaffected dignity, affectionately, freely, justly; securing respite for yourself from all other intruding regards.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "II.5",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Every moment think steadily as a Roman and a man to do what thou hast in hand with perfect and simple dignity, and feeling of affection, and freedom, and justice, and to give thyself relief from all other thoughts.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "focus",
     "present"
@@ -234,6 +339,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "1",
+   "translator": "Elizabeth Carter",
+   "alts": [],
    "themes": [
     "control",
     "dichotomy"
@@ -249,6 +356,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "5",
+   "translator": "Robert Dobbin",
+   "alts": [],
    "themes": [
     "perception",
     "control"
@@ -264,6 +373,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "8",
+   "translator": "W. A. Oldfather",
+   "alts": [],
    "themes": [
     "acceptance",
     "serenity"
@@ -279,6 +390,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "46",
+   "translator": "W. A. Oldfather",
+   "alts": [],
    "themes": [
     "action",
     "humility"
@@ -294,6 +407,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "33",
+   "translator": "W. A. Oldfather",
+   "alts": [],
    "themes": [
     "character",
     "integrity"
@@ -309,6 +424,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "21",
+   "translator": "",
+   "alts": [],
    "themes": [
     "mortality",
     "memento mori"
@@ -324,6 +441,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Discourses",
    "section": "III.23",
+   "translator": "",
+   "alts": [],
    "themes": [
     "action",
     "identity"
@@ -339,6 +458,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Discourses",
    "section": "I.24",
+   "translator": "W. A. Oldfather",
+   "alts": [],
    "themes": [
     "adversity",
     "character",
@@ -355,6 +476,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Discourses",
    "section": "IV.1",
+   "translator": "W. A. Oldfather",
+   "alts": [],
    "themes": [
     "freedom",
     "discipline"
@@ -370,6 +493,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Discourses",
    "section": "I.1",
+   "translator": "W. A. Oldfather",
+   "alts": [],
    "themes": [
     "mortality",
     "equanimity"
@@ -385,6 +510,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "43",
+   "translator": "T. W. Higginson",
+   "alts": [],
    "themes": [
     "perception",
     "forgiveness"
@@ -400,6 +527,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "13.4",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "anxiety",
     "perception"
@@ -415,6 +544,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "1",
+   "translator": "",
+   "alts": [],
    "themes": [
     "time",
     "mortality"
@@ -430,6 +561,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "1",
+   "translator": "",
+   "alts": [],
    "themes": [
     "time",
     "discipline"
@@ -445,6 +578,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "On the Shortness of Life",
    "section": "1.3",
+   "translator": "Aubrey Stewart",
+   "alts": [],
    "themes": [
     "time",
     "discipline"
@@ -460,6 +595,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "On Tranquillity of Mind",
    "section": "11.6",
+   "translator": "Aubrey Stewart",
+   "alts": [],
    "themes": [
     "mortality",
     "fear"
@@ -474,6 +611,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "2.2",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "focus",
     "depth"
@@ -489,6 +628,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "83.2",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "self-examination",
     "evening"
@@ -504,6 +645,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "101.7",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "mortality",
     "evening"
@@ -519,6 +662,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "26.10",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "mortality",
     "memento mori"
@@ -533,6 +678,8 @@ export const DATA = {
    "author": "Heraclitus",
    "work": "Fragments",
    "section": "DK 119 (Burnet fr. 121)",
+   "translator": "John Burnet",
+   "alts": [],
    "themes": [
     "character",
     "destiny"
@@ -548,6 +695,8 @@ export const DATA = {
    "author": "Heraclitus",
    "work": "Fragments",
    "section": "DK 91 (Burnet fr. 41, 42)",
+   "translator": "John Burnet",
+   "alts": [],
    "themes": [
     "change",
     "impermanence"
@@ -562,6 +711,8 @@ export const DATA = {
    "author": "Heraclitus",
    "work": "Fragments",
    "section": "DK 107 (Burnet fr. 4)",
+   "translator": "John Burnet",
+   "alts": [],
    "themes": [
     "perception",
     "discernment"
@@ -576,6 +727,8 @@ export const DATA = {
    "author": "Socrates",
    "work": "Plato's Apology",
    "section": "38a",
+   "translator": "",
+   "alts": [],
    "themes": [
     "self-examination",
     "philosophy"
@@ -590,6 +743,8 @@ export const DATA = {
    "author": "Socrates",
    "work": "Plato's Apology",
    "section": "29a",
+   "translator": "F. J. Church",
+   "alts": [],
    "themes": [
     "mortality",
     "humility"
@@ -605,6 +760,8 @@ export const DATA = {
    "author": "Socrates",
    "work": "Plato's Apology",
    "section": "21d",
+   "translator": "Harold North Fowler",
+   "alts": [],
    "themes": [
     "humility",
     "self-knowledge"
@@ -619,6 +776,8 @@ export const DATA = {
    "author": "Aristotle",
    "work": "Nicomachean Ethics",
    "section": "II.6 (1106b36)",
+   "translator": "W. D. Ross",
+   "alts": [],
    "themes": [
     "virtue",
     "mean"
@@ -634,6 +793,8 @@ export const DATA = {
    "author": "Cicero",
    "work": "On Duties",
    "section": "I.7",
+   "translator": "",
+   "alts": [],
    "themes": [
     "integrity",
     "truth"
@@ -648,6 +809,8 @@ export const DATA = {
    "author": "Cicero",
    "work": "Tusculan Disputations",
    "section": "II.5 (II.13)",
+   "translator": "C. D. Yonge",
+   "alts": [],
    "themes": [
     "learning",
     "discipline"
@@ -662,6 +825,8 @@ export const DATA = {
    "author": "Viktor Frankl",
    "work": "Man's Search for Meaning",
    "section": "Part II",
+   "translator": "Ilse Lasch",
+   "alts": [],
    "themes": [
     "acceptance",
     "change"
@@ -677,6 +842,8 @@ export const DATA = {
    "author": "Viktor Frankl",
    "work": "Man's Search for Meaning",
    "section": "Part I",
+   "translator": "",
+   "alts": [],
    "themes": [
     "freedom",
     "attitude"
@@ -692,6 +859,8 @@ export const DATA = {
    "author": "Viktor Frankl",
    "work": "Man's Search for Meaning",
    "section": "Part II",
+   "translator": "",
+   "alts": [],
    "themes": [
     "meaning",
     "suffering"
@@ -707,6 +876,8 @@ export const DATA = {
    "author": "Montaigne",
    "work": "Essays",
    "section": "III.12",
+   "translator": "",
+   "alts": [],
    "themes": [
     "fear",
     "anxiety"
@@ -722,6 +893,8 @@ export const DATA = {
    "author": "Montaigne",
    "work": "Essays",
    "section": "I.26 \"Of the education of children\" (Cotton I.25)",
+   "translator": "Charles Cotton",
+   "alts": [],
    "themes": [
     "equanimity",
     "character"
@@ -737,6 +910,8 @@ export const DATA = {
    "author": "Boethius",
    "work": "The Consolation of Philosophy",
    "section": "Book II",
+   "translator": "W. V. Cooper",
+   "alts": [],
    "themes": [
     "fortune",
     "impermanence"
@@ -752,6 +927,8 @@ export const DATA = {
    "author": "Boethius",
    "work": "The Consolation of Philosophy",
    "section": "Book II",
+   "translator": "I.T.",
+   "alts": [],
    "themes": [
     "perception",
     "contentment"
@@ -767,6 +944,8 @@ export const DATA = {
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
    "section": "33",
+   "translator": "Stephen Mitchell",
+   "alts": [],
    "themes": [
     "self-knowledge",
     "mastery"
@@ -782,6 +961,8 @@ export const DATA = {
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
    "section": "64",
+   "translator": "James Legge",
+   "alts": [],
    "themes": [
     "action",
     "beginning"
@@ -796,6 +977,8 @@ export const DATA = {
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
    "section": "40",
+   "translator": "Gia-fu Feng & Jane English",
+   "alts": [],
    "themes": [
     "acceptance",
     "yielding"
@@ -811,6 +994,8 @@ export const DATA = {
    "author": "Confucius",
    "work": "Analects",
    "section": "2.17",
+   "translator": "James Legge",
+   "alts": [],
    "themes": [
     "humility",
     "self-knowledge"
@@ -825,6 +1010,8 @@ export const DATA = {
    "author": "Pierre Hadot",
    "work": "Philosophy as a Way of Life",
    "section": "Chapter 11, \"Philosophy as a Way of Life\"",
+   "translator": "Michael Chase",
+   "alts": [],
    "themes": [
     "practice",
     "transformation"
@@ -839,6 +1026,8 @@ export const DATA = {
    "author": "James Stockdale",
    "work": "quoted in Jim Collins, Good to Great",
    "section": "Chapter 4",
+   "translator": "",
+   "alts": [],
    "themes": [
     "resilience",
     "reality"
@@ -854,6 +1043,8 @@ export const DATA = {
    "author": "James Stockdale",
    "work": "quoted in Jim Collins, Good to Great",
    "section": "Chapter 4",
+   "translator": "",
+   "alts": [],
    "themes": [
     "resilience",
     "meaning"
@@ -864,10 +1055,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-2-4-time",
-   "quote": "Remember how long thou hast been putting off these things, and how often thou hast received an opportunity from the gods, and yet dost not use it.",
+   "quote": "Think how long you have gone on postponing, how often the gods have granted days of grace, which you have failed to use.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "II.4",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Remember how long thou hast been putting off these things, and how often thou hast received an opportunity from the gods, and yet dost not use it.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "discipline",
     "mortality"
@@ -883,6 +1081,8 @@ export const DATA = {
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "II.17",
+   "translator": "Gregory Hays",
+   "alts": [],
    "themes": [
     "impermanence",
     "mortality"
@@ -894,10 +1094,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-4-12-things",
-   "quote": "Things have no hold on the soul. They have no access to it, cannot move or direct it. It is moved and directed by itself alone.",
+   "quote": "Things material cannot touch the soul in anyway whatever, nor find entrance there, nor have power to sway or move it. Soul is self-swayed, self-moved.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
-   "section": "IV.12",
+   "section": "V.19",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Things have no hold on the soul. They have no access to it, cannot move or direct it. It is moved and directed by itself alone.",
+     "translator": "Gregory Hays"
+    }
+   ],
    "themes": [
     "perception",
     "control"
@@ -909,10 +1116,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-4-18-neighbor",
-   "quote": "How much trouble he avoids who does not look to see what his neighbor says or does or thinks, but only to what he does himself, that it may be just and pure.",
+   "quote": "How much valuable time may be gained by not looking at what some neighbour says or does or thinks, but only taking care that our own acts are just and holy.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "IV.18",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "How much trouble he avoids who does not look to see what his neighbor says or does or thinks, but only to what he does himself, that it may be just and pure.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "focus",
     "envy"
@@ -924,10 +1138,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-5-16-thoughts",
-   "quote": "Such as are thy habitual thoughts, such also will be the character of thy mind; for the soul is dyed by the thoughts.",
+   "quote": "Repeat impressions, and your understanding will assimilate itself to them; for the soul takes the dye of its impressions.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "V.16",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Such as are thy habitual thoughts, such also will be the character of thy mind; for the soul is dyed by the thoughts.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "character",
     "discipline"
@@ -938,10 +1159,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-6-21-truth",
-   "quote": "If anyone can refute me — show me I'm making a mistake or looking at things from the wrong perspective — I'll gladly change. It's the truth I'm after.",
+   "quote": "If any one can convince and show me that some view or action of mine is wrong, I will cheerfully change: I seek the truth, which never yet hurt any man.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VI.21",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "If anyone can refute me — show me I'm making a mistake or looking at things from the wrong perspective — I'll gladly change. It's the truth I'm after.",
+     "translator": "Gregory Hays"
+    }
+   ],
    "themes": [
     "humility",
     "truth"
@@ -953,10 +1181,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-7-27-not-there",
-   "quote": "Think not so much of what thou hast not as of what thou hast: but of the things which thou hast select the best, and then reflect how eagerly they would have been sought, if thou hadst them not.",
+   "quote": "Do not imagine yourself to have what you have not; but take full account of the excellences which you do possess, and in gratitude remember how you would hanker after them, if you had them not.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VII.27",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Think not so much of what thou hast not as of what thou hast: but of the things which thou hast select the best, and then reflect how eagerly they would have been sought, if thou hadst them not.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "gratitude",
     "negative visualization"
@@ -968,10 +1203,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-9-13-judgment",
-   "quote": "Today I escaped from anxiety. Or no, I discarded it, because it was within me, in my own perceptions — not outside.",
+   "quote": "To-day I got clear of trouble; say rather, I cleared trouble out; the trouble was not without but within, a matter of views.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "IX.13",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Today I escaped from anxiety. Or no, I discarded it, because it was within me, in my own perceptions — not outside.",
+     "translator": "Gregory Hays"
+    }
+   ],
    "themes": [
     "anxiety",
     "perception"
@@ -983,10 +1225,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-9-40-pain",
-   "quote": "About pain: the pain which is intolerable carries us off; but that which lasts a long time is tolerable; and the mind maintains its own tranquillity by retiring into itself, and the ruling faculty is not made worse.",
+   "quote": "Pain that is past bearing, brings an end; pain that lasts, can be borne. The understanding in abstraction maintains its calm, and the Inner Self is unimpaired.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VII.33",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "About pain: the pain which is intolerable carries us off; but that which lasts a long time is tolerable; and the mind maintains its own tranquillity by retiring into itself, and the ruling faculty is not made worse.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "suffering",
     "endurance"
@@ -998,10 +1247,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-12-1-now",
-   "quote": "You could leave life right now. Let that determine what you do and say and think.",
+   "quote": "Whatever you do or say or think, it is in your power, remember, to take leave of life.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "II.11",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "You could leave life right now. Let that determine what you do and say and think.",
+     "translator": "Gregory Hays"
+    }
+   ],
    "themes": [
     "memento mori",
     "mortality"
@@ -1013,10 +1269,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-12-32-tiny-share",
-   "quote": "How small a part of the boundless and unfathomable time is assigned to every man, for it is very soon swallowed up in the eternal!",
+   "quote": "What a jot of infinite unfathomable time is assigned to any one of us! In a moment it vanishes into eternity.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "XII.32",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "How small a part of the boundless and unfathomable time is assigned to every man, for it is very soon swallowed up in the eternal!",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "mortality",
     "perspective"
@@ -1028,10 +1291,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-7-22-love",
-   "quote": "It is peculiar to man to love even those who do wrong.",
+   "quote": "It is man's special gift to love even those who fall into blunders.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VII.22",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "It is peculiar to man to love even those who do wrong.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "forgiveness",
     "love"
@@ -1042,10 +1312,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-8-36-burden",
-   "quote": "Do not disturb thyself by thinking of the whole of thy life. Let not thy thoughts at once embrace all the various troubles which thou mayest expect to befall thee: but on every occasion ask thyself, What is there in this which is intolerable and past bearing?",
+   "quote": "Do not let the impression of life as a whole confound you. Do not focus in one all the train of possible and painful consequences; but as each trouble comes, say to yourself — What is there here too hard to bear or to endure?",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VIII.36",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Do not disturb thyself by thinking of the whole of thy life. Let not thy thoughts at once embrace all the various troubles which thou mayest expect to befall thee: but on every occasion ask thyself, What is there in this which is intolerable and past bearing?",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "present",
     "anxiety"
@@ -1057,10 +1334,17 @@ export const DATA = {
   },
   {
    "id": "aurelius-meditations-9-29-do-good",
-   "quote": "Be not ashamed to be helped; for it is thy business to do thy duty like a soldier in the assault on a town.",
+   "quote": "Do not be ashamed of being helped. It is incumbent upon you to do your appointed work, like a soldier in the breach.",
    "author": "Marcus Aurelius",
    "work": "Meditations",
    "section": "VII.7",
+   "translator": "Gerald Rendall",
+   "alts": [
+    {
+     "text": "Be not ashamed to be helped; for it is thy business to do thy duty like a soldier in the assault on a town.",
+     "translator": "George Long"
+    }
+   ],
    "themes": [
     "humility",
     "duty"
@@ -1076,6 +1360,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "15",
+   "translator": "T. W. Higginson",
+   "alts": [],
    "themes": [
     "acceptance",
     "desire"
@@ -1090,6 +1376,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "17",
+   "translator": "Elizabeth Carter",
+   "alts": [],
    "themes": [
     "acceptance",
     "role"
@@ -1105,6 +1393,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "20",
+   "translator": "",
+   "alts": [],
    "themes": [
     "perception",
     "anger"
@@ -1120,6 +1410,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "26",
+   "translator": "Elizabeth Carter",
+   "alts": [],
    "themes": [
     "equanimity",
     "perception"
@@ -1135,6 +1427,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Discourses",
    "section": "I.15",
+   "translator": "",
+   "alts": [],
    "themes": [
     "patience",
     "progress"
@@ -1150,6 +1444,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Discourses",
    "section": "III.21",
+   "translator": "",
+   "alts": [],
    "themes": [
     "speech",
     "discipline"
@@ -1165,6 +1461,8 @@ export const DATA = {
    "author": "Epictetus",
    "work": "Enchiridion",
    "section": "50",
+   "translator": "T. W. Higginson",
+   "alts": [],
    "themes": [
     "discipline",
     "integrity"
@@ -1180,6 +1478,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "5.7-8",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "anxiety",
     "present"
@@ -1195,6 +1495,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "6",
+   "translator": "",
+   "alts": [],
    "themes": [
     "self-knowledge",
     "friendship"
@@ -1209,6 +1511,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "2.6",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "contentment",
     "wealth"
@@ -1223,6 +1527,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "104.8",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "inner life",
     "change"
@@ -1238,6 +1544,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "78.13",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "suffering",
     "perception"
@@ -1253,6 +1561,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "96.5",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "discipline",
     "duty"
@@ -1267,6 +1577,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "On Anger",
    "section": "II.29",
+   "translator": "",
+   "alts": [],
    "themes": [
     "anger",
     "restraint"
@@ -1281,6 +1593,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "On Providence",
    "section": "5.10",
+   "translator": "Aubrey Stewart",
+   "alts": [],
    "themes": [
     "resilience",
     "adversity"
@@ -1295,6 +1609,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "13",
+   "translator": "",
+   "alts": [],
    "themes": [
     "anxiety",
     "fear"
@@ -1310,6 +1626,8 @@ export const DATA = {
    "author": "Seneca",
    "work": "Letters to Lucilius",
    "section": "71.3",
+   "translator": "Richard M. Gummere",
+   "alts": [],
    "themes": [
     "purpose",
     "direction"
@@ -1324,6 +1642,8 @@ export const DATA = {
    "author": "Cicero",
    "work": "Tusculan Disputations",
    "section": "III.30 (III.73)",
+   "translator": "C. D. Yonge",
+   "alts": [],
    "themes": [
     "self-knowledge",
     "humility"
@@ -1339,6 +1659,8 @@ export const DATA = {
    "author": "Cicero",
    "work": "On Friendship",
    "section": "22 (ch. 6); first sentence from 86 (ch. 23)",
+   "translator": "E. S. Shuckburgh",
+   "alts": [],
    "themes": [
     "friendship",
     "community"
@@ -1353,6 +1675,8 @@ export const DATA = {
    "author": "Aristotle",
    "work": "Nicomachean Ethics",
    "section": "II.9 (1109a27)",
+   "translator": "W. D. Ross",
+   "alts": [],
    "themes": [
     "anger",
     "discernment"
@@ -1368,6 +1692,8 @@ export const DATA = {
    "author": "Aristotle",
    "work": "Politics",
    "section": "III.4 (1277b)",
+   "translator": "William Ellis",
+   "alts": [],
    "themes": [
     "humility",
     "leadership"
@@ -1383,6 +1709,8 @@ export const DATA = {
    "author": "Aristotle",
    "work": "Nicomachean Ethics",
    "section": "X.4 (1174b23-33)",
+   "translator": "W. D. Ross",
+   "alts": [],
    "themes": [
     "work",
     "excellence"
@@ -1397,6 +1725,8 @@ export const DATA = {
    "author": "Heraclitus",
    "work": "Fragments",
    "section": "DK 6 (Burnet fr. 32)",
+   "translator": "John Burnet",
+   "alts": [],
    "themes": [
     "renewal",
     "present"
@@ -1411,6 +1741,8 @@ export const DATA = {
    "author": "Socrates",
    "work": "Plato's Crito",
    "section": "48b",
+   "translator": "F. J. Church",
+   "alts": [],
    "themes": [
     "integrity",
     "right living"
@@ -1426,6 +1758,8 @@ export const DATA = {
    "author": "Boethius",
    "work": "The Consolation of Philosophy",
    "section": "II, prose 1",
+   "translator": "W. V. Cooper",
+   "alts": [],
    "themes": [
     "fortune",
     "acceptance"
@@ -1441,6 +1775,8 @@ export const DATA = {
    "author": "Boethius",
    "work": "The Consolation of Philosophy",
    "section": "II, prose 5",
+   "translator": "I.T.",
+   "alts": [],
    "themes": [
     "self-knowledge",
     "humanity"
@@ -1455,6 +1791,8 @@ export const DATA = {
    "author": "Montaigne",
    "work": "Essays",
    "section": "III.10 \"Of managing the will\"",
+   "translator": "Charles Cotton",
+   "alts": [],
    "themes": [
     "inner life",
     "boundaries"
@@ -1470,6 +1808,8 @@ export const DATA = {
    "author": "Montaigne",
    "work": "Essays",
    "section": "I.39 \"Of solitude\" (Cotton I.38)",
+   "translator": "Charles Cotton",
+   "alts": [],
    "themes": [
     "self-mastery",
     "inner life"
@@ -1485,6 +1825,8 @@ export const DATA = {
    "author": "Montaigne",
    "work": "Essays",
    "section": "I.20 (Cotton I.19), chapter title",
+   "translator": "Charles Cotton",
+   "alts": [],
    "themes": [
     "mortality",
     "memento mori"
@@ -1500,6 +1842,8 @@ export const DATA = {
    "author": "Montaigne",
    "work": "Essays",
    "section": "I.23 \"Of custom\" (Cotton I.22)",
+   "translator": "Charles Cotton",
+   "alts": [],
    "themes": [
     "judgment",
     "conformity"
@@ -1514,6 +1858,8 @@ export const DATA = {
    "author": "Friedrich Nietzsche",
    "work": "quoted in Viktor Frankl, Man's Search for Meaning",
    "section": "Part II",
+   "translator": "Ilse Lasch",
+   "alts": [],
    "themes": [
     "meaning",
     "endurance"
@@ -1529,6 +1875,8 @@ export const DATA = {
    "author": "Viktor Frankl",
    "work": "Man's Search for Meaning",
    "section": "Preface to the 1984 edition",
+   "translator": "Ilse Lasch",
+   "alts": [],
    "themes": [
     "purpose",
     "meaning"
@@ -1544,6 +1892,8 @@ export const DATA = {
    "author": "Viktor Frankl",
    "work": "Man's Search for Meaning",
    "section": "Part I",
+   "translator": "",
+   "alts": [],
    "themes": [
     "acceptance",
     "context"
@@ -1558,6 +1908,8 @@ export const DATA = {
    "author": "Pierre Hadot",
    "work": "Philosophy as a Way of Life",
    "section": "Chapter 3, \"Spiritual Exercises\"",
+   "translator": "Michael Chase",
+   "alts": [],
    "themes": [
     "practice",
     "transformation"
@@ -1572,6 +1924,8 @@ export const DATA = {
    "author": "Pierre Hadot",
    "work": "Philosophy as a Way of Life",
    "section": "Chapter 3, \"Spiritual Exercises\"",
+   "translator": "Michael Chase",
+   "alts": [],
    "themes": [
     "present",
     "attention"
@@ -1587,6 +1941,8 @@ export const DATA = {
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
    "section": "9",
+   "translator": "Stephen Mitchell",
+   "alts": [],
    "themes": [
     "restraint",
     "excess"
@@ -1601,6 +1957,8 @@ export const DATA = {
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
    "section": "33",
+   "translator": "Gia-fu Feng & Jane English",
+   "alts": [],
    "themes": [
     "contentment",
     "enough"
@@ -1615,6 +1973,8 @@ export const DATA = {
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
    "section": "63",
+   "translator": "Stephen Mitchell",
+   "alts": [],
    "themes": [
     "discipline",
     "patience"
@@ -1630,6 +1990,8 @@ export const DATA = {
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
    "section": "71",
+   "translator": "D. C. Lau",
+   "alts": [],
    "themes": [
     "humility",
     "self-knowledge"
@@ -1644,6 +2006,8 @@ export const DATA = {
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
    "section": "76",
+   "translator": "James Legge",
+   "alts": [],
    "themes": [
     "flexibility",
     "life"
@@ -1659,6 +2023,8 @@ export const DATA = {
    "author": "Confucius",
    "work": "Analects",
    "section": "4.25",
+   "translator": "James Legge",
+   "alts": [],
    "themes": [
     "virtue",
     "community"
@@ -1673,6 +2039,8 @@ export const DATA = {
    "author": "Confucius",
    "work": "Analects",
    "section": "4.17",
+   "translator": "James Legge",
+   "alts": [],
    "themes": [
     "self-examination",
     "character"
@@ -1688,6 +2056,8 @@ export const DATA = {
    "author": "Confucius",
    "work": "Analects",
    "section": "14.27",
+   "translator": "",
+   "alts": [],
    "themes": [
     "integrity",
     "action"
@@ -1703,6 +2073,8 @@ export const DATA = {
    "author": "Ralph Waldo Emerson",
    "work": "Self-Reliance",
    "section": "1841",
+   "translator": "",
+   "alts": [],
    "themes": [
     "self-trust",
     "integrity"
@@ -1718,6 +2090,8 @@ export const DATA = {
    "author": "Ralph Waldo Emerson",
    "work": "Self-Reliance",
    "section": "1841",
+   "translator": "",
+   "alts": [],
    "themes": [
     "independence",
     "integrity"
@@ -1732,6 +2106,8 @@ export const DATA = {
    "author": "Ralph Waldo Emerson",
    "work": "Self-Reliance",
    "section": "1841",
+   "translator": "",
+   "alts": [],
    "themes": [
     "envy",
     "self-knowledge"
@@ -1747,6 +2123,8 @@ export const DATA = {
    "author": "Ralph Waldo Emerson",
    "work": "Self-Reliance",
    "section": "1841",
+   "translator": "",
+   "alts": [],
    "themes": [
     "independence",
     "truth"
@@ -1761,6 +2139,8 @@ export const DATA = {
    "author": "Henry David Thoreau",
    "work": "Walden",
    "section": "1854",
+   "translator": "",
+   "alts": [],
    "themes": [
     "examined life",
     "resignation"
@@ -1776,6 +2156,8 @@ export const DATA = {
    "author": "Henry David Thoreau",
    "work": "Walden",
    "section": "Walden, ch. 2 \"Where I Lived, and What I Lived For\"",
+   "translator": "",
+   "alts": [],
    "themes": [
     "simplicity",
     "focus"
@@ -1790,6 +2172,8 @@ export const DATA = {
    "author": "Henry David Thoreau",
    "work": "Walden",
    "section": "1854",
+   "translator": "",
+   "alts": [],
    "themes": [
     "intention",
     "mortality"
@@ -1805,6 +2189,8 @@ export const DATA = {
    "author": "Henry David Thoreau",
    "work": "Walden",
    "section": "1854",
+   "translator": "",
+   "alts": [],
    "themes": [
     "action",
     "purpose"
@@ -1819,6 +2205,8 @@ export const DATA = {
    "author": "Bhagavad Gita",
    "work": "Bhagavad Gita",
    "section": "2.47",
+   "translator": "A. C. Bhaktivedanta Swami Prabhupada",
+   "alts": [],
    "themes": [
     "duty",
     "detachment"
@@ -1834,6 +2222,8 @@ export const DATA = {
    "author": "Bhagavad Gita",
    "work": "Bhagavad Gita",
    "section": "3.35",
+   "translator": "Edwin Arnold",
+   "alts": [],
    "themes": [
     "duty",
     "authenticity"
@@ -1849,6 +2239,8 @@ export const DATA = {
    "author": "Bhagavad Gita",
    "work": "Bhagavad Gita",
    "section": "6.5-6.6",
+   "translator": "Edwin Arnold",
+   "alts": [],
    "themes": [
     "self-mastery",
     "discipline"
@@ -1864,6 +2256,8 @@ export const DATA = {
    "author": "Bhagavad Gita",
    "work": "Bhagavad Gita",
    "section": "2.14",
+   "translator": "Edwin Arnold",
+   "alts": [],
    "themes": [
     "impermanence",
     "endurance"
@@ -1879,6 +2273,8 @@ export const DATA = {
    "author": "Buddha",
    "work": "Dhammapada",
    "section": "1",
+   "translator": "F. Max Müller",
+   "alts": [],
    "themes": [
     "thought",
     "character"
@@ -1893,6 +2289,8 @@ export const DATA = {
    "author": "Buddha",
    "work": "Dhammapada",
    "section": "50",
+   "translator": "F. Max Müller",
+   "alts": [],
    "themes": [
     "self-examination",
     "humility"
@@ -1908,6 +2306,8 @@ export const DATA = {
    "author": "Buddha",
    "work": "Dhammapada",
    "section": "103",
+   "translator": "Narada Thera",
+   "alts": [],
    "themes": [
     "self-mastery",
     "discipline"
@@ -1923,6 +2323,8 @@ export const DATA = {
    "author": "Buddha",
    "work": "Dhammapada",
    "section": "223",
+   "translator": "Narada Thera",
+   "alts": [],
    "themes": [
     "anger",
     "virtue"
@@ -1938,6 +2340,8 @@ export const DATA = {
    "author": "Buddha",
    "work": "Dhammapada",
    "section": "80",
+   "translator": "F. Max Müller",
+   "alts": [],
    "themes": [
     "self-mastery",
     "discipline"
@@ -1953,6 +2357,8 @@ export const DATA = {
    "author": "Simone Weil",
    "work": "Letter to Joë Bousquet",
    "section": "13 April 1942",
+   "translator": "",
+   "alts": [],
    "themes": [
     "attention",
     "presence",
@@ -1969,6 +2375,8 @@ export const DATA = {
    "author": "Simone Weil",
    "work": "Gravity and Grace",
    "section": "\"To Desire Without an Object\"",
+   "translator": "Arthur Wills",
+   "alts": [],
    "themes": [
     "self-knowledge",
     "desire",
@@ -1985,6 +2393,8 @@ export const DATA = {
    "author": "Simone Weil",
    "work": "The Need for Roots",
    "section": "Part II, opening",
+   "translator": "",
+   "alts": [],
    "themes": [
     "belonging",
     "community",
@@ -2001,6 +2411,8 @@ export const DATA = {
    "author": "Iris Murdoch",
    "work": "\"The Sublime and the Good\"",
    "section": "Existentialists and Mystics, 1959",
+   "translator": "",
+   "alts": [],
    "themes": [
     "love",
     "attention",
@@ -2017,6 +2429,8 @@ export const DATA = {
    "author": "Iris Murdoch",
    "work": "The Sovereignty of Good",
    "section": "\"On 'God' and 'Good'\"",
+   "translator": "",
+   "alts": [],
    "themes": [
     "self-deception",
     "attention",
@@ -2034,6 +2448,8 @@ export const DATA = {
    "author": "Iris Murdoch",
    "work": "The Sovereignty of Good",
    "section": "\"On 'God' and 'Good'\"",
+   "translator": "",
+   "alts": [],
    "themes": [
     "ego",
     "self-mastery"
@@ -2049,6 +2465,8 @@ export const DATA = {
    "author": "Hannah Arendt",
    "work": "On Violence",
    "section": "Section II",
+   "translator": "",
+   "alts": [],
    "themes": [
     "power",
     "character",
@@ -2065,6 +2483,8 @@ export const DATA = {
    "author": "Hannah Arendt",
    "work": "Eichmann in Jerusalem",
    "section": "Epilogue",
+   "translator": "",
+   "alts": [],
    "themes": [
     "evil",
     "thoughtlessness",
@@ -2081,6 +2501,8 @@ export const DATA = {
    "author": "Maya Angelou",
    "work": "Letter to My Daughter",
    "section": "Introduction (Random House, 2008)",
+   "translator": "",
+   "alts": [],
    "themes": [
     "adversity",
     "character",
@@ -2097,6 +2519,8 @@ export const DATA = {
    "author": "Maya Angelou",
    "work": "Black Women Writers at Work",
    "section": "interview with Claudia Tate (1983)",
+   "translator": "",
+   "alts": [],
    "themes": [
     "resilience",
     "persistence"

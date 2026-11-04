@@ -39,6 +39,10 @@ const CORPORA = {
     { ...gut(15877), label: 'Long (1862)' },
     { ...gut(2680), label: 'Casaubon (1634)' },
     { name: 'hays-vreeman', url: 'https://vreeman.com/meditations/', html: true, label: 'Hays (2002), via vreeman.com' },
+    // Rendall, 1898 first edition: the app's Marcus translation since November 2026. Two OCR scans of
+    // the same printing, so an OCR error in one is caught by the other.
+    { name: 'archive-rendall-1898-a', url: 'https://archive.org/download/cu31924029002149/cu31924029002149_djvu.txt', label: 'Rendall (1898), Cornell scan' },
+    { name: 'archive-rendall-1898-b', url: 'https://archive.org/download/marcusaureliusan00marcrich/marcusaureliusan00marcrich_djvu.txt', label: 'Rendall (1898), California scan' },
   ],
   Epictetus: [
     { ...gut(10661), label: 'Long (1877), selection' },

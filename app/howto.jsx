@@ -135,7 +135,7 @@ export default function HowToScreen() {
         </View>
 
         <View style={s.footer}>
-          <Text style={s.footerQuote}>“No longer talk at all about the kind of man that a good man ought to be, but be such.”</Text>
+          <Text style={s.footerQuote}>“No more mere talk of what the good man should be. Be it!”</Text>
           <Text style={s.footerAttr}>Marcus Aurelius · Meditations</Text>
         </View>
 

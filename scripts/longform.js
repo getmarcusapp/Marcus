@@ -89,7 +89,9 @@ function validate(lf) {
     if ('payoff' in seg) {
       const src = STOIC_QUOTES.find(q => q.id === seg.payoff);
       if (!src) { problems.push(`${where}: payoff "${seg.payoff}" is not in stoicQuotes.js`); continue; }
-      if (!S.words(src.quote).join(' ').includes(S.words(seg.excerpt).join(' '))) {
+      // Verbatim in the shown wording or another credited translation (src.alts).
+      const wordings = [src.quote, ...(src.alts || []).map(a => a.text)];
+      if (!wordings.some(t => S.words(t).join(' ').includes(S.words(seg.excerpt).join(' ')))) {
         problems.push(`${where}: payoff excerpt does not appear verbatim in ${seg.payoff}`);
       }
     }

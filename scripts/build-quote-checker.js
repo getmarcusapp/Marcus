@@ -112,7 +112,12 @@ const CLIENT = `
   // strip "Know thyself. \u2014 Socrates", because what was left was 13
   // characters, and that entry could then never be found.
   function stripAttr(t) {
-    var out = String(t || '').replace(/\\s*[\\u2014\\u2013-]{1,2}\\s*[^\\u2014\\u2013-]{0,70}$/, '');
+    // Only a trailing dash followed by something shaped like a credit (a capital,
+    // no sentence inside it) is an attribution. Translators also use dashes
+    // mid-sentence: "Reject the view \u2014 and straightway, you are whole."
+    var out = String(t || '').replace(/\\s*[\\u2014\\u2013-]{1,2}\\s*([A-Z][^\\u2014\\u2013?!]{0,70})$/, function (m, tail) {
+      return /[.?!]\\s+[A-Z]/.test(tail) ? m : '';
+    });
     return out.trim().split(/\\s+/).filter(Boolean).length >= 2 ? out : String(t || '');
   }
   function bigrams(s) {
@@ -181,7 +186,7 @@ const CLIENT = `
       render(
         '<p class="qc-verdict">In our checked library</p>' +
         '<p class="qc-quoted">' + q[0] + '</p>' +
-        '<p class="qc-fact"><b>' + q[1] + '</b>, ' + q[2] + (q[3] ? ' ' + q[3] : '') + '</p>' +
+        '<p class="qc-fact"><b>' + q[1] + '</b>, ' + q[2] + (q[3] ? ' ' + q[3] : '') + (q[4] ? ', trans. ' + q[4] : '') + '</p>' +
         '<p class="qc-note">This passage is in the corpus the app reads from, cited to a work and a section you can open and check. ' +
         'Translations vary; the wording above is the one we hold.</p>', 'good');
       return;
@@ -203,7 +208,7 @@ const CLIENT = `
     }
     render(
       '<p class="qc-verdict">Not in our library</p>' +
-      '<p class="qc-fact">We hold ' + D.corpus.length + ' checked passages and ' + D.mis.length + ' documented misattributions, and this matches neither.</p>' +
+      '<p class="qc-fact">We hold ' + D.n + ' checked passages and ' + D.mis.length + ' documented misattributions, and this matches neither.</p>' +
       '<p class="qc-note">That is a description of our search, not a verdict on the quote. Two things commonly produce this answer for ' +
       'a real passage: we may simply not hold it, or you may have a different translation. This tool matches wording, and two honest ' +
       'translations of the same Greek can share almost no words at all.</p>' +
@@ -255,7 +260,11 @@ function build() {
   }
 
   const data = {
-    corpus: STOIC_QUOTES.map(q => [q.quote, q.author, q.work, q.source || '']),
+    // One row per wording: the passage as the app shows it, then any other
+    // translation of it that people paste (q.alts), each credited.
+    corpus: STOIC_QUOTES.flatMap(q => [[q.quote, q.author, q.work, q.source || '', q.translator || ''],
+      ...(q.alts || []).map(a => [a.text, q.author, q.work, q.source || '', a.translator])]),
+    n: STOIC_QUOTES.length,
     mis: MISATTRIBUTIONS.map(m => [m.text, m.credited, m.actual || '', m.note, m.confidence, m.id]),
   };
 

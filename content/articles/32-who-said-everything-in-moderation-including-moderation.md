@@ -5,7 +5,7 @@ entry: moderation-including-moderation
 description: It is a twentieth-century joke about an ancient maxim, first found in print in 1927. Not Marcus Aurelius, and not Oscar Wilde, Mark Twain, Petronius or Julia Child either.
 pillar: practice
 published: 2026-10-29
-modified: 2026-10-29
+modified: 2026-11-05
 about: [{"name": "Everything in moderation, including moderation", "description": "A modern joke on the ancient maxim 'nothing in excess', misattributed to Marcus Aurelius and others."}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}, {"name": "Quote Investigator", "sameAs": "https://quoteinvestigator.com/"}]
 ---
@@ -48,18 +48,18 @@ So "everything in moderation" has a respectable ancestry. "Including moderation"
 
 He wrote about temperance as a virtue, and he did not mean a joke. His clearest description is of his adoptive father, the emperor Antoninus Pius, whom he admired for exactly this:
 
-> But to be strong enough both to bear the one and to be sober in the other is the mark of a man who has a perfect and invincible soul.
+> The luxuries which tend to refine life, and of which fortune is so lavish, he enjoyed at once modestly and unfeignedly; if there, he partook unaffectedly, if absent, he did not feel the lack.
 >
-> — Marcus Aurelius, *Meditations* I.16, trans. George Long
+> — Marcus Aurelius, *Meditations* I.16, trans. Gerald Rendall (1898)
 
-The "one" and "other" are abstaining from pleasures and enjoying them. Marcus praises a man who could do either without losing himself, which is what Stoic temperance means: not avoiding good things, but not being owned by them. He ranks it among the virtues that matter most:
+Enjoyed when they were there, not missed when they were gone. Marcus praises a man who could take good things or leave them without losing himself, which is what Stoic temperance means: not avoiding good things, but not being owned by them. He ranks it among the virtues that matter most:
 
-> I see a virtue which is opposed to love of pleasure, and that is temperance.
+> In the constitution of the reasoning being I perceive no virtue in mutiny against justice; in mutiny against pleasure I see self-control.
 >
-> — Marcus Aurelius, *Meditations* VIII.39, trans. George Long
+> — Marcus Aurelius, *Meditations* VIII.39, trans. Gerald Rendall (1898)
 
 That is a serious idea about self-command. "Including moderation" is a good joke. They are not the same thing, and only one of them is his.
 
 This is on our [list of misattributed Stoic quotes](/misattributed-stoic-quotes#moderation-including-moderation). For temperance as the Stoics meant it, see [the four Stoic virtues](/four-stoic-virtues).
 
-**Sources:** Quote Investigator, "Be Moderate In Everything Including Moderation" (May 13, 2022); Marcus Aurelius, *Meditations*, trans. George Long, Project Gutenberg #15877; Hesiod, *Works and Days*, trans. H. G. Evelyn-White, Project Gutenberg #348; Diogenes Laertius, *Lives* I.93, trans. R. D. Hicks (1925), on Wikisource.
+**Sources:** Quote Investigator, "Be Moderate In Everything Including Moderation" (May 13, 2022); Marcus Aurelius, *Meditations*, trans. George Long, Project Gutenberg #15877, and trans. Gerald Rendall, *Marcus Aurelius Antoninus to Himself* (1898), on archive.org; Hesiod, *Works and Days*, trans. H. G. Evelyn-White, Project Gutenberg #348; Diogenes Laertius, *Lives* I.93, trans. R. D. Hicks (1925), on Wikisource.

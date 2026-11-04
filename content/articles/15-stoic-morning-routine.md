@@ -4,7 +4,7 @@ title: The Stoic Morning Routine
 description: What Marcus Aurelius actually did at dawn, why the morning has a different job than the evening, and a five-minute routine built from the sources rather than from productivity culture.
 pillar: practice
 published: 2026-08-02
-modified: 2026-08-02
+modified: 2026-11-05
 about: [{"name": "Stoic morning preparation", "description": "The practice of preparing for the day ahead by sorting what is in one's control, naming likely difficulty, and rehearsing a response, distinct from the evening review of the day past."}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}, {"name": "Epictetus", "sameAs": "https://en.wikipedia.org/wiki/Epictetus"}, {"name": "Seneca", "sameAs": "https://en.wikipedia.org/wiki/Seneca_the_Younger"}]
 ---
@@ -17,13 +17,17 @@ The [evening examination](/stoic-evening-examination) judges what happened. It i
 
 Book II of the *Meditations* opens at dawn, and it is not gentle:
 
-> When you wake, tell yourself: the people I deal with today will be meddling, ungrateful, arrogant, dishonest, jealous and surly.
+> When you wake, say to yourself — To-day I shall encounter meddling, ingratitude, violence, cunning, malice, self-seeking; all of them the results of men not knowing what is good and what is evil.
+>
+> — Marcus Aurelius, *Meditations* II.1, trans. Gerald Rendall (1898)
 
-He goes on: they are like this because they cannot tell good from evil, and none of them can implicate me in ugliness, and we were made to work together. That is a complete morning practice in four sentences. It names the likely difficulty, explains it, and settles in advance how he will meet it.
+He goes on: none of them can implicate me in ugliness, and we were made to work together. That is a complete morning practice in four sentences. It names the likely difficulty, explains it, and settles in advance how he will meet it.
 
 Book V opens with the other half, and it is the most human passage in the book:
 
-> At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work, as a human being. What do I have to complain of, if I am going to do what I was born for?
+> In the morning, when you feel loth to rise, fall back upon the thought 'I am rising for man's work. Why make a grievance of setting about that for which I was born, and for sake of which I have been brought into the world?'
+>
+> — Marcus Aurelius, *Meditations* V.1, trans. Gerald Rendall (1898)
 
 An emperor talking himself out of staying in bed. He then argues with himself about whether he was made to lie under blankets keeping warm, concedes it is pleasant, and asks whether he exists to feel good or to do things.
 

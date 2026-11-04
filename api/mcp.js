@@ -105,6 +105,7 @@ export function checkQuote({ quote, attributed_to }, client) {
       ? `The wording is genuine, but it is ${q.author}'s, not ${attributed_to}'s. ` : '';
     return out({
       verdict: 'verified', quote: q.quote, author: q.author, work: q.work, section: q.section || null,
+      translator: q.translator || null,
       wrong_author: !!who, citation: cite(q), library: size,
       note: 'Verbatim from the translation held in the library. Other translations word it differently.',
     }, `${who}Verified: "${q.quote}" (${cite(q)}). Translations vary; this is the wording in the checked library.`);

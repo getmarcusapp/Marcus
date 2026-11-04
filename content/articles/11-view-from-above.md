@@ -4,7 +4,7 @@ title: The View From Above
 description: The Stoic exercise of seeing your life from a great height, where it comes from in Marcus Aurelius, what it is actually for, and how to run it in five minutes without it becoming nihilism.
 pillar: practice
 published: 2026-08-02
-modified: 2026-08-02
+modified: 2026-11-05
 about: [{"name": "The view from above", "description": "A Stoic contemplative exercise of imaginatively ascending to view the earth and one's own life from a great height, in order to see one's circumstances at their actual scale."}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}, {"name": "Seneca", "sameAs": "https://en.wikipedia.org/wiki/Seneca_the_Younger"}, {"name": "Pierre Hadot", "sameAs": "https://en.wikipedia.org/wiki/Pierre_Hadot"}]
 ---
@@ -19,9 +19,11 @@ The scholar Pierre Hadot named this the view from above and identified it as a d
 
 The clearest instance is in Book IX, where he suggests observing the movements of the stars as though you were running alongside them, and considering constantly how the elements change into one another. Elsewhere he surveys human life from a height and sees herds, armies, farms, weddings, dissolutions, courts, deserts, foreign nations, festivals, mournings, markets, all mixed together and made orderly by contraries.
 
-And in Book IV, the passage that does most of the work:
+And in Book VI, the passage that does most of the work:
 
-> Asia and Europe are corners of the world. The whole sea is a drop. Athos a clod. All the present time is a point in eternity.
+> In the universe Asia and Europe are but corners; ocean a drop; Athos a grain; the span of time, a moment in eternity.
+>
+> — Marcus Aurelius, *Meditations* VI.36, trans. Gerald Rendall (1898)
 
 He is not saying nothing matters. He returns from these passages to specific duties, immediately and every time. He is resizing, not dismissing.
 
