@@ -28,6 +28,7 @@
  * sitemap picks it up.
  */
 const fs = require('fs');
+const { ART } = require('./site-artwork');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
 const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
@@ -55,7 +56,7 @@ const PAGES = [
   {
     slug: 'death',
     title: 'Stoic Quotes on Death',
-    blurb: 'Twelve passages on mortality from Marcus Aurelius, Seneca, Epictetus and Musonius Rufus, each with its source.',
+    blurb: '{N} passages on mortality from Marcus Aurelius, Seneca and Epictetus, each with its source.',
     intro:
       'The Stoics wrote about death more than almost anything else, and not as a morbid interest. Their claim is that a life is ' +
       'shaped by how honestly you hold its ending: that the person who has rehearsed dying is harder to frighten, wastes less ' +
@@ -81,7 +82,7 @@ const PAGES = [
   {
     slug: 'perception',
     title: 'Stoic Quotes on Perception and Judgment',
-    blurb: 'Ten passages on the Stoic claim that events do not disturb us, our judgments about them do.',
+    blurb: '{N} passages on the Stoic claim that events do not disturb us, our judgments about them do.',
     intro:
       'This is the load-bearing idea in Stoic practice, and the one most often flattened in the retelling. The claim is not that ' +
       'nothing bad happens, nor that you should feel less. It is narrower: between an event and your distress sits a judgment you ' +
@@ -106,7 +107,7 @@ const PAGES = [
   {
     slug: 'anxiety',
     title: 'Stoic Quotes on Anxiety and Fear',
-    blurb: 'Seven passages on imagined trouble, from Seneca, Marcus Aurelius and Epictetus, each with its source.',
+    blurb: '{N} passages on imagined trouble, from Seneca, Marcus Aurelius and Epictetus, each with its source.',
     intro:
       'The Stoic account of anxiety is unusually practical, and Seneca is its best source because he plainly suffered from it. ' +
       'The argument is arithmetic rather than consoling: most of what we fear either never arrives or arrives smaller than the ' +
@@ -127,7 +128,7 @@ const PAGES = [
   {
     slug: 'discipline',
     title: 'Stoic Quotes on Discipline and Self-Mastery',
-    blurb: 'Twelve passages on habit, attention and the use of time, with chapter and verse.',
+    blurb: '{N} passages on habit, attention and the use of time, with chapter and verse.',
     intro:
       'Stoic discipline is not endurance for its own sake. It is the claim that character is the residue of what you repeatedly ' +
       'do, so the small settled decisions matter more than the large declared ones. Marcus is the most useful writer here ' +
@@ -153,7 +154,7 @@ const PAGES = [
   {
     slug: 'character',
     title: 'Stoic Quotes on Character',
-    blurb: 'Ten passages on what a person is made of, and how the Stoics thought it was built.',
+    blurb: '{N} passages on what a person is made of, and how the Stoics thought it was built.',
     intro:
       'The Stoics treated character as something constructed rather than discovered, and they were specific about the method: ' +
       'decide in advance what sort of person you are, so that each separate occasion does not have to be argued out from the ' +
@@ -176,7 +177,7 @@ const PAGES = [
   {
     slug: 'other-people',
     title: 'Stoic Quotes on Dealing with Other People',
-    blurb: 'Nine passages on difficult people, insult, anger and what we owe each other.',
+    blurb: '{N} passages on difficult people, insult, anger and what we owe each other.',
     intro:
       'Stoicism is often read as a philosophy of withdrawal, which is close to the opposite of what its authors practiced. Marcus ' +
       'ran an empire, Seneca served in government, Cicero argued in the courts. Justice is the virtue that is entirely about ' +
@@ -214,11 +215,23 @@ img{max-width:100%;display:block}
 .tq-intro{font-size:18px;color:rgba(232,228,220,.82);margin:0;max-width:62ch}
 .tq-main{padding:40px 24px 64px}
 .tq-note{font-size:15px;color:rgba(232,228,220,.66);border-left:2px solid rgba(201,169,97,.4);padding:2px 0 2px 16px;margin:0 0 40px;max-width:62ch}
-.tq-q{margin:0 0 34px;padding:0 0 30px;border-bottom:1px solid rgba(232,228,220,.08)}
-.tq-q:last-of-type{border-bottom:0}
-.tq-text{font-size:20px;line-height:1.55;margin:0 0 12px;color:#f3efe7}
-.tq-cite{font-size:14px;color:rgba(232,228,220,.6);margin:0;font-style:normal}
-.tq-cite b{color:rgba(232,228,220,.85);font-weight:600}
+.tq-q{position:relative;margin:0 0 20px;padding:26px 26px 22px 30px;border-left:3px solid #c9a961;border-radius:0 14px 14px 0;background:linear-gradient(100deg,rgba(201,169,97,.12),rgba(201,169,97,.03) 70%)}
+.tq-q::before{content:"\\201C";position:absolute;top:-6px;right:18px;font-family:Georgia,serif;font-size:96px;line-height:1;color:rgba(201,169,97,.22)}
+.tq-text{font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;font-style:italic;font-size:21px;line-height:1.5;margin:0 0 14px;color:#f3efe7}
+.tq-cite{font-size:14px;color:rgba(232,228,220,.62);margin:0;font-style:normal}
+.tq-cite b{color:#c9a961;font-weight:600}
+.tq-cite span::before{content:" \\00b7 ";color:rgba(232,228,220,.35)}
+.tq-art{margin:0 0 30px;border-radius:12px;overflow:hidden;background:rgba(232,228,220,.03)}
+.tq-art img{width:100%;height:auto;max-height:460px;object-fit:cover;background:#0d0d0f}
+.tq-art figcaption{font-size:12.5px;color:rgba(232,228,220,.5);padding:10px 14px}
+.tq-appcard{display:flex;gap:24px;align-items:center;margin:8px 0 28px;padding:22px 24px;border-radius:16px;border:1px solid rgba(201,169,97,.28);background:radial-gradient(120% 140% at 0% 0%,rgba(120,88,46,.35),rgba(20,15,10,.6) 60%,rgba(13,13,15,.9))}
+.tq-appcard img{width:120px;height:auto;flex:0 0 auto;filter:drop-shadow(0 12px 24px rgba(0,0,0,.6))}
+.tq-appcard-label{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#c9a961;margin:0 0 8px}
+.tq-appcard-copy{font-size:16px;line-height:1.5;color:#e8e4dc;margin:0 0 16px}
+.tq-appcard .tq-nav-cta{display:inline-block}
+.tq-card-img{display:flex;gap:16px;align-items:center;background:linear-gradient(100deg,rgba(201,169,97,.08),transparent 70%)}
+.tq-card-img img{width:96px;height:96px;object-fit:cover;border-radius:10px;flex:0 0 auto}
+@media (max-width:560px){.tq-appcard{gap:16px;padding:18px}.tq-appcard img{width:88px}.tq-card-img img{width:72px;height:72px}.tq-q{padding:22px 18px 18px 20px}}
 .tq-h2{font-family:Cinzel,Georgia,serif;font-size:22px;margin:44px 0 14px}
 .tq-list{list-style:none;padding:0;margin:0;display:grid;gap:14px}
 .tq-card{border:.5px solid rgba(232,228,220,.16);border-radius:12px;padding:18px 20px}
@@ -257,6 +270,32 @@ function shell({ title, desc, canonical, jsonLd, body, ogSlug }) {
     GA + '</head><body>' + NAV + body + FOOTER + '</body></html>';
 }
 
+// One painting per theme, from the same credited, public-domain gallery as the
+// articles (scripts/site-artwork.js), chosen for the subject.
+const THEME_ART = {
+  death: 'memento-mori',              // Hals: a young man holding a skull
+  perception: 'narcissus',            // judging what you see, and mistaking it
+  anxiety: 'fishermen-at-sea',        // Turner: a small boat in a dark sea
+  discipline: 'dichotomy-of-control', // Carracci: Hercules choosing the hard road
+  character: 'aristotle-homer',       // Rembrandt: one man weighing another
+  'other-people': 'marcus-bread',     // Vien: Marcus among the people he served
+  index: 'school-of-athens',
+};
+function artFigure(key, cls) {
+  const a = ART[key];
+  const credit = [a.artist, a.work, a.date].filter(Boolean).join(', ');
+  return '<figure class="' + cls + '"><img src="/img/art/' + a.file + '" alt="' + esc(credit) + '" fetchpriority="high" decoding="async">' +
+    '<figcaption>' + esc(credit) + '</figcaption></figure>';
+}
+
+const APP_STORE = 'https://apps.apple.com/app/id6789749038';
+const APP_CARD =
+  '<aside class="tq-appcard">' +
+  '<img src="/img/app-reading-phone.png" alt="The Marcus app showing a daily reading" width="180" height="367" loading="lazy" decoding="async">' +
+  '<div><p class="tq-appcard-label">Marcus for iPhone</p>' +
+  '<p class="tq-appcard-copy">One passage like these each morning, checked against its translation, then a morning intention and an evening review.</p>' +
+  '<a class="tq-nav-cta" href="' + APP_STORE + '">Download on the App Store</a></div></aside>';
+
 const APP_CTA =
   '<section class="tq-app">' +
   '<img src="/skull-gold.png" alt="" width="38" height="52">' +
@@ -264,13 +303,20 @@ const APP_CTA =
   '<a class="tq-nav-cta" href="/">Explore the app →</a></section>';
 
 function quoteHtml(q) {
-  const cite = [q.author, q.work, q.source].filter(Boolean);
+  const where = [q.work, q.source].filter(Boolean).join(' ');
   return '<blockquote class="tq-q">' +
     '<p class="tq-text">' + esc(q.quote) + '</p>' +
-    '<p class="tq-cite"><b>' + esc(cite[0]) + '</b>' +
-    (cite.length > 1 ? ', ' + esc(cite.slice(1).join(' ')) : '') + '</p>' +
+    '<p class="tq-cite"><b>' + esc(q.author) + '</b>' +
+    (where ? '<span>' + esc(where) + '</span>' : '') +
+    (q.translator ? '<span>trans. ' + esc(q.translator) + '</span>' : '') + '</p>' +
     '</blockquote>';
 }
+
+// Blurbs say how many passages a page holds. They said 'Twelve' after an audit
+// left eleven, so the number is filled in from the page itself.
+const WORDS = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+  'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen', 'Twenty'];
+for (const p of PAGES) p.blurb = p.blurb.replace('{N}', WORDS[p.ids.length] || String(p.ids.length));
 
 function build() {
   const corpus = loadCorpus();
@@ -311,8 +357,9 @@ function build() {
       '<p class="tq-intro">' + page.intro + '</p>' +
       '</div></header>' +
       '<main class="tq-main" id="main"><div class="tq-wrap">' +
+      (THEME_ART[page.slug] ? artFigure(THEME_ART[page.slug], 'tq-art') : '') +
       '<p class="tq-note">' + page.note + '</p>' +
-      quotes.map(quoteHtml).join('') +
+      quotes.map((q, i) => (i === 4 ? APP_CARD : '') + quoteHtml(q)).join('') +
       APP_CTA +
       '</div></main>';
     fs.writeFileSync(path.join(OUT_DIR, page.slug + '.html'),
@@ -330,11 +377,14 @@ function build() {
     'and a good deal of it is not Stoic. Browse them by theme, check a quote of your own, or read the ones we traced to somebody else.</p>' +
     '</div></header>' +
     '<main class="tq-main"><div class="tq-wrap">' +
+    artFigure(THEME_ART.index, 'tq-art') +
     '<p class="tq-note">We audited our own quote library one passage at a time and removed the ones that were not what they claimed to be. ' +
     'The findings are on our <a href="/misattributed-stoic-quotes">list of misattributed Stoic quotes</a>.</p>' +
     '<ul class="tq-list">' +
-    PAGES.map(p => '<li class="tq-card"><a href="/stoic-quotes/' + p.slug + '">' + esc(p.title) + '</a>' +
-      '<p>' + esc(p.blurb) + '</p></li>').join('') +
+    PAGES.map(p => '<li class="tq-card tq-card-img">' +
+      (THEME_ART[p.slug] ? '<img src="/img/art/' + ART[THEME_ART[p.slug]].file + '" alt="" loading="lazy" decoding="async">' : '') +
+      '<div><a href="/stoic-quotes/' + p.slug + '">' + esc(p.title) + '</a>' +
+      '<p>' + esc(p.blurb) + '</p></div></li>').join('') +
     '</ul>' +
     // This is the hub for the whole quotes cluster, not just the themed pages.
     // It shipped without a single link to the checker, which is the most useful
