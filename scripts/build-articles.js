@@ -112,6 +112,21 @@ function renderMarkdown(md) {
       flushList('ol', items); continue;
     }
 
+    // A table: consecutive lines that start with "|". The second line is the
+    // markdown separator (| --- |) and is skipped. Wrapped so it scrolls
+    // sideways on a phone instead of widening the page.
+    if (line.startsWith('|')) {
+      const rows = [];
+      while (i < lines.length && lines[i].startsWith('|')) { rows.push(lines[i]); i++; }
+      const cells = r => r.replace(/^\|\s*|\s*\|\s*$/g, '').split(/\s*\|\s*/);
+      const body = rows.slice(1).filter(r => !/^\|[\s:|-]+\|?\s*$/.test(r));
+      out.push('<div class="ar-table-wrap"><table class="ar-table"><thead><tr>' +
+        cells(rows[0]).map(c => '<th scope="col">' + inline(c) + '</th>').join('') + '</tr></thead><tbody>' +
+        body.map(r => '<tr>' + cells(r).map((c, k) => (k ? '<td>' : '<th scope="row">') + inline(c) + (k ? '</td>' : '</th>')).join('') + '</tr>').join('') +
+        '</tbody></table></div>');
+      continue;
+    }
+
     if (/^-\s/.test(line)) {
       const items = [];
       while (i < lines.length && /^-\s/.test(lines[i])) { items.push(lines[i].replace(/^-\s/, '')); i++; }
@@ -121,7 +136,7 @@ function renderMarkdown(md) {
     // Paragraph: consume until a blank line or a block-level marker.
     const buf = [];
     while (i < lines.length && lines[i].trim() &&
-           !/^(#{2,4}\s|>|-\s|\d+\.\s|---\s*$)/.test(lines[i])) {
+           !/^(#{2,4}\s|>|-\s|\d+\.\s|---\s*$|\|)/.test(lines[i])) {
       buf.push(lines[i]); i++;
     }
     // A paragraph that is entirely bold and ends without a stop is a lead-in,
@@ -327,6 +342,11 @@ ${artCss('ar')}
 .ar-quote span{display:block;font-family:Cinzel,Georgia,serif;font-size:19px;line-height:1.5;color:#e8e4dc}
 .ar-quote cite{display:block;margin-top:10px;font-style:normal;font-size:13px;letter-spacing:.08em;color:rgba(232,228,220,.5)}
 .ar-list{margin:0 0 24px;padding-left:22px}
+.ar-table-wrap{overflow-x:auto;margin:0 0 28px;-webkit-overflow-scrolling:touch;max-width:calc(100vw - 32px)}
+.ar-table{width:100%;border-collapse:collapse;font-size:15px;min-width:560px}
+.ar-table th,.ar-table td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid rgba(201,169,97,.18);color:rgba(232,228,220,.84)}
+.ar-table thead th{color:#c9a961;font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.ar-table tbody th{color:#e8e4dc;font-weight:600}
 .ar-list li{font-size:17px;color:rgba(232,228,220,.84);margin-bottom:10px}
 .ar-rule{border:0;border-top:1px solid rgba(232,228,220,.09);margin:44px 0}
 .ar-p strong,.ar-list strong{color:#e8e4dc;font-weight:600}

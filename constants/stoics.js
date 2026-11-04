@@ -208,6 +208,8 @@ export const STOICS = [
     id: 'cicero',
     section: 'Sources & influences',
     name: 'Cicero',
+    // People search "was Cicero a Stoic?" The page answers it; the title should too.
+    seoTitle: 'Was Cicero a Stoic? Life, Teaching and Where to Start',
     role: 'Orator and philosopher',
     dates: '106–43 BC',
     summary: 'Not a Stoic. The reason Stoic ethics survived into the Latin West.',

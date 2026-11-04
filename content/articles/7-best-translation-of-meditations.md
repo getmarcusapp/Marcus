@@ -1,10 +1,10 @@
 ---
 slug: best-translation-of-meditations
 title: "The Best Translation of Meditations: Hays, Hard, Hammond or Long?"
-description: The best version of Marcus Aurelius's Meditations to read, compared. Hays, Hard, Hammond, Waterfield and the free Long and Casaubon, with the same passage in three translations side by side.
+description: The best version of Marcus Aurelius's Meditations to read, compared. Hays, Hard, Hammond, Staniforth, Waterfield, Hicks and the free Long, Casaubon and Haines, with the same passage in three translations side by side.
 pillar: practice
 published: 2026-08-02
-modified: 2026-10-28
+modified: 2026-11-04
 about: [{"name": "Meditations", "description": "The private notebook of Marcus Aurelius, written in Greek on campaign and never intended for publication.", "sameAs": "https://en.wikipedia.org/wiki/Meditations"}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}, {"name": "Gregory Hays", "sameAs": "https://en.wikipedia.org/wiki/Meditations"}]
 ---
@@ -18,6 +18,20 @@ Which is why people who bought the wrong edition often conclude the *Meditations
 **Buy the Gregory Hays translation** (Modern Library, 2002) if you are reading it for practice rather than scholarship. It is the one we recommend in our [Library](/library), and for most readers it is not close.
 
 Read on if you want to know what you are trading away, because Hays does trade something.
+
+## Every major translation at a glance
+
+| Translator | Edition | How it reads | Best for |
+| --- | --- | --- | --- |
+| Gregory Hays | Modern Library, 2002 | Plain, contemporary, compressed | A first read, for practice |
+| Robin Hard | Oxford World's Classics, 2011 | Faithful and readable, good notes | The copy you keep and reread |
+| Martin Hammond | Penguin Classics, 2006 | Careful, precise, a little cool | Study, with full notes |
+| Robin Waterfield | Basic Books, 2021 | Modern, heavily annotated | Readers who want commentary |
+| Maxwell Staniforth | Penguin Classics, 1964 | Mid-century, readable, a little dated | A secondhand copy you already own |
+| C. Scot Hicks and David V. Hicks | *The Emperor's Handbook*, Scribner, 2002 | Loose and conversational | Readers who found the others stiff |
+| George Long | 1862, free | Victorian, thee and thou | Reading free, online |
+| C. R. Haines | Loeb Classical Library, 1916, free | Literal, Greek on the facing page | Checking the Greek |
+| Meric Casaubon | 1634, free | Seventeenth-century English | Curiosity |
 
 ## The free version, and why it reads oddly
 
@@ -69,6 +83,14 @@ Careful, well annotated, slightly cooler on the page than Hays. Excellent if you
 
 A fine modern translation with substantial commentary, and Waterfield is a very experienced hand with Greek philosophy. Worth considering if you like heavy apparatus.
 
+**Maxwell Staniforth** (Penguin Classics, 1964) — *the old Penguin.*
+
+For four decades this was the edition most English readers met, until Penguin replaced it with Hammond's. It is readable and still turns up everywhere secondhand. If you already own it, there is no need to replace it; if you are buying new, the modern options above are better value.
+
+**C. Scot Hicks and David V. Hicks** (*The Emperor's Handbook*, Scribner, 2002) — *the loosest.*
+
+A deliberately free, conversational rendering, closer to paraphrase than the others. Some readers who bounced off every other version finish this one. Be careful quoting from it: its wording is often the furthest of any from the Greek.
+
 ## Which to actually buy
 
 **Reading it to practice, first time:** Hays. It is the only one that consistently makes people want to keep reading.
@@ -77,7 +99,7 @@ A fine modern translation with substantial commentary, and Waterfield is a very 
 
 **Reading it for study or comparison:** Hammond or Waterfield, and ideally alongside one of the others.
 
-**Reading it for free:** Long is legitimate and costs nothing. Know that the distance you feel is Victorian English, not Marcus.
+**Reading it for free:** Long is legitimate and costs nothing. Know that the distance you feel is Victorian English, not Marcus. If you read Greek, or want to check what Marcus actually wrote, Haines's Loeb edition is also free and prints the Greek opposite the English.
 
 A reasonable approach many people land on: Hays to read, Hard to keep.
 

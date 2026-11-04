@@ -229,7 +229,7 @@ function figurePage(fig, prev, next, books, bookshopUrl, amazonUrl) {
     '</nav>';
 
   return head({
-    title: fig.name + ' — Life, Teaching and Where to Start | Marcus',
+    title: (fig.seoTitle || fig.name + ' — Life, Teaching and Where to Start') + ' | Marcus',
     ogTitle: fig.name + ' — ' + fig.role,
     desc,
     canonical,

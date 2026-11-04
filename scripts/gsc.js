@@ -239,7 +239,7 @@ async function main() {
   }
 }
 
-module.exports = { dateRange, table, loadKey };
+module.exports = { dateRange, table, loadKey, accessToken, query };
 if (require.main === module) {
   main().catch(e => { console.error('\n' + e.message + '\n'); process.exit(1); });
 }
