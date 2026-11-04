@@ -29,6 +29,8 @@
  * Sources: assets/meditations/img, assets/virtues and assets/heroes (the app's
  * own gallery), plus Wikimedia Commons. Resized to 1200px:
  *   sips -s format jpeg -Z 1200 --setProperty formatOptions 70 <src> --out public/img/art/<name>
+ * and a 520px thumbnail for the Learn hub cards:
+ *   sips -s format jpeg -Z 520 --setProperty formatOptions 62 <art> --out public/img/art/thumb/<name>
  */
 
 // Artist, work and why, lifted from app/imagery.jsx so the two cannot drift.

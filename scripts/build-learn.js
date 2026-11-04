@@ -19,6 +19,21 @@ const fs = require('fs');
 const path = require('path');
 const { footerHtml } = require('./site-footer');
 const { navHtml, navCss, fontLinks, skipLink } = require('./site-nav');
+const { ART, BY_SLUG } = require('./site-artwork');
+
+// Each card shows the painting of the page it links to, so the hub reads as
+// what it is: thirty-odd pieces, each about something. Article pages take
+// theirs from site-artwork.js; the few non-article pages are assigned here.
+const HUB_ART = {
+  '/misattributed-stoic-quotes': 'evening-examination',
+  '/check-a-stoic-quote': 'the-astronomer',
+  '/stoic-quotes': 'philosopher-in-meditation',
+  '/stoics': 'school-of-athens',
+  '/library': 'saint-paul-writing',
+};
+const artKeyFor = href => HUB_ART[href] || BY_SLUG[href.replace(/^\//, '')];
+const thumb = key => key && ART[key] ? '/img/art/thumb/' + ART[key].file : null;
+const APP_STORE = 'https://apps.apple.com/app/id6789749038';
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';
@@ -151,17 +166,32 @@ function build() {
     }))),
   };
 
-  const sections = live.map(p =>
+  const appCard =
+    '<aside class="ln-appcard">' +
+    '<img src="/img/app-reading-phone.png" alt="The Marcus app showing a daily reading" width="180" height="367" loading="lazy" decoding="async">' +
+    '<div><p class="ln-appcard-label">Marcus for iPhone</p>' +
+    '<p class="ln-appcard-copy">Everything on this page, as a daily practice: one checked passage each morning, a morning intention, an evening review.</p>' +
+    '<a class="ln-nav-cta" href="' + APP_STORE + '">Download on the App Store</a></div></aside>';
+
+  const sections = live.map((p, si) =>
     '<section class="ln-section' + (p.key === 'start' ? ' ln-section-lead' : '') + '">' +
     '<h2 class="ln-section-title">' + esc(p.title) +
-    '<span class="ln-count">' + p.pages.length + '</span></h2>' +
+    '<span class="ln-count">' + p.pages.length + (p.pages.length === 1 ? ' piece' : ' pieces') + '</span></h2>' +
     '<p class="ln-section-intro">' + esc(p.intro) + '</p>' +
     '<div class="ln-list">' +
-    p.pages.map(x =>
-      '<a class="ln-item" href="' + esc(x.href) + '">' +
-      '<h3 class="ln-item-title">' + esc(x.title) + '</h3>' +
-      '<p class="ln-item-blurb">' + esc(x.blurb) + '</p></a>').join('') +
-    '</div></section>').join('');
+    p.pages.map(x => {
+      const t = thumb(artKeyFor(x.href));
+      return '<a class="ln-item" href="' + esc(x.href) + '">' +
+        (t ? '<img class="ln-item-img" src="' + t + '" alt="" loading="lazy" decoding="async">' : '') +
+        '<div class="ln-item-body"><h3 class="ln-item-title">' + esc(x.title) + '</h3>' +
+        '<p class="ln-item-blurb">' + esc(x.blurb) + '</p></div></a>';
+    }).join('') +
+    '</div></section>' + (si === 0 ? appCard : '')).join('');
+
+  const hero = ART['view-from-above'];
+  const heroArt = '<figure class="ln-art"><img src="/img/art/' + hero.file + '" alt="' +
+    esc([hero.artist, hero.work, hero.date].join(', ')) + '" fetchpriority="high" decoding="async">' +
+    '<figcaption>' + esc([hero.artist, hero.work, hero.date].join(', ')) + '</figcaption></figure>';
 
   const html = '<!doctype html><html lang="en"><head>' +
     '<meta charset="utf-8">' +
@@ -195,7 +225,7 @@ function build() {
     '<p class="ln-hero-copy">Not a summary of the philosophy. The exercises the Stoics ran on themselves daily, ' +
     'the people who wrote them down, and an honest account of which famous quotations are not theirs at all.</p>' +
     '</div></header>' +
-    '<main class="ln-main" id="main">' + sections +
+    '<main class="ln-main" id="main">' + heroArt + sections +
     '<section class="ln-app">' +
     '<img class="ln-app-skull" src="/skull-gold.png" alt="" width="64" height="64">' +
     '<p class="ln-app-copy">Marcus turns all of this into a daily practice for iOS: a morning preparation, ' +
@@ -230,29 +260,40 @@ img{max-width:100%;display:block}
 .ln-hero-copy{font-size:18px;color:rgba(232,228,220,.78);margin:0;max-width:62ch}
 .ln-main{max-width:760px;margin:0 auto;padding:48px 24px 8px}
 .ln-section{margin-bottom:60px}
-.ln-section-title{display:flex;align-items:baseline;justify-content:space-between;gap:14px;font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#c9a961;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid rgba(232,228,220,.09)}
+.ln-section-title{display:flex;align-items:center;justify-content:space-between;gap:14px;font-family:Cinzel,Georgia,serif;font-size:26px;font-weight:400;letter-spacing:.03em;color:#e8e4dc;margin:0 0 12px;padding-bottom:12px;border-bottom:1px solid rgba(201,169,97,.28)}
 .ln-section-intro{font-size:16px;color:rgba(232,228,220,.66);margin:0 0 28px;max-width:64ch}
 /* A grid, not one column. Thirty items in a single file is the wall; two
    abreast on a wide screen is a page you can scan. */
 .ln-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:8px}
-.ln-item{text-decoration:none;display:block;padding:18px 20px;border-radius:10px;border:1px solid transparent;background:rgba(232,228,220,.02);transition:background .15s,border-color .15s}
-.ln-item:hover{background:rgba(232,228,220,.05);border-color:rgba(232,228,220,.14)}
+.ln-item{text-decoration:none;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;border:1px solid rgba(201,169,97,.16);background:linear-gradient(180deg,rgba(201,169,97,.06),rgba(232,228,220,.02));transition:background .15s,border-color .15s,transform .15s}
+.ln-item:hover{border-color:rgba(201,169,97,.45);transform:translateY(-2px)}
+.ln-item-img{width:100%;height:150px;object-fit:cover;object-position:center 30%;display:block;background:#15120e}
+.ln-item-body{padding:16px 18px 18px}
 .ln-item:hover .ln-item-title{color:#c9a961}
 .ln-item-title{font-family:Cinzel,Georgia,serif;font-size:19px;font-weight:600;margin:0 0 6px;transition:color .15s;line-height:1.25}
 .ln-item-blurb{font-size:15px;color:rgba(232,228,220,.7);margin:0}
 /* The opening section carries the weight: full width, gold-tinted, larger. */
-.ln-section-lead .ln-list{grid-template-columns:1fr}
-.ln-section-lead .ln-item{background:rgba(201,169,97,.05);border-color:rgba(201,169,97,.2);padding:22px 24px}
+.ln-section-lead .ln-list{grid-template-columns:1fr;gap:14px}
+.ln-section-lead .ln-item{flex-direction:row;background:linear-gradient(100deg,rgba(201,169,97,.12),rgba(201,169,97,.03));border-color:rgba(201,169,97,.3)}
+.ln-section-lead .ln-item-img{width:220px;height:auto;min-height:150px;flex:0 0 auto}
+.ln-section-lead .ln-item-body{padding:22px 24px;align-self:center}
 .ln-section-lead .ln-item-title{font-size:24px}
 .ln-section-lead .ln-item-blurb{font-size:16px;max-width:70ch}
-.ln-count{font-family:Inter,system-ui,sans-serif;font-size:11px;letter-spacing:.12em;color:rgba(232,228,220,.38);font-weight:400}
-@media (max-width:640px){.ln-list{grid-template-columns:1fr;gap:6px}.ln-item{padding:16px 18px}}
+.ln-count{font-family:Inter,system-ui,sans-serif;font-size:12px;letter-spacing:.06em;color:#c9a961;font-weight:500;border:1px solid rgba(201,169,97,.35);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.ln-art{margin:0 0 48px;border-radius:14px;overflow:hidden;background:rgba(232,228,220,.03)}
+.ln-art img{width:100%;height:auto;max-height:420px;object-fit:cover;display:block}
+.ln-art figcaption{font-size:12.5px;color:rgba(232,228,220,.5);padding:10px 14px}
+.ln-appcard{display:flex;gap:24px;align-items:center;margin:-20px 0 60px;padding:22px 24px;border-radius:16px;border:1px solid rgba(201,169,97,.28);background:radial-gradient(120% 140% at 0% 0%,rgba(120,88,46,.35),rgba(20,15,10,.6) 60%,rgba(13,13,15,.9))}
+.ln-appcard img{width:120px;height:auto;flex:0 0 auto;filter:drop-shadow(0 12px 24px rgba(0,0,0,.6))}
+.ln-appcard-label{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#c9a961;margin:0 0 8px}
+.ln-appcard-copy{font-size:16px;line-height:1.5;color:#e8e4dc;margin:0 0 16px}
+.ln-appcard .ln-nav-cta{display:inline-block}
+@media (max-width:640px){.ln-list{grid-template-columns:1fr;gap:12px}.ln-section-lead .ln-item{flex-direction:column}.ln-section-lead .ln-item-img{width:100%;height:160px;min-height:0}.ln-appcard{gap:16px;padding:18px}.ln-appcard img{width:88px}.ln-section-title{font-size:21px}}
 .ln-app{text-align:center;margin:40px 0 0;padding:44px 24px;border-top:1px solid rgba(232,228,220,.09)}
 .ln-app-skull{width:56px;height:56px;object-fit:contain;margin:0 auto 16px;opacity:.9}
 .ln-app-copy{font-size:16px;color:rgba(232,228,220,.78);max-width:54ch;margin:0 auto 20px}
 .ln-footer{text-align:center;padding:32px 24px 48px;font-size:13px;color:rgba(232,228,220,.45)}
 .ln-footer a{color:rgba(232,228,220,.7)}
-@media (max-width:640px){.ln-item{margin:0;padding:16px 0}}
 
 /* Shared chrome last: these override the builder's own nav rules, and a
    mobile menu that cannot hide is worse than no mobile menu. */
