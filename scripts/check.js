@@ -723,6 +723,26 @@ function noKnownParaphrases() {
   return fail;
 }
 
+// A citation prints as "work section", so a section that repeats the work
+// reads "Letters to Lucilius Letters 26.10". Worse, a section naming a
+// different work than the work field cites the wrong book, which is how one
+// passage from On Tranquillity of Mind came to be labelled Letters to Lucilius.
+function corpusCitations() {
+  const src = read('constants/stoicQuotes.js').replace(/export\s+(const|function)/g, '$1');
+  const m = {};
+  new Function('m', src + ';m.q=STOIC_QUOTES')(m);
+  const WORKS = ['Letters', 'Letter', 'Discourses', 'Enchiridion', 'Meditations', 'Apology', 'Crito', 'On Tranquillity',
+    'On Anger', 'On Providence', 'On the Shortness', 'Nicomachean', 'Tusculan', 'Essays', 'Analects', 'Tao Te Ching',
+    'Bhagavad Gita', 'Dhammapada', 'Consolation', 'Politics', 'On Friendship', 'On Duties'];
+  const fail = [];
+  for (const q of m.q) {
+    const s = String(q.source || '');
+    const w = WORKS.find(x => s.startsWith(x + ' '));
+    if (w) fail.push(`constants/stoicQuotes.js ${q.id}: source "${s}" starts with a work name; the work belongs in work ("${q.work}")`);
+  }
+  return fail;
+}
+
 function quoteChecker() {
   const fail = [];
   const { CLIENT, loadModule, SLUG } = require(path.join(ROOT, 'scripts', 'build-quote-checker.js'));
@@ -2422,6 +2442,7 @@ const CHECKS = [
   ['no duplicate passages in the reading corpus', corpusDuplicates],
   ['the themed quote pages are sourced and distinct', themePages],
   ['the quote checker returns the right verdict', quoteChecker],
+  ['reading-corpus citations name one work, once', corpusCitations],
   ['the widget and the app share one App Group and one quote', widgetSetup],
   ['app screens and the homepage quote translators, not paraphrases', noKnownParaphrases],
   ['every misattribution article is linked from the list', articleEntries],

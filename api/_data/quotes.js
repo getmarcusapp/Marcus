@@ -233,7 +233,7 @@ export const DATA = {
    "quote": "Of things, some are in our power and others not. In our power are opinion, pursuit, desire, aversion, and, in one word, whatever are our own actions. Not in our power are body, property, reputation, command, and, in one word, whatever are not our own actions.",
    "author": "Epictetus",
    "work": "Enchiridion",
-   "section": "Enchiridion 1",
+   "section": "1",
    "themes": [
     "control",
     "dichotomy"
@@ -248,7 +248,7 @@ export const DATA = {
    "quote": "It is not events that disturb people, it is their judgements concerning them.",
    "author": "Epictetus",
    "work": "Enchiridion",
-   "section": "Enchiridion 5",
+   "section": "5",
    "themes": [
     "perception",
     "control"
@@ -278,7 +278,7 @@ export const DATA = {
    "quote": "On no occasion call yourself a philosopher, and do not, for the most part, talk among laymen about your philosophic principles, but do what follows from your principles.",
    "author": "Epictetus",
    "work": "Enchiridion",
-   "section": "Enchiridion 46",
+   "section": "46",
    "themes": [
     "action",
     "humility"
@@ -354,7 +354,7 @@ export const DATA = {
    "quote": "He is free who lives as he wills, who is subject neither to compulsion, nor hindrance, nor force, whose choices are unhampered, whose desires attain their end, whose aversions do not fall into what they would avoid.",
    "author": "Epictetus",
    "work": "Discourses",
-   "section": "Discourses IV.1",
+   "section": "IV.1",
    "themes": [
     "freedom",
     "discipline"
@@ -369,7 +369,7 @@ export const DATA = {
    "quote": "I must die. If forthwith, I die; and if a little later, I will take lunch now, since the hour for lunch has come, and afterwards I will die at the appointed time.",
    "author": "Epictetus",
    "work": "Discourses",
-   "section": "Discourses I.1",
+   "section": "I.1",
    "themes": [
     "mortality",
     "equanimity"
@@ -384,7 +384,7 @@ export const DATA = {
    "quote": "Everything has two handles: one by which it may be borne, another by which it cannot.",
    "author": "Epictetus",
    "work": "Enchiridion",
-   "section": "Enchiridion 43",
+   "section": "43",
    "themes": [
     "perception",
     "forgiveness"
@@ -399,7 +399,7 @@ export const DATA = {
    "quote": "There are more things, Lucilius, likely to frighten us than there are to crush us; we suffer more often in imagination than in reality.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 13.4",
+   "section": "13.4",
    "themes": [
     "anxiety",
     "perception"
@@ -414,7 +414,7 @@ export const DATA = {
    "quote": "Nothing is ours, except time. We were entrusted by nature with the ownership of this single thing, so fleeting and slippery that anyone who will can oust us from possession.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letter 1",
+   "section": "1",
    "themes": [
     "time",
     "mortality"
@@ -429,7 +429,7 @@ export const DATA = {
    "quote": "Set yourself free for your own sake; gather and save your time, which till lately has been forced from you, or filched away, or has merely slipped from your hands.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letter 1",
+   "section": "1",
    "themes": [
     "time",
     "discipline"
@@ -444,7 +444,7 @@ export const DATA = {
    "quote": "We do not have a very short time assigned to us, but we lose a great deal of it: life is long enough to carry out the most important projects: we have an ample portion, if we do but arrange the whole of it aright",
    "author": "Seneca",
    "work": "On the Shortness of Life",
-   "section": "On the Shortness of Life 1.3",
+   "section": "1.3",
    "themes": [
     "time",
     "discipline"
@@ -458,8 +458,8 @@ export const DATA = {
    "id": "seneca-letter-47-fortune",
    "quote": "He who fears death will never act as becomes a living man.",
    "author": "Seneca",
-   "work": "Letters to Lucilius",
-   "section": "On Tranquillity of Mind 11.6",
+   "work": "On Tranquillity of Mind",
+   "section": "11.6",
    "themes": [
     "mortality",
     "fear"
@@ -473,7 +473,7 @@ export const DATA = {
    "quote": "Everywhere means nowhere. When a person spends all his time in foreign travel, he ends by having many acquaintances, but no friends.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 2.2",
+   "section": "2.2",
    "themes": [
     "focus",
     "depth"
@@ -487,8 +487,8 @@ export const DATA = {
    "id": "seneca-on-anger-3-36-self-examination",
    "quote": "I shall keep watching myself continually, and—a most useful habit—shall review each day. For this is what makes us wicked: that no one of us looks back over his own life.",
    "author": "Seneca",
-   "work": "On Anger",
-   "section": "Letters 83.2",
+   "work": "Letters to Lucilius",
+   "section": "83.2",
    "themes": [
     "self-examination",
     "evening"
@@ -503,7 +503,7 @@ export const DATA = {
    "quote": "Therefore, let us so order our minds as if we had come to the very end. Let us postpone nothing. Let us balance life’s account every day.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 101.7",
+   "section": "101.7",
    "themes": [
     "mortality",
     "evening"
@@ -518,7 +518,7 @@ export const DATA = {
    "quote": "“Think on death.” In saying this, he bids us think on freedom. He who has learned to die has unlearned slavery; he is above any external power, or, at any rate, he is beyond it.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 26.10",
+   "section": "26.10",
    "themes": [
     "mortality",
     "memento mori"
@@ -589,7 +589,7 @@ export const DATA = {
    "quote": "For to fear death, my friends, is only to think ourselves wise, without being wise: for it is to think that we know what we do not know.",
    "author": "Socrates",
    "work": "Plato's Apology",
-   "section": "Apology 29a",
+   "section": "29a",
    "themes": [
     "mortality",
     "humility"
@@ -618,7 +618,7 @@ export const DATA = {
    "quote": "Virtue, then, is a state of character concerned with choice, lying in a mean, i.e. the mean relative to us, this being determined by a rational principle, and by that principle by which the man of practical wisdom would determine it.",
    "author": "Aristotle",
    "work": "Nicomachean Ethics",
-   "section": "Nicomachean Ethics II.6 (1106b36)",
+   "section": "II.6 (1106b36)",
    "themes": [
     "virtue",
     "mean"
@@ -647,7 +647,7 @@ export const DATA = {
    "quote": "As a field, although it may be naturally fruitful, cannot produce a crop without dressing, so neither can the mind without education; such is the weakness of either without the other.",
    "author": "Cicero",
    "work": "Tusculan Disputations",
-   "section": "Tusculan Disputations II.5 (II.13)",
+   "section": "II.5 (II.13)",
    "themes": [
     "learning",
     "discipline"
@@ -721,7 +721,7 @@ export const DATA = {
    "quote": "The most manifest sign of wisdom is a continual cheerfulness; her state is like that of things in the regions above the moon, always clear and serene.",
    "author": "Montaigne",
    "work": "Essays",
-   "section": "Essays I.26 \"Of the education of children\" (Cotton I.25)",
+   "section": "I.26 \"Of the education of children\" (Cotton I.25)",
    "themes": [
     "equanimity",
     "character"
@@ -781,7 +781,7 @@ export const DATA = {
    "quote": "The tree which fills the arms grew from the tiniest sprout; the tower of nine storeys rose from a (small) heap of earth; the journey of a thousand li commenced with a single step.",
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
-   "section": "Tao Te Ching 64",
+   "section": "64",
    "themes": [
     "action",
     "beginning"
@@ -810,7 +810,7 @@ export const DATA = {
    "quote": "When you know a thing, to hold that you know it; and when you do not know a thing, to allow that you do not know it;-- this is knowledge.",
    "author": "Confucius",
    "work": "Analects",
-   "section": "Analects 2.17",
+   "section": "2.17",
    "themes": [
     "humility",
     "self-knowledge"
@@ -1075,7 +1075,7 @@ export const DATA = {
    "quote": "Remember that you must behave as at a banquet. Is anything brought round to you? Put out your hand and take a moderate share. Does it pass by you? Do not stop it. Is it not yet come? Do not yearn in desire toward it, but wait till it reaches you.",
    "author": "Epictetus",
    "work": "Enchiridion",
-   "section": "Enchiridion 15",
+   "section": "15",
    "themes": [
     "acceptance",
     "desire"
@@ -1089,7 +1089,7 @@ export const DATA = {
    "quote": "Remember that you are an actor in a drama, of such a kind as the author pleases to make it. If short, of a short one; if long, of a long one. If it be his pleasure you should act a poor man, a cripple, a governor, or a private person, see that you act it naturally.",
    "author": "Epictetus",
    "work": "Enchiridion",
-   "section": "Enchiridion 17",
+   "section": "17",
    "themes": [
     "acceptance",
     "role"
@@ -1119,7 +1119,7 @@ export const DATA = {
    "quote": "Is the child or wife of another dead? There is no one who would not say, “This is a human accident.” But if any one’s own child happens to die, it is presently, “Alas! how wretched am I?” But it should be remembered how we are affected in hearing the same thing concerning others.",
    "author": "Epictetus",
    "work": "Enchiridion",
-   "section": "Enchiridion 26",
+   "section": "26",
    "themes": [
     "equanimity",
     "perception"
@@ -1164,7 +1164,7 @@ export const DATA = {
    "quote": "Whatever rules you have adopted, abide by them as laws, and as if you would be impious to transgress them; and do not regard what anyone says of you, for this, after all, is no concern of yours.",
    "author": "Epictetus",
    "work": "Enchiridion",
-   "section": "Enchiridion 50",
+   "section": "50",
    "themes": [
     "discipline",
     "integrity"
@@ -1179,7 +1179,7 @@ export const DATA = {
    "quote": "“Cease to hope,” he says, “and you will cease to fear.” … But the chief cause of both these ills is that we do not adapt ourselves to the present, but send our thoughts a long way ahead.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 5.7-8",
+   "section": "5.7-8",
    "themes": [
     "anxiety",
     "present"
@@ -1194,7 +1194,7 @@ export const DATA = {
    "quote": "I have begun to be a friend to myself.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letter 6",
+   "section": "6",
    "themes": [
     "self-knowledge",
     "friendship"
@@ -1208,7 +1208,7 @@ export const DATA = {
    "quote": "It is not the man who has too little, but the man who craves more, that is poor.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 2.6",
+   "section": "2.6",
    "themes": [
     "contentment",
     "wealth"
@@ -1222,7 +1222,7 @@ export const DATA = {
    "quote": "What profit is there in crossing the sea and in going from one city to another? If you would escape your troubles, you need not another place but another personality.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 104.8",
+   "section": "104.8",
    "themes": [
     "inner life",
     "change"
@@ -1237,7 +1237,7 @@ export const DATA = {
    "quote": "Pain is slight if opinion has added nothing to it; but if, on the other hand, you begin to encourage yourself and say, “It is nothing,—a trifling matter at most; keep a stout heart and it will soon cease”; then in thinking it slight, you will make it slight.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 78.13",
+   "section": "78.13",
    "themes": [
     "suffering",
     "perception"
@@ -1252,7 +1252,7 @@ export const DATA = {
    "quote": "And yet life, Lucilius, is really a battle.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 96.5",
+   "section": "96.5",
    "themes": [
     "discipline",
     "duty"
@@ -1280,7 +1280,7 @@ export const DATA = {
    "quote": "Fire tries gold, misfortune tries brave men.",
    "author": "Seneca",
    "work": "On Providence",
-   "section": "On Providence 5.10",
+   "section": "5.10",
    "themes": [
     "resilience",
     "adversity"
@@ -1294,7 +1294,7 @@ export const DATA = {
    "quote": "There are more things, Lucilius, likely to frighten us than there are to crush us; we suffer more often in imagination than in reality.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letter 13",
+   "section": "13",
    "themes": [
     "anxiety",
     "fear"
@@ -1309,7 +1309,7 @@ export const DATA = {
    "quote": "When a man does not know what harbour he is making for, no wind is the right wind.",
    "author": "Seneca",
    "work": "Letters to Lucilius",
-   "section": "Letters 71.3",
+   "section": "71.3",
    "themes": [
     "purpose",
     "direction"
@@ -1323,7 +1323,7 @@ export const DATA = {
    "quote": "For it is the peculiar characteristic of folly to perceive the vices of others, but to forget its own.",
    "author": "Cicero",
    "work": "Tusculan Disputations",
-   "section": "Tusculan Disputations III.30 (III.73)",
+   "section": "III.30 (III.73)",
    "themes": [
     "self-knowledge",
     "humility"
@@ -1338,7 +1338,7 @@ export const DATA = {
    "quote": "Such friendship enhances prosperity, and relieves adversity of its burden by halving and sharing it.",
    "author": "Cicero",
    "work": "On Friendship",
-   "section": "On Friendship 22 (ch. 6); first sentence from 86 (ch. 23)",
+   "section": "22 (ch. 6); first sentence from 86 (ch. 23)",
    "themes": [
     "friendship",
     "community"
@@ -1352,7 +1352,7 @@ export const DATA = {
    "quote": "Any one can get angry—that is easy—or give or spend money; but to do this to the right person, to the right extent, at the right time, with the right motive, and in the right way, that is not for every one, nor is it easy.",
    "author": "Aristotle",
    "work": "Nicomachean Ethics",
-   "section": "Nicomachean Ethics II.9 (1109a27)",
+   "section": "II.9 (1109a27)",
    "themes": [
     "anger",
     "discernment"
@@ -1367,7 +1367,7 @@ export const DATA = {
    "quote": "For well is it said, no one knows how to command who has not himself been under command of another.",
    "author": "Aristotle",
    "work": "Politics",
-   "section": "Politics III.4 (1277b)",
+   "section": "III.4 (1277b)",
    "themes": [
     "humility",
     "leadership"
@@ -1382,7 +1382,7 @@ export const DATA = {
    "quote": "Pleasure completes the activity not as the corresponding permanent state does, by its immanence, but as an end which supervenes as the bloom of youth does on those in the flower of their age.",
    "author": "Aristotle",
    "work": "Nicomachean Ethics",
-   "section": "Nicomachean Ethics X.4 (1174b23-33)",
+   "section": "X.4 (1174b23-33)",
    "themes": [
     "work",
     "excellence"
@@ -1410,7 +1410,7 @@ export const DATA = {
    "quote": "Now consider whether we still hold to the belief, that we should set the highest value, not on living, but on living well?",
    "author": "Socrates",
    "work": "Plato's Crito",
-   "section": "Crito 48b",
+   "section": "48b",
    "themes": [
     "integrity",
     "right living"
@@ -1425,7 +1425,7 @@ export const DATA = {
    "quote": "You have given yourself over to Fortune's rule, and you must bow yourself to your mistress's ways.",
    "author": "Boethius",
    "work": "The Consolation of Philosophy",
-   "section": "Consolation of Philosophy II, prose 1",
+   "section": "II, prose 1",
    "themes": [
     "fortune",
     "acceptance"
@@ -1440,7 +1440,7 @@ export const DATA = {
    "quote": "For in other living creatures the ignorance of themselves is nature, but in men it is vice.",
    "author": "Boethius",
    "work": "The Consolation of Philosophy",
-   "section": "Consolation of Philosophy II, prose 5",
+   "section": "II, prose 5",
    "themes": [
     "self-knowledge",
     "humanity"
@@ -1454,7 +1454,7 @@ export const DATA = {
    "quote": "‘Tis my opinion that a man should lend himself to others, and only give himself to himself.",
    "author": "Montaigne",
    "work": "Essays",
-   "section": "Essays III.10 \"Of managing the will\"",
+   "section": "III.10 \"Of managing the will\"",
    "themes": [
     "inner life",
     "boundaries"
@@ -1469,7 +1469,7 @@ export const DATA = {
    "quote": "The greatest thing in the world is for a man to know that he is his own.",
    "author": "Montaigne",
    "work": "Essays",
-   "section": "Essays I.39 \"Of solitude\" (Cotton I.38)",
+   "section": "I.39 \"Of solitude\" (Cotton I.38)",
    "themes": [
     "self-mastery",
     "inner life"
@@ -1484,7 +1484,7 @@ export const DATA = {
    "quote": "That to study philosophy is to learn to die.",
    "author": "Montaigne",
    "work": "Essays",
-   "section": "Essays I.20 (Cotton I.19), chapter title",
+   "section": "I.20 (Cotton I.19), chapter title",
    "themes": [
     "mortality",
     "memento mori"
@@ -1499,7 +1499,7 @@ export const DATA = {
    "quote": "I do believe, that no so absurd or ridiculous fancy can enter into human imagination, that does not meet with some example of public practice, and that, consequently, our reason does not ground and back up.",
    "author": "Montaigne",
    "work": "Essays",
-   "section": "Essays I.23 \"Of custom\" (Cotton I.22)",
+   "section": "I.23 \"Of custom\" (Cotton I.22)",
    "themes": [
     "judgment",
     "conformity"
@@ -1643,27 +1643,13 @@ export const DATA = {
    "quote": "Man at his birth is supple and weak; at his death, firm and strong.",
    "author": "Lao Tzu",
    "work": "Tao Te Ching",
-   "section": "Tao Te Ching 76",
+   "section": "76",
    "themes": [
     "flexibility",
     "life"
    ],
    "virtues": [
     "moderation",
-    "wisdom"
-   ]
-  },
-  {
-   "id": "confucius-analects-rectify",
-   "quote": "When you know a thing, to hold that you know it; and when you do not know a thing, to allow that you do not know it — this is knowledge.",
-   "author": "Confucius",
-   "work": "Analects",
-   "section": "2.17",
-   "themes": [
-    "humility",
-    "knowledge"
-   ],
-   "virtues": [
     "wisdom"
    ]
   },
@@ -1686,7 +1672,7 @@ export const DATA = {
    "quote": "When we see men of worth, we should think of equalling them; when we see men of a contrary character, we should turn inwards and examine ourselves.",
    "author": "Confucius",
    "work": "Analects",
-   "section": "Analects 4.17",
+   "section": "4.17",
    "themes": [
     "self-examination",
     "character"
@@ -1847,7 +1833,7 @@ export const DATA = {
    "quote": "Finally, this is better, that one do His own task as he may, even though he fail, Than take tasks not his own, though they seem good.",
    "author": "Bhagavad Gita",
    "work": "Bhagavad Gita",
-   "section": "Bhagavad Gita 3.35",
+   "section": "3.35",
    "themes": [
     "duty",
     "authenticity"
@@ -1862,7 +1848,7 @@ export const DATA = {
    "quote": "Let each man raise The Self by Soul, not trample down his Self, Since Soul that is Self's friend may grow Self's foe.",
    "author": "Bhagavad Gita",
    "work": "Bhagavad Gita",
-   "section": "Bhagavad Gita 6.5-6.6",
+   "section": "6.5-6.6",
    "themes": [
     "self-mastery",
     "discipline"
@@ -1877,7 +1863,7 @@ export const DATA = {
    "quote": "Bringing thee heat and cold, sorrows and joys, 'Tis brief and mutable! Bear with it, Prince! As the wise bear.",
    "author": "Bhagavad Gita",
    "work": "Bhagavad Gita",
-   "section": "Bhagavad Gita 2.14",
+   "section": "2.14",
    "themes": [
     "impermanence",
     "endurance"
@@ -1892,7 +1878,7 @@ export const DATA = {
    "quote": "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts.",
    "author": "Buddha",
    "work": "Dhammapada",
-   "section": "Dhammapada 1",
+   "section": "1",
    "themes": [
     "thought",
     "character"
@@ -1906,7 +1892,7 @@ export const DATA = {
    "quote": "Not the perversities of others, not their sins of commission or omission, but his own misdeeds and negligences should a sage take notice of.",
    "author": "Buddha",
    "work": "Dhammapada",
-   "section": "Dhammapada 50",
+   "section": "50",
    "themes": [
     "self-examination",
     "humility"
@@ -1951,7 +1937,7 @@ export const DATA = {
    "quote": "Well-makers lead the water (wherever they like); fletchers bend the arrow; carpenters bend a log of wood; wise people fashion themselves.",
    "author": "Buddha",
    "work": "Dhammapada",
-   "section": "Dhammapada 80",
+   "section": "80",
    "themes": [
     "self-mastery",
     "discipline"
