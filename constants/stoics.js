@@ -48,6 +48,16 @@ export const STOICS = [
     summary: 'A shipwrecked merchant who founded a school on a public porch.',
     life: "Zeno came to Athens from Citium in Cyprus, a merchant of Phoenician descent, and lost his cargo at sea. The story he told afterwards was that the shipwreck was the making of him. Adrift in a strange city, he wandered into a bookseller's, read an account of Socrates, and asked where such men were to be found. The bookseller pointed at Crates the Cynic walking past.\n\nHe taught in the Stoa Poikile, the painted porch on the edge of the Athenian agora, and the school took its name from the building rather than the man. Everything he wrote is lost, including a Republic that scandalized later Stoics. What survives is the shape of the thing: that virtue alone is good, that externals are indifferent, and that a life goes well when it is lived in agreement with nature.",
     teaching: 'Virtue is the only good. Everything else, health, wealth, reputation, is material the good life is built from, not the thing itself.',
+    question: {
+      q: 'Who founded Stoicism?',
+      a: "Zeno of Citium, in Athens, around 300 BC. He taught in the Stoa Poikile, the painted porch on the edge of the agora, and the school took its name from the building: his followers, at first called Zenonians, became known as men of the Stoa, or Stoics.",
+    },
+    // Reported sayings, not writings: everything Zeno wrote is lost.
+    wordsTitle: 'In the ancient sources',
+    words: [
+      { text: '“I made a prosperous voyage when I suffered shipwreck.”', source: 'Zeno, as reported by Diogenes Laertius, Lives VII.4, trans. R. D. Hicks (1925)' },
+      { text: '“The reason why we have two ears and only one mouth is that we may listen the more and talk the less.”', source: 'Zeno, as reported by Diogenes Laertius, Lives VII.23, trans. R. D. Hicks (1925)' },
+    ],
     works: ['Republic (lost)', 'On Human Nature (lost)'],
     forWhom: 'Anyone who wants to know where the whole thing started, and on what.',
     bookIds: ['sellars-stoicism', 'hadot-philosophy-as-way-of-life'],
@@ -62,10 +72,18 @@ export const STOICS = [
     role: 'Second head of the Stoa',
     dates: 'c. 330–230 BC',
     summary: 'A boxer who carried water by night so he could study by day.',
-    life: "Cleanthes of Assos arrived in Athens with almost nothing, having been a boxer, and paid for his education by hauling water in the dark hours. His contemporaries thought him slow. He was, by his own account, a vessel that took a long time to fill and then held what it was given.\n\nHe led the school for over thirty years after Zeno's death and pushed Stoic thought toward its physics and its theology. His Hymn to Zeus is the longest continuous piece of early Stoic writing to survive, and it reads less like doctrine than like prayer. At around ninety he stopped eating, and having started, declined to start again.",
+    life: "Cleanthes of Assos arrived in Athens with almost nothing, having been a boxer, and paid for his education by hauling water in the dark hours. His contemporaries thought him slow. Zeno compared him to hard wax tablets, difficult to write on but keeping whatever is written on them.\n\nHe led the school for over thirty years after Zeno's death and pushed Stoic thought toward its physics and its theology. His Hymn to Zeus is the longest continuous piece of early Stoic writing to survive, and it reads less like doctrine than like prayer. At around ninety he stopped eating, and having started, declined to start again.",
     teaching: 'The order you find in the world is not indifferent to you. Living well means falling into step with it rather than dragging against it.',
+    question: {
+      q: 'What is Cleanthes known for?',
+      a: "For the Hymn to Zeus, the longest piece of early Stoic writing to survive whole, and for the short prayer Epictetus quoted at the very end of his handbook. And for his devotion: he drew water in gardens by night so he could study by day, which earned him the nickname Phreantles, the Well-lifter.",
+    },
+    words: [
+      { text: 'Nought is done that is done without Thee in the earth or the waters\nOr in the heights of heaven, save the deed of the fool and the sinner.', source: 'Cleanthes, Hymn to Zeus, trans. in Hastings Crossley, The Golden Sayings of Epictetus (1903)' },
+      { text: 'Lead me, O Zeus, and thou O Destiny,\nThe way that I am bid by you to go:\nTo follow I am ready. If I choose not,\nI make myself a wretch, and still must follow.', source: 'Cleanthes, quoted by Epictetus at the end of the Enchiridion, trans. George Long' },
+    ],
     works: ['Hymn to Zeus', 'On Pleasure (lost)'],
-    forWhom: 'Anyone who suspects they are the slow vessel, and wants the argument for persisting anyway.',
+    forWhom: 'Anyone who suspects they are a slow learner, and wants the argument for persisting anyway.',
     bookIds: ['sellars-stoicism'],
     image: null,
     imageNote: 'No securely identified likeness survives.',
@@ -80,6 +98,16 @@ export const STOICS = [
     summary: 'The logician who turned a set of convictions into a system.',
     life: "Chrysippus of Soli took over a school that was losing arguments and rebuilt its foundations. He is credited with something in the region of seven hundred books, and with a logic so far ahead of its moment that it was not properly understood again for two thousand years. The ancient verdict was blunt: if there had been no Chrysippus, there would have been no Stoa.\n\nEvery one of those books is lost. What we have is quotation, mostly by opponents, which means the most rigorous Stoic reaches us through people arguing with him. Diogenes Laertius reports that he died laughing at his own joke about a donkey eating figs, which may say more about ancient biography than about Chrysippus.",
     teaching: 'Feelings are not weather. They follow from judgments you have made, which means they can be examined, and corrected.',
+    question: {
+      q: 'Why does Chrysippus matter?',
+      a: "Because he made Stoicism a system. He rebuilt its logic, its physics and its ethics so thoroughly that later Stoics argued from his books, not Zeno's. Almost all of his writing is lost; what survives comes to us in quotations and summaries by others, including his critics.",
+    },
+    // Said of him, not by him.
+    wordsTitle: 'What the ancients said of him',
+    words: [
+      { text: '“But for Chrysippus, there had been no Porch.”', source: 'A line applied to him, in Diogenes Laertius, Lives VII.183, trans. R. D. Hicks (1925)' },
+      { text: 'So renowned was he for dialectic that most people thought, if the gods took to dialectic, they would adopt no other system than that of Chrysippus.', source: 'Diogenes Laertius, Lives VII.180, trans. R. D. Hicks (1925)' },
+    ],
     works: ['On Passions (lost)', 'Logical Investigations (fragments)'],
     forWhom: 'Anyone who wants the argument underneath the advice.',
     bookIds: ['sellars-stoicism', 'hadot-philosophy-as-way-of-life'],

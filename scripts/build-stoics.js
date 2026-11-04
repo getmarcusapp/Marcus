@@ -203,6 +203,19 @@ function figurePage(fig, prev, next, books, bookshopUrl, amazonUrl) {
     jobTitle: fig.role,
   };
 
+  // `question` answers what people search about this figure, in the words they
+  // search it. `words` are real passages with a translator and a section
+  // number, rendered as quotations, unlike `teaching`, which is a paraphrase.
+  const questionHtml = fig.question
+    ? '<section class="st-block"><h2>' + esc(fig.question.q) + '</h2>' + paragraphs(fig.question.a) + '</section>'
+    : '';
+  const wordsHtml = (fig.words || []).length
+    ? '<section class="st-block"><h2>' + esc(fig.wordsTitle || 'In his own words') + '</h2>' +
+      fig.words.map(w => '<blockquote class="st-q">' +
+        w.text.split('\n').map(l => '<span>' + esc(l) + '</span>').join('') +
+        '<cite>' + esc(w.source) + '</cite></blockquote>').join('') + '</section>'
+    : '';
+
   const worksHtml = (fig.works || []).length
     ? '<section class="st-block"><h2>Works</h2><ul class="st-works">' +
       fig.works.map(w => '<li>' + esc(w) + '</li>').join('') + '</ul></section>'
@@ -251,10 +264,12 @@ function figurePage(fig, prev, next, books, bookshopUrl, amazonUrl) {
     // constants/stoics.js instructs that it always appear under the image.
     (WEB_PORTRAITS ? '<p class="st-imagenote">' + esc(fig.imageNote) + '</p>' + creditHtml : '') +
     '<section class="st-block st-lead">' + paragraphs(fig.life) + '</section>' +
+    questionHtml +
     // Never rendered with quote marks or an attribution dash: it is a plain
     // statement of the idea, not the figure's words.
     '<section class="st-block"><h2>What he taught</h2>' +
     '<p class="st-teaching">' + esc(fig.teaching) + '</p></section>' +
+    wordsHtml +
     worksHtml +
     '<section class="st-block"><h2>Who it is for</h2><p>' + esc(fig.forWhom) + '</p></section>' +
     booksHtml +
@@ -416,6 +431,9 @@ img{max-width:100%;display:block}
 .st-block p{font-size:17px;color:rgba(232,228,220,.84);margin:0 0 16px;max-width:66ch}
 .st-lead p{font-size:17.5px}
 .st-teaching{font-style:italic;color:#e8e4dc !important;border-left:2px solid #c9a961;padding-left:18px}
+.st-q{margin:0 0 22px;padding:0 0 0 20px;border-left:2px solid #c9a961}
+.st-q span{display:block;font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;font-style:italic;font-size:19px;line-height:1.55;color:#e8e4dc}
+.st-q cite{display:block;margin-top:8px;font-style:normal;font-size:13px;letter-spacing:.04em;color:rgba(232,228,220,.55)}
 .st-works{margin:0;padding-left:20px;color:rgba(232,228,220,.8)}
 .st-works li{margin-bottom:6px}
 .st-book{display:flex;gap:18px;padding:20px 0;border-bottom:1px solid rgba(232,228,220,.07)}
