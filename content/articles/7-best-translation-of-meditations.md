@@ -33,6 +33,12 @@ Read on if you want to know what you are trading away, because Hays does trade s
 | C. R. Haines | Loeb Classical Library, 1916, free | Literal, Greek on the facing page | Checking the Greek |
 | Meric Casaubon | 1634, free | Seventeenth-century English | Curiosity |
 
+![Hays, Modern Library](/img/covers/meditations-hays.jpg)
+![Hard, Oxford World's Classics](/img/covers/meditations-hard.jpg)
+![Hammond, Penguin Classics](/img/covers/meditations-hammond.jpg)
+![Waterfield, Basic Books](/img/covers/meditations-waterfield.jpg)
+![Staniforth, Penguin Classics (1964)](/img/covers/meditations-staniforth.jpg)
+
 ## The free version, and why it reads oddly
 
 Almost every free ebook of the *Meditations* is **George Long's 1862 translation**, because it is long out of copyright. It is a serious piece of Victorian scholarship and it is the reason many people believe Marcus wrote like a bishop.
@@ -65,29 +71,41 @@ We have left out Hard, Hammond and Waterfield here, not because they are worse b
 
 ## The main modern options
 
-**Gregory Hays** (Modern Library, 2002) — *the recommendation.*
+### Gregory Hays: The recommendation
+
+*Modern Library, 2002*
 
 Hays writes as though Marcus were talking, because he was. Short lines, contemporary English, no ornament. "The impediment to action advances action. What stands in the way becomes the way" is his, and its afterlife tells you something about how well it works.
 
 The trade: Hays takes liberties. He compresses, he breaks paragraphs where the Greek does not, and he occasionally sacrifices literal accuracy for force. Scholars have reservations. For a reader who wants the book to change how they act on a Tuesday, those reservations do not much matter. His introduction is also the best short essay on Marcus you can get for the price of the book.
 
-**Robin Hard** (Oxford World's Classics, 2011) — *the best balance.*
+### Robin Hard: The best balance
+
+*Oxford World's Classics, 2011*
 
 More faithful than Hays, more readable than Long, and the Oxford notes are genuinely useful when Marcus refers to something you do not know. If you want one edition to keep and reread, this is a strong case. Hard also translated the Epictetus we recommend, so the two sit well together.
 
-**Martin Hammond** (Penguin Classics, 2006) — *the scholarly middle.*
+### Martin Hammond: The scholarly middle
+
+*Penguin Classics, 2006*
 
 Careful, well annotated, slightly cooler on the page than Hays. Excellent if you want precision without archaism.
 
-**Robin Waterfield** (Basic Books, 2021) — *the newest.*
+### Robin Waterfield: The newest
+
+*Basic Books, 2021*
 
 A fine modern translation with substantial commentary, and Waterfield is a very experienced hand with Greek philosophy. Worth considering if you like heavy apparatus.
 
-**Maxwell Staniforth** (Penguin Classics, 1964) — *the old Penguin.*
+### Maxwell Staniforth: The old Penguin
+
+*Penguin Classics, 1964*
 
 For four decades this was the edition most English readers met, until Penguin replaced it with Hammond's. It is readable and still turns up everywhere secondhand. If you already own it, there is no need to replace it; if you are buying new, the modern options above are better value.
 
-**C. Scot Hicks and David V. Hicks** (*The Emperor's Handbook*, Scribner, 2002) — *the loosest.*
+### C. Scot Hicks and David V. Hicks: The loosest
+
+*The Emperor's Handbook* (Scribner, 2002)
 
 A deliberately free, conversational rendering, closer to paraphrase than the others. Some readers who bounced off every other version finish this one. Be careful quoting from it: its wording is often the furthest of any from the Greek.
 

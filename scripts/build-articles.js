@@ -112,6 +112,19 @@ function renderMarkdown(md) {
       flushList('ol', items); continue;
     }
 
+    // A row of images: consecutive lines of ![caption](src). Used for book
+    // covers, so a page about choosing an edition shows the editions.
+    if (/^!\[/.test(line)) {
+      const figs = [];
+      while (i < lines.length && /^!\[/.test(lines[i])) {
+        const m = lines[i].match(/^!\[([^\]]*)\]\(([^)]+)\)/);
+        if (m) figs.push('<figure><img src="' + esc(m[2]) + '" alt="' + esc(m[1].replace(/[*_]/g, '')) + '" loading="lazy" decoding="async" width="180" height="270"><figcaption>' + inline(m[1]) + '</figcaption></figure>');
+        i++;
+      }
+      out.push('<div class="ar-figs">' + figs.join('') + '</div>');
+      continue;
+    }
+
     // A table: consecutive lines that start with "|". The second line is the
     // markdown separator (| --- |) and is skipped. Wrapped so it scrolls
     // sideways on a phone instead of widening the page.
@@ -136,7 +149,7 @@ function renderMarkdown(md) {
     // Paragraph: consume until a blank line or a block-level marker.
     const buf = [];
     while (i < lines.length && lines[i].trim() &&
-           !/^(#{2,4}\s|>|-\s|\d+\.\s|---\s*$|\|)/.test(lines[i])) {
+           !/^(#{2,4}\s|>|-\s|\d+\.\s|---\s*$|\||!\[)/.test(lines[i])) {
       buf.push(lines[i]); i++;
     }
     // A paragraph that is entirely bold and ends without a stop is a lead-in,
@@ -336,10 +349,14 @@ ${artCss('ar')}
 .ar-byline a{color:rgba(232,228,220,.8)}
 .ar-byline span{opacity:.4}
 .ar-p{font-size:17.5px;color:rgba(232,228,220,.86);margin:0 0 22px}
-.ar-h2{font-family:Cinzel,Georgia,serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#c9a961;margin:52px 0 18px;padding-bottom:10px;border-bottom:1px solid rgba(232,228,220,.09)}
+.ar-h2{font-family:Cinzel,Georgia,serif;font-size:25px;line-height:1.3;letter-spacing:.03em;font-weight:400;color:#e8e4dc;margin:60px 0 20px;padding-bottom:12px;border-bottom:1px solid rgba(201,169,97,.28)}
 .ar-h3{font-family:Cinzel,Georgia,serif;font-size:19px;font-weight:600;margin:36px 0 12px;color:#e8e4dc}
 .ar-quote{margin:0 0 26px;padding:0 0 0 22px;border-left:2px solid #c9a961}
-.ar-quote span{display:block;font-family:Cinzel,Georgia,serif;font-size:19px;line-height:1.5;color:#e8e4dc}
+.ar-quote span{display:block;font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;font-style:italic;font-size:20px;line-height:1.55;color:#e8e4dc}
+.ar-figs{display:flex;gap:14px;margin:8px 0 32px;overflow-x:auto;padding-bottom:4px}
+.ar-figs figure{margin:0;flex:0 0 auto;width:108px}
+.ar-figs img{display:block;width:108px;height:162px;object-fit:cover;border-radius:3px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.ar-figs figcaption{margin-top:8px;font-size:12.5px;line-height:1.35;color:rgba(232,228,220,.62)}
 .ar-quote cite{display:block;margin-top:10px;font-style:normal;font-size:13px;letter-spacing:.08em;color:rgba(232,228,220,.5)}
 .ar-list{margin:0 0 24px;padding-left:22px}
 .ar-table-wrap{overflow-x:auto;margin:0 0 28px;-webkit-overflow-scrolling:touch;max-width:calc(100vw - 32px)}
