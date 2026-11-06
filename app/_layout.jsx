@@ -288,7 +288,7 @@ export default function Layout() {
         <Tabs.Screen
           name="meditate"
           options={{
-            tabBarIcon: () => <ManagedTabIcon iconName="headset-outline" tabKey="meditate" />,
+            tabBarIcon: () => <ManagedTabIcon iconName="eye-outline" tabKey="meditate" />,
             tabBarLabel: () => <ManagedTabLabel label="Meditate" tabKey="meditate" />,
           }}
         />
