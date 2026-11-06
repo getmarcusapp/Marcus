@@ -18,7 +18,7 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 // failure. Revisit if/when V supplies a taller bg-parallax.png asset
 // designed with vertical headroom built in.
 const PARALLAX_BG_HEIGHT = SCREEN_H;
-import { MEDITATIONS, MEDITATIONS_LIST, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
+import { MEDITATIONS, MEDITATIONS_LIST, useMeditationPlayer, open as openMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { useDeviceTilt } from '../lib/useDeviceTilt';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -135,7 +135,7 @@ export default function PracticeScreen() {
   function playMed(med) {
     if (!hasAccess) { router.push('/paywall'); return; }
     haptics.tap();
-    toggleMeditation(med);
+    openMeditation(med);
   }
   function toggleMedPlay() { playMed(todayMed); }
   // Five suggestions beneath the featured pick; the full library is the

@@ -8,7 +8,7 @@ import {
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { MEDITATIONS, useMeditationPlayer, toggle as toggleMeditation, formatMedTime } from '../lib/meditationPlayer';
+import { MEDITATIONS, useMeditationPlayer, open as openMeditation, formatMedTime } from '../lib/meditationPlayer';
 import { useMiniPlayerInset } from '../components/MiniMeditationPlayer';
 import { useCaretScroll } from '../lib/useCaretScroll';
 import { PracticeHeader } from '../components/PracticeHeader';
@@ -334,7 +334,7 @@ export default function JournalScreen() {
                     <Text style={s.listenEyebrow}>{journalMed.duration + ' meditation'}</Text>
                     <TouchableOpacity
                       style={[s.listenCard, isCurrent && s.listenCardActive]}
-                      onPress={() => { haptics.tap(); toggleMeditation(journalMed); }}
+                      onPress={() => { haptics.tap(); openMeditation(journalMed); }}
                       activeOpacity={0.85}
                       disabled={jIsLoading}
                     >

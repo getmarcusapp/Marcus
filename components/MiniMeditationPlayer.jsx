@@ -3,10 +3,10 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter, usePathname } from 'expo-router';
+import { usePathname } from 'expo-router';
 import {
   MEDITATIONS, useMeditationPlayer,
-  toggle, seek, unload, formatMedTime,
+  toggle, seek, unload, expand, formatMedTime,
 } from '../lib/meditationPlayer';
 import { colors, radius, font } from '../constants/theme';
 
@@ -22,29 +22,17 @@ export function useMiniPlayerInset() {
   return player.currentMedId ? MINI_PLAYER_HEIGHT : 0;
 }
 
-// Routes where the mini-player should NOT show: the full meditate screen
-// already has its own player, and onboarding/paywall hide the tab bar.
-const HIDDEN_ROUTES = new Set(['/meditate', '/onboarding', '/paywall', '/ready', '/welcome']);
-
-// Map current pathname -> label shown on the meditate back button when the
-// user expands the mini-player from elsewhere in the app.
-const PATH_LABELS = {
-  '/': 'Practice',
-  '/journal': 'Journal',
-  '/emotions': 'Emotions',
-  '/more': 'More',
-  '/compass': 'Compass',
-  '/read': 'Reading',
-  '/review': 'Review',
-};
+// Routes where the mini-player should NOT show: onboarding/paywall hide the
+// tab bar. The Meditate tab shows it like everywhere else, now that the full
+// player is its own screen (components/FullMeditationPlayer.jsx).
+const HIDDEN_ROUTES = new Set(['/onboarding', '/paywall', '/ready', '/welcome']);
 
 export function MiniMeditationPlayer() {
-  const router = useRouter();
   const pathname = usePathname();
   const player = useMeditationPlayer();
 
   if (!player.currentMedId) return null;
-  if (HIDDEN_ROUTES.has(pathname)) return null;
+  if (player.expanded || HIDDEN_ROUTES.has(pathname)) return null;
   const med = MEDITATIONS[player.currentMedId];
   if (!med) return null;
 
@@ -59,14 +47,7 @@ export function MiniMeditationPlayer() {
       <View style={s.body}>
         <TouchableOpacity
           style={s.titleArea}
-          onPress={() => router.push({
-            pathname: '/meditate',
-            params: {
-              id: med.id,
-              from: pathname,
-              fromLabel: PATH_LABELS[pathname] || 'Back',
-            },
-          })}
+          onPress={expand}
           activeOpacity={0.7}
         >
           <Text style={s.title} numberOfLines={1}>{med.title}</Text>

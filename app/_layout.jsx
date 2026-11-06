@@ -11,6 +11,7 @@ import { scheduleReengagementNotifications, scheduleAllNotifications } from '../
 import * as health from '../lib/health';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MiniMeditationPlayer } from '../components/MiniMeditationPlayer';
+import { FullMeditationPlayer } from '../components/FullMeditationPlayer';
 import { LockScreen } from '../components/LockScreen';
 import { LaunchSplash } from '../components/LaunchSplash';
 import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
@@ -339,6 +340,7 @@ export default function Layout() {
         <Tabs.Screen name="read-archive" options={{ href: null }} />
       </Tabs>
       <MiniMeditationPlayer />
+      <FullMeditationPlayer />
       {isLocked && <LockScreen />}
     </SafeAreaProvider>
       )}
