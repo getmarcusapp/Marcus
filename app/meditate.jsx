@@ -98,36 +98,33 @@ export default function MeditateScreen() {
           return (
             <View key={group.id}>
               <Text style={s.groupLabel}>{group.label}</Text>
-              <View style={s.list}>
+              {/* Two-column grid of paintings: every meditation visible, the art
+                  doing the inviting. Sideways rows wait until a group has six+. */}
+              <View style={s.grid}>
                 {meds.map(med => {
                   // The loaded meditation, else today's contextual pick, so the
-                  // list matches the hero image and the Practice card.
+                  // grid matches the hero image and the Practice card.
                   const isActive = (player.currentMedId || contextualMed.id) === med.id;
+                  const isCurrent = player.currentMedId === med.id;
                   return (
                     <TouchableOpacity
                       key={med.id}
-                      style={[s.medCard, isActive && s.medCardActive]}
+                      style={[s.tile, isActive && s.tileActive]}
                       onPress={() => selectMeditation(med)}
-                      activeOpacity={0.7}
+                      activeOpacity={0.8}
+                      accessibilityLabel={`${med.title}, ${med.duration}`}
                     >
-                      <View style={s.medLeft}>
-                        <View style={s.medThumb}>
-                          <Image source={med.image} style={s.medThumbImg} resizeMode="cover" />
-                          <View style={s.medThumbOverlay}>
-                            <Ionicons
-                              name={isActive && isPlaying ? 'pause-circle' : 'play-circle'}
-                              size={30}
-                              color={isActive ? colors.accent : '#fff'}
-                            />
-                          </View>
-                        </View>
-                        <View style={s.medText}>
-                          <Text style={[s.medTitle, isActive && s.medTitleActive]}>
-                            {med.title}
-                          </Text>
-                          <Text style={s.medMeta}>{med.subtitle} · {med.duration}</Text>
-                        </View>
+                      <Image source={med.image} style={StyleSheet.absoluteFill} resizeMode="cover" />
+                      <LinearGradient
+                        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.35)', 'rgba(0,0,0,0.9)']}
+                        locations={[0.35, 0.6, 1]}
+                        style={StyleSheet.absoluteFill}
+                      />
+                      <View style={s.badge}>
+                        <Ionicons name={isCurrent && isPlaying ? 'pause' : 'play'} size={10} color={isCurrent ? colors.accent : '#fff'} />
+                        <Text style={[s.badgeText, isCurrent && { color: colors.accent }]}>{med.duration}</Text>
                       </View>
+                      <Text style={s.tileTitle} numberOfLines={3}>{med.title}</Text>
                     </TouchableOpacity>
                   );
                 })}
@@ -161,7 +158,12 @@ const s = StyleSheet.create({
   title: { fontSize: 34, fontFamily: font.display, color: '#FFFFFF', letterSpacing: -1, lineHeight: 40, textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 8 },
   sub: { fontSize: font.subSize, color: colors.textSecondary, lineHeight: 22 },
 
-  list: { paddingHorizontal: spacing.lg },
+  grid: { paddingHorizontal: spacing.lg, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 14 },
+  tile: { width: '48%', aspectRatio: 1, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000', justifyContent: 'flex-end', borderWidth: 0.5, borderColor: colors.border },
+  tileActive: { borderColor: colors.accent, borderWidth: 1 },
+  badge: { position: 'absolute', top: 8, right: 8, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 4 },
+  badgeText: { fontSize: 11, color: '#fff', fontFamily: font.bodyMedium, fontVariant: ['tabular-nums'] },
+  tileTitle: { fontSize: 15, lineHeight: 19, color: '#fff', fontFamily: font.bodySemiBold, paddingHorizontal: 12, paddingBottom: 12, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
   // Group pills: copied from app/library.jsx so the two read as one control.
   chipsWrap: { backgroundColor: colors.bg, borderBottomWidth: 0.5, borderBottomColor: colors.border, paddingVertical: 6, justifyContent: 'center' },
   chip: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 6, backgroundColor: colors.bgCard },
@@ -173,39 +175,4 @@ const s = StyleSheet.create({
   groupLabel: { fontSize: font.labelSize, color: colors.accent, letterSpacing: font.sectionTracking, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: spacing.xl, marginBottom: spacing.sm, paddingHorizontal: spacing.lg },
   sectionLabel: { fontSize: font.labelSize, color: colors.textSecondary, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: spacing.md },
 
-  medCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
-  },
-  // Active/playing row — bright gold bordered box, matching the journal &
-  // practice meditation cards. Negative margin + matching padding lets the
-  // border expand outward into the list inset so content doesn't shift.
-  medCardActive: {
-    borderWidth: 0.5,
-    borderColor: colors.accent,
-    borderBottomColor: colors.accent,
-    borderRadius: radius.md,
-    marginHorizontal: -10,
-    paddingHorizontal: 10,
-  },
-  medLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, flex: 1 },
-  medThumb: {
-    width: 64, height: 64, borderRadius: radius.md,
-    overflow: 'hidden', backgroundColor: '#000',
-    position: 'relative',
-  },
-  medThumbImg: { width: '100%', height: '100%' },
-  medThumbOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  medText: { flex: 1 },
-  medTitle: { fontSize: 15, fontFamily: font.bodyMedium, color: colors.textSecondary, marginBottom: 3 },
-  medTitleActive: { color: colors.textPrimary },
-  medMeta: { fontSize: 12, color: colors.textSecondary },
 });
