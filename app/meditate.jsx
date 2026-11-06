@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
   StyleSheet, SafeAreaView, ActivityIndicator, Image,
@@ -19,6 +19,9 @@ export default function MeditateScreen() {
   const params = useLocalSearchParams();
   const player = useMeditationPlayer();
   const scrollRef = useRef(null);
+  // Group filter pills, same look and behaviour as the Library's: tap to show
+  // one group, tap again (or All) to show everything.
+  const [groupFilter, setGroupFilter] = useState(null);
 
   useFocusEffect(useCallback(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
@@ -84,7 +87,7 @@ export default function MeditateScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 }}>
+      <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} stickyHeaderIndices={[1]} contentContainerStyle={{ paddingBottom: 36 }}>
 
         <View style={[s.header, !showHeaderImage && s.headerCompact]}>
           {showHeaderImage && (
@@ -101,6 +104,28 @@ export default function MeditateScreen() {
             <Text style={s.eyebrow}>{countWord(MEDITATIONS_LIST.length)} guided meditations</Text>
             <Text style={s.title}>{`Ancient attention\ntraining`}</Text>
           </View>
+        </View>
+
+        {/* Sticky group pills (index 1 in the ScrollView, so it sticks) */}
+        <View style={s.chipsWrap}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
+            <TouchableOpacity style={[s.chip, !groupFilter && s.chipActive]} onPress={() => setGroupFilter(null)} activeOpacity={0.7}>
+              <Text style={[s.chipText, !groupFilter && s.chipTextActive]}>
+                All<Text style={[s.chipCount, !groupFilter && s.chipCountActive]}> · {MEDITATIONS_LIST.length}</Text>
+              </Text>
+            </TouchableOpacity>
+            {GROUPS.map(g => {
+              const active = groupFilter === g.id;
+              const count = MEDITATIONS_LIST.filter(m => m.group === g.id).length;
+              return (
+                <TouchableOpacity key={g.id} style={[s.chip, active && s.chipActive]} onPress={() => setGroupFilter(active ? null : g.id)} activeOpacity={0.7}>
+                  <Text style={[s.chipText, active && s.chipTextActive]}>
+                    {g.label}<Text style={[s.chipCount, active && s.chipCountActive]}> · {count}</Text>
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </View>
 
         {/* Player */}
@@ -160,7 +185,7 @@ export default function MeditateScreen() {
         )}
 
         {/* Meditation list, by group (lib/meditationPlayer.js GROUPS) */}
-        {GROUPS.map(group => {
+        {GROUPS.filter(g => !groupFilter || g.id === groupFilter).map(group => {
           const meds = MEDITATIONS_LIST.filter(m => m.group === group.id);
           if (!meds.length) return null;
           return (
@@ -280,6 +305,14 @@ const s = StyleSheet.create({
   skipBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 
   list: { paddingHorizontal: spacing.lg },
+  // Group pills: copied from app/library.jsx so the two read as one control.
+  chipsWrap: { backgroundColor: colors.bg, borderBottomWidth: 0.5, borderBottomColor: colors.border, paddingVertical: 6, justifyContent: 'center' },
+  chip: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 6, backgroundColor: colors.bgCard },
+  chipActive: { borderColor: colors.accent, backgroundColor: colors.bg },
+  chipText: { fontSize: 13, color: colors.textSecondary, letterSpacing: 0.3, fontFamily: font.bodyMedium },
+  chipTextActive: { color: colors.accent },
+  chipCount: { fontSize: 12, color: colors.textSecondary, fontFamily: font.body },
+  chipCountActive: { color: colors.accentDim },
   groupLabel: { fontSize: font.labelSize, color: colors.accent, letterSpacing: font.sectionTracking, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: spacing.xl, marginBottom: spacing.sm, paddingHorizontal: spacing.lg },
   sectionLabel: { fontSize: font.labelSize, color: colors.textSecondary, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: spacing.md },
 
