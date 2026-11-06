@@ -1,0 +1,47 @@
+[[bell]]
+[[4]]
+The day is done. Whatever it held, it is behind you now. Nothing in the next few minutes will change what happened. That is not what this is for.
+[[8]]
+Find a position you can be still in. Let your breathing slow on its own. Don't force it.
+[[23]]
+Seneca kept a practice. Each night before sleep, he would put the day on trial. Not to punish himself. To see clearly.
+[[5]]
+Three questions, asked honestly. We will ask them now.
+[[8]]
+The first question. What did I do well today?
+[[5]]
+Not what went well. What did you do? Where did you act with intention? Where did you bring your better self to what was in front of you?
+[[5]]
+Let something come. Don't reach for it.
+[[45]]
+Don't dismiss it because it seems small. Small acts of virtue are still virtue. Seneca understood this. The Stoics were not waiting for grand occasions to be who they intended to be.
+[[18]]
+The second question. Where did I fall short of my own standard?
+[[5]]
+Not where did the world fail you. Where did you fall short? Of patience, of honesty, of the person you decided this morning to be?
+[[5]]
+Let something come.
+[[45]]
+Don't linger in it. Look at it clearly, and then set it down.
+[[8]]
+This is not about guilt. It is about honesty. Guilt looks backward. Examination looks forward.
+[[6]]
+Marcus wrote to himself again and again about his failures. He didn't pretend they hadn't happened. He didn't collapse under them. He named them, and returned to the practice.
+[[18]]
+The third question. What am I carrying that I can release tonight?
+[[5]]
+Not everything that happened today needs to come with you into tomorrow. Some of it is finished. Some of it was never yours to carry.
+[[8]]
+Is there an outcome you're still resisting? Something that didn't go the way you hoped, that you keep returning to? Is there something someone said or did that you're still holding?
+[[38]]
+You can put it down. Not because it doesn't matter. Because carrying it through the night serves nothing.
+[[30]]
+The Stoics called this the art of letting go of what is not in your control. It is a practice, not a single decision. A return, again and again, to the same honest question.
+[[15]]
+Take one slow breath.
+[[8]]
+You have examined the day. You have not looked away from it. That is the practice.
+[[6]]
+Tomorrow, you begin again. Rest now.
+[[8]]
+[[bell]]
