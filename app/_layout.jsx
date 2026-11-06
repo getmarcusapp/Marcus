@@ -282,21 +282,23 @@ export default function Layout() {
             tabBarLabel: () => <ManagedTabLabel label="Practice" tabKey="practice" />,
           }}
         />
-        {/* A tab of its own since the library grew from seven meditations to
-            fifteen (Nov 2026): over two hours of audio needs a permanent
-            home, not a swipe row on Practice. Practice stays first. */}
-        <Tabs.Screen
-          name="meditate"
-          options={{
-            tabBarIcon: () => <ManagedTabIcon iconName="eye-outline" tabKey="meditate" />,
-            tabBarLabel: () => <ManagedTabLabel label="Meditate" tabKey="meditate" />,
-          }}
-        />
         <Tabs.Screen
           name="emotions"
           options={{
             tabBarIcon: () => <ManagedTabIcon iconName="heart-outline" tabKey="emotions" />,
             tabBarLabel: () => <ManagedTabLabel label="Emotions" tabKey="emotions" />,
+          }}
+        />
+        {/* A tab of its own since the library grew from seven meditations to
+            fifteen (Nov 2026): over two hours of audio needs a permanent
+            home, not a swipe row on Practice. After Emotions, so the tabs
+            users already know stay where they were, and the optional
+            library follows the core practice. */}
+        <Tabs.Screen
+          name="meditate"
+          options={{
+            tabBarIcon: () => <ManagedTabIcon iconName="eye-outline" tabKey="meditate" />,
+            tabBarLabel: () => <ManagedTabLabel label="Meditate" tabKey="meditate" />,
           }}
         />
         <Tabs.Screen
