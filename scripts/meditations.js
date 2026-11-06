@@ -142,6 +142,32 @@ async function main() {
     }
     return;
   }
+  if (cmd === 'verify') {
+    // Transcribe each render and compare it with its script, word by word.
+    // v3 is expressive and can drift ("its own pace" once came back "peace"),
+    // so nothing is installed until this reads 100%.
+    const W = t => (t.toLowerCase().replace(/’/g, "'").replace(/-/g, ' ').match(/[a-z']+/g) || [])
+      .map(w => w.replace(/^'|'$/g, '')).filter(Boolean);
+    for (const id of ids) {
+      let j = null;
+      for (let a = 0; a < 4 && !(j && j.text); a++) {
+        const form = new FormData();
+        form.append('model_id', 'scribe_v1');
+        form.append('file', new Blob([fs.readFileSync(path.join(OUT, id + '.mp3'))]), 'a.mp3');
+        const r = await fetch('https://api.elevenlabs.io/v1/speech-to-text', { method: 'POST', headers: { 'xi-api-key': process.env.ELEVENLABS_API_KEY }, body: form });
+        j = await r.json(); if (!j.text) await new Promise(z => setTimeout(z, 5000 * (a + 1)));
+      }
+      const s = W(parse(id).filter(x => x.say).map(x => x.say).join(' ')), h = W(j.text.replace(/\(.*?\)|\[.*?\]/g, ' '));
+      const n = s.length, m = h.length, dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+      for (let i = n - 1; i >= 0; i--) for (let k = m - 1; k >= 0; k--) dp[i][k] = s[i] === h[k] ? dp[i + 1][k + 1] + 1 : Math.max(dp[i + 1][k], dp[i][k + 1]);
+      const out = []; let i = 0, k = 0, mi = [], ex = [];
+      const flush = () => { if (mi.length || ex.length) out.push(`script "${mi.join(' ')}" heard "${ex.join(' ')}"`); mi = []; ex = []; };
+      while (i < n && k < m) { if (s[i] === h[k]) { flush(); i++; k++; } else if (dp[i + 1][k] >= dp[i][k + 1]) mi.push(s[i++]); else ex.push(h[k++]); }
+      while (i < n) mi.push(s[i++]); while (k < m) ex.push(h[k++]); flush();
+      console.log(`${id.padEnd(24)} ${(100 * dp[0][0] / n).toFixed(1)}%`); out.slice(0, 8).forEach(x => console.log('    ' + x));
+    }
+    return;
+  }
   if (cmd === 'install') {
     for (const id of ids) {
       const map = { 'premeditatio-malorum': 'premeditatio-malorum' };
@@ -150,6 +176,6 @@ async function main() {
     }
     return;
   }
-  console.log('usage: meditations.js sample | build <id>|--all | install <id>|--all');
+  console.log('usage: meditations.js sample | build <id>|--all | verify <id>|--all | install <id>|--all');
 }
 main().catch(e => { console.error('✗ ' + e.message); process.exit(1); });
