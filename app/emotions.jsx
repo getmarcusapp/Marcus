@@ -360,8 +360,11 @@ export default function EmotionsScreen() {
                 onBlur={() => setFocusedField(null)}
                 onContentSizeChange={onGrow('trigger')}
                 editable={hasAccess}
+                // Locked: a non-editable field can still take focus on iOS and raise its
+                // Done/Next bar over the tab bar. Let the tap reach the card (paywall).
+                pointerEvents={hasAccess ? 'auto' : 'none'}
                 scrollEnabled={false}
-                inputAccessoryViewID={Platform.OS === 'ios' ? 'emoTriggerAccessory' : undefined}
+                inputAccessoryViewID={Platform.OS === 'ios' && hasAccess ? 'emoTriggerAccessory' : undefined}
                 keyboardAppearance="dark"
               />
             </TouchableOpacity>
@@ -386,8 +389,11 @@ export default function EmotionsScreen() {
                 onBlur={() => setFocusedField(null)}
                 onContentSizeChange={onGrow('reaction')}
                 editable={hasAccess}
+                // Locked: a non-editable field can still take focus on iOS and raise its
+                // Done/Next bar over the tab bar. Let the tap reach the card (paywall).
+                pointerEvents={hasAccess ? 'auto' : 'none'}
                 scrollEnabled={false}
-                inputAccessoryViewID={Platform.OS === 'ios' ? 'emoReactionAccessory' : undefined}
+                inputAccessoryViewID={Platform.OS === 'ios' && hasAccess ? 'emoReactionAccessory' : undefined}
                 keyboardAppearance="dark"
               />
             </TouchableOpacity>
@@ -465,8 +471,11 @@ export default function EmotionsScreen() {
                 onBlur={() => setFocusedField(null)}
                 onContentSizeChange={onGrow('response')}
                 editable={hasAccess}
+                // Locked: a non-editable field can still take focus on iOS and raise its
+                // Done/Next bar over the tab bar. Let the tap reach the card (paywall).
+                pointerEvents={hasAccess ? 'auto' : 'none'}
                 scrollEnabled={false}
-                inputAccessoryViewID={Platform.OS === 'ios' ? 'emoResponseAccessory' : undefined}
+                inputAccessoryViewID={Platform.OS === 'ios' && hasAccess ? 'emoResponseAccessory' : undefined}
                 keyboardAppearance="dark"
               />
             </TouchableOpacity>
