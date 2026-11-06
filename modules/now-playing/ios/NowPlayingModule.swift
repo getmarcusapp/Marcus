@@ -52,6 +52,7 @@ public class NowPlayingModule: Module {
   private func ensureCommands() {
     if commandsReady { return }
     commandsReady = true
+    UIApplication.shared.beginReceivingRemoteControlEvents()
     let c = MPRemoteCommandCenter.shared()
     let send = { [weak self] (command: String, position: Double) -> MPRemoteCommandHandlerStatus in
       self?.sendEvent("onRemoteCommand", ["command": command, "position": position])
