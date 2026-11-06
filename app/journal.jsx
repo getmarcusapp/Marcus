@@ -331,7 +331,7 @@ export default function JournalScreen() {
                   const jLoaded = jDuration > 0;
                   return (
                     <>
-                    <Text style={s.listenEyebrow}>{'< 5 min meditation'}</Text>
+                    <Text style={s.listenEyebrow}>{journalMed.duration + ' meditation'}</Text>
                     <TouchableOpacity
                       style={[s.listenCard, isCurrent && s.listenCardActive]}
                       onPress={() => { haptics.tap(); toggleMeditation(journalMed); }}

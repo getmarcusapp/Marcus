@@ -49,6 +49,46 @@ const MEDITATION_NOTES = {
     work: 'The Choice of Hercules (c. 1596, Museo di Capodimonte, Naples)',
     why: 'Hercules at the crossroads, seated between the steep path of Virtue and the easy path of Pleasure. The choice is the one thing entirely his — exactly what the dichotomy of control isolates: not the outcome, not the road, but which way he turns. Carracci paints the moment of decision itself.',
   },
+  'inner-citadel': {
+    artist: 'Hubert Robert',
+    work: 'The Equestrian Statue of Marcus Aurelius (1757, Metropolitan Museum of Art)',
+    why: 'Marcus on the Capitoline, steady in the middle of a crowded square. The bronze has survived nearly two thousand years while Rome changed around it, which is the citadel he described: not a place away from the world, but a stillness inside it.',
+  },
+  'before-you-react': {
+    artist: 'Peter Paul Rubens',
+    work: 'The Dying Seneca (c. 1612–13, Alte Pinakothek, Munich)',
+    why: 'Seneca, who wrote three books against anger, meeting the worst thing a ruler could do to him with composure. The meditation borrows his advice on anger; the painting shows the self-command it was for.',
+  },
+  'debts-of-book-one': {
+    artist: 'Eugène Delacroix',
+    work: 'The Last Words of the Emperor Marcus Aurelius (1844, Musée des Beaux-Arts de Lyon)',
+    why: 'Marcus at the end, surrounded by the people he would leave behind. The first book of the Meditations is his list of what he owed to others; this is the other end of the same life.',
+  },
+  'what-frightens-us': {
+    artist: 'J. M. W. Turner',
+    work: 'Fishermen at Sea (1796, Tate)',
+    why: 'A small boat in a dark sea under a cold moon. The storm is real, but the boat is still afloat, which is the whole of Seneca\'s point: more things frighten us than crush us.',
+  },
+  'amor-fati': {
+    artist: 'Francisco Goya',
+    work: 'Atropos, or The Fates (1820–23, Museo del Prado)',
+    why: 'The Fates holding the thread of a life. Amor fati is the practice of loving what they spin rather than fighting it.',
+  },
+  'circles-of-concern': {
+    artist: 'Raphael',
+    work: 'The School of Athens (1509–11, Apostolic Palace, Vatican)',
+    why: 'Philosophers of every school gathered in one hall, arguing, teaching, listening. The circles of concern are drawn inward until everyone is inside one room like this.',
+  },
+  'river-of-time': {
+    artist: 'Caspar David Friedrich',
+    work: 'The Monk by the Sea (1808–10, Alte Nationalgalerie, Berlin)',
+    why: 'One small figure on the shore before an enormous, moving expanse. The meditation asks you to stand beside the river of time the way he stands beside the sea: watching, not drowning.',
+  },
+  'before-sleep': {
+    artist: 'Henri Rousseau',
+    work: 'The Sleeping Gypsy (1897, Museum of Modern Art)',
+    why: 'Deep sleep under a full moon, untroubled even by the lion. A picture of the rest the day has earned.',
+  },
 };
 
 const VIRTUE_NOTES = {
@@ -235,7 +275,7 @@ export default function ImageryScreen() {
           ))}
 
           <SectionHeader
-            eyebrow="The seven meditations"
+            eyebrow="The meditations"
             title="One artwork per meditation"
             sub="Surfaced contextually based on the time of day."
           />

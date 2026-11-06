@@ -16,7 +16,10 @@ import { saveCompass, setHasOnboarded, setHasSeenCompassIntro } from '../store/d
 import { DEFAULT_COMPASS } from '../constants/compassFields';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
-import { MEDITATIONS_LIST, playPreview, stopPreview, useMeditationPlayer } from '../lib/meditationPlayer';
+import { MEDITATIONS, MEDITATIONS_LIST, playPreview, stopPreview, useMeditationPlayer } from '../lib/meditationPlayer';
+
+// Onboarding previews five, one from each group; the rest wait in the Meditate tab.
+const ONBOARDING_MEDS = ['premeditatio', 'present-moment', 'before-you-react', 'memento-mori', 'before-sleep'].map(id => MEDITATIONS[id]);
 import { pickAndImportBackup } from '../lib/backup';
 import { track } from '../lib/analytics';
 
@@ -269,7 +272,7 @@ function PhilosophyStep({ onNext }) {
           {[
             { title: 'Stoic Compass', desc: 'Your personal North Star: why you practice, what you want to overcome, who you aspire to be.' },
             { title: 'Daily Reading', desc: 'A real Stoic quote chosen for you each day, drawn from the canon and grounded in your Compass.' },
-            { title: 'Guided Meditations', desc: 'Seven Stoic meditations, less than five minutes each. Voiced. Surfaced contextually for the time of day.' },
+            { title: 'Guided Meditations', desc: 'Fifteen Stoic meditations, eight to ten minutes each, with real pauses. Voiced, in their own tab.' },
             { title: 'Morning Journal', desc: 'Reflect on what is in your control, foresee what may come, and prepare for what the day requires.' },
             { title: 'Evening Journal', desc: 'Examine how you acted, confess where you fell short, and release what you carry.' },
             { title: 'Emotion logger', desc: 'When strong emotions arise, log the trigger, examine your thinking, and choose your response.' },
@@ -405,14 +408,14 @@ function MeditationsStep({ onNext }) {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={s.medOnbHeroText}>
-            <Text style={s.previewEyebrow}>Seven guided meditations</Text>
+            <Text style={s.previewEyebrow}>{MEDITATIONS_LIST.length === 15 ? 'Fifteen' : MEDITATIONS_LIST.length} guided meditations</Text>
             <Text style={s.previewTitle}>{`Ancient attention\ntraining`}</Text>
           </View>
         </View>
 
         <View style={s.previewBody}>
           <View>
-            {MEDITATIONS_LIST.map((m, idx) => {
+            {ONBOARDING_MEDS.map((m, idx) => {
               const previewing = previewMedId === m.id;
               const loading = previewing && isLoading;
               return (
@@ -420,7 +423,7 @@ function MeditationsStep({ onNext }) {
                   key={m.id}
                   activeOpacity={0.7}
                   onPress={() => previewing ? stopPreview() : playPreview(m)}
-                  style={[s.medOnbCard, idx < MEDITATIONS_LIST.length - 1 && s.medOnbCardBorder]}
+                  style={[s.medOnbCard, idx < ONBOARDING_MEDS.length - 1 && s.medOnbCardBorder]}
                 >
                   <View style={s.medOnbLeft}>
                     <View style={s.medOnbThumb}>
@@ -443,6 +446,7 @@ function MeditationsStep({ onNext }) {
                 </TouchableOpacity>
               );
             })}
+            <Text style={s.medOnbMore}>{`And ${MEDITATIONS_LIST.length - ONBOARDING_MEDS.length} more in the Meditate tab, from Amor Fati to The River of Time.`}</Text>
           </View>
         </View>
       </ScrollView>
@@ -780,6 +784,7 @@ const s = StyleSheet.create({
   // Meditation card pattern — mirrors the in-app /meditate list so the
   // onboarding preview shows the actual product design (painting thumbnail
   // + title + meta) instead of a generic numbered list.
+  medOnbMore: { fontSize: 13, color: colors.textSecondary, fontFamily: font.body, marginTop: 14, lineHeight: 19 },
   medOnbCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 },
   medOnbCardBorder: { borderBottomWidth: 0.5, borderBottomColor: colors.border },
   medOnbLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, flex: 1 },

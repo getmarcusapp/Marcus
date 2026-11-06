@@ -16,7 +16,7 @@ const sections = [
   },
   {
     title: 'The daily practice',
-    content: 'Each day has four core elements:\n\n1. Stoic Compass: Read your personal North Star to anchor your intentions.\n\n2. Daily Reading: A real Stoic quote chosen for you each day, grounded in your Compass, with a 3-4 sentence reflection in your voice. Save your own insight underneath; it accumulates in Past readings.\n\n3. Morning Journal: Reflect on what is in your control, foresee what may come, and prepare for the day.\n\n4. Evening Journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.\n\nA mid-day pause and seven guided meditations sit alongside the daily practice. Both are optional. Use them when they serve.',
+    content: 'Each day has four core elements:\n\n1. Stoic Compass: Read your personal North Star to anchor your intentions.\n\n2. Daily Reading: A real Stoic quote chosen for you each day, grounded in your Compass, with a 3-4 sentence reflection in your voice. Save your own insight underneath; it accumulates in Past readings.\n\n3. Morning Journal: Reflect on what is in your control, foresee what may come, and prepare for the day.\n\n4. Evening Journal: Examine how you acted, confess where you fell short, and release what you carry before sleep.\n\nA mid-day pause and fifteen guided meditations sit alongside the daily practice. Both are optional. Use them when they serve.',
   },
   {
     title: 'The Stoic Compass',
@@ -44,7 +44,7 @@ const sections = [
   },
   {
     title: 'Guided meditations',
-    content: 'Seven short audio sessions, voiced. Each runs less than five minutes. Optional alongside the daily practice, surfaced contextually for the time of day.\n\nView From Above: Rise above your circumstances to see them at scale.\n\nPremeditatio Malorum: Look at what might go wrong before the day begins, so it cannot surprise you. Best in the morning.\n\nThe Evening Examination: Three honest questions. Then put the day down.\n\nNegative Visualization: Imagine the absence of what you love, to see it clearly.\n\nThe Present Moment: Pure attention training. Not staying. Returning.\n\nMemento Mori: Remember that you will die. Not to grieve, but to live differently.\n\nThe Dichotomy of Control: Sort what is yours to control from what is not, and set the rest down.\n\nUse them on the way to work, before journaling, or whenever you need to return to yourself. They are not required for your streak. They are a tool.',
+    content: 'Fifteen voiced sessions, each eight to ten minutes, with real pauses for the practice itself. They live in the Meditate tab, grouped by when they help most, and one is suggested on the Practice tab for the time of day.\n\nMorning. Premeditatio Malorum: look at what might go wrong before the day begins. The Debts of Book One: name who taught you what.\n\nAnytime. The Present Moment, The Dichotomy of Control, The Inner Citadel, and The View From Above.\n\nHard moments. Before You React, for anger. What Frightens Us, for anxiety. Amor Fati, for what you cannot change.\n\nPerspective. Memento Mori, Negative Visualization, The River of Time, and Circles of Concern.\n\nEvening. The Evening Examination, and Before Sleep, made for listening in bed.\n\nUse them on the way to work, before journaling, or whenever you need to return to yourself. They are not required for your streak. They are a tool.',
   },
   {
     id: 'widgets',

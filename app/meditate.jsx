@@ -4,12 +4,11 @@ import {
   StyleSheet, SafeAreaView, ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { ScreenHeader } from '../components/ScreenHeader';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radius, spacing, font } from '../constants/theme';
 import {
-  MEDITATIONS, MEDITATIONS_LIST,
+  MEDITATIONS, MEDITATIONS_LIST, GROUPS,
   useMeditationPlayer, play, toggle as togglePlayer, seek as seekPlayer,
   formatMedTime,
 } from '../lib/meditationPlayer';
@@ -71,12 +70,6 @@ export default function MeditateScreen() {
   const progress = duration > 0 ? position / duration : 0;
   const formatTime = formatMedTime;
 
-  // Back-navigation source. Hidden routes are siblings of the tabs so
-  // router.back() falls through to the active tab; we accept an explicit
-  // ?from=&fromLabel= from the caller and replace to that route.
-  const fromPath = params?.from || '/more';
-  const fromLabel = params?.fromLabel || 'More';
-
   // Contextual meditation for the page hero (matches the practice card pick):
   // morning -> Premeditatio, midday -> View From Above, evening -> Evening Examination.
   // Only shown when nothing is selected — once a meditation is loaded, the
@@ -91,7 +84,6 @@ export default function MeditateScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScreenHeader fromPath={fromPath} fromLabel={fromLabel} />
       <ScrollView ref={scrollRef} style={[s.scroll, { backgroundColor: colors.bgCard }]} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 36 }}>
 
         <View style={[s.header, !showHeaderImage && s.headerCompact]}>
@@ -106,7 +98,7 @@ export default function MeditateScreen() {
             </>
           )}
           <View style={s.headerContent}>
-            <Text style={s.eyebrow}>Seven guided meditations</Text>
+            <Text style={s.eyebrow}>{countWord(MEDITATIONS_LIST.length)} guided meditations</Text>
             <Text style={s.title}>{`Ancient attention\ntraining`}</Text>
           </View>
         </View>
@@ -167,46 +159,59 @@ export default function MeditateScreen() {
           </View>
         )}
 
-        {/* Meditation list */}
-        <View style={s.list}>
-          {MEDITATIONS_LIST.map(med => {
-            // When nothing is loaded in the player, highlight today's contextual
-            // so the list matches the hero image and the Practice tile pick.
-            const highlightId = selected?.id || contextualMed.id;
-            const isActive = highlightId === med.id;
-            return (
-              <TouchableOpacity
-                key={med.id}
-                style={[s.medCard, isActive && s.medCardActive]}
-                onPress={() => selectMeditation(med)}
-                activeOpacity={0.7}
-              >
-                <View style={s.medLeft}>
-                  <View style={s.medThumb}>
-                    <Image source={med.image} style={s.medThumbImg} resizeMode="cover" />
-                    <View style={s.medThumbOverlay}>
-                      <Ionicons
-                        name={isActive && isPlaying ? 'pause-circle' : 'play-circle'}
-                        size={30}
-                        color={isActive ? colors.accent : '#fff'}
-                      />
-                    </View>
-                  </View>
-                  <View style={s.medText}>
-                    <Text style={[s.medTitle, isActive && s.medTitleActive]}>
-                      {med.title}
-                    </Text>
-                    <Text style={s.medMeta}>{med.subtitle} · {med.time} · {med.duration}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        {/* Meditation list, by group (lib/meditationPlayer.js GROUPS) */}
+        {GROUPS.map(group => {
+          const meds = MEDITATIONS_LIST.filter(m => m.group === group.id);
+          if (!meds.length) return null;
+          return (
+            <View key={group.id}>
+              <Text style={s.groupLabel}>{group.label}</Text>
+              <View style={s.list}>
+                {meds.map(med => {
+                  // When nothing is loaded in the player, highlight today's contextual
+                  // so the list matches the hero image and the Practice tile pick.
+                  const highlightId = selected?.id || contextualMed.id;
+                  const isActive = highlightId === med.id;
+                  return (
+                    <TouchableOpacity
+                      key={med.id}
+                      style={[s.medCard, isActive && s.medCardActive]}
+                      onPress={() => selectMeditation(med)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={s.medLeft}>
+                        <View style={s.medThumb}>
+                          <Image source={med.image} style={s.medThumbImg} resizeMode="cover" />
+                          <View style={s.medThumbOverlay}>
+                            <Ionicons
+                              name={isActive && isPlaying ? 'pause-circle' : 'play-circle'}
+                              size={30}
+                              color={isActive ? colors.accent : '#fff'}
+                            />
+                          </View>
+                        </View>
+                        <View style={s.medText}>
+                          <Text style={[s.medTitle, isActive && s.medTitleActive]}>
+                            {med.title}
+                          </Text>
+                          <Text style={s.medMeta}>{med.subtitle} · {med.duration}</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const NUMBER_WORDS = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+  'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen', 'Twenty'];
+const countWord = n => NUMBER_WORDS[n] || String(n);
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bgDeep },
@@ -275,6 +280,7 @@ const s = StyleSheet.create({
   skipBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 
   list: { paddingHorizontal: spacing.lg },
+  groupLabel: { fontSize: font.labelSize, color: colors.accent, letterSpacing: font.sectionTracking, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: spacing.xl, marginBottom: spacing.sm, paddingHorizontal: spacing.lg },
   sectionLabel: { fontSize: font.labelSize, color: colors.textSecondary, letterSpacing: 2, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginBottom: spacing.md },
 
   medCard: {

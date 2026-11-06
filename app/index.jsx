@@ -138,9 +138,10 @@ export default function PracticeScreen() {
     toggleMeditation(med);
   }
   function toggleMedPlay() { playMed(todayMed); }
-  // The other five meditations browse-able in the gallery beneath the
-  // featured contextual pick (featured-first).
-  const otherMeds = MEDITATIONS_LIST.filter(m => m.id !== todayMed.id);
+  // Five suggestions beneath the featured pick; the full library is the
+  // Meditate tab. A swipe row of fourteen was past the point anyone scrolls.
+  const SUGGESTED = ['present-moment', 'dichotomy-of-control', 'inner-citadel', 'memento-mori', 'before-you-react', 'view-from-above'];
+  const otherMeds = SUGGESTED.filter(id => id !== todayMed.id).slice(0, 5).map(id => MEDITATIONS[id]);
 
   const today = todayDate;
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -604,7 +605,7 @@ export default function PracticeScreen() {
               </View>
             </>
           ) : (
-            <Text style={s.medMeta}>{'< 5 min · guided'}</Text>
+            <Text style={s.medMeta}>{todayMed.duration + ' · guided'}</Text>
           )}
         </View>
         {/* Play button straddling the image/body seam — floating FAB layered
@@ -628,6 +629,11 @@ export default function PracticeScreen() {
         {otherMeds.map(med => (
           <MeditationGalleryCard key={med.id} med={med} player={player} onPress={playMed} />
         ))}
+        <TouchableOpacity style={[s.galleryCard, s.galleryAll]} onPress={() => router.push('/meditate')} activeOpacity={0.85}>
+          <Ionicons name="headset-outline" size={26} color={colors.accent} />
+          <Text style={s.galleryAllTitle}>All {MEDITATIONS_LIST.length}{'\n'}meditations</Text>
+          <Ionicons name="arrow-forward" size={16} color={colors.accent} />
+        </TouchableOpacity>
       </ScrollView>
     </>
   );
@@ -1178,6 +1184,8 @@ const s = StyleSheet.create({
   galleryHeading: { fontSize: font.labelSize, letterSpacing: font.sectionTracking, color: colors.accent, fontFamily: font.bodyMedium, textTransform: 'uppercase', marginTop: 8, marginBottom: 10, marginLeft: 2 },
   galleryRow: { paddingRight: 16, paddingBottom: 20, gap: 12 },
   galleryCard: { width: 148 },
+  galleryAll: { borderWidth: 0.5, borderColor: colors.accent, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', gap: 10, minHeight: 150, backgroundColor: 'rgba(201,169,97,0.06)' },
+  galleryAllTitle: { fontSize: 14, fontFamily: font.bodySemiBold, color: colors.textPrimary, textAlign: 'center', lineHeight: 19 },
   galleryImageWrap: { width: 148, height: 148, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000', position: 'relative', marginBottom: 10 },
   galleryImage: { width: '100%', height: '100%' },
   galleryPlay: { position: 'absolute', bottom: 8, right: 8 },

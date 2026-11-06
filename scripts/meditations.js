@@ -117,7 +117,11 @@ async function render(items, out, model = MODEL) {
   filters.push(`[${n}:a]aresample=44100,pan=mono|c0=0.5*c0+0.5*c1,atrim=0:${total.toFixed(2)},volume=${PAD_DB}dB,afade=t=in:d=6,afade=t=out:st=${(total - 8).toFixed(2)}:d=8[pad]`);
   labels.push('[pad]');
   filters.push(`${labels.join('')}amix=inputs=${labels.length}:normalize=0:dropout_transition=0,atrim=0:${total.toFixed(2)},loudnorm=I=-19:TP=-2:LRA=11[out]`);
-  ff([...inputs, '-filter_complex', filters.join(';'), '-map', '[out]', '-ac', '1', '-ar', '44100', '-c:a', 'libmp3lame', '-b:a', '80k', out]);
+  // Master as WAV; the MP3 is for listening to a render, the app gets HE-AAC
+  // (install), which holds speech over a quiet pad at about a third the size.
+  const wav = out.replace(/\.mp3$/, '.wav');
+  ff([...inputs, '-filter_complex', filters.join(';'), '-map', '[out]', '-ac', '1', '-ar', '44100', '-c:a', 'pcm_s16le', wav]);
+  ff(['-i', wav, '-c:a', 'libmp3lame', '-b:a', '80k', out]);
   return { total, words: says.reduce((s, [x]) => s + x.say.split(/\s+/).length, 0) };
 }
 
@@ -170,9 +174,12 @@ async function main() {
   }
   if (cmd === 'install') {
     for (const id of ids) {
-      const map = { 'premeditatio-malorum': 'premeditatio-malorum' };
-      fs.copyFileSync(path.join(OUT, id + '.mp3'), path.join(ASSETS, (map[id] || id) + '.mp3'));
-      console.log('installed', id);
+      // HE-AAC at 40 kb/s mono (its ceiling), via macOS afconvert: about 2.4 MB for eight
+      // minutes. Fifteen meditations as 80k MP3 were 78 MB of app download.
+      const dest = path.join(ASSETS, id + '.m4a');
+      execFileSync('afconvert', ['-f', 'm4af', '-d', 'aach', '-b', '40000', path.join(OUT, id + '.wav'), dest]);
+      const old = path.join(ASSETS, id + '.mp3'); if (fs.existsSync(old)) fs.rmSync(old);
+      console.log('installed', id, (fs.statSync(dest).size / 1048576).toFixed(1) + ' MB');
     }
     return;
   }

@@ -42,7 +42,7 @@ function HamburgerIcon({ color, size = 26, barWidth = 22, barHeight = 2, gap = 4
 // right tab icon stays illuminated even when the underlying route is
 // one of the hidden (href:null) flow screens like /compass or /journal.
 const PRACTICE_ROUTES = new Set([
-  '/', '/index', '/compass', '/read', '/journal', '/review', '/meditate',
+  '/', '/index', '/compass', '/read', '/journal', '/review',
   '/journal-history', '/read-archive', '/review-archive', '/foundations',
   '/prosoche',
 ]);
@@ -69,11 +69,13 @@ function NotificationRouter() {
   return null;
 }
 const EMOTIONS_ROUTES = new Set(['/emotions', '/emotions-history']);
+const MEDITATE_ROUTES = new Set(['/meditate']);
 function useLogicalTabKey() {
   const pathname = usePathname();
   const path = (pathname || '/').split('?')[0];
   if (PRACTICE_ROUTES.has(path)) return 'practice';
   if (EMOTIONS_ROUTES.has(path)) return 'emotions';
+  if (MEDITATE_ROUTES.has(path)) return 'meditate';
   return 'more';
 }
 
@@ -280,6 +282,16 @@ export default function Layout() {
             tabBarLabel: () => <ManagedTabLabel label="Practice" tabKey="practice" />,
           }}
         />
+        {/* A tab of its own since the library grew from seven meditations to
+            fifteen (Nov 2026): over two hours of audio needs a permanent
+            home, not a swipe row on Practice. Practice stays first. */}
+        <Tabs.Screen
+          name="meditate"
+          options={{
+            tabBarIcon: () => <ManagedTabIcon iconName="headset-outline" tabKey="meditate" />,
+            tabBarLabel: () => <ManagedTabLabel label="Meditate" tabKey="meditate" />,
+          }}
+        />
         <Tabs.Screen
           name="emotions"
           options={{
@@ -310,7 +322,6 @@ export default function Layout() {
         <Tabs.Screen name="dispatches" options={{ href: null }} />
         <Tabs.Screen name="foundations" options={{ href: null }} />
         <Tabs.Screen name="foundations-list" options={{ href: null }} />
-        <Tabs.Screen name="meditate" options={{ href: null }} />
         <Tabs.Screen name="prosoche" options={{ href: null }} />
         <Tabs.Screen name="imagery" options={{ href: null }} />
         <Tabs.Screen name="library" options={{ href: null }} />
