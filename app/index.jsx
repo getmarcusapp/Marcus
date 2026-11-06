@@ -630,7 +630,7 @@ export default function PracticeScreen() {
           <MeditationGalleryCard key={med.id} med={med} player={player} onPress={playMed} />
         ))}
         <TouchableOpacity style={[s.galleryCard, s.galleryAll]} onPress={() => router.push('/meditate')} activeOpacity={0.85}>
-          <Ionicons name="headset-outline" size={26} color={colors.accent} />
+          <Ionicons name="eye-outline" size={26} color={colors.accent} />
           <Text style={s.galleryAllTitle}>All {MEDITATIONS_LIST.length}{'\n'}meditations</Text>
           <Ionicons name="arrow-forward" size={16} color={colors.accent} />
         </TouchableOpacity>
