@@ -114,10 +114,10 @@ export default function MeditateScreen() {
                       activeOpacity={0.8}
                       accessibilityLabel={`${med.title}, ${med.duration}`}
                     >
-                      <Image source={med.image} style={StyleSheet.absoluteFill} resizeMode="cover" />
+                      <Image source={med.image} style={s.tileImg} resizeMode="cover" />
                       <LinearGradient
-                        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.35)', 'rgba(0,0,0,0.9)']}
-                        locations={[0.35, 0.6, 1]}
+                        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.75)']}
+                        locations={[0.55, 1]}
                         style={StyleSheet.absoluteFill}
                       />
                       <View style={s.badge}>
@@ -161,6 +161,9 @@ const s = StyleSheet.create({
   grid: { paddingHorizontal: spacing.lg, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 14 },
   tile: { width: '48%', aspectRatio: 1, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000', justifyContent: 'flex-end', borderWidth: 0.5, borderColor: colors.border },
   tileActive: { borderColor: colors.accent, borderWidth: 1 },
+  // Explicit size: absoluteFill alone drew the painting at its native size,
+  // clipped, so a tile showed a zoomed-in corner.
+  tileImg: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   badge: { position: 'absolute', top: 8, right: 8, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 4 },
   badgeText: { fontSize: 11, color: '#fff', fontFamily: font.bodyMedium, fontVariant: ['tabular-nums'] },
   tileTitle: { fontSize: 15, lineHeight: 19, color: '#fff', fontFamily: font.bodySemiBold, paddingHorizontal: 12, paddingBottom: 12, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
