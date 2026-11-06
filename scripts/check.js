@@ -2349,6 +2349,18 @@ function lockedInputs() {
   return out;
 }
 
+// EAS builds the uploaded native project (ios/ is not easignored), so its
+// version, not app.json's, is what reaches Apple. A prebuild done before a
+// version bump shipped build 27 as an already-live 1.5.1 (rejected, ITMS-90062).
+function nativeVersion() {
+  const pbx = path.join(ROOT, 'ios/Marcus.xcodeproj/project.pbxproj');
+  if (!fs.existsSync(pbx)) return [];
+  const want = JSON.parse(read('app.json')).expo.version;
+  const found = [...new Set([...fs.readFileSync(pbx, 'utf8').matchAll(/MARKETING_VERSION = ([^;]+);/g)].map(m => m[1]))];
+  return found.filter(v => v !== want)
+    .map(v => `ios/ project is at ${v} but app.json says ${want}: run npx expo prebuild -p ios --clean`);
+}
+
 function compassCopy() {
   const fail = [];
 
@@ -2495,6 +2507,7 @@ const CHECKS = [
   ['sitemap dates and the IndexNow key', sitemapHealth],
   ['the Compass asks one question and seeds one answer', compassCopy],
   ['a locked text field never strands the user above the tab bar', lockedInputs],
+  ['the native project ships the version app.json names', nativeVersion],
 ];
 
 let total = 0;
