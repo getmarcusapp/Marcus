@@ -2328,6 +2328,27 @@ function sitemapHealth() {
   return fail;
 }
 
+// A field locked for non-subscribers is editable={false}, but iOS still lets
+// it take focus, which raises its Done/Next bar over the tab bar and strands
+// the user. Every input gated on hasAccess must also refuse the tap and drop
+// its accessory bar while locked.
+function lockedInputs() {
+  const out = [];
+  const files = ['app', 'components'].flatMap(d => fs.readdirSync(path.join(ROOT, d))
+    .filter(n => n.endsWith('.jsx')).map(n => d + '/' + n));
+  for (const file of files) {
+    for (const blk of read(file).match(/<TextInput\b[\s\S]*?\/>/g) || []) {
+      if (!/editable=\{[^}]*hasAccess/.test(blk)) continue;
+      const line = read(file).slice(0, read(file).indexOf(blk)).split('\n').length;
+      if (!/pointerEvents=\{hasAccess \? 'auto' : 'none'\}/.test(blk))
+        out.push(`${file}:${line} locked input still takes the tap (add pointerEvents)`);
+      if (/inputAccessoryViewID=/.test(blk) && !/inputAccessoryViewID=\{[^}]*hasAccess/.test(blk))
+        out.push(`${file}:${line} locked input still attaches its Done/Next bar`);
+    }
+  }
+  return out;
+}
+
 function compassCopy() {
   const fail = [];
 
@@ -2473,6 +2494,7 @@ const CHECKS = [
   ['the weekly review can read its own week', weekReadBack],
   ['sitemap dates and the IndexNow key', sitemapHealth],
   ['the Compass asks one question and seeds one answer', compassCopy],
+  ['a locked text field never strands the user above the tab bar', lockedInputs],
 ];
 
 let total = 0;

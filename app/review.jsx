@@ -498,9 +498,10 @@ export default function ReviewScreen() {
                     onChangeText={text => setAnswers(prev => ({ ...prev, [p.key]: text }))}
                     onContentSizeChange={onGrow(`prompt-${p.key}`)}
                     editable={hasAccess}
+                    pointerEvents={hasAccess ? 'auto' : 'none'}
                     scrollEnabled={false}
                     keyboardAppearance="dark"
-                    inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewWizardAccessory' : undefined}
+                    inputAccessoryViewID={Platform.OS === 'ios' && hasAccess ? 'reviewWizardAccessory' : undefined}
                   />
                 </View>
               </View>
@@ -595,8 +596,9 @@ export default function ReviewScreen() {
                   onFocus={() => setOpenHint(null)}
                   onContentSizeChange={onGrow('account')}
                   editable={hasAccess}
+                  pointerEvents={hasAccess ? 'auto' : 'none'}
                   scrollEnabled={false}
-                  inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewWizardAccessory' : undefined}
+                  inputAccessoryViewID={Platform.OS === 'ios' && hasAccess ? 'reviewWizardAccessory' : undefined}
                 />
               </View>
             )}
@@ -631,8 +633,9 @@ export default function ReviewScreen() {
                 onChangeText={setIntention}
                 onContentSizeChange={onGrow('intention')}
                 editable={hasAccess}
+                pointerEvents={hasAccess ? 'auto' : 'none'}
                 scrollEnabled={false}
-                inputAccessoryViewID={Platform.OS === 'ios' ? 'reviewWizardAccessory' : undefined}
+                inputAccessoryViewID={Platform.OS === 'ios' && hasAccess ? 'reviewWizardAccessory' : undefined}
               />
             </View>
             )}

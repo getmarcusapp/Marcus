@@ -463,9 +463,10 @@ export default function JournalScreen() {
                         onFocus={() => setOpenHint(null)}
                         onContentSizeChange={onGrow(`prompt-${openPrompt}`)}
                         editable={hasAccess}
+                        pointerEvents={hasAccess ? 'auto' : 'none'}
                         scrollEnabled={false}
                         keyboardAppearance="dark"
-                        inputAccessoryViewID={Platform.OS === 'ios' ? 'journalAccessory' : undefined}
+                        inputAccessoryViewID={Platform.OS === 'ios' && hasAccess ? 'journalAccessory' : undefined}
                       />
                     </TouchableOpacity>
                   </View>

@@ -503,8 +503,9 @@ Return only the JSON object.`;
                     onContentSizeChange={onGrow('insight')}
                     scrollEnabled={false}
                     editable={!insightSaved && hasAccess}
+                    pointerEvents={hasAccess ? 'auto' : 'none'}
                     keyboardAppearance="dark"
-                    inputAccessoryViewID={Platform.OS === 'ios' ? 'readingInsightAccessory' : undefined}
+                    inputAccessoryViewID={Platform.OS === 'ios' && hasAccess ? 'readingInsightAccessory' : undefined}
                   />
                 </TouchableOpacity>
 
