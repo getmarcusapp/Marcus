@@ -4,6 +4,7 @@ import {
   StyleSheet, SafeAreaView, Alert,
 } from 'react-native';
 import { useRouter, useFocusEffect, Redirect } from 'expo-router';
+import { devSetFreeDay } from '../lib/dayTwo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { cancelAllNotifications } from '../notifications';
@@ -69,6 +70,13 @@ function DeveloperSettingsInner() {
         ? 'Premium flag ON. Gates are bypassed — you have full access.'
         : 'Premium flag OFF. Gates engage — locked actions push to paywall. The app re-applies the dev override on next launch, so this is a per-session test.',
     );
+  }
+
+  async function runFreeDay(which) {
+    await devSetFreeDay(which);
+    if (which === 'none') { Alert.alert('', 'Free day cleared.'); return; }
+    setPremiumFlag(false);
+    router.replace('/');
   }
 
   async function handleResetOnboarding() {
@@ -249,6 +257,19 @@ function DeveloperSettingsInner() {
             Dev/beta builds auto-set this flag to ON on app launch so testers aren't blocked. Toggle OFF to verify the read-only / paywall behavior in this session. The launch override reapplies next time the app starts.
           </Text>
 
+          <Text style={s.secLabel}>Free day</Text>
+          <Text style={[s.helperText, { marginTop: 0, marginBottom: 12 }]}>
+            Walk through the free day and the day-two paywall. Each turns the Premium flag off for this session, then opens Practice.
+          </Text>
+          <TouchableOpacity style={s.resetBtn} onPress={() => runFreeDay('today')} activeOpacity={0.8}>
+            <Text style={s.resetBtnText}>Free day · today (seal it to see the card)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.resetBtn} onPress={() => runFreeDay('yesterday')} activeOpacity={0.8}>
+            <Text style={s.resetBtnText}>Free day · yesterday (day-two paywall)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.resetBtn} onPress={() => runFreeDay('none')} activeOpacity={0.8}>
+            <Text style={s.resetBtnText}>Clear free day</Text>
+          </TouchableOpacity>
           <Text style={s.secLabel}>Trial simulation</Text>
           <Text style={[s.helperText, { marginTop: 0, marginBottom: 12 }]}>
             Simulate being mid-trial so you can preview the trial-state UX (banner on Practice). Active simulation overrides the Premium flag — clear it when done. Currently: {trialSim === null ? 'off' : `${trialSim} day${trialSim === 1 ? '' : 's'} left`}.
