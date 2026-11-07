@@ -66,6 +66,18 @@ export async function getSubscriptionStatus() {
   }
 }
 
+// Whether this customer has ever had a subscription or purchase, active or
+// not. null when RevenueCat can't be reached, so callers can fail closed.
+export async function hasEverPurchased() {
+  try {
+    const info = await Purchases.getCustomerInfo();
+    return (info.allPurchasedProductIdentifiers || []).length > 0 ||
+      Object.keys(info.entitlements?.all || {}).length > 0;
+  } catch {
+    return null;
+  }
+}
+
 // Get available offerings from RevenueCat
 export async function getOfferings() {
   try {

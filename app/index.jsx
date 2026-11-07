@@ -31,6 +31,7 @@ import { refreshNotificationsForToday, onPracticeSealed } from '../notifications
 import { FOUNDATIONS_LETTERS } from '../constants/foundations';
 import { getFoundationsState } from '../lib/foundations';
 import { exportBackup } from '../lib/backup';
+import { claimDayTwoPaywall } from '../lib/dayTwo';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
 import { track } from '../lib/analytics';
@@ -130,6 +131,12 @@ export default function PracticeScreen() {
   const medHasLoaded = medDuration > 0;
 
   const { hasAccess, trialDaysLeft, isFreeDay } = useEntitlement();
+  // The first open after the free day: present the paywall once, at the
+  // moment the practice has been felt (lib/dayTwo.js).
+  useEffect(() => {
+    if (hasAccess !== false) return;
+    claimDayTwoPaywall().then(show => { if (show) router.push('/paywall?from=day-two'); });
+  }, [hasAccess]);
   // Play/pause any meditation (featured card or gallery card) through the
   // shared singleton player, gated on entitlement.
   function playMed(med) {
@@ -712,10 +719,23 @@ export default function PracticeScreen() {
             </View>
           </Animated.View>
 
+          {isFreeDay ? (
+            // The free day, sealed: the practice has just been felt, so this
+            // is where continuing it is offered. A card, not a modal, because
+            // the first-seal rating prompt fires at this same moment.
+            <Animated.View style={sealedAnimStyle(2)}>
+              <TouchableOpacity style={[s.sealedRestCard, s.sealedFreeCard]} onPress={() => router.push('/paywall?from=day-one')} activeOpacity={0.8}>
+                <Text style={s.sealedRestTitle}>Day one, sealed</Text>
+                <Text style={s.sealedRestSub}>That was the whole practice, kept for a day. Keep it going with seven days free.</Text>
+                <Text style={s.sealedFreeCta}>Start your free trial →</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          ) : (
           <Animated.View style={[s.sealedRestCard, sealedAnimStyle(2)]}>
             <Text style={s.sealedRestTitle}>The rest of the day is yours</Text>
             <Text style={s.sealedRestSub}>You have done what was required. Now live what you practiced.</Text>
           </Animated.View>
+          )}
 
           {/* Practice tiles remain reachable after sealing so users can review
               today's journals, reading, compass — and so the Weekly Review tile
@@ -990,6 +1010,8 @@ const s = StyleSheet.create({
     marginHorizontal: spacing.md,
     marginBottom: 4,
   },
+  sealedFreeCard: { borderColor: colors.accentDim },
+  sealedFreeCta: { marginTop: 10, fontSize: 13, color: colors.accent, fontFamily: font.bodyMedium, letterSpacing: 0.3 },
   // Matches the welcome card exactly (title 17 / sub 14) so the two cards read
   // as one consistent component.
   // Sized to match the Stoic Compass routine tile (title 15 / sub 12) per V.

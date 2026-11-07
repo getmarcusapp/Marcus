@@ -11,7 +11,15 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { GoldPrimary } from '../components/GoldButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { track } from '../lib/analytics';
+import { dayOneRecap } from '../lib/dayTwo';
 
+
+// The first line of the after-free-day hero: what they did with the day.
+function dayOneLine(recap) {
+  if (recap?.sealed) return 'You kept a full day of practice.';
+  if (recap?.journals) return `You wrote ${recap.journals === 1 ? 'your first entry' : recap.journals + ' entries'} on your free day.`;
+  return 'Your free day is over. The practice is not.';
+}
 
 export default function PaywallScreen() {
   const router = useRouter();
@@ -44,6 +52,13 @@ export default function PaywallScreen() {
   // Whether this person can still take their one free day (see useEntitlement).
   const [freeDay, setFreeDay] = useState(null);
   useEffect(() => { freeDayState().then(setFreeDay); }, []);
+  // Reached from the free day's sealed card ('day-one') or the first open
+  // after it ('day-two', lib/dayTwo.js): the hero speaks to what they did.
+  const afterFreeDay = params?.from === 'day-one' || params?.from === 'day-two';
+  const [recap, setRecap] = useState(null);
+  useEffect(() => { if (afterFreeDay) dayOneRecap().then(setRecap); }, [afterFreeDay]);
+  // `from` doubles as the route to return to, except for these markers.
+  const returnRoute = params?.from && !['onboarding', 'day-one', 'day-two'].includes(params.from) ? params.from : '/';
 
   function openSubscriptionSettings() {
     // iOS deep link to the user's App Store subscriptions page — the
@@ -181,7 +196,7 @@ export default function PaywallScreen() {
     <SafeAreaView style={s.safe}>
       {showTopBack && (
         <ScreenHeader
-          fromPath={params?.from || '/'}
+          fromPath={returnRoute}
           fromLabel={params?.fromLabel || 'Back'}
         />
       )}
@@ -198,10 +213,10 @@ export default function PaywallScreen() {
             style={s.skull}
             resizeMode="contain"
           />
-          <Text style={s.eyebrow}>Marcus Premium</Text>
-          <Text style={s.title}>Become someone{'\n'}you respect</Text>
+          <Text style={s.eyebrow}>{afterFreeDay ? (params.from === 'day-one' ? 'Day one, sealed' : 'Day two') : 'Marcus Premium'}</Text>
+          <Text style={s.title}>{afterFreeDay ? 'Keep the\npractice going' : 'Become someone\nyou respect'}</Text>
           <Text style={s.sub}>
-            A complete daily Stoic practice.{'\n'}
+            {afterFreeDay ? dayOneLine(recap) : 'A complete daily Stoic practice.'}{'\n'}
             {annualPrice ? `7 days free, then ${annualPrice}/year.` : 'Your first 7 days are free.'}
           </Text>
           {trialDaysLeft !== null && (
@@ -221,6 +236,7 @@ export default function PaywallScreen() {
           {[
             { icon: '◎', text: 'Daily compass, morning & evening journals' },
             { icon: '◎', text: 'Fresh Stoic readings every morning' },
+            { icon: '◎', text: 'Guided meditations, 8 to 10 minutes each' },
             { icon: '◎', text: 'Emotion logger with Stoic reframes' },
             { icon: '◎', text: 'Weekly review with Virtue ledger' },
             { icon: '◎', text: 'Private by design. Your journal never leaves your device.' },
@@ -383,7 +399,7 @@ export default function PaywallScreen() {
             // from a specific surface (More · Subscription, locked features,
             // etc.). Falls back to postPaywallRoute for the onboarding flow
             // which doesn't pass a destination.
-            const declineRoute = params?.from && params.from !== 'onboarding' ? params.from : postPaywallRoute;
+            const declineRoute = params?.from === 'onboarding' ? postPaywallRoute : returnRoute;
             router.replace(declineRoute);
           }}
           activeOpacity={0.7}
