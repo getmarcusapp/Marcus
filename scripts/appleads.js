@@ -10,6 +10,8 @@
  *   node scripts/appleads.js bids <campaignId> <json>   set keyword bids: {"<keywordId>": 2.5, ...}
  *   node scripts/appleads.js default-bid <campaignId> <adGroupId> <amount>
  *   node scripts/appleads.js budget <campaignId> <amount>      (guarded)
+ *   node scripts/appleads.js pause <campaignId> [keywordId,...]   pause a campaign, or keywords in it
+ *   node scripts/appleads.js resume <campaignId> [keywordId,...]  (resuming a campaign is budget-guarded)
  *
  * Credentials (.env.local, never printed): APPLE_ADS_CLIENT_ID, _TEAM_ID,
  * _KEY_ID, _ORG_ID, _KEY_PATH (the private key, ~/.appleads/private-key.pem,
@@ -106,8 +108,11 @@ async function keywords(days = 7) {
 async function guardBudget(changeCampaignId, newAmount) {
   let total = 0;
   for (const c of await campaigns()) {
+    // The campaign being changed always counts at its new amount, even if it
+    // is paused now (resuming is exactly when it rejoins the total).
+    if (String(c.id) === String(changeCampaignId)) { total += newAmount; continue; }
     if (c.status !== 'ENABLED' || c.servingStatus === 'NOT_RUNNING' && c.displayStatus === 'PAUSED') continue;
-    total += String(c.id) === String(changeCampaignId) ? newAmount : money(c.dailyBudgetAmount);
+    total += money(c.dailyBudgetAmount);
   }
   if (total > MAX_DAILY_TOTAL + 1e-9 && !process.argv.includes('--allow-over-ceiling')) {
     throw new Error(`refused: running daily budgets would total $${total.toFixed(2)}, over the $${MAX_DAILY_TOTAL} ceiling Gio set`);
@@ -129,11 +134,33 @@ async function setBids(campaignId, map) {
   }
 }
 
+// Pause or resume a whole campaign, or just some of its keywords. Resuming a
+// campaign puts its budget back into the running total, so it is guarded.
+async function setStatus(campaignId, keywordIds, on) {
+  if (!keywordIds.length) {
+    if (on) {
+      const c = (await api('GET', `/campaigns/${campaignId}`)).data;
+      await guardBudget(campaignId, Number(c.dailyBudgetAmount.amount));
+    }
+    await api('PUT', `/campaigns/${campaignId}`, { campaign: { status: on ? 'ENABLED' : 'PAUSED' } });
+    return console.log(`campaign ${campaignId} -> ${on ? 'ENABLED' : 'PAUSED'}`);
+  }
+  for (const ag of (await api('GET', `/campaigns/${campaignId}/adgroups`)).data) {
+    const ks = (await api('GET', `/campaigns/${campaignId}/adgroups/${ag.id}/targetingkeywords?limit=1000`)).data
+      .filter(k => keywordIds.includes(String(k.id)));
+    if (!ks.length) continue;
+    await api('PUT', `/campaigns/${campaignId}/adgroups/${ag.id}/targetingkeywords/bulk`,
+      ks.map(k => ({ id: k.id, status: on ? 'ACTIVE' : 'PAUSED' })));
+    for (const k of ks) console.log(`  ${k.text} -> ${on ? 'ACTIVE' : 'PAUSED'}`);
+  }
+}
+
 async function main() {
   const [cmd, a, b, c] = process.argv.slice(2);
   if (cmd === 'status') return status(Number(a) || 7);
   if (cmd === 'keywords') return keywords(Number(a) || 7);
   if (cmd === 'bids') return setBids(a, JSON.parse(b));
+  if (cmd === 'pause' || cmd === 'resume') return setStatus(a, b ? b.split(',') : [], cmd === 'resume');
   if (cmd === 'default-bid') {
     await api('PUT', `/campaigns/${a}/adgroups/${b}`, { defaultBidAmount: { amount: String(c), currency: 'USD' } });
     return console.log(`default bid for ad group ${b} -> $${c}`);
