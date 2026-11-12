@@ -6,6 +6,7 @@
  *   node scripts/quote-study.js check       fetch each page, look for the fakes
  *   node scripts/quote-study.js report      print the numbers and every hit
  *   node scripts/quote-study.js export      write the public dataset (CSV)
+ *   node scripts/quote-study.js google      cross-check: Google's top ten for the same searches
  *
  * WHY THIS IS SEPARATE FROM outreach.js. Outreach finds pages by searching for
  * the fake lines themselves, so its 90 confirmed pages say nothing about how
@@ -176,19 +177,83 @@ function report() {
   }
 }
 
+// THE GOOGLE CROSS-CHECK. The sample above comes from Brave because that is
+// the search API we have; most people search on Google, and a sceptic will
+// ask. Google sells no API for its real results, so this goes through SerpApi
+// (a paid service that returns them), top ten only, and is kept apart from
+// the main sample: it answers "does the finding hold on Google's first
+// page?", it does not change the published rate.
+async function google() {
+  if (!process.env.SERPAPI_KEY) throw new Error('SERPAPI_KEY is not set in .env.local');
+  const state = load();
+  const g = state.google || (state.google = { sampled: new Date().toISOString(), pages: {} });
+  const done = new Set(Object.values(g.pages).flatMap(p => p.found.map(f => f.q)));
+  for (const q of QUERIES) {
+    if (done.has(q)) continue; // each search costs one of 250 a month
+    const u = 'https://serpapi.com/search.json?engine=google&gl=us&hl=en&num=10&q=' + encodeURIComponent(q) + '&api_key=' + process.env.SERPAPI_KEY;
+    const res = await fetch(u);
+    if (!res.ok) throw new Error('serpapi HTTP ' + res.status + ' on "' + q + '"');
+    const organic = ((await res.json()).organic_results || []).slice(0, 10);
+    organic.forEach((r, i) => {
+      if (host(r.link) === 'getmarcus.app') return;
+      const p = g.pages[r.link] || (g.pages[r.link] = { found: [] });
+      p.found.push({ q, rank: r.position || i + 1 });
+      p.title = r.title;
+    });
+    console.log(`${q}: ${organic.length} results`);
+    save(state);
+    await sleep(1000);
+  }
+  // SerpApi sometimes hands back Google's own redirect (google.com/goto?url=…)
+  // in place of the result's address. Take the one hop it points to, so the
+  // page is judged, and merged, under its real URL.
+  for (const [url, p] of Object.entries(g.pages)) {
+    if (!/^https:\/\/www\.google\.com\/goto\?/.test(url)) continue;
+    const res = await fetch(url, { redirect: 'manual', headers: { 'User-Agent': UA } });
+    const to = res.headers.get('location');
+    if (!to || host(to) === 'google.com') continue; // leave it; it will be reported unread
+    const real = g.pages[to] || (g.pages[to] = { found: [], title: p.title });
+    real.found.push(...p.found);
+    delete g.pages[url];
+  }
+  const entries = det.loadMisattributions();
+  for (const [url, p] of Object.entries(g.pages)) {
+    if (p.hits !== undefined || p.unread) continue;
+    const seen = state.pages[url]; // already judged in the main sample: same verdict
+    if (seen && (seen.hits || seen.unread)) Object.assign(p, { hits: seen.hits, corrected: seen.corrected, unread: seen.unread, words: seen.words, shared: true });
+    else await checkOne(url, p, entries);
+  }
+  for (const p of Object.values(g.pages)) if (p.unread === undefined) delete p.unread;
+  save(state);
+  const all = Object.entries(g.pages), read = all.filter(([, p]) => p.hits), bad = read.filter(([, p]) => p.hits.length);
+  console.log(`\n# Google top ten, sampled ${g.sampled.slice(0, 10)} via SerpApi`);
+  console.log(`  ${all.length} distinct pages; ${all.filter(([, p]) => p.shared).length} were already in the Brave sample`);
+  console.log(`  ${read.length} could be read; ${bad.length} (${read.length ? Math.round(100 * bad.length / read.length) : 0}%) publish a documented fake as genuine`);
+  for (const q of QUERIES) {
+    const first = all.find(([, p]) => p.found.some(f => f.q === q && f.rank === 1));
+    if (first) console.log(`  #1 for ${q.padEnd(30)} ${host(first[0]).padEnd(24)} ${first[1].hits ? (first[1].hits.length ? 'FAKE ' + first[1].hits.map(h => h.id).join('+') : 'clean') : 'unread: ' + first[1].unread}`);
+  }
+  if (process.argv.includes('--hits')) for (const [url, p] of bad) if (!p.shared) for (const h of p.hits) console.log(`\n${url}\n  [${h.id}] …${h.context}…`);
+  console.log('\n## Unread'); for (const [url, p] of all) if (!p.hits) console.log(`  ${p.unread.padEnd(28)} ${url}`);
+}
+
 // The published dataset: every sampled page, whether it could be read, and
 // what was found, so anyone can re-check a row. One file per run of the study,
 // named by month, and never rewritten once the write-up cites it.
 function exportCsv() {
   const state = load();
+  writeCsv(state.pages, String(state.sampled).slice(0, 7));
+  if (state.google) writeCsv(state.google.pages, state.google.sampled.slice(0, 7) + '-google');
+}
+function writeCsv(pages, name) {
   const cell = v => '"' + String(v).replace(/"/g, '""') + '"';
-  const rows = Object.entries(state.pages).map(([url, p]) => ({
+  const rows = Object.entries(pages).map(([url, p]) => ({
     url, best: Math.min(...p.found.map(f => f.rank)),
     found: p.found.map(f => f.q + ' #' + f.rank).join('; '),
     status: p.hits ? 'read' : 'unread', reason: p.hits ? '' : (p.unread || 'unchecked'),
     fakes: (p.hits || []).map(h => h.id).join('; '), corrected: (p.corrected || []).join('; '),
   })).sort((a, b) => a.best - b.best || a.url.localeCompare(b.url));
-  const out = path.join(__dirname, '..', 'public', 'data', 'stoic-quote-study-' + String(state.sampled).slice(0, 7) + '.csv');
+  const out = path.join(__dirname, '..', 'public', 'data', 'stoic-quote-study-' + name + '.csv');
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, ['url,best_rank,searches_and_ranks,status,unread_reason,fakes_published_as_genuine,fakes_corrected_or_discussed']
     .concat(rows.map(r => [r.url, r.best, r.found, r.status, r.reason, r.fakes, r.corrected].map(cell).join(','))).join('\n') + '\n');
@@ -196,5 +261,5 @@ function exportCsv() {
 }
 
 const cmd = process.argv[2];
-(cmd === 'sample' ? sample() : cmd === 'check' ? check() : Promise.resolve(cmd === 'export' ? exportCsv() : report()))
+(cmd === 'sample' ? sample() : cmd === 'check' ? check() : cmd === 'google' ? google() : Promise.resolve(cmd === 'export' ? exportCsv() : report()))
   .catch(e => { console.error('✗ ' + e.message); process.exit(1); });

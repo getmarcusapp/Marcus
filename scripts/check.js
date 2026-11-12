@@ -2499,6 +2499,15 @@ function quoteStudy() {
     .filter(l => /\| \d+ \|$/.test(l)).map(l => +l.match(/\| (\d+) \|$/)[1]).sort((a, b) => b - a);
   const want = Object.values(per).sort((a, b) => b - a);
   if (counts.join() !== want.join()) fail.push(`quote study: the table of fakes counts ${counts.join()} pages, the dataset gives ${want.join()}`);
+  // The Google cross-check has its own file and its own sentence.
+  const g = read('public/data/stoic-quote-study-2026-11-google.csv').trim().split('\n').slice(1).map(l => l.slice(1, -1).split('","'));
+  const gRead = g.filter(r => r[3] === 'read'), gBad = gRead.filter(r => r[5]);
+  for (const line of [`and ${g.length} distinct pages.`, `Of the ${gRead.length} we could read, ${gBad.length} carry a fake. That is ${Math.round(100 * gBad.length / gRead.length)} percent`]) {
+    if (!md.includes(line)) fail.push('quote study: the article does not say "' + line + '", which is what the Google dataset gives');
+  }
+  const top = readRows.filter(r => +r[1] <= 10), topBad = top.filter(r => r[5]);
+  const topLine = `Of the ${top.length} readable pages that ranked in the top ten for some search, ${topBad.length} carry a fake, which is ${Math.round(100 * topBad.length / top.length)} percent.`;
+  if (!md.includes(topLine)) fail.push('quote study: the article does not say "' + topLine + '"');
   const NAMED = /(^|\.)(goodreads|azquotes|dailystoic)\.com$/;
   for (const r of bad) {
     const h = new URL(r[0]).hostname.replace(/^www\./, '');

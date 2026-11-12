@@ -11,7 +11,7 @@ mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/
 
 Search for Stoic quotes and about one page in four will hand you a line the Stoics never wrote, with a Stoic's name under it.
 
-We measured it. On November 12, 2026 we took the top 40 results for ten ordinary searches, read every page we could, and looked for the misattributions on [our documented list](/misattributed-stoic-quotes). Of 144 pages, 38 print at least one of them as a genuine quotation. That is 26 percent.
+We measured it. On November 12, 2026 we took the top 40 results for ten ordinary searches, read every page we could, and looked for the misattributions on [our documented list](/misattributed-stoic-quotes). Of 144 pages, 38 print at least one of them as a genuine quotation. That is 26 percent. On the first page of results, on Google as well, it is closer to one in six.
 
 ## The numbers
 
@@ -25,7 +25,7 @@ We measured it. On November 12, 2026 we took the top 40 results for ten ordinary
 
 Counted by website instead of by page, it is 28 of 87 sites, about a third.
 
-The problem does not thin out at the top. Of the 35 readable pages that ranked in the top ten for some search, 6 carry a fake.
+The top of the results is better, but not clean. Of the 35 readable pages that ranked in the top ten for some search, 6 carry a fake, which is 17 percent.
 
 ## The first result is often the wrong one
 
@@ -41,6 +41,14 @@ The Seneca page carries "Luck is what happens when preparation meets opportunity
 Goodreads quotes are added and voted on by readers, so no editor chose these. But the effect is the same: the page most people see first vouches for a line its author never wrote. AZQuotes, another large quote site in the sample, carries three on its Marcus Aurelius page.
 
 The other first result deserves a mention too. The Daily Stoic's quote page ranked first for five of the ten searches, and it contains none of the lines we tested. Neither do the other nine Daily Stoic pages in the sample.
+
+## The same check on Google
+
+The sample above comes from Brave Search. Most people search on Google, so we repeated the check there: the first page of Google results for the same ten searches, which came to 76 results and 57 distinct pages.
+
+Of the 29 we could read, 5 carry a fake. That is 17 percent, the same rate as the top ten of the main sample.
+
+The first result is the same too. Goodreads leads the same four searches on Google, with the same lines.
 
 ## The fakes we found
 
@@ -69,7 +77,7 @@ We name Goodreads and AZQuotes here because they are large platforms and the fin
 ## How we did it
 
 1. **The searches.** Ten queries a reader might type: "marcus aurelius quotes", "seneca quotes", "epictetus quotes", "stoic quotes", "stoicism quotes", "best stoic quotes", "famous stoic quotes", "stoic quotes on life", "meditations quotes" and "marcus aurelius quotes on life". We chose the second five before seeing their results and dropped none afterward.
-2. **The sample.** The top 40 results for each, from the Brave Search API with the country set to the United States. That gave 400 results and 283 distinct pages. Our own pages were removed.
+2. **The sample.** The top 40 results for each, from the Brave Search API with the country set to the United States. That gave 400 results and 283 distinct pages. Our own pages were removed. For the Google cross-check we used SerpApi, a service that returns Google's results, because Google offers no way to request them directly.
 3. **Reading.** A program fetched each page under its own name, MarcusQuoteChecker, and obeyed robots.txt. It did not pretend to be a browser.
 4. **What counts.** A page counts only if it prints one of the documented lines, credits it to the wrong person right beside the line or in the page title, and does not name the true source or discuss the attribution anywhere near it. A page that debunks a fake is the opposite of a hit, and 28 pages did some version of that.
 5. **A person read every hit.** The first automatic pass counted three pages wrongly: two were explaining that the quotes are fake, and one credited its line to someone else. We tightened the rules, ran it again, and read all 38 remaining pages by hand.
@@ -78,14 +86,14 @@ We name Goodreads and AZQuotes here because they are large platforms and the fin
 
 - **It is a floor.** We tested 30 lines we have documented. A page with a different fake counts as clean here. We also left out very short sayings such as "Know thyself", because they match too many innocent sentences.
 - **Half the sample could not be read.** 139 of the 283 pages are missing from the rate. 56 disallow crawling, mostly Facebook, Reddit, Pinterest, Instagram and Quora. 50 refused our program, including Medium, BrainyQuote and Quotefancy. 27 returned no readable text, and 6 failed to load. The 26 percent describes pages an honest crawler can open, and says nothing about social posts.
-- **Brave is not Google.** We used the search API we have access to. Rankings differ between engines, though the same sites tend to appear.
+- **The main sample is from Brave, not Google.** The Google cross-check covers only the first page of results, 29 readable pages. It agrees with Brave's top ten, and it cannot confirm the 26 percent, which comes from pages further down.
 - **144 pages is a small sample**, and pages from the same site are not independent. The true rate could plausibly sit anywhere from about a fifth to a third. "About one in four" is as precise as this gets.
 - **It is one day.** Rankings and pages change.
 - **"Clean" means only that.** A page with none of our 30 lines may still misquote in other ways. We did not check wording, only attribution.
 
 ## The data
 
-[Download the dataset (CSV)](/data/stoic-quote-study-2026-11.csv). It lists all 283 pages with the searches and ranks where each appeared, whether it could be read, and which lines were found. The program that produced it is [in our public repository](https://github.com/getmarcusapp/Marcus/blob/main/scripts/quote-study.js), and the list of misattributions it tests, with the source for each, is [here](/misattributed-stoic-quotes).
+[Download the dataset (CSV)](/data/stoic-quote-study-2026-11.csv). It lists all 283 pages with the searches and ranks where each appeared, whether it could be read, and which lines were found. The [Google cross-check](/data/stoic-quote-study-2026-11-google.csv) is a separate file in the same format. The program that produced it is [in our public repository](https://github.com/getmarcusapp/Marcus/blob/main/scripts/quote-study.js), and the list of misattributions it tests, with the source for each, is [here](/misattributed-stoic-quotes).
 
 You may reuse the numbers and the data with a link to this page. If you find an error, including a page we counted wrongly, write to [hello@getmarcus.app](mailto:hello@getmarcus.app) and we will correct it and say so here.
 
