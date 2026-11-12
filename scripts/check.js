@@ -2470,6 +2470,43 @@ function compassCopy() {
 
 // ── runner ──────────────────────────────────────────────────────────────────
 
+// The quote study publishes a rate and the dataset behind it. If someone
+// re-exports the CSV, or edits a number in the write-up, the two must still
+// agree: a study whose headline cannot be recomputed from its own data is the
+// kind of sourcing the page criticises. The article also promises not to name
+// the small sites it counted, so none of their hosts may appear in it.
+function quoteStudy() {
+  const fail = [];
+  const csv = read('public/data/stoic-quote-study-2026-11.csv').trim().split('\n').slice(1)
+    .map(l => l.slice(1, -1).split('","'));
+  const md = read('content/articles/35-fake-stoic-quotes-study.md');
+  const readRows = csv.filter(r => r[3] === 'read');
+  const bad = readRows.filter(r => r[5]);
+  const strict = readRows.filter(r => r[5].split('; ').some(id => id && id !== 'not-what-happens'));
+  const pct = n => Math.round(100 * n / readRows.length);
+  const must = [
+    `- **Distinct pages in the top 40 results:** ${csv.length}`,
+    `- **Pages we could read:** ${readRows.length}`,
+    `- **Pages that publish a documented fake as genuine:** ${bad.length} (${pct(bad.length)}%)`,
+    `- **The same, leaving out the Epictetus paraphrase:** ${strict.length} (${pct(strict.length)}%)`,
+    `- **Pages carrying more than one:** ${bad.filter(r => r[5].includes(';')).length}`,
+    `- **Pages that name the true source or flag the doubt:** ${readRows.filter(r => r[6]).length}`,
+  ];
+  for (const line of must) if (!md.includes(line)) fail.push('quote study: the article does not say "' + line + '", which is what the dataset gives');
+  const per = {};
+  for (const r of bad) for (const id of r[5].split('; ')) per[id] = (per[id] || 0) + 1;
+  const counts = (md.split('## The fakes we found')[1] || '').split('\n## ')[0].split('\n')
+    .filter(l => /\| \d+ \|$/.test(l)).map(l => +l.match(/\| (\d+) \|$/)[1]).sort((a, b) => b - a);
+  const want = Object.values(per).sort((a, b) => b - a);
+  if (counts.join() !== want.join()) fail.push(`quote study: the table of fakes counts ${counts.join()} pages, the dataset gives ${want.join()}`);
+  const NAMED = /(^|\.)(goodreads|azquotes|dailystoic)\.com$/;
+  for (const r of bad) {
+    const h = new URL(r[0]).hostname.replace(/^www\./, '');
+    if (!NAMED.test(h) && md.includes(h.split('.').slice(-2)[0])) fail.push(`quote study: the article names ${h}, a site it promises not to name`);
+  }
+  return fail;
+}
+
 const CHECKS = [
   ['copy counts agree with the data', copyCounts],
   ['the misattribution count matches the list', misattributionCount],
@@ -2508,6 +2545,7 @@ const CHECKS = [
   ['the Compass asks one question and seeds one answer', compassCopy],
   ['a locked text field never strands the user above the tab bar', lockedInputs],
   ['the native project ships the version app.json names', nativeVersion],
+  ['the quote study says what its dataset says', quoteStudy],
 ];
 
 let total = 0;

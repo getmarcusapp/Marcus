@@ -5,6 +5,7 @@
  *   node scripts/quote-study.js sample      search, save the sample of URLs
  *   node scripts/quote-study.js check       fetch each page, look for the fakes
  *   node scripts/quote-study.js report      print the numbers and every hit
+ *   node scripts/quote-study.js export      write the public dataset (CSV)
  *
  * WHY THIS IS SEPARATE FROM outreach.js. Outreach finds pages by searching for
  * the fake lines themselves, so its 90 confirmed pages say nothing about how
@@ -33,7 +34,10 @@ const { allowed } = require('./outreach'); // also loads .env.local
 const det = require('./find-misquotes');
 
 const OUT = path.join(__dirname, 'out', 'quote-study.json');
-const QUERIES = ['marcus aurelius quotes', 'seneca quotes', 'epictetus quotes', 'stoic quotes', 'stoicism quotes'];
+const QUERIES = ['marcus aurelius quotes', 'seneca quotes', 'epictetus quotes', 'stoic quotes', 'stoicism quotes',
+  // Second five, added 2026-11-12 to steady the rate. Chosen before looking at
+  // any of their results, and never dropped afterwards for what they showed.
+  'best stoic quotes', 'famous stoic quotes', 'stoic quotes on life', 'meditations quotes', 'marcus aurelius quotes on life'];
 const PER_QUERY = 40;
 const UA = 'MarcusQuoteChecker/1.0 (+https://getmarcus.app/check-a-stoic-quote)';
 // Words in a "credited to" field that are not a name.
@@ -53,7 +57,9 @@ async function sample() {
   const state = load();
   state.sampled = new Date().toISOString();
   state.engine = 'Brave Search';
+  const done = new Set(Object.values(state.pages).flatMap(p => p.found.map(f => f.q)));
   for (const q of QUERIES) {
+    if (done.has(q)) { console.log(`${q}: already sampled`); continue; } // a re-run would count ranks twice
     let rank = 0;
     for (let offset = 0; offset * 20 < PER_QUERY; offset++) {
       const u = 'https://api.search.brave.com/res/v1/web/search?count=20&country=us&offset=' + offset + '&q=' + encodeURIComponent(q);
@@ -170,6 +176,25 @@ function report() {
   }
 }
 
+// The published dataset: every sampled page, whether it could be read, and
+// what was found, so anyone can re-check a row. One file per run of the study,
+// named by month, and never rewritten once the write-up cites it.
+function exportCsv() {
+  const state = load();
+  const cell = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const rows = Object.entries(state.pages).map(([url, p]) => ({
+    url, best: Math.min(...p.found.map(f => f.rank)),
+    found: p.found.map(f => f.q + ' #' + f.rank).join('; '),
+    status: p.hits ? 'read' : 'unread', reason: p.hits ? '' : (p.unread || 'unchecked'),
+    fakes: (p.hits || []).map(h => h.id).join('; '), corrected: (p.corrected || []).join('; '),
+  })).sort((a, b) => a.best - b.best || a.url.localeCompare(b.url));
+  const out = path.join(__dirname, '..', 'public', 'data', 'stoic-quote-study-' + String(state.sampled).slice(0, 7) + '.csv');
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(out, ['url,best_rank,searches_and_ranks,status,unread_reason,fakes_published_as_genuine,fakes_corrected_or_discussed']
+    .concat(rows.map(r => [r.url, r.best, r.found, r.status, r.reason, r.fakes, r.corrected].map(cell).join(','))).join('\n') + '\n');
+  console.log('wrote ' + path.relative(process.cwd(), out) + ' (' + rows.length + ' pages)');
+}
+
 const cmd = process.argv[2];
-(cmd === 'sample' ? sample() : cmd === 'check' ? check() : Promise.resolve(report()))
+(cmd === 'sample' ? sample() : cmd === 'check' ? check() : Promise.resolve(cmd === 'export' ? exportCsv() : report()))
   .catch(e => { console.error('✗ ' + e.message); process.exit(1); });

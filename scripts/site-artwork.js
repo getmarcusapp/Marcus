@@ -197,6 +197,8 @@ const BY_SLUG = {
   'best-stoic-apps': 'marcus-app',
   // A man at his desk with the page in front of him: the prompts are for that.
   'stoic-journal-prompts': 'saint-paul-writing',
+  // Vermeer's astronomer checks the globe against the book: a study does that.
+  'fake-stoic-quotes-study': 'the-astronomer',
 };
 
 function artFor(slug) {
