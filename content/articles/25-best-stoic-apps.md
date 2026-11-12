@@ -79,7 +79,7 @@ Ours. Marcus is a daily practice rather than a library or a journal: the routine
 - **Where it falls short:** no Android version and no cloud sync. Your practice lives on one phone, and you back it up yourself.
 - **Best for:** people who want to practice Stoicism every day, not read about it.
 
-[App Store listing](https://apps.apple.com/app/id6789749038) · [getmarcus.app](/)
+[App Store listing](https://apps.apple.com/app/id6789749038?pt=129154098&ct=web-compare&mt=8) · [getmarcus.app](/)
 
 ## What about the Daily Stoic app?
 

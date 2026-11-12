@@ -162,7 +162,7 @@ function renderMarkdown(md) {
 // A card for the app, placed after the second section, where a reader who is
 // still here is engaged; the end-of-page card is seen by the few who finish.
 // Not on the app comparison page, where it would turn a comparison into a pitch.
-const APP_STORE = 'https://apps.apple.com/app/id6789749038';
+const APP_STORE = require('./site-nav').appStoreUrl('web-content');
 function withAppCard(html, slug) {
   if (slug === 'best-stoic-apps') return html;
   const card = '<aside class="ar-appcard">' +

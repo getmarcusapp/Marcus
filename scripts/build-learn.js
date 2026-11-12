@@ -33,7 +33,7 @@ const HUB_ART = {
 };
 const artKeyFor = href => HUB_ART[href] || BY_SLUG[href.replace(/^\//, '')];
 const thumb = key => key && ART[key] ? '/img/art/thumb/' + ART[key].file : null;
-const APP_STORE = 'https://apps.apple.com/app/id6789749038';
+const APP_STORE = require('./site-nav').appStoreUrl('web-content');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://getmarcus.app';

@@ -123,7 +123,20 @@ const FONT_URL = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;7
 // It rides in fontLinks because every generated page already puts that in
 // its <head>; 4 of about 900 App Store page views came from the web in the 28 days
 // to 2026-11-09, and none of the pages offered the banner.
-const APP_BANNER = '<meta name="apple-itunes-app" content="app-id=6789749038">';
+// App Store links carry Apple's campaign tags, so App Analytics can say how
+// many page views and installs the website sent (Acquisition > Campaigns).
+// The tokens are deliberately coarse: Apple only shows a campaign once it has
+// at least five installs, and the whole site sent one in the month before
+// this was added. Which page a click came from is in GA's app_store_click.
+//   web-home     the homepage        web-compare  /best-stoic-apps
+//   web-content  articles, Learn, quote pages     web-banner   Safari's banner
+const APP_ID = '6789749038';
+const PROVIDER_ID = '129154098';
+function appStoreUrl(ct) {
+  return 'https://apps.apple.com/app/id' + APP_ID + '?pt=' + PROVIDER_ID + '&amp;ct=' + ct + '&amp;mt=8';
+}
+const APP_BANNER = '<meta name="apple-itunes-app" content="app-id=' + APP_ID +
+  ', affiliate-data=pt=' + PROVIDER_ID + '&amp;ct=web-banner">';
 
 function fontLinks() {
   return APP_BANNER + '<link rel="preconnect" href="https://fonts.googleapis.com">' +
@@ -133,4 +146,4 @@ function fontLinks() {
     '<noscript><link rel="stylesheet" href="' + FONT_URL + '"></noscript>';
 }
 
-module.exports = { APP_BANNER, ITEMS, CTA, navHtml, navCss, navScript, fontLinks, skipLink, FONT_URL };
+module.exports = { APP_BANNER, appStoreUrl, ITEMS, CTA, navHtml, navCss, navScript, fontLinks, skipLink, FONT_URL };

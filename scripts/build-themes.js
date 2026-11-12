@@ -288,7 +288,7 @@ function artFigure(key, cls) {
     '<figcaption>' + esc(credit) + '</figcaption></figure>';
 }
 
-const APP_STORE = 'https://apps.apple.com/app/id6789749038';
+const APP_STORE = require('./site-nav').appStoreUrl('web-content');
 const APP_CARD =
   '<aside class="tq-appcard">' +
   '<img src="/img/app-reading-phone.png" alt="The Marcus app showing a daily reading" width="180" height="367" loading="lazy" decoding="async">' +
