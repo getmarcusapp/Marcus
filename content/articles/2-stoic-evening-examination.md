@@ -106,7 +106,7 @@ The correct register sits between them and it is best described as *interested*.
 
 Seneca's own account is in *On Anger* III.36, and it is a page long — worth reading in the original rather than in summary. The Epictetus passage is *Discourses* III.10. Both are in the translations we recommend on our [Library](/library) page, and the people behind them are on [The Stoics](/stoics).
 
-For the wider practice this sits inside, see [how to keep a Stoic journal](/how-to-keep-a-stoic-journal).
+For the wider practice this sits inside, see [how to keep a Stoic journal](/how-to-keep-a-stoic-journal). The evening questions, with the morning and weekly ones, are collected in [Stoic journal prompts](/stoic-journal-prompts).
 
 ---
 

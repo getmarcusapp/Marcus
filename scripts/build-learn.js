@@ -88,6 +88,7 @@ const PILLARS = [
     title: 'The exercises',
     intro: 'What the Stoics actually did, daily, and how to run the same drills without abandoning them by February.',
     pages: [
+      { href: '/stoic-journal-prompts', title: 'Stoic journal prompts', blurb: 'Seventeen questions for the morning, the evening and the week, each with the passage it comes from.', published: true },
       { href: '/stoic-morning-routine', title: 'The Stoic morning routine', blurb: 'What Marcus actually did at dawn, and why the morning has a different job than the evening.', published: true },
       { href: '/stoic-evening-examination', title: 'The Stoic evening examination', blurb: 'Seneca put himself on trial every night, as a judge who does not frighten the defendant. The oldest documented practice in the tradition.', published: true },
       { href: '/premeditatio-malorum', title: 'Premeditatio malorum', blurb: 'Rehearsing what could go wrong, and why it is the opposite of worrying about it.', published: true },

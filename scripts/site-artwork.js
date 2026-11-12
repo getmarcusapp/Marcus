@@ -195,6 +195,8 @@ const BY_SLUG = {
   // The painting Ridley Scott showed the studio when pitching Gladiator.
   'did-marcus-aurelius-say-echoes-in-eternity': 'pollice-verso',
   'best-stoic-apps': 'marcus-app',
+  // A man at his desk with the page in front of him: the prompts are for that.
+  'stoic-journal-prompts': 'saint-paul-writing',
 };
 
 function artFor(slug) {

@@ -75,4 +75,4 @@ Once a week, read back both. Everyone has one recurring gap between the two, and
 
 *Meditations* II.1 and V.1 are the primary sources and take two minutes to read. Epictetus, *Enchiridion* 33 and 1. Both on our [Library](/library), and see [which translation of Meditations](/best-translation-of-meditations) before you buy.
 
-The full daily structure is in [how to keep a Stoic journal](/how-to-keep-a-stoic-journal).
+The full daily structure is in [how to keep a Stoic journal](/how-to-keep-a-stoic-journal), and the questions for each part are in [Stoic journal prompts](/stoic-journal-prompts).

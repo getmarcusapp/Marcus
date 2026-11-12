@@ -4,7 +4,7 @@ title: How to Keep a Stoic Journal
 description: The most famous book in Stoicism is a private notebook. What made it a Stoic one, the evening examination and morning preparation in full, and how to keep the practice going.
 pillar: practice
 published: 2026-08-02
-modified: 2026-10-29
+modified: 2026-11-11
 about: [{"name": "Stoic journaling", "description": "The Stoic practice of daily written self-examination, structured by questions about ones own conduct rather than by events or feelings."}]
 mentions: [{"name": "Marcus Aurelius", "sameAs": "https://en.wikipedia.org/wiki/Marcus_Aurelius"}, {"name": "Seneca", "sameAs": "https://en.wikipedia.org/wiki/Seneca_the_Younger"}, {"name": "Epictetus", "sameAs": "https://en.wikipedia.org/wiki/Epictetus"}]
 order: 1
@@ -89,6 +89,8 @@ If you want a structure to start with rather than a blank page:
 That last one is the step almost nobody does, and it is where most of the value is.
 
 ## Where to read further
+
+If you want the questions themselves, all of them are on one page: [seventeen Stoic journal prompts](/stoic-journal-prompts), each with its source.
 
 The three primary texts, in the translations worth owning, are on our [Library](/library) page, and the people behind them are on [The Stoics](/stoics). If you want the short version: Marcus Aurelius for the journal itself, Epictetus for the method, Seneca for the company.
 
