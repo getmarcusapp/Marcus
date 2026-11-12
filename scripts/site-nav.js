@@ -119,12 +119,18 @@ function navHtml(prefix, current) {
 // crossing between them.
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:ital,wght@0,400;0,500;1,300;1,400&display=swap';
 
+// Safari on iPhone shows its native "View in App Store" banner for this tag.
+// It rides in fontLinks because every generated page already puts that in
+// its <head>; 4 of about 900 App Store page views came from the web in the 28 days
+// to 2026-11-09, and none of the pages offered the banner.
+const APP_BANNER = '<meta name="apple-itunes-app" content="app-id=6789749038">';
+
 function fontLinks() {
-  return '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+  return APP_BANNER + '<link rel="preconnect" href="https://fonts.googleapis.com">' +
     '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
     '<link rel="preload" as="style" href="' + FONT_URL + '">' +
     '<link rel="stylesheet" href="' + FONT_URL + '" media="print" onload="this.media=\'all\';this.onload=null">' +
     '<noscript><link rel="stylesheet" href="' + FONT_URL + '"></noscript>';
 }
 
-module.exports = { ITEMS, CTA, navHtml, navCss, navScript, fontLinks, skipLink, FONT_URL };
+module.exports = { APP_BANNER, ITEMS, CTA, navHtml, navCss, navScript, fontLinks, skipLink, FONT_URL };
