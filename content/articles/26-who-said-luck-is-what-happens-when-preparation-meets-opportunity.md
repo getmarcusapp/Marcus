@@ -2,6 +2,8 @@
 slug: who-said-luck-is-what-happens-when-preparation-meets-opportunity
 title: “Luck Is What Happens When Preparation Meets Opportunity”: Not Seneca
 description: The saying is American, first printed unsigned in 1912 and in its modern wording in a 1928 loan-company ad. Seneca's name was attached around 1999. What he actually wrote about preparation.
+seoTitle: Who Really Said “Luck Is What Happens When Preparation Meets Opportunity”?
+seoDescription: It is credited to Seneca almost everywhere, and he never wrote it. Where the saying was first printed, when his name got attached to it, and what he did write about preparation.
 entry: luck-preparation
 pillar: practice
 published: 2026-10-28

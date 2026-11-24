@@ -3,6 +3,8 @@ slug: who-said-everything-in-moderation-including-moderation
 title: “Everything in Moderation, Including Moderation”: Not Marcus Aurelius
 entry: moderation-including-moderation
 description: It is a twentieth-century joke about an ancient maxim, first found in print in 1927. Not Marcus Aurelius, and not Oscar Wilde, Mark Twain, Petronius or Julia Child either.
+seoTitle: Who Really Said “Everything in Moderation, Including Moderation”?
+seoDescription: Marcus Aurelius, Oscar Wilde, Mark Twain and Julia Child all get the credit. None of them said it. Where the joke first appears in print, and the ancient maxim it is making fun of.
 pillar: practice
 published: 2026-10-29
 modified: 2026-11-05

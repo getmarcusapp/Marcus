@@ -201,7 +201,7 @@ function page(meta, bodyHtml, prev, next) {
       {
         '@type': 'Article',
         '@id': canonical + '#article',
-        headline: meta.title,
+        headline: meta.seoTitle || meta.title,
         description: meta.description,
         url: canonical,
         mainEntityOfPage: { '@id': canonical + '#webpage' },
@@ -274,8 +274,10 @@ function page(meta, bodyHtml, prev, next) {
     '<meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1">' +
     GA +
-    '<title>' + esc(meta.title) + ' | Marcus</title>' +
-    '<meta name="description" content="' + esc(meta.description) + '">' +
+    // seoTitle / seoDescription change only what a search result shows. The page
+    // itself (h1, In brief, share cards) keeps the plain title and description.
+    '<title>' + esc(meta.seoTitle || meta.title) + ' | Marcus</title>' +
+    '<meta name="description" content="' + esc(meta.seoDescription || meta.description) + '">' +
     '<meta name="robots" content="index, follow, max-image-preview:large">' +
     '<link rel="canonical" href="' + canonical + '">' +
     '<meta property="og:type" content="article">' +
