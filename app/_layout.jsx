@@ -254,7 +254,7 @@ export default function Layout() {
           // bypass the subscription gate by tapping a tab. Paywall is the
           // single entry point to the app for non-trialing, non-paying
           // users.
-          tabBarStyle: (route.name === 'onboarding' || route.name === 'paywall' || route.name === 'ready' || route.name === 'welcome') ? { display: 'none' } : {
+          tabBarStyle: (route.name === 'onboarding' || route.name === 'paywall' || route.name === 'cancel-survey' || route.name === 'ready' || route.name === 'welcome') ? { display: 'none' } : {
             backgroundColor: colors.bg,
             borderTopColor: colors.border,
             borderTopWidth: 0.5,
@@ -332,6 +332,7 @@ export default function Layout() {
         <Tabs.Screen name="stoics" options={{ href: null }} />
         <Tabs.Screen name="stoic" options={{ href: null }} />
         <Tabs.Screen name="paywall" options={{ href: null }} />
+        <Tabs.Screen name="cancel-survey" options={{ href: null }} />
         <Tabs.Screen name="ready" options={{ href: null }} />
         <Tabs.Screen name="welcome" options={{ href: null }} />
         <Tabs.Screen name="journal-history" options={{ href: null }} />

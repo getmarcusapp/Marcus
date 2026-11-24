@@ -1,0 +1,44 @@
+name: Cancel answers
+
+# Once a day: if anyone answered "What made you cancel?" in the app since the
+# last run, email the answers to the owner. Silent on days with none.
+#
+# Needs three repository secrets that the newsletter already uses (MAIL_USER,
+# MAIL_PASS, MAIL_TO) and one of its own: REVENUECAT_SECRET_KEY, the read-only
+# v2 key. Until that secret exists the step is skipped, not failed.
+#
+# The window is 26 hours for a 24-hour schedule, so a late runner cannot drop
+# an answer. The cost is that one may occasionally arrive twice.
+
+on:
+  schedule:
+    - cron: '17 16 * * *'   # 16:17 UTC, morning Pacific
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        working-directory: scripts
+        run: npm ci || npm install
+      - name: Email new answers
+        env:
+          REVENUECAT_SECRET_KEY: ${{ secrets.REVENUECAT_SECRET_KEY }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: |
+          if [ -z "$REVENUECAT_SECRET_KEY" ]; then
+            echo "REVENUECAT_SECRET_KEY is not set as a repository secret; nothing to do."
+            exit 0
+          fi
+          node scripts/cancel-reasons.js --hours 26 --mail

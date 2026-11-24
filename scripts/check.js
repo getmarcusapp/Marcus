@@ -2516,6 +2516,61 @@ function quoteStudy() {
   return fail;
 }
 
+// The cancel question is asked of people on their way out, so the ways it can
+// go wrong are all unkind: asking someone whose card failed why they left,
+// asking a subscriber, asking twice, turning the screen into a plea to stay,
+// or sending what they typed somewhere the privacy promise says it never goes.
+function cancelSurvey() {
+  const fail = [];
+  const { cancelState, CANCEL_REASONS } = evalExports('lib/cancelSurvey.js', ['cancelState', 'CANCEL_REASONS']);
+  const base = { isActive: true, willRenew: false, periodType: 'TRIAL', expirationDate: '2026-12-01T00:00:00Z', unsubscribeDetectedAt: '2026-11-25T00:00:00Z', billingIssueDetectedAt: null };
+  const cases = [
+    ['a cancelled trial', base, 'trial'],
+    ['a cancelled trial that has since expired', { ...base, isActive: false }, 'trial'],
+    ['a cancelled paid subscription', { ...base, periodType: 'NORMAL' }, 'paid'],
+    ['no purchase at all', null, null],
+    ['a renewing subscriber', { ...base, willRenew: true, unsubscribeDetectedAt: null }, null],
+    ['a failed card', { ...base, billingIssueDetectedAt: '2026-11-24T00:00:00Z' }, null],
+    ['an expired failed card', { ...base, isActive: false, unsubscribeDetectedAt: null, billingIssueDetectedAt: '2026-11-24T00:00:00Z' }, null],
+    ['a lifetime purchase', { ...base, expirationDate: null, unsubscribeDetectedAt: null }, null],
+    ['someone who cancelled and resubscribed', { ...base, willRenew: true }, null],
+  ];
+  for (const [name, ent, want] of cases) {
+    const got = cancelState(ent);
+    if ((got && got.stage) !== want && !(got === null && want === null)) {
+      fail.push(`lib/cancelSurvey.js: ${name} should give ${want === null ? 'no survey' : want}, gave ${got ? got.stage : 'no survey'}`);
+    }
+  }
+  const lib = read('lib/cancelSurvey.js');
+  const claim = (lib.split('export async function claimCancelSurvey')[1] || '').split('\nexport ')[0];
+  if (!/getItem\(SHOWN_KEY\)\) return null/.test(claim) || !/setItem\(SHOWN_KEY/.test(claim)) {
+    fail.push('lib/cancelSurvey.js: claimCancelSurvey no longer marks the question as shown, so it would be asked again');
+  }
+  // Analytics promises never to carry anything a person wrote.
+  const tracked = (lib.match(/track\('cancel_reason',[^)]*\)/) || [''])[0];
+  if (!tracked) fail.push('lib/cancelSurvey.js: the reason is no longer counted in analytics');
+  if (/note/.test(tracked)) fail.push('lib/cancelSurvey.js: the typed note is being sent to analytics, which promises never to carry what a user wrote');
+
+  const screen = read('app/cancel-survey.jsx');
+  if (!/>Skip</.test(screen)) fail.push('app/cancel-survey.jsx: there is no Skip');
+  for (const word of ['paywall', 'discount', 'offer', 'resubscribe', 'Are you sure']) {
+    if (new RegExp(word, 'i').test(screen.replace(/\/\/.*$/gm, ''))) fail.push(`app/cancel-survey.jsx: mentions "${word}". This screen asks one question and sells nothing`);
+  }
+  if (!/without your name or email/.test(screen)) fail.push('app/cancel-survey.jsx: the note field no longer says where the answer goes');
+  if (!/name="cancel-survey"/.test(read('app/_layout.jsx'))) fail.push('app/_layout.jsx: cancel-survey is not registered, so it would appear as a tab');
+
+  // The report labels answers by id. A reason the report does not know prints
+  // as a bare id; a renamed id orphans every answer already recorded.
+  const labels = extractLiteral('scripts/cancel-reasons.js', 'LABELS');
+  for (const r of CANCEL_REASONS) {
+    if (labels[r.id] !== r.label) fail.push(`scripts/cancel-reasons.js: LABELS.${r.id} does not match the app's wording "${r.label}"`);
+  }
+  for (const id of ['price', 'usage', 'expectation', 'missing', 'trying', 'other']) {
+    if (!CANCEL_REASONS.some(r => r.id === id)) fail.push(`lib/cancelSurvey.js: reason id "${id}" is gone; answers already recorded under it would stop matching`);
+  }
+  return fail;
+}
+
 const CHECKS = [
   ['copy counts agree with the data', copyCounts],
   ['the misattribution count matches the list', misattributionCount],
@@ -2555,6 +2610,7 @@ const CHECKS = [
   ['a locked text field never strands the user above the tab bar', lockedInputs],
   ['the native project ships the version app.json names', nativeVersion],
   ['the quote study says what its dataset says', quoteStudy],
+  ['the cancel question is asked once, of the right people, and sells nothing', cancelSurvey],
 ];
 
 let total = 0;

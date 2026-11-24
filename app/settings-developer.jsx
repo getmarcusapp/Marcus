@@ -270,6 +270,13 @@ function DeveloperSettingsInner() {
           <TouchableOpacity style={s.resetBtn} onPress={() => runFreeDay('none')} activeOpacity={0.8}>
             <Text style={s.resetBtnText}>Clear free day</Text>
           </TouchableOpacity>
+          <Text style={s.secLabel}>Cancel survey</Text>
+          <Text style={[s.helperText, { marginTop: 0, marginBottom: 12 }]}>
+            The one question shown after renewal is turned off. The preview records nothing.
+          </Text>
+          <TouchableOpacity style={s.resetBtn} onPress={() => router.push('/cancel-survey?preview=1&stage=trial&active=1&until=' + encodeURIComponent(new Date(Date.now() + 3 * 864e5).toISOString()))} activeOpacity={0.8}>
+            <Text style={s.resetBtnText}>Preview the cancel survey</Text>
+          </TouchableOpacity>
           <Text style={s.secLabel}>Trial simulation</Text>
           <Text style={[s.helperText, { marginTop: 0, marginBottom: 12 }]}>
             Simulate being mid-trial so you can preview the trial-state UX (banner on Practice). Active simulation overrides the Premium flag — clear it when done. Currently: {trialSim === null ? 'off' : `${trialSim} day${trialSim === 1 ? '' : 's'} left`}.

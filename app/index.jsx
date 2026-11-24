@@ -32,6 +32,7 @@ import { FOUNDATIONS_LETTERS } from '../constants/foundations';
 import { getFoundationsState } from '../lib/foundations';
 import { exportBackup } from '../lib/backup';
 import { claimDayTwoPaywall } from '../lib/dayTwo';
+import { claimCancelSurvey } from '../lib/cancelSurvey';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
 import { track } from '../lib/analytics';
@@ -136,6 +137,15 @@ export default function PracticeScreen() {
   useEffect(() => {
     if (hasAccess !== false) return;
     claimDayTwoPaywall().then(show => { if (show) router.push('/paywall?from=day-two'); });
+  }, [hasAccess]);
+  // The first open after turning off renewal: one question, once
+  // (lib/cancelSurvey.js). It cannot collide with the day-two paywall, which
+  // is only ever shown to someone who has never subscribed.
+  useEffect(() => {
+    if (hasAccess === null) return;
+    claimCancelSurvey().then(c => {
+      if (c) router.push(`/cancel-survey?stage=${c.stage}&active=${c.active ? 1 : 0}&until=${encodeURIComponent(c.until)}`);
+    });
   }, [hasAccess]);
   // Play/pause any meditation (featured card or gallery card) through the
   // shared singleton player, gated on entitlement.

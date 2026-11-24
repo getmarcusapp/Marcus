@@ -78,6 +78,30 @@ export async function hasEverPurchased() {
   }
 }
 
+// RevenueCat's full record of the entitlement, active or expired: it carries
+// unsubscribeDetectedAt and billingIssueDetectedAt, which the active-only
+// view above drops once access ends. null when there has never been one.
+// Throws when RevenueCat can't be reached, so callers can tell "no record"
+// from "don't know".
+export async function getEntitlementRecord() {
+  const info = await Purchases.getCustomerInfo();
+  return info?.entitlements?.all?.[ENTITLEMENT_ID] || null;
+}
+
+// Attach attributes to this anonymous customer. RevenueCat queues them and
+// syncs on its own schedule; the explicit sync is so an answer given just
+// before the app is closed for good still gets out.
+export async function setCustomerAttributes(attrs) {
+  try {
+    await Purchases.setAttributes(attrs);
+    Purchases.syncAttributesAndOfferingsIfNeeded().catch(() => {});
+    return true;
+  } catch (e) {
+    console.log('setCustomerAttributes error:', e);
+    return false;
+  }
+}
+
 // Get available offerings from RevenueCat
 export async function getOfferings() {
   try {
