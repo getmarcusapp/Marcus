@@ -16,6 +16,7 @@ import { LockScreen } from '../components/LockScreen';
 import { LaunchSplash } from '../components/LaunchSplash';
 import { initAppLock, handleForeground, handleBackground, useAppLock } from '../lib/appLock';
 import { initAnalytics, track } from '../lib/analytics';
+import { noteFirstOpen } from '../lib/usage';
 import { getUnreadCount, subscribeDispatches, refreshDispatches } from '../lib/dispatches';
 import { useFonts, Inter_300Light, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_300Light_Italic } from '@expo-google-fonts/inter';
 import { Cinzel_400Regular } from '@expo-google-fonts/cinzel';
@@ -191,6 +192,7 @@ export default function Layout() {
 
     initAnalytics();
     track('app_started');
+    noteFirstOpen();
 
     initializePurchases();
     scheduleReengagementNotifications();

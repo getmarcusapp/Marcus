@@ -7,10 +7,10 @@ import { GoldPrimary } from '../components/GoldButton';
 // Background sized to the literal window, matching Practice/More (see index.jsx).
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
-// Post-paywall confirmation screen. Sits between the paywall and the
-// Practice tab so the "your practice begins now" moment lands after the
-// commercial step rather than before it. Reached via router.replace
-// from the paywall when the source was onboarding (?from=onboarding).
+// The last screen of onboarding. Since 1.5.4 it is reached straight from the
+// reminders step, with the free day already begun and no paywall in between
+// (app/onboarding.jsx). A restore during onboarding still passes through the
+// paywall and lands here.
 export default function ReadyScreen() {
   const router = useRouter();
 
@@ -27,6 +27,7 @@ export default function ReadyScreen() {
           <Image source={require('../assets/skull-gold.png')} style={s.skull} resizeMode="contain" />
           <Text style={s.title}>Your practice{'\n'}begins now</Text>
           <Text style={s.streak}>Day 1</Text>
+          <Text style={s.note}>Today's practice is yours in full. There is nothing to decide yet.</Text>
         </View>
         <View style={s.footer}>
           <GoldPrimary
@@ -74,6 +75,7 @@ const s = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
   },
+  note: { marginTop: 18, fontSize: 15, lineHeight: 23, color: colors.textSecondary, fontFamily: font.body, textAlign: 'center', maxWidth: 280 },
   footer: {
     paddingHorizontal: 24,
     paddingBottom: 24,

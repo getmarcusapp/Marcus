@@ -15,6 +15,11 @@ Notifications.setNotificationHandler({
   }),
 });
 
+// Whether iOS will currently deliver our reminders. Never prompts.
+export async function notificationsGranted() {
+  try { return (await Notifications.getPermissionsAsync()).status === 'granted'; } catch { return false; }
+}
+
 export async function requestNotificationPermissions() {
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;

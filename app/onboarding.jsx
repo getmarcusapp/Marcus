@@ -16,6 +16,7 @@ import { saveCompass, setHasOnboarded, setHasSeenCompassIntro } from '../store/d
 import { DEFAULT_COMPASS } from '../constants/compassFields';
 import { GoldPrimary, GoldSecondary } from '../components/GoldButton';
 import { requestNotificationPermissions, scheduleAllNotifications } from '../notifications';
+import { startFreeDay } from '../lib/useEntitlement';
 import { MEDITATIONS, MEDITATIONS_LIST, playPreview, stopPreview, useMeditationPlayer } from '../lib/meditationPlayer';
 
 // Onboarding previews five, one from each group; the rest wait in the Meditate tab.
@@ -56,7 +57,7 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
 
   // Onboarding ends by persisting the default compass + has_onboarded, then
-  // routing to the paywall. The Compass walkthrough has moved to the live
+  // starting the free day (no paywall; see handleFinish). The Compass walkthrough has moved to the live
   // /compass screen — users see it the first time they open Compass, gated
   // by has_seen_compass_intro. Keeps onboarding shorter and lets the
   // walkthrough land in context.
@@ -73,7 +74,14 @@ export default function OnboardingScreen() {
     await setHasSeenCompassIntro(false);
     await setHasOnboarded();
     track('onboarding_completed');
-    router.replace('/paywall?from=onboarding');
+    // THE FIRST SESSION ASKS FOR NOTHING. Until 1.5.4 onboarding ended on the
+    // paywall. Every trial started there was cancelled unpaid (0 of 7 by
+    // November 2026); the trials that paid were started a day or two later,
+    // by people who had come back. So the free day now simply begins, and the
+    // offer is made after it (lib/dayTwo.js). Anyone who wants to subscribe
+    // today still can, from the banner on Practice.
+    if (await startFreeDay()) track('free_day_started', { from: 'onboarding' });
+    router.replace('/ready');
   }
 
   const steps = [

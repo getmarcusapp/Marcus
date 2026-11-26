@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, Image, Animated, ActivityIndicator,
-  Dimensions, AppState, Alert,
+  Dimensions, AppState, Alert, Linking,
 } from 'react-native';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
@@ -27,11 +27,15 @@ import { colors, radius, spacing, font } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { morningQuotes, mementoMoriQuotes, getDailyQuote } from '../constants/quotes';
 import { getTodayJournal, getStreak, getTodayReading, getCompassDone, getReviews } from '../store/db';
-import { refreshNotificationsForToday, onPracticeSealed } from '../notifications';
+import {
+  refreshNotificationsForToday, onPracticeSealed, notificationsGranted,
+  requestNotificationPermissions, scheduleAllNotifications,
+} from '../notifications';
 import { FOUNDATIONS_LETTERS } from '../constants/foundations';
 import { getFoundationsState } from '../lib/foundations';
 import { exportBackup } from '../lib/backup';
 import { claimDayTwoPaywall } from '../lib/dayTwo';
+import { noteSubscriptionMoments } from '../lib/usage';
 import { claimCancelSurvey } from '../lib/cancelSurvey';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as haptics from '../lib/haptics';
@@ -138,11 +142,26 @@ export default function PracticeScreen() {
     if (hasAccess !== false) return;
     claimDayTwoPaywall().then(show => { if (show) router.push('/paywall?from=day-two'); });
   }, [hasAccess]);
+  // On the free day, whether tomorrow's reminder can reach this person. If
+  // not, the sealed card offers it: that reminder is the way back.
+  const [remindersOn, setRemindersOn] = useState(null);
+  useEffect(() => {
+    if (isFreeDay) notificationsGranted().then(setRemindersOn);
+  }, [isFreeDay]);
+  async function askForTomorrow() {
+    haptics.tap();
+    const granted = await requestNotificationPermissions();
+    track('notifications_permission', { granted, from: 'day-one' });
+    if (granted) { await scheduleAllNotifications(); setRemindersOn(true); }
+    // Refused earlier, so iOS will not ask twice: Settings is the only way.
+    else Linking.openSettings().catch(() => {});
+  }
   // The first open after turning off renewal: one question, once
   // (lib/cancelSurvey.js). It cannot collide with the day-two paywall, which
   // is only ever shown to someone who has never subscribed.
   useEffect(() => {
     if (hasAccess === null) return;
+    noteSubscriptionMoments();
     claimCancelSurvey().then(c => {
       if (c) router.push(`/cancel-survey?stage=${c.stage}&active=${c.active ? 1 : 0}&until=${encodeURIComponent(c.until)}`);
     });
@@ -730,14 +749,22 @@ export default function PracticeScreen() {
           </Animated.View>
 
           {isFreeDay ? (
-            // The free day, sealed: the practice has just been felt, so this
-            // is where continuing it is offered. A card, not a modal, because
+            // The free day, sealed. Until 1.5.4 this card offered the trial.
+            // Three in four new users never opened the app a second time, so
+            // what this moment needs is a reason to come back tomorrow; the
+            // offer is made then (lib/dayTwo.js). A card, not a modal, because
             // the first-seal rating prompt fires at this same moment.
             <Animated.View style={sealedAnimStyle(2)}>
-              <TouchableOpacity style={[s.sealedRestCard, s.sealedFreeCard]} onPress={() => router.push('/paywall?from=day-one')} activeOpacity={0.8}>
+              <TouchableOpacity
+                style={[s.sealedRestCard, s.sealedFreeCard]}
+                onPress={remindersOn === false ? askForTomorrow : undefined}
+                disabled={remindersOn !== false}
+                activeOpacity={0.8}
+              >
                 <Text style={s.sealedRestTitle}>Day one, sealed</Text>
-                <Text style={s.sealedRestSub}>That was the whole practice, kept for a day. Keep it going with seven days free.</Text>
-                <Text style={s.sealedFreeCta}>Start your free trial →</Text>
+                <Text style={s.sealedRestSub}>That was the whole practice, kept for a day. Tomorrow brings a new reading and a new question.</Text>
+                {remindersOn === false && <Text style={s.sealedFreeCta}>Remind me tomorrow morning →</Text>}
+                {remindersOn === true && <Text style={s.sealedFreeNote}>Your morning reminder is set.</Text>}
               </TouchableOpacity>
             </Animated.View>
           ) : (
@@ -1021,6 +1048,7 @@ const s = StyleSheet.create({
     marginBottom: 4,
   },
   sealedFreeCard: { borderColor: colors.accentDim },
+  sealedFreeNote: { marginTop: 10, fontSize: 13, color: colors.textSecondary, fontFamily: font.body },
   sealedFreeCta: { marginTop: 10, fontSize: 13, color: colors.accent, fontFamily: font.bodyMedium, letterSpacing: 0.3 },
   // Matches the welcome card exactly (title 17 / sub 14) so the two cards read
   // as one consistent component.

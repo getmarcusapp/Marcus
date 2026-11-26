@@ -2571,6 +2571,52 @@ function cancelSurvey() {
   return fail;
 }
 
+// 1.5.4 made two promises. The first session asks for nothing: no paywall
+// between onboarding and the first practice, and a sealed free day that points
+// at tomorrow, not at a price. And the usage counts that now ride on the
+// decision events are counts: small whole numbers, never anything a person
+// wrote, never anything that could identify them.
+function firstSession() {
+  const fail = [];
+  const code = f => read(f).replace(/\/\/.*$/gm, '');
+  const ob = code('app/onboarding.jsx');
+  const finish = (ob.split('async function handleFinish')[1] || '').split('\n  const steps')[0];
+  if (/paywall/.test(finish)) fail.push('app/onboarding.jsx: onboarding ends on the paywall again. The first session asks for nothing');
+  if (!/startFreeDay\(\)/.test(finish)) fail.push('app/onboarding.jsx: onboarding no longer starts the free day, so a new user would land on locked fields');
+  if (!/router\.replace\('\/ready'\)/.test(finish)) fail.push('app/onboarding.jsx: onboarding no longer ends on /ready');
+
+  const home = code('app/index.jsx');
+  const card = (home.split('sealedFreeCard]}')[1] || '').split('</TouchableOpacity>')[0];
+  if (!card) fail.push('app/index.jsx: the sealed free-day card is gone');
+  if (/paywall|trial|free for|subscribe/i.test(card)) fail.push('app/index.jsx: the sealed free-day card is selling again. It gives a reason to come back; the offer waits for day two');
+  if (!/Remind me tomorrow/.test(card)) fail.push('app/index.jsx: the sealed free-day card no longer offers tomorrow\'s reminder');
+  if (!/claimDayTwoPaywall\(\)/.test(home)) fail.push('app/index.jsx: the day-two offer is gone, so nobody is ever asked');
+  if (!/isFreeDay[\s\S]{0,400}Start your 7-day trial/.test(home)) fail.push('app/index.jsx: the free-day banner is gone, so someone who wants to subscribe on day one cannot find how');
+
+  const usage = code('lib/usage.js');
+  const counts = (usage.split('export async function usageCounts')[1] || '').split('\nexport ')[0];
+  const ret = (counts.match(/return \{([\s\S]*?)\n    \};/) || [])[1] || '';
+  const keys = [...ret.matchAll(/^\s*([a-z_]+):\s*(.*?),?$/gm)].map(m => [m[1], m[2]]);
+  const want = ['days_sealed', 'entries', 'readings', 'meditations', 'days_since_first_open', 'took_free_day'];
+  if (keys.map(k => k[0]).join() !== want.join()) fail.push(`lib/usage.js: usageCounts returns [${keys.map(k => k[0]).join(', ')}], expected [${want.join(', ')}]. Reports read these keys; a new one needs a reason`);
+  for (const [k, v] of keys) {
+    if (!/cap\(/.test(v) && !/\? 1 : 0$/.test(v)) fail.push(`lib/usage.js: ${k} is not capped, so it could single out one long-time user`);
+  }
+  if (/\.(text|body|content|note|answer|trigger|reaction|title)\b/.test(counts)) fail.push('lib/usage.js: usageCounts reads what a person wrote. It may count entries, never read them');
+  if (/getAppUserID|appUserID|identif/i.test(usage)) fail.push('lib/usage.js: an identifier is travelling with the counts');
+  if (!/const CAP = (\d+)/.test(usage) || Number(RegExp.$1) > 50) fail.push('lib/usage.js: the cap on counts is missing or too high to be coarse');
+
+  if (!/trackWithUsage\(selectedPackage === 'lifetime' \? 'lifetime_purchased' : 'trial_started'/.test(code('app/paywall.jsx'))) fail.push('app/paywall.jsx: a trial start no longer carries the usage counts');
+  if (!/track\('cancel_reason',[^\n]*usageCounts\(\)/.test(code('lib/cancelSurvey.js'))) fail.push('lib/cancelSurvey.js: the cancel answer no longer carries the usage counts');
+  for (const ev of ['trial_converted', 'renewal_off']) {
+    if (!new RegExp(`trackWithUsage\\('${ev}'`).test(usage)) fail.push(`lib/usage.js: ${ev} is no longer reported`);
+  }
+  if (!/noteSubscriptionMoments\(\)/.test(home)) fail.push('app/index.jsx: nothing calls noteSubscriptionMoments, so conversions and cancellations go uncounted');
+  if (!/noteMeditation\(\)/.test(code('lib/meditationPlayer.js'))) fail.push('lib/meditationPlayer.js: meditations are no longer counted');
+  if (!/noteFirstOpen\(\)/.test(code('app/_layout.jsx'))) fail.push('app/_layout.jsx: the first open is no longer remembered');
+  return fail;
+}
+
 const CHECKS = [
   ['copy counts agree with the data', copyCounts],
   ['the misattribution count matches the list', misattributionCount],
@@ -2611,6 +2657,7 @@ const CHECKS = [
   ['the native project ships the version app.json names', nativeVersion],
   ['the quote study says what its dataset says', quoteStudy],
   ['the cancel question is asked once, of the right people, and sells nothing', cancelSurvey],
+  ['the first session asks for nothing, and usage counts stay counts', firstSession],
 ];
 
 let total = 0;

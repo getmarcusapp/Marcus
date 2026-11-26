@@ -6,6 +6,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, radius, spacing, font } from '../constants/theme';
 import { getOfferings, purchasePackage, restorePurchases } from '../store/purchases';
+import { trackWithUsage } from '../lib/usage';
 import { useEntitlement, startFreeDay, freeDayState } from '../lib/useEntitlement';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { GoldPrimary } from '../components/GoldButton';
@@ -125,7 +126,8 @@ export default function PaywallScreen() {
     if (result.success && result.entitled) {
       // A lifetime purchase is not a trial; counting it as one would make
       // the trial funnel lie.
-      track(selectedPackage === 'lifetime' ? 'lifetime_purchased' : 'trial_started',
+      // With the usage counts (lib/usage.js): what had they done by now?
+      trackWithUsage(selectedPackage === 'lifetime' ? 'lifetime_purchased' : 'trial_started',
         { plan: selectedPackage, from: params?.from || 'direct' });
       // Don't write has_premium here — RevenueCat is the source of truth
       // for real subscriptions, and writing it would short-circuit the
