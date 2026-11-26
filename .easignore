@@ -17,6 +17,7 @@ expo-env.d.ts
 # so EAS installs node_modules + Pods consistently.
 ios/Pods/
 ios/build/
+ios/build-sim/
 ios/DerivedData/
 
 # Native artifacts
